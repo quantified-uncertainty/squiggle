@@ -2,7 +2,7 @@ import axios from "axios";
 
 import { Question } from "@quri/metaforecast-db";
 
-import { prepareQuestion, upsertSingleQuestion } from "../robot";
+import { prepareQuestion, upsertSingleQuestion } from "../dbUtils";
 import { FetchedQuestion, Platform } from "../types";
 import { ElasticQuestion, questionToElasticDocument } from "../utils/elastic";
 

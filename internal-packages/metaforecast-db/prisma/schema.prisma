@@ -14,18 +14,6 @@ datasource db {
   url      = env("METAFORECAST_DB_URL")
 }
 
-model Dashboard {
-  id          String   @id
-  title       String
-  description String
-  contents    Json
-  timestamp   DateTime @db.Timestamp(6)
-  creator     String
-  extra       Json
-
-  @@map("dashboards")
-}
-
 model Question {
   /// E.g. "fantasyscotus-580"
   id          String @id
@@ -72,18 +60,21 @@ model Question {
 }
 
 model History {
-  id                String
-  idref             String?
-  question          Question? @relation(fields: [idref], references: [id], onDelete: SetNull, onUpdate: Restrict)
+  // short primary key
+  pk Int @id @default(autoincrement())
+
+  id       String // original id
+  idref    String? // ref id to the question; we need both ids, because questions can be removed
+  question Question? @relation(fields: [idref], references: [id], onDelete: SetNull, onUpdate: Restrict)
+
   title             String
   url               String
   platform          String
   description       String
   options           Json
-  fetched           DateTime  @db.Timestamp(6)
+  fetched           DateTime @db.Timestamp(6)
   qualityindicators Json
   extra             Json
-  pk                Int       @id @default(autoincrement())
 
   @@index([id])
   @@index([platform])
@@ -92,12 +83,33 @@ model History {
   @@map("history")
 }
 
+model PlatformState {
+  platform String @id
+  state    Json
+
+  @@map("platform_state")
+}
+
+model Dashboard {
+  id          String   @id
+  title       String
+  description String
+  contents    Json
+  timestamp   DateTime @db.Timestamp(6)
+  creator     String
+  extra       Json
+
+  @@map("dashboards")
+}
+
 model FrontpageId {
   question Question @relation(fields: [id], references: [id], onDelete: Cascade)
   id       String   @unique
 }
 
-// Manifold-specific tables
+// ****************************** Platform-specific tables ******************************
+
+// *************** Manifold-specific tables ***************
 
 enum ManifoldToken {
   MANA

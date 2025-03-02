@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import { QuestionOption } from "../../common/types";
-import { saveQuestions } from "../robot";
+import { saveQuestions } from "../dbUtils";
 import { FetchedQuestion, Platform } from "../types";
 
 /* Definitions */
@@ -192,7 +192,6 @@ export const smarkets: Platform = {
         await saveQuestions({
           platform: smarkets,
           fetchedQuestions: events,
-          partial: true,
         });
       });
   },

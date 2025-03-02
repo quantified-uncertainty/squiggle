@@ -1,4 +1,5 @@
 import { type Command } from "@commander-js/extra-typings";
+import { z } from "zod";
 
 import { Question } from "@quri/metaforecast-db";
 
@@ -14,7 +15,7 @@ export type QualityIndicators = {
   volume24Hours?: number;
   address?: number;
   tradevolume?: string;
-  pool?: any;
+  pool?: Record<string, number>;
   createdTime?: any;
   shares_volume?: any;
   yes_bid?: any;
@@ -41,14 +42,12 @@ export type FetchedQuestion = Omit<
 // fetcher should return null if platform failed to fetch questions for some reason
 type PlatformFetcherResult = {
   questions: FetchedQuestion[];
-  // if partial is true then we won't cleanup old questions from the database; this is useful when manually invoking a fetcher with arguments for updating a single question
-  partial?: boolean;
 } | null;
 type PlatformFetcher = () => Promise<PlatformFetcherResult>;
 
 // using "" as ArgNames default is technically incorrect, but shouldn't cause any real issues
 // (I couldn't find a better solution for signifying an empty value, though there probably is one)
-export type Platform = {
+export type Platform<TState extends z.ZodTypeAny = any> = {
   name: string; // short name for ids and `platform` db column, e.g. "xrisk"
   label: string; // longer name for displaying on frontend etc., e.g. "X-risk estimates"
   color: string; // used on frontend
@@ -58,6 +57,8 @@ export type Platform = {
 
   // fetchers are optional
   fetcher?: PlatformFetcher;
+
+  stateSchema?: TState;
 };
 
 export type PlatformConfig = {

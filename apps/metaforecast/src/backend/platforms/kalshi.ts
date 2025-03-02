@@ -2,6 +2,12 @@ import api from "api";
 
 import { Platform } from "../types";
 
+/**
+ * https://kalshi.com
+ *
+ * Broken/disabled, FIXME.
+ */
+
 const kalshi_api = api("@trading-api/v2.0#13mtbs10lc863irx");
 
 /* Definitions */

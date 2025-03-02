@@ -1,6 +1,5 @@
-import { FC, ReactElement, ReactNode } from "react";
-
 import Link from "next/link";
+import { FC, ReactElement, ReactNode } from "react";
 import { FaExpand } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
@@ -12,7 +11,7 @@ import { cleanText, isQuestionBinary } from "../../../utils";
 import { QuestionOptions } from "../QuestionOptions";
 import { QuestionFooter } from "./QuestionFooter";
 
-const truncateText = (length: number, text: string): string => {
+function truncateText(length: number, text: string): string {
   if (!text) {
     return "";
   }
@@ -33,13 +32,11 @@ const truncateText = (length: number, text: string): string => {
   let truncatedText =
     text.slice(0, lastIndex) + (lastLetter != "." ? "..." : "..");
   return truncatedText;
-};
+}
 
 // Auxiliary components
 
-const DisplayMarkdown: React.FC<{ description: string }> = ({
-  description,
-}) => {
+const DisplayMarkdown: FC<{ description: string }> = ({ description }) => {
   const formatted = truncateText(250, cleanText(description));
   // overflow-hidden overflow-ellipsis h-24
   return formatted === "" ? null : (
@@ -54,7 +51,7 @@ const DisplayMarkdown: React.FC<{ description: string }> = ({
   );
 };
 
-const LastUpdated: React.FC<{ timestamp: Date }> = ({ timestamp }) => (
+const LastUpdated: FC<{ timestamp: Date }> = ({ timestamp }) => (
   <div className="flex items-center">
     <svg className="mt-1" height="10" width="16">
       <circle cx="4" cy="4" r="4" fill="rgb(29, 78, 216)" />

@@ -1,4 +1,4 @@
-import { saveQuestions } from "@/backend/robot";
+import { saveQuestions } from "@/backend/dbUtils";
 import { FetchedQuestion, Platform } from "@/backend/types";
 
 import { average } from "../../../utils";
@@ -10,7 +10,7 @@ import {
   ApiQuestion,
   fetchApiQuestions,
   fetchSingleApiQuestion,
-} from "./api";
+} from "./api2";
 
 const platformName = "metaculus";
 const now = new Date().toISOString();
@@ -28,15 +28,18 @@ async function apiQuestionToFetchedQuestions(
     if (q.publish_time > now || now > q.resolve_time) {
       return true;
     }
+
+    // TODO - remove this check? we should just store everything and sort out the quality later
     if (q.prediction_count < 10) {
       return true;
     }
+
     return false;
   };
 
-  const buildFetchedQuestion = (
+  function buildFetchedQuestion(
     q: ApiPredictable & ApiCommon
-  ): Omit<FetchedQuestion, "url" | "description" | "title"> => {
+  ): Omit<FetchedQuestion, "url" | "description" | "title"> {
     const isBinary = q.possibilities.type === "binary";
     let options: FetchedQuestion["options"] = [];
     if (isBinary) {
@@ -71,39 +74,39 @@ async function apiQuestionToFetchedQuestions(
         },
       },
     };
-  };
+  }
 
   if (apiQuestion.type === "group") {
     await sleep(SLEEP_TIME);
-    let apiQuestionDetailsTemp;
+    let apiQuestionDetails: ApiQuestion;
     try {
-      apiQuestionDetailsTemp = await fetchSingleApiQuestion(apiQuestion.id);
+      apiQuestionDetails = await fetchSingleApiQuestion(apiQuestion.id);
     } catch (error) {
       console.log(error);
       return [];
     }
-    const apiQuestionDetails = apiQuestionDetailsTemp;
+
     if (apiQuestionDetails.type !== "group") {
       console.log("Error: expected `group` type");
-      return []; //throw new Error("Expected `group` type"); // shouldn't happen, this is mostly for typescript
-    } else {
-      try {
-        let result = (apiQuestionDetails.sub_questions || [])
-          .filter((q) => !skip(q))
-          .map((sq) => {
-            const tmp = buildFetchedQuestion(sq);
-            return {
-              ...tmp,
-              title: `${apiQuestion.title} (${sq.title})`,
-              description: apiQuestionDetails.description || "",
-              url: `https://www.metaculus.com${apiQuestion.page_url}?sub-question=${sq.id}`,
-            };
-          });
-        return result;
-      } catch (error) {
-        console.log(error);
-        return [];
-      }
+      return [];
+    }
+
+    try {
+      const result = (apiQuestionDetails.sub_questions || [])
+        .filter((q) => !skip(q))
+        .map((sq) => {
+          const tmp = buildFetchedQuestion(sq);
+          return {
+            ...tmp,
+            title: `${apiQuestion.title} (${sq.title})`,
+            description: apiQuestionDetails.description ?? "",
+            url: `https://www.metaculus.com${apiQuestion.page_url}?sub-question=${sq.id}`,
+          };
+        });
+      return result;
+    } catch (error) {
+      console.log(error);
+      return [];
     }
   } else if (apiQuestion.type === "forecast") {
     if (apiQuestion.group) {
@@ -111,11 +114,6 @@ async function apiQuestionToFetchedQuestions(
     }
     if (skip(apiQuestion)) {
       console.log(`- [Skipping]: ${apiQuestion.title}`);
-      /*console.log(`Close time: ${
-        apiQuestion.close_time
-      }, resolve time: ${
-        apiQuestion.resolve_time
-      }`)*/
       return [];
     }
 
@@ -127,8 +125,8 @@ async function apiQuestionToFetchedQuestions(
         {
           ...tmp,
           title: apiQuestion.title,
-          description: apiQuestionDetails.description || "",
-          url: "https://www.metaculus.com" + apiQuestion.page_url,
+          description: apiQuestionDetails.description ?? "",
+          url: `https://www.metaculus.com${apiQuestion.page_url}`,
         },
       ];
     } catch (error) {
@@ -139,9 +137,7 @@ async function apiQuestionToFetchedQuestions(
     if (apiQuestion.type !== "claim") {
       // should never happen, since `discriminator` in JTD schema causes a strict runtime check
       console.log(
-        `Unknown metaculus question type: ${
-          (apiQuestion as any).type
-        }, skipping`
+        `Unknown metaculus question type: ${apiQuestion.type}, skipping`
       );
     }
     return [];
@@ -186,12 +182,11 @@ export const metaculus: Platform = {
       await sleep(SLEEP_TIME);
       const apiQuestions: ApiMultipleQuestions = await fetchApiQuestions(next);
       const results = apiQuestions.results;
-      // console.log(results)
       let j = false;
 
       for (const result of results) {
         const questions = await apiQuestionToFetchedQuestions(result);
-        // console.log(questions)
+
         for (const question of questions) {
           console.log(`- ${question.title}`);
           if ((!j && i % 20 === 0) || debug) {
@@ -210,8 +205,7 @@ export const metaculus: Platform = {
   },
 
   calculateStars(data) {
-    let { numforecasts } = data.qualityindicators;
-    numforecasts = Number(numforecasts);
+    const numforecasts = Number(data.qualityindicators.numforecasts);
     const nuno = () => (numforecasts > 300 ? 4 : numforecasts > 100 ? 3 : 2);
     const eli = () => 3;
     const misha = () => 3;

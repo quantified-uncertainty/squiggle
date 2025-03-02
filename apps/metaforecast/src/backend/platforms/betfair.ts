@@ -1,8 +1,13 @@
-/* Imports */
 import axios from "axios";
 import https from "https";
 
 import { FetchedQuestion, Platform } from "../types";
+
+/**
+ * https://www.betfair.com
+ *
+ * We're interested only in the politics section, https://www.betfair.com/exchange/plus/en/politics-betting-2378961
+ */
 
 const platformName = "betfair";
 
@@ -10,7 +15,7 @@ const platformName = "betfair";
 const endpoint = process.env["SECRET_BETFAIR_ENDPOINT"]!;
 
 /* Utilities */
-const arraysEqual = (a: string[], b: string[]) => {
+function arraysEqual(a: string[], b: string[]) {
   if (a === b) return true;
   if (a == null || b == null) return false;
   if (a.length !== b.length) return false;
@@ -19,21 +24,20 @@ const arraysEqual = (a: string[], b: string[]) => {
   // the array, you should sort both arrays here.
   // Please note that calling sort on an array will modify that array.
   // you might want to clone your array first.
-
-  for (var i = 0; i < a.length; ++i) {
+  for (let i = 0; i < a.length; ++i) {
     if (a[i] !== b[i]) return false;
   }
   return true;
-};
+}
 
-const mergeRunners = (runnerCatalog: any, runnerBook: any) => {
-  let keys = Object.keys(runnerCatalog);
-  let result = [];
+function mergeRunners(runnerCatalog: any, runnerBook: any) {
+  const keys = Object.keys(runnerCatalog);
+  const result = [];
   for (let key of keys) {
     result.push({ ...runnerCatalog[key], ...runnerBook[key] });
   }
   return result;
-};
+}
 
 /* Support functions */
 
@@ -51,19 +55,19 @@ async function fetchPredictions() {
 }
 
 async function whipIntoShape(data: any) {
-  let catalogues = data.market_catalogues;
-  let books = data.market_books;
-  let keys1 = Object.keys(catalogues).sort();
-  let keys2 = Object.keys(books).sort();
+  const catalogues = data.market_catalogues;
+  const books = data.market_books;
+  const keys1 = Object.keys(catalogues).sort();
+  const keys2 = Object.keys(books).sort();
   // console.log(keys1)
   // console.log(keys2)
-  let results = [];
+  const results = [];
   if (!arraysEqual(keys1, keys2)) {
     throw new Error(
       "Betfair: Error in endpoint; Betfair catalogues and books do not match"
     );
   } else {
-    for (let key of keys1) {
+    for (const key of keys1) {
       results.push({
         ...catalogues[key],
         ...books[key],
@@ -75,21 +79,20 @@ async function whipIntoShape(data: any) {
 }
 
 async function processPredictions(data: any) {
-  let predictions = await whipIntoShape(data);
-  // console.log(JSON.stringify(predictions, null, 4))
-  let results: FetchedQuestion[] = predictions.map((prediction) => {
-    /* if(Math.floor(Math.random() * 10) % 20 ==0){
-       console.log(JSON.stringify(prediction, null, 4))
-    } */
-    let id = `${platformName}-${prediction.marketId}`;
-    let normalizationFactor = prediction.options
+  const predictions = await whipIntoShape(data);
+
+  const results: FetchedQuestion[] = predictions.map((prediction) => {
+    const id = `${platformName}-${prediction.marketId}`;
+
+    const normalizationFactor = prediction.options
       .filter(
         (option: any) => option.status == "ACTIVE" && option.totalMatched > 0
       )
       .map((option: any) => option.lastPriceTraded)
       .map((x: any) => 1 / x)
       .reduce((a: any, b: any) => a + b, 0);
-    let options = prediction.options
+
+    const options = prediction.options
       .filter(
         (option: any) => option.status == "ACTIVE" && option.totalMatched > 0
       )
@@ -104,7 +107,7 @@ async function processPredictions(data: any) {
 
     // console.log(prediction.options)
 
-    let rules = prediction.description.rules
+    const rules = prediction.description.rules
       .split("Regs</a>.")[1]
       .replace(/<br><br>/g, " ")
       .replace(/<br>/g, " ")
@@ -117,7 +120,7 @@ async function processPredictions(data: any) {
     }
 
     let title = rules.split("? ")[0] + "?";
-    let description = rules.split("? ")[1].trim();
+    const description = rules.split("? ")[1].trim();
     if (title.includes("of the named")) {
       title = prediction.marketName + ": " + title;
     }
@@ -133,7 +136,7 @@ async function processPredictions(data: any) {
     };
     return result;
   });
-  return results; //resultsProcessed
+  return results;
 }
 
 export const betfair: Platform = {
@@ -153,7 +156,7 @@ export const betfair: Platform = {
 
     const firstOption = data.options[0];
 
-    // Substract 1 star if probability is above 90% or below 10%
+    // Subtract 1 star if probability is above 90% or below 10%
     if (
       firstOption &&
       ((firstOption.probability || 0) < 0.1 ||
@@ -162,7 +165,7 @@ export const betfair: Platform = {
       starsDecimal = starsDecimal - 1;
     }
 
-    let starsInteger = Math.round(starsDecimal);
+    const starsInteger = Math.round(starsDecimal);
     return starsInteger;
   },
 };

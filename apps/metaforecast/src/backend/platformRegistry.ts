@@ -19,8 +19,12 @@ import { xrisk } from "./platforms/xrisk";
 import { Platform, PlatformConfig } from "./types";
 
 // function instead of const array, this helps with circular dependencies
-export function getPlatforms(): Platform[] {
-  return [
+export function getPlatforms(
+  opts: {
+    withDailyFetcherOnly?: boolean;
+  } = {}
+): Platform[] {
+  const platforms: Platform[] = [
     betfair,
     fantasyscotus,
     foretold,
@@ -40,6 +44,12 @@ export function getPlatforms(): Platform[] {
     wildeford,
     xrisk,
   ];
+
+  if (opts.withDailyFetcherOnly) {
+    return platforms.filter((platform) => platform.fetcher);
+  }
+
+  return platforms;
 }
 
 let _nameToLabelCache: { [k: string]: string } | undefined;

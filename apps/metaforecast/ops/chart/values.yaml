@@ -14,3 +14,6 @@ jobs:
   frontpage:
     command: ["pnpm", "run", "cli", "frontpage"]
     schedule: "0 6 * * *" # every day at 6am
+  manifold-fetch-new:
+    command: ["pnpm", "run", "cli", "manifold", "fetch-new"]
+    schedule: "*/5 * * * *" # every 5 minutes

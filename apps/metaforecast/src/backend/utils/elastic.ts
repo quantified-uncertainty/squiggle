@@ -51,6 +51,47 @@ export function questionToElasticDocument(question: Question): ElasticQuestion {
   };
 }
 
+export async function indexQuestions(questions: Question[]) {
+  const client = getClient();
+
+  // add questions to the existing index
+  let count = 0;
+  let operations: { id: string; document: ElasticQuestion }[] = [];
+
+  const flush = async () => {
+    if (!operations.length) return;
+    await client.bulk({
+      operations: operations.flatMap((op) => [
+        { index: { _index: ALIAS_NAME, _id: op.id } },
+        op.document,
+      ]),
+    });
+    count += operations.length;
+    console.log(count);
+    operations = [];
+  };
+
+  for (const question of questions) {
+    operations.push({
+      id: question.id,
+      document: questionToElasticDocument(question),
+    });
+    if (operations.length >= 100) {
+      await flush();
+    }
+  }
+  await flush();
+  console.log(`Pushed ${count} records to Elasticsearch.`);
+}
+
+export async function deleteQuestionsFromIndex(questionIds: string[]) {
+  const client = getClient();
+  await client.deleteByQuery({
+    index: ALIAS_NAME,
+    body: { query: { ids: { values: questionIds } } },
+  });
+}
+
 export async function rebuildElasticDatabase() {
   const questions = await prisma.question.findMany();
 
@@ -71,33 +112,7 @@ export async function rebuildElasticDatabase() {
     },
   });
 
-  let count = 0;
-  let operations: { id: string; document: ElasticQuestion }[] = [];
-
-  const flush = async () => {
-    if (!operations.length) return;
-    await getClient().bulk({
-      operations: operations.flatMap((op) => [
-        { index: { _index: index, _id: op.id } },
-        op.document,
-      ]),
-    });
-    count += operations.length;
-    console.log(count);
-    operations = [];
-  };
-
-  for (const question of questions) {
-    operations.push({
-      id: question.id,
-      document: questionToElasticDocument(question),
-    });
-    if (operations.length >= 100) {
-      await flush();
-    }
-  }
-  await flush();
-  console.log(`Pushed ${count} records to Elasticsearch.`);
+  await indexQuestions(questions);
 
   console.log("Switching alias to new index");
   await getClient().indices.updateAliases({

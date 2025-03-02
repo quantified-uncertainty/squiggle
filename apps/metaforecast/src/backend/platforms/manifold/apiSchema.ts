@@ -59,7 +59,7 @@ export const liteMarketSchema = z.object({
   siblingContractId: z.string().optional(), // id of the prizecash or mana version of this question that you get to by toggling.
 });
 
-export type ManifoldLiteMarket = z.infer<typeof liteMarketSchema>;
+export type ManifoldApiLiteMarket = z.infer<typeof liteMarketSchema>;
 
 // A complete market, along with answers (for free response markets)
 // Based on type FullMarket in https://docs.manifold.markets/api#get-v0marketmarketid
@@ -103,7 +103,7 @@ export const fullMarketSchema = liteMarketSchema.extend({
   groupSlugs: z.array(z.string()).optional(),
 });
 
-export type ManifoldFullMarket = z.infer<typeof fullMarketSchema>;
+export type ManifoldApiFullMarket = z.infer<typeof fullMarketSchema>;
 
 /*
  * // example:
@@ -125,4 +125,4 @@ export const groupSchema = z.object({
   // TODO - more fields
 });
 
-export type ManifoldGroup = z.infer<typeof groupSchema>;
+export type ManifoldApiGroup = z.infer<typeof groupSchema>;

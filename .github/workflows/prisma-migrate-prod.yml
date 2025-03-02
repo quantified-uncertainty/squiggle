@@ -1,10 +1,22 @@
 name: Prisma Migrate Production DB
-# Copy-pasted from ./prisma-migrate-dev.yml
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      run_hub_migration:
+        description: "Run Hub database migration"
+        type: boolean
+        default: true
+        required: false
+      run_metaforecast_migration:
+        description: "Run Metaforecast database migration"
+        type: boolean
+        default: true
+        required: false
 
 jobs:
-  migrate:
+  migrate-hub:
+    if: ${{ inputs.run_hub_migration }}
     runs-on: ubuntu-latest
     environment: Production
     steps:
@@ -15,14 +27,38 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: "pnpm"
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Migrate
+      - name: Migrate Hub
         working-directory: ./apps/hub
         env:
           DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
+        run: npx prisma migrate deploy
+
+  migrate-metaforecast:
+    if: ${{ inputs.run_metaforecast_migration }}
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Migrate Metaforecast
+        working-directory: ./internal-packages/metaforecast-db
+        env:
+          DATABASE_URL: "${{ secrets.METAFORECAST_DATABASE_URL }}"
         run: npx prisma migrate deploy

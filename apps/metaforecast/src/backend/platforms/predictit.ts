@@ -19,16 +19,16 @@ async function fetchmarkets(): Promise<any[]> {
   return openMarkets;
 }
 
-async function fetchmarketrules(market_id: string | number) {
-  let response = await axios({
+async function fetchMarketRules(market_id: string | number) {
+  const response = await axios({
     method: "get",
     url: "https://www.predictit.org/api/Market/" + market_id,
   });
   return response.data.rule;
 }
 
-async function fetchmarketvolumes() {
-  let response = await axios({
+async function fetchMarketVolumes() {
+  const response = await axios({
     method: "get",
     url: "https://predictit-f497e.firebaseio.com/marketStats.json",
   });
@@ -41,24 +41,23 @@ export const predictit: Platform = {
   color: "#460c00",
   async fetcher() {
     let markets = await fetchmarkets();
-    let marketVolumes = await fetchmarketvolumes();
+    const marketVolumes = await fetchMarketVolumes();
 
     markets = markets.map((market) => ({
       ...market,
       TotalSharesTraded: marketVolumes[market.id]["TotalSharesTraded"],
     }));
-    // console.log(markets)
 
-    let results: FetchedQuestion[] = [];
-    for (let market of markets) {
-      // console.log(market.name)
-      let id = `${platformName}-${market.id}`;
-      let isbinary = market.contracts.length == 1;
+    const results: FetchedQuestion[] = [];
+    for (const market of markets) {
+      const id = `${platformName}-${market.id}`;
       await sleep(3000 * (1 + Math.random()));
-      let descriptionraw = await fetchmarketrules(market.id);
-      let descriptionprocessed1 = toMarkdown(descriptionraw);
-      let description = descriptionprocessed1;
-      let shares_volume = market["TotalSharesTraded"];
+      const descriptionRaw = await fetchMarketRules(market.id);
+      const descriptionProcessed1 = toMarkdown(descriptionRaw);
+      const description = descriptionProcessed1;
+      const shares_volume = market["TotalSharesTraded"];
+
+      // let isbinary = market.contracts.length == 1;
       // let percentageFormatted = isbinary ? Number(Number(market.contracts[0].lastTradePrice) * 100).toFixed(0) + "%" : "none"
 
       let options: FetchedQuestion["options"] = (market.contracts as any[]).map(
@@ -68,18 +67,18 @@ export const predictit: Platform = {
           type: "PROBABILITY",
         })
       );
-      let totalValue = options
+      const totalValue = options
         .map((element: any) => Number(element.probability))
         .reduce((a, b) => a + b, 0);
 
-      if (options.length != 1 && totalValue > 1) {
+      if (options.length !== 1 && totalValue > 1) {
         options = options.map((element) => ({
           ...element,
           probability: Number(element.probability) / totalValue,
         }));
       } else if (options.length == 1) {
-        let option = options[0];
-        let probability = option.probability;
+        const option = options[0];
+        const probability = option.probability;
         options = [
           {
             name: "Yes",
@@ -104,7 +103,6 @@ export const predictit: Platform = {
           shares_volume,
         },
       };
-      // console.log(obj)
       results.push(obj);
     }
 

@@ -43,15 +43,6 @@ $ pnpm run cli
 $ pnpm run dev
 ```
 
-### 4. Example: download the metaforecasts database
-
-```
-$ git clone https://github.com/quantified-uncertainty/squiggle
-$ cd apps/metaforecast
-$ pnpm install
-$ node src/backend/manual/manualDownload.js
-```
-
 ## Integrations
 
 Metaforecast has been integrated into:
@@ -69,7 +60,7 @@ In general, if you want to integrate metaforecast into your service, we want to 
 
 ## Code layout
 
-- frontend code is in [src/pages/](./src/pages/), [src/web/](./src/web/) and in a few other places which are required by Next.js (e.g. root-level configs in postcss.config.js and tailwind.config.js)
+- frontend code is in [src/app/](./src/app/), [src/web/](./src/web/) and in a few other places which are required by Next.js (e.g. root-level configs in postcss.config.js and tailwind.config.js)
 - various backend code is in [src/backend/](./src/backend/)
 - fetching libraries for various platforms is in [src/backend/platforms/](./src/backend/platforms/)
 - rudimentary documentation is in [docs/](./docs)
@@ -86,7 +77,7 @@ Overall, the services which we use are:
 
 - Elasticsearch for search
 - Vercel for website deployment
-- Heroku for background jobs, e.g. fetching new forecasts
+- Kubernetes hosted on DigitalOcean for background jobs, e.g. fetching new forecasts (deployed as Helm chart in `ops/chart/`)
 - Postgres on DigitalOcean for database
 
 ## Various notes
@@ -98,18 +89,4 @@ Overall, the services which we use are:
 
 ## To do
 
-- [x] Update Metaculus and Manifold Markets fetchers
-- [x] Add markets from [Insight Prediction](https://insightprediction.com/).
-- [ ] Update broken fetchers:
-  - [x] For Good Judgment
-  - [ ] Kalshi: Requires a US person to create an account to access their v2 api.
-- [ ] Use <https://news.manifold.markets/p/above-the-fold-midterms-special> to update stars calculation for Manifold.
-- [ ] Add a few more snippets, with fetching individual questions, questions with histories, questions added within the last 24h to the /contrib folder (good first issue)
-- [ ] Refactor code so that users can capture and push the question history chart to imgur (good first issue)
-- [ ] Upgrade to [React 18](https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html). This will require dealing with the workaround we used for [this issue](https://github.com/vercel/next.js/issues/36019#issuecomment-1103266481)
-- [ ] Add database of resolutions
-- [ ] Allow users to embed predictions in the EA Forum/LessWrong (in progress)
-- [ ] Find a long-term mantainer for this project
-- [ ] Allow users to record their own predictions
-- [ ] Release snapshots (I think @niplav is working on this)
-- [ ] ...
+See [issues tagged with Metaforecast label](https://github.com/quantified-uncertainty/metaforecast/issues/), as well as the old [Metaforecast repo](https://github.com/quantified-uncertainty/metaforecast/issues/).
