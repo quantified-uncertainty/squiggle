@@ -34,6 +34,8 @@ resource "vercel_project" "main" {
   name           = "metaforecast"
   root_directory = "apps/metaforecast"
 
+  enable_affected_projects_deployments = false
+
   git_repository = {
     repo              = "quantified-uncertainty/squiggle"
     type              = "github"
