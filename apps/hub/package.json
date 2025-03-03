@@ -6,13 +6,8 @@
     "node": "22.x"
   },
   "scripts": {
-    "db:migrate:dev": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate dev",
-    "db:migrate": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate deploy",
-    "db:reset": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma migrate reset",
     "dev": "next dev -p 3001 --turbo",
     "start": "__NEXT_PRIVATE_PREBUNDLED_REACT=next next start",
-    "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
-    "gen": "pnpm gen:prisma",
     "gen:watch": "nodemon --watch src --ext ts,tsx,prisma --exec 'pnpm run gen'",
     "build:esbuild": "node ./esbuild.cjs",
     "build:ts": "pnpm gen && tsc",
@@ -33,6 +28,7 @@
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
+    "@quri/hub-db": "workspace:*",
     "@vercel/analytics": "^1.3.1",
     "base64-js": "^1.5.1",
     "clsx": "^2.1.1",
@@ -58,6 +54,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@prisma/nextjs-monorepo-workaround-plugin": "^6.3.1",
     "@quri/configs": "workspace:*",
     "@types/d3": "^7.4.3",
     "@types/invariant": "^2.2.37",
@@ -75,7 +72,6 @@
     "nodemon": "^3.1.9",
     "postcss": "^8.4.38",
     "prettier": "^3.4.2",
-    "prisma": "^6.3.1",
     "tailwindcss": "^3.4.3",
     "tsx": "^4.19.1",
     "typescript": "^5.7.3"
