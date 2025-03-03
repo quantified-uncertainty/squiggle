@@ -1,0 +1,6 @@
+{
+  "type": "commonjs",
+  "devDependencies": {
+    "@turbo/gen": "^2.4.4"
+  }
+}
