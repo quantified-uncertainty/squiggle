@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "gen:prisma": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
-    "build:ts": "pnpm gen:prisma && tsc",
+    "gen": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
+    "build:ts": "pnpm gen && tsc",
     "build": "pnpm run build:ts"
   },
   "dependencies": {
