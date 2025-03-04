@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
@@ -6,6 +5,8 @@ import {
   ValidationErrors,
 } from "next-safe-action";
 import { z } from "zod";
+
+import { Prisma } from "@quri/hub-db";
 
 export class ActionError extends Error {}
 

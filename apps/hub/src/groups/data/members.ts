@@ -1,4 +1,4 @@
-import { MembershipRole, Prisma } from "@prisma/client";
+import { MembershipRole, Prisma } from "@quri/hub-db";
 
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";

@@ -1,5 +1,6 @@
-import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
+
+import { MembershipRole } from "@quri/hub-db";
 
 import { SafeActionDropdownAction } from "@/components/ui/SafeActionDropdownAction";
 import { updateMembershipRoleAction } from "@/groups/actions/updateMembershipRoleAction";

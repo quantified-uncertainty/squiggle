@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { spawn } from "node:child_process";
+
+import { PrismaClient } from "@quri/hub-db";
 
 import { createVariableRevision } from "./createVariableRevision";
 import { WorkerOutput, WorkerRunMessage } from "./worker";

@@ -1,6 +1,6 @@
-import { MembershipRole } from "@prisma/client";
 import { FC } from "react";
 
+import { MembershipRole } from "@quri/hub-db";
 import {
   DropdownMenuModalActionItem,
   PlusIcon,

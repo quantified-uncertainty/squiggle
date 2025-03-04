@@ -1,8 +1,8 @@
 import "server-only";
 
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { Prisma } from "@quri/hub-db";
 import { ClientWorkflow } from "@quri/squiggle-ai";
 import { Workflow } from "@quri/squiggle-ai/server";
 

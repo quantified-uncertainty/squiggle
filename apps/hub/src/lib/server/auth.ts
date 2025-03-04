@@ -36,7 +36,9 @@ function buildAuthConfig(): NextAuthConfig {
   }
 
   const config: NextAuthConfig = {
-    adapter: PrismaAdapter(prisma),
+    adapter: PrismaAdapter(
+      prisma as any // @auth/prisma-adapter doesn't support our PrismaClient from @quri/hub-db
+    ),
     providers,
     callbacks: {
       async session({ session, user }) {

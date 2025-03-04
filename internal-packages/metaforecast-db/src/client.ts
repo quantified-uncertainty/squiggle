@@ -6,11 +6,7 @@ declare global {
   var _metaforecastPrisma: PrismaClient | undefined;
 }
 
-export const prisma =
-  global._metaforecastPrisma ||
-  new PrismaClient({
-    // log: ["query"],
-  });
+export const prisma = global._metaforecastPrisma || new PrismaClient({});
 
 if (process.env["NODE_ENV"] !== "production")
   global._metaforecastPrisma = prisma;

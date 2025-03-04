@@ -1,7 +1,6 @@
 import "server-only";
 
-import { AiWorkflow as PrismaAiWorkflow } from "@prisma/client";
-
+import { AiWorkflow as PrismaAiWorkflow } from "@quri/hub-db";
 import { ClientWorkflow } from "@quri/squiggle-ai";
 
 import { decodeV1_0JsonToClientWorkflow } from "@/ai/data/v1_0";
