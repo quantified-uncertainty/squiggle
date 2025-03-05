@@ -1,0 +1,21 @@
+{
+  "name": "@quri/manifold-evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:ts": "tsc",
+    "build": "pnpm run build:ts"
+  },
+  "devDependencies": {
+    "@quri/configs": "workspace:*",
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

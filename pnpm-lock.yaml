@@ -774,6 +774,21 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
 
+  internal-packages/manifold-evals:
+    devDependencies:
+      '@quri/configs':
+        specifier: workspace:*
+        version: link:../configs
+      '@types/node':
+        specifier: ^22.13.1
+        version: 22.13.1
+      tsx:
+        specifier: ^4.19.3
+        version: 4.19.3
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
   internal-packages/metaforecast-db:
     dependencies:
       '@prisma/client':
