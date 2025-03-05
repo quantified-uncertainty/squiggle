@@ -1,5 +1,6 @@
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
+
+import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import {

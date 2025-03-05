@@ -1,6 +1,7 @@
-import { Searchable as PrismaSearchable } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { z } from "zod";
+
+import { Searchable as PrismaSearchable } from "@quri/hub-db";
 
 import {
   groupRoute,

@@ -1,6 +1,7 @@
-import { User } from "@prisma/client";
 import { Session } from "next-auth";
 import { redirect } from "next/navigation";
+
+import { User } from "@quri/hub-db";
 
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";

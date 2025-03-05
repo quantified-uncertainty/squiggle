@@ -1,6 +1,6 @@
-import { type MembershipRole } from "@prisma/client";
 import { FC } from "react";
 
+import { type MembershipRole } from "@quri/hub-db";
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
 import { GroupMemberDTO } from "@/groups/data/members";

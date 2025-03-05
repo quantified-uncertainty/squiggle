@@ -11,7 +11,14 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist", "build", ".next", "*.tsbuildinfo", "!.next/cache"]
+      "outputs": [
+        "dist",
+        "build",
+        ".next",
+        "*.tsbuildinfo",
+        "!.next/cache",
+        "generated" // useful for *-db packages
+      ]
     },
     "build:storybook": {
       "dependsOn": ["build"],

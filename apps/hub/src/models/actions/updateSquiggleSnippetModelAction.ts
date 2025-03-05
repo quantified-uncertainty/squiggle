@@ -1,8 +1,8 @@
 "use server";
-import { RelativeValuesDefinition } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { RelativeValuesDefinition } from "@quri/hub-db";
 import { squiggleVersions } from "@quri/versioned-squiggle-components";
 
 import { modelRoute } from "@/lib/routes";

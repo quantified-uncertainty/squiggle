@@ -1,7 +1,8 @@
 "use server";
 
-import { MembershipRole } from "@prisma/client";
 import { z } from "zod";
+
+import { MembershipRole } from "@quri/hub-db";
 
 import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";

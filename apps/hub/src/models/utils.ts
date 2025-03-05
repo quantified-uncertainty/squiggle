@@ -1,4 +1,4 @@
-import { Model, Prisma } from "@prisma/client";
+import { Model, Prisma } from "@quri/hub-db";
 
 import { ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";

@@ -1,6 +1,6 @@
-import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
+import { Prisma } from "@quri/hub-db";
 import {
   SqLinker,
   SqModule,

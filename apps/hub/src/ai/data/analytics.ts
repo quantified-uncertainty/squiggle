@@ -1,5 +1,4 @@
-import * as Prisma from "@prisma/client";
-
+import * as Prisma from "@quri/hub-db";
 import { CodeArtifact, Workflow } from "@quri/squiggle-ai/server";
 
 import { getAiCodec } from "@/ai/data/utils";

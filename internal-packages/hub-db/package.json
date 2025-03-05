@@ -1,0 +1,25 @@
+{
+  "name": "@quri/hub-db",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
+    "build:ts": "pnpm gen && tsc",
+    "build": "pnpm run build:ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "prisma": "^6.3.1"
+  },
+  "devDependencies": {
+    "@quri/configs": "workspace:*",
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

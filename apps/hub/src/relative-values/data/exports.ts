@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { modelWhereHasAccess } from "@/models/data/authHelpers";

@@ -1,8 +1,8 @@
 import "server-only";
 
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+import { Prisma } from "@quri/hub-db";
 import { ClientWorkflow } from "@quri/squiggle-ai";
 
 // Snapshot of ClientWorkflow schemas as it was at the time we upgraded to V2
