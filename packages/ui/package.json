@@ -61,7 +61,7 @@
     "@storybook/react": "^8.5.3",
     "@storybook/react-vite": "^8.5.3",
     "@tailwindcss/forms": "^0.5.7",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.9",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
