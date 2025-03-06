@@ -1,21 +1,19 @@
-import { fetchAllMarketsLite, fetchFullMarket } from "./api";
+import { fetchAllMarketsLite, fetchFullMarket, FetchParams } from "./api";
 import { ManifoldApiFullMarket, ManifoldApiLiteMarket } from "./apiSchema";
-
-export type FetchParams = {
-  upToUpdatedTime?: Date;
-};
 
 /**
  * Fetches all lite markets from the Manifold API.
  */
 export async function fetchLiteMarkets({
   upToUpdatedTime,
+  beforeId,
 }: FetchParams = {}): Promise<{
   liteMarkets: ManifoldApiLiteMarket[];
   latestUpdateTime?: Date;
 }> {
   const liteMarkets = await fetchAllMarketsLite({
     upToUpdatedTime,
+    beforeId,
   });
   console.log(`Fetched ${liteMarkets.length} markets from API`);
 

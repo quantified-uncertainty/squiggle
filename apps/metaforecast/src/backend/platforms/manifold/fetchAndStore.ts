@@ -1,7 +1,8 @@
 import { ManifoldMarket } from "@quri/metaforecast-db";
 
+import { FetchParams } from "./api";
 import { saveMarketsToExtendedTables } from "./extendedTables";
-import { fetchFullMarkets, FetchParams } from "./fetch";
+import { fetchFullMarkets } from "./fetch";
 
 /**
  * High-level function that orchestrates the fetching pipeline.

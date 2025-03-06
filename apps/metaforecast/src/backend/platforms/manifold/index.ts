@@ -132,25 +132,37 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         await processMarketsAndSave(this, prismaMarkets, { index: true });
       });
 
-    command.command("fetch-new").action(async () => {
-      const state = await getPlatformState(this);
-      const upToUpdatedTime = state?.lastFetched
-        ? new Date(state.lastFetched)
-        : new Date(Date.now() - 1000 * 60 * 60 * 24); // 1 day ago
+    command
+      .command("fetch-new")
+      .option(
+        "--up-to-updated-time <timestamp>",
+        "Fetch markets up to this timestamp; defaults to platform state. If set, state won't be updated."
+      )
+      .option(
+        "--before <id>",
+        "Fetch markets before this id; useful for resuming"
+      )
+      .action(async (options) => {
+        const state = await getPlatformState(this);
+        const upToUpdatedTime = options.upToUpdatedTime
+          ? new Date(options.upToUpdatedTime)
+          : state?.lastFetched
+            ? new Date(state.lastFetched)
+            : new Date(Date.now() - 1000 * 60 * 60 * 24); // 1 day ago
 
-      const { prismaMarkets, latestUpdateTime } =
-        await fetchAndStoreMarketsFromApi({
-          upToUpdatedTime,
-        });
+        const { prismaMarkets, latestUpdateTime } =
+          await fetchAndStoreMarketsFromApi({
+            upToUpdatedTime,
+          });
 
-      await processMarketsAndSave(this, prismaMarkets, { index: true });
+        await processMarketsAndSave(this, prismaMarkets, { index: true });
 
-      if (latestUpdateTime) {
-        await setPlatformState(this, {
-          lastFetched: latestUpdateTime.getTime(),
-        });
-      }
-    });
+        if (latestUpdateTime && !options.upToUpdatedTime) {
+          await setPlatformState(this, {
+            lastFetched: latestUpdateTime.getTime(),
+          });
+        }
+      });
 
     // not a daily fetcher because we'll usually use an incremental fetcher
     // this command probably won't work, because it will run out of memory

@@ -20,14 +20,18 @@ const ENDPOINT = "https://api.manifold.markets/v0";
 
 const v0MarketsSchema = z.array(liteMarketSchema);
 
+export type FetchParams = {
+  upToUpdatedTime?: Date;
+  beforeId?: string;
+};
+
 export async function fetchAllMarketsLite({
   upToUpdatedTime,
-}: {
-  upToUpdatedTime?: Date;
-} = {}): Promise<ManifoldApiLiteMarket[]> {
+  beforeId,
+}: FetchParams = {}): Promise<ManifoldApiLiteMarket[]> {
   const endpoint = `${ENDPOINT}/markets`;
 
-  let lastId = "";
+  let lastId = beforeId ?? "";
   const allMarkets: ManifoldApiLiteMarket[] = [];
   let counter = 1;
   while (1) {
