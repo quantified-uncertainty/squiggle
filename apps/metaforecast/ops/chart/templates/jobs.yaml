@@ -1,12 +1,11 @@
 {{- range $jobname, $job := .Values.jobs }}
----  
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ $.Release.Name }}-{{ $jobname }}
 spec:
   concurrencyPolicy: Forbid
-  schedule: {{ $job.schedule | required "schedule is required" }}
+  schedule: {{ $job.schedule | required "schedule is required" | toYaml }}
   timeZone: Etc/UTC
   jobTemplate:
     metadata:
@@ -28,4 +27,5 @@ spec:
                 name: {{ $.Values.envSecret }}
             command:
               {{- $job.command | required "command is required" | toYaml | nindent 12 }}
+---
 {{- end }}
