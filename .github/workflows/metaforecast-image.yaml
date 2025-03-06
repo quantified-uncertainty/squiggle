@@ -71,7 +71,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
