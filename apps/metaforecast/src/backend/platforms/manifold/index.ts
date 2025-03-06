@@ -153,11 +153,12 @@ export const manifold: Platform<z.ZodObject<{ lastFetched: z.ZodNumber }>> = {
         const { prismaMarkets, latestUpdateTime } =
           await fetchAndStoreMarketsFromApi({
             upToUpdatedTime,
+            beforeId: options.before,
           });
 
         await processMarketsAndSave(this, prismaMarkets, { index: true });
 
-        if (latestUpdateTime && !options.upToUpdatedTime) {
+        if (latestUpdateTime && !options.upToUpdatedTime && !options.before) {
           await setPlatformState(this, {
             lastFetched: latestUpdateTime.getTime(),
           });
