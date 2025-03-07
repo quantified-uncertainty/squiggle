@@ -6,7 +6,6 @@ node_modules
 .log
 
 /.vscode/*.code-workspace
-/.vscode/settings.json
 .turbo
 *.tsbuildinfo
 
