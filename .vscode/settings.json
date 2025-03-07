@@ -1,0 +1,32 @@
+{
+  "jest.virtualFolders": [
+    {
+      "name": "squiggle-lang",
+      "rootPath": "packages/squiggle-lang",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "components",
+      "rootPath": "packages/components",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "prettier-plugin",
+      "rootPath": "packages/prettier-plugin",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "serializer",
+      "rootPath": "packages/serializer",
+      "runMode": "on-demand"
+    },
+    {
+      "name": "ai",
+      "rootPath": "internal-packages/ai",
+      "runMode": "on-demand"
+    }
+  ],
+  "files.associations": {
+    "turbo.json": "jsonc"
+  }
+}
