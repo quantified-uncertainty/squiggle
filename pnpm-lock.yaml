@@ -775,6 +775,16 @@ importers:
         version: 5.7.3
 
   internal-packages/manifold-evals:
+    dependencies:
+      '@quri/squiggle-ai':
+        specifier: workspace:^
+        version: link:../ai
+      '@quri/squiggle-lang':
+        specifier: workspace:0.10.1-0
+        version: link:../../packages/squiggle-lang
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -782,6 +792,9 @@ importers:
       '@types/node':
         specifier: ^22.13.1
         version: 22.13.1
+      '@types/react':
+        specifier: ^19.0.10
+        version: 19.0.10
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -18627,7 +18640,7 @@ snapshots:
 
   '@types/react-copy-to-clipboard@5.0.7':
     dependencies:
-      '@types/react': 19.0.8
+      '@types/react': 19.0.10
 
   '@types/react-dom@19.0.3(@types/react@19.0.8)':
     dependencies:

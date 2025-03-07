@@ -1,6 +1,6 @@
 {
   "extends": "@quri/configs/tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "dist/build.tsbuildinfo"
-  }
+    "tsBuildInfoFile": "dist/build.tsbuildinfo",
+  },
 }

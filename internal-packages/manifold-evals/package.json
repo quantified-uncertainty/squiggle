@@ -9,6 +9,7 @@
   "devDependencies": {
     "@quri/configs": "workspace:*",
     "@types/node": "^22.13.1",
+    "@types/react": "^19.0.10",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   },
@@ -17,5 +18,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
+  },
+  "dependencies": {
+    "@quri/squiggle-ai": "workspace:^",
+    "@quri/squiggle-lang": "workspace:0.10.1-0",
+    "dotenv": "^16.4.5"
   }
 }
