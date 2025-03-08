@@ -96,6 +96,9 @@ importers:
       '@quri/hub-db':
         specifier: workspace:*
         version: link:../../internal-packages/hub-db
+      '@quri/manifold-evals':
+        specifier: workspace:*
+        version: link:../../internal-packages/manifold-evals
       '@quri/squiggle-ai':
         specifier: workspace:*
         version: link:../../internal-packages/ai
