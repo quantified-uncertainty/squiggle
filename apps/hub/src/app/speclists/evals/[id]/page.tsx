@@ -6,7 +6,7 @@ import { getEvalById } from "@quri/manifold-evals";
 
 import { Link } from "@/components/ui/Link";
 
-import SquiggleCode from "./SquiggleCode";
+import { RunSquiggle } from "./RunSquiggle";
 
 export const dynamicParams = true;
 
@@ -96,9 +96,9 @@ export default async function EvalDetailPage({
 
                   <div className="mt-3">
                     <p className="mb-2 text-sm font-medium text-gray-700">
-                      Squiggle Code:
+                      Squiggle Model:
                     </p>
-                    <SquiggleCode code={result.code} />
+                    <RunSquiggle code={result.code} />
                   </div>
 
                   {result.workflow && (
