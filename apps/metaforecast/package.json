@@ -52,7 +52,7 @@
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/textversionjs": "^1.1.4",
     "@types/tunnel": "^0.0.7",
-    "@urql/core": "5.0.8",
+    "@urql/core": "5.1.1",
     "@urql/next": "^1.1.2",
     "airtable": "^0.12.2",
     "ajv": "^8.17.1",
