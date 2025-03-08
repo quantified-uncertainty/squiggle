@@ -1,29 +1,32 @@
-export type Spec = {
-  id: string;
-  description: string;
-};
+import { Prisma, PrismaClient } from "@quri/hub-db";
 
-export type SpecList = {
-  specs: Spec[];
-};
+// Global Prisma client to be reused across the application
+export const prisma: PrismaClient = new PrismaClient();
 
-export async function getMockSpecList(): Promise<SpecList> {
-  const specs = [
-    {
-      id: "2plus2",
-      description: "How much is 2 + 2?",
+const select = {
+  id: true,
+  specs: {
+    select: {
+      spec: true,
     },
-    {
-      id: "pianoTuners",
-      description: "How many piano tuners are there in the world?",
-    },
-    {
-      id: "worldPopulation",
-      description: "How many people live in the world?",
-    },
-  ];
+  },
+} satisfies Prisma.SpecListSelect;
 
-  return {
-    specs,
-  };
+export type SpecList = NonNullable<
+  Awaited<
+    ReturnType<typeof prisma.specList.findFirst<{ select: typeof select }>>
+  >
+>;
+
+export async function getSpecListById(id: string): Promise<SpecList> {
+  return prisma.specList.findUniqueOrThrow({
+    where: { id },
+    select,
+  });
+}
+
+export async function getAllSpecLists(): Promise<SpecList[]> {
+  return prisma.specList.findMany({
+    select,
+  });
 }

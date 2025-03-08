@@ -1,44 +1,20 @@
-import fs from "fs/promises";
-import path from "path";
-
-import { LlmConfig, llmLinker } from "@quri/squiggle-ai";
+import { Prisma } from "@quri/hub-db";
+import { LlmConfig } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
   makeAiCodec,
   PromptArtifact,
   Workflow,
 } from "@quri/squiggle-ai/server";
-import { run, SqValue } from "@quri/squiggle-lang";
 
-import { Spec } from "../specLists.js";
-import { EvalResult, Evaluator } from "./index.js";
+import { prisma } from "../specLists.js";
+import { Evaluator } from "./index.js";
 
-function specToPrompt(spec: Spec) {
+function specToPrompt(spec: { id: string; description: string }) {
   return `Write a model for this question: ${spec.description}. Return the answer in the final expression.`;
 }
 
-export async function loadWorkflowFromFile(
-  filePath: string
-): Promise<Workflow<any>> {
-  const codec = makeAiCodec({
-    anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
-  });
-
-  const json = await fs.readFile(filePath, "utf-8");
-
-  const { entrypoint, bundle } = JSON.parse(json);
-
-  const deserializer = codec.makeDeserializer(bundle);
-
-  const workflow = deserializer.deserialize<"workflow">(entrypoint);
-
-  return workflow;
-}
-
-async function serializeWorkflowToFile(
-  workflow: Workflow<any>,
-  filePath: string
-) {
+function serializeWorkflow(workflow: Workflow<any>): Prisma.InputJsonValue {
   const codec = makeAiCodec({
     anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
   });
@@ -47,65 +23,48 @@ async function serializeWorkflowToFile(
   const entrypoint = serializer.serialize("workflow", workflow);
   const bundle = serializer.getBundle();
 
-  const serializedWorkflow = JSON.stringify({ entrypoint, bundle });
-  await fs.writeFile(filePath, serializedWorkflow);
+  return { entrypoint, bundle };
 }
 
-function sqValueToString(value: SqValue): string {
-  if (value.tag === "Dist" && value.context) {
-    const env = value.context.runContext.environment;
-    const sparkline = String(value.value.toSparkline(env).value);
-    const mean = String(value.value.mean(env));
-    return `${sparkline} Mean: ${mean}`;
+async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
+  // Create a stub user if we don't have user data
+  const evaluatorUserEmail = process.env["EVALUATOR_USER_EMAIL"];
+  if (!evaluatorUserEmail) {
+    throw new Error("EVALUATOR_USER_EMAIL is not set");
   }
-  return value.toString();
-}
 
-async function workflowStringResult(workflow: Workflow<any>): Promise<string> {
-  const workflowResult = workflow.getFinalResult();
-  const code = workflowResult.code;
-  const squiggleModuleOutput = await run(code, {
-    linker: llmLinker,
+  const serialized = serializeWorkflow(workflow);
+
+  const dbWorkflow = await prisma.aiWorkflow.create({
+    data: {
+      id: workflow.id,
+      format: "V2_0",
+      workflow: serialized,
+      markdown: workflow.getFinalResult().logSummary || "",
+      user: {
+        connect: {
+          email: evaluatorUserEmail,
+        },
+      },
+    },
   });
 
-  const result = squiggleModuleOutput.result.ok
-    ? sqValueToString(squiggleModuleOutput.result.value.result)
-    : squiggleModuleOutput.result.value.toString();
-
-  return result;
+  return dbWorkflow.id;
 }
-
-export async function loadSpecEvalResult({
-  dir,
-  spec,
-}: {
-  dir: string;
-  spec: Spec;
-}): Promise<EvalResult> {
-  const filePath = path.join(dir, `${spec.id}.json`);
-  const workflow = await loadWorkflowFromFile(filePath);
-  const result = await workflowStringResult(workflow);
-
-  return {
-    specId: spec.id,
-    result,
-  };
-}
+const llmConfig: LlmConfig = {
+  llmId: "Claude-Sonnet",
+  priceLimit: 0.8,
+  durationLimitMinutes: 6,
+  messagesInHistoryToKeep: 4,
+  numericSteps: 1,
+  styleGuideSteps: 1,
+};
 
 export async function getAiEvaluator({
-  storeWorkflowsDir,
+  storeInDb = true,
 }: {
-  storeWorkflowsDir?: string;
+  storeInDb?: boolean;
 } = {}): Promise<Evaluator> {
-  const llmConfig: LlmConfig = {
-    llmId: "Claude-Sonnet",
-    priceLimit: 0.8,
-    durationLimitMinutes: 6,
-    messagesInHistoryToKeep: 4,
-    numericSteps: 1,
-    styleGuideSteps: 1,
-  };
-
   const evaluator: Evaluator = async (spec) => {
     const workflow = createSquiggleWorkflowTemplate.instantiate({
       llmConfig,
@@ -116,15 +75,19 @@ export async function getAiEvaluator({
     });
 
     await workflow.runToResult();
-    if (storeWorkflowsDir) {
-      const workflowFile = path.join(storeWorkflowsDir, `${spec.id}.json`);
-      await serializeWorkflowToFile(workflow, workflowFile);
+
+    // Store workflow to database if enabled
+    let workflowId = workflow.id;
+    if (storeInDb) {
+      workflowId = await saveWorkflowToDb(workflow);
     }
-    const result = await workflowStringResult(workflow);
+
+    const workflowResult = workflow.getFinalResult();
 
     return {
       specId: spec.id,
-      result,
+      code: workflowResult.code,
+      workflowId,
     };
   };
 

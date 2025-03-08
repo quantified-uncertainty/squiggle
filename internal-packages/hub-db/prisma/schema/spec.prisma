@@ -1,0 +1,73 @@
+// "Spec" == "Definition" == "Question", a node in the ontology graph that can be responded to with a value.
+model Spec {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    description String
+
+    specLists   SpecsOnSpecLists[]
+    evalResults EvalResult[]
+}
+
+model SpecList {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    specs SpecsOnSpecLists[]
+    evals Eval[]
+}
+
+model SpecsOnSpecLists {
+    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
+    specId String
+
+    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
+    specListId String
+
+    @@id([specId, specListId])
+    @@index([specId])
+    @@index([specListId])
+}
+
+// "Eval" is a shorthand for "collection of EvalResults on a SpecList"
+model Eval {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // metadata about the evaluator that was used
+    evaluator String
+
+    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
+    specListId String
+
+    evalResults EvalResult[]
+}
+
+model EvalResult {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
+    specId String
+
+    /**
+     * All eval results are Squiggle models.
+     * Simple approach, Squiggle code is copy-pasted here from AiWorkflow outputs.
+     * Ideally, we should store each result as a Model or a Variable table. But that part of codebase is too complicated to bother for now, because of revisions.
+     */
+    code String
+
+    eval   Eval   @relation(fields: [evalId], references: [id])
+    evalId String
+
+    workflowId String?     @unique
+    workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
+}

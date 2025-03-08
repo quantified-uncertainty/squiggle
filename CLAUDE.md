@@ -11,7 +11,7 @@
 
 ## Code Style
 
-- Use TypeScript with strict typing; avoid `any`
+- Use TypeScript with strict typing; never use `any`, try your best guess at the type if necessary, even if you're not sure it's correct
 - Use `const` over `let` over `var`, default to `const`
 - React: Use functional components with `FC<Props>` typing
 - Component files should match component names with named exports

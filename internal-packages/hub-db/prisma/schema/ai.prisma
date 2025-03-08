@@ -19,4 +19,6 @@ model AiWorkflow {
 
     // TODO - remove default
     markdown String @default("")
+
+    evalResult EvalResult?
 }
