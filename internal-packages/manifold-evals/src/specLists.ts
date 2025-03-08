@@ -1,7 +1,7 @@
-import { Prisma, PrismaClient } from "@quri/hub-db";
+import { Prisma, PrismaClient, getPrismaClient } from "@quri/hub-db";
 
-// Global Prisma client to be reused across the application
-export const prisma: PrismaClient = new PrismaClient();
+// Get the shared Prisma client
+export const prisma: PrismaClient = getPrismaClient();
 
 const select = {
   id: true,
