@@ -34,7 +34,7 @@
   "dependencies": {
     "@atmina/urql-custom-scalars-exchange": "^1.1.0",
     "@elastic/elasticsearch": "^8.17.1",
-    "@floating-ui/react-dom": "^0.7.2",
+    "@floating-ui/react-dom": "^2.1.2",
     "@graphql-yoga/plugin-response-cache": "^3.10.0",
     "@inquirer/prompts": "^7.3.2",
     "@pothos/core": "^4.3.0",
