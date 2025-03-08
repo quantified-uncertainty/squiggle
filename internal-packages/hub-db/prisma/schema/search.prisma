@@ -1,0 +1,15 @@
+model Searchable {
+    id String @id @default(cuid())
+
+    model   Model?  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    modelId String? @unique
+
+    definition   RelativeValuesDefinition? @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+    definitionId String?                   @unique
+
+    user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String? @unique
+
+    group   Group?  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    groupId String? @unique
+}

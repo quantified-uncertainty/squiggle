@@ -1,0 +1,13 @@
+// Owner is an abstraction on top of Group and User.
+// Only models have slugs, so we can have URLs like https://squigglehub.org/models/owner-slug/model-slug.
+model Owner {
+    id String @id @default(cuid())
+
+    slug String @unique @db.Citext
+
+    group Group?
+    user  User?
+
+    models                    Model[]
+    relativeValuesDefinitions RelativeValuesDefinition[]
+}
