@@ -1,11 +1,11 @@
 import { Spec, SpecList } from "../specLists.js";
 
-type EvalResult = {
+export type EvalResult = {
   specId: string;
   result: string;
 };
 
-type EvalResultList = {
+export type EvalResultList = {
   specList: SpecList;
   results: EvalResult[];
 };
