@@ -251,8 +251,8 @@ importers:
         specifier: ^1.1.0
         version: 1.1.1(@urql/core@5.0.8(graphql@16.10.0))(graphql@16.10.0)(wonka@6.3.4)
       '@elastic/elasticsearch':
-        specifier: ^8.15.1
-        version: 8.17.0
+        specifier: ^8.17.1
+        version: 8.17.1
       '@floating-ui/react-dom':
         specifier: ^0.7.2
         version: 0.7.2(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2657,8 +2657,8 @@ packages:
     resolution: {integrity: sha512-mepCf/e9+SKYy1d02/UkvSy6+6MoyXhVxP8lLDfA7BPE1X1d4dR0sZznmbM8/XVJ1GPM+Svnx7Xj6ZweByWUkw==}
     engines: {node: '>17.0.0'}
 
-  '@elastic/elasticsearch@8.17.0':
-    resolution: {integrity: sha512-FZ+gQUrPsMpQ2RRIXwTmCoUeFCEausMhp4eQOyxT9j1cwGXHJrhelR6jffM1SC95kQUkB7+TcTq7oQ+bG2BQ9g==}
+  '@elastic/elasticsearch@8.17.1':
+    resolution: {integrity: sha512-EaDP4/jfNu0nhnHZjxk9bL9ofKWKX9QUdEJ8QsGa+/KMPBEwD+HMyYXH4FSRlg7YONI0UbdO/mMZobvcEnMFBA==}
     engines: {node: '>=18'}
 
   '@elastic/transport@8.9.4':
@@ -14843,7 +14843,7 @@ snapshots:
 
   '@dagrejs/graphlib@2.2.4': {}
 
-  '@elastic/elasticsearch@8.17.0':
+  '@elastic/elasticsearch@8.17.1':
     dependencies:
       '@elastic/transport': 8.9.4
       apache-arrow: 18.1.0
