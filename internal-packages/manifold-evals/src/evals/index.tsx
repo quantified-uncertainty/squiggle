@@ -1,6 +1,74 @@
-import { Eval, EvalResult, Spec } from "@quri/hub-db";
+import { Eval, EvalResult, getPrismaClient, Prisma, Spec } from "@quri/hub-db";
 
-import { prisma, SpecList } from "../specLists.js";
+import { SpecList } from "../specLists.js";
+
+// Selection for fetching eval data with detailed information
+export const evalSelectWithDetails = {
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  evaluator: true,
+  specList: {
+    select: {
+      id: true,
+      specs: {
+        select: {
+          spec: true,
+        },
+      },
+    },
+  },
+  evalResults: {
+    select: {
+      id: true,
+      code: true,
+      spec: true,
+      workflow: {
+        select: {
+          id: true,
+          markdown: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.EvalSelect;
+
+// Type for eval data with all details included
+export type EvalWithDetails = Prisma.EvalGetPayload<{
+  select: typeof evalSelectWithDetails;
+}>;
+
+export async function getAllEvals() {
+  const prisma = getPrismaClient();
+  return prisma.eval.findMany({
+    select: {
+      id: true,
+      createdAt: true,
+      evaluator: true,
+      specList: {
+        select: {
+          id: true,
+        },
+      },
+      _count: {
+        select: {
+          evalResults: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
+export async function getEvalById(id: string): Promise<EvalWithDetails> {
+  const prisma = getPrismaClient();
+  return prisma.eval.findUniqueOrThrow({
+    where: { id },
+    select: evalSelectWithDetails,
+  });
+}
 
 type EvaluatorResult = Pick<EvalResult, "specId" | "code" | "workflowId">;
 
@@ -13,6 +81,7 @@ export async function runEvalOnSpecList(
   evaluator: Evaluator
 ): Promise<Eval> {
   // create a new Eval record
+  const prisma = getPrismaClient();
   const evaluation = await prisma.eval.create({
     data: {
       evaluator: "anonymous", // TODO: named evaluators
@@ -65,6 +134,7 @@ export async function runEvalOnSpecList(
 
 export async function printEvalResultList(evaluation: Eval) {
   const maxIdLength = 24;
+  const prisma = getPrismaClient();
 
   const results = await prisma.evalResult.findMany({
     where: {

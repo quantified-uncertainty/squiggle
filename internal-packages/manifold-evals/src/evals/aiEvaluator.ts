@@ -1,4 +1,4 @@
-import { Prisma } from "@quri/hub-db";
+import { getPrismaClient, Prisma } from "@quri/hub-db";
 import { LlmConfig } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
@@ -7,7 +7,6 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
-import { prisma } from "../specLists.js";
 import { Evaluator } from "./index.js";
 
 function specToPrompt(spec: { id: string; description: string }) {
@@ -35,7 +34,7 @@ async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
 
   const serialized = serializeWorkflow(workflow);
 
-  const dbWorkflow = await prisma.aiWorkflow.create({
+  const dbWorkflow = await getPrismaClient().aiWorkflow.create({
     data: {
       id: workflow.id,
       format: "V2_0",

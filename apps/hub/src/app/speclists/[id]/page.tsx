@@ -6,19 +6,23 @@ import { Link } from "@/components/ui/Link";
 
 export const dynamicParams = true;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   return {
-    title: `Spec List: ${params.id} - Squiggle Hub`,
+    title: `Spec List: ${(await params).id} - Squiggle Hub`,
   };
 }
 
 export default async function SpecListDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
-    const specList = await getSpecListById(params.id);
+    const specList = await getSpecListById((await params).id);
 
     return (
       <div>

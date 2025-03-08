@@ -1,11 +1,14 @@
 #!/usr/bin/env tsx
 
 import "dotenv/config";
+
 import inquirer from "inquirer";
-import { prisma } from "../specLists.js";
+
+import { getPrismaClient } from "@quri/hub-db";
 
 async function selectEval() {
   // Get all evals with their spec lists
+  const prisma = getPrismaClient();
   const evals = await prisma.eval.findMany({
     include: {
       specList: true,
@@ -26,9 +29,9 @@ async function selectEval() {
       type: "list",
       name: "evalId",
       message: "Select an evaluation to view:",
-      choices: evals.map((eval_) => ({
-        name: `${eval_.id} (${eval_.evaluator}, ${eval_._count.evalResults} results, created ${eval_.createdAt.toLocaleString()})`,
-        value: eval_.id,
+      choices: evals.map((evaluation) => ({
+        name: `${evaluation.id} (${evaluation.evaluator}, ${evaluation._count.evalResults} results, created ${evaluation.createdAt.toLocaleString()})`,
+        value: evaluation.id,
       })),
     },
   ]);
@@ -38,6 +41,7 @@ async function selectEval() {
 
 async function displayEvalResults(evalId: string) {
   // Get eval results with related specs
+  const prisma = getPrismaClient();
   const eval_ = await prisma.eval.findUniqueOrThrow({
     where: { id: evalId },
     include: {
@@ -63,11 +67,11 @@ async function displayEvalResults(evalId: string) {
   for (const result of eval_.evalResults) {
     console.log(`\nSpec: ${result.spec.description}`);
     console.log(`ID: ${result.spec.id}`);
-    
+
     if (result.workflow) {
       console.log(`Workflow ID: ${result.workflow.id}`);
     }
-    
+
     console.log("\nCode:");
     console.log(result.code);
     console.log("\n----------------------------------------");
@@ -82,7 +86,7 @@ async function main() {
     console.error("Error:", error);
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await getPrismaClient().$disconnect();
   }
 }
 

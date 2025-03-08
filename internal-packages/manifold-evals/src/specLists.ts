@@ -1,7 +1,4 @@
-import { Prisma, PrismaClient, getPrismaClient } from "@quri/hub-db";
-
-// Get the shared Prisma client
-export const prisma: PrismaClient = getPrismaClient();
+import { getPrismaClient, Prisma } from "@quri/hub-db";
 
 const select = {
   id: true,
@@ -12,13 +9,10 @@ const select = {
   },
 } satisfies Prisma.SpecListSelect;
 
-export type SpecList = NonNullable<
-  Awaited<
-    ReturnType<typeof prisma.specList.findFirst<{ select: typeof select }>>
-  >
->;
+export type SpecList = Prisma.SpecListGetPayload<{ select: typeof select }>;
 
 export async function getSpecListById(id: string): Promise<SpecList> {
+  const prisma = getPrismaClient();
   return prisma.specList.findUniqueOrThrow({
     where: { id },
     select,
@@ -26,6 +20,7 @@ export async function getSpecListById(id: string): Promise<SpecList> {
 }
 
 export async function getAllSpecLists(): Promise<SpecList[]> {
+  const prisma = getPrismaClient();
   return prisma.specList.findMany({
     select,
   });

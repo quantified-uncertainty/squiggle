@@ -13,7 +13,15 @@ export default async function SpecListsPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-xl font-semibold">Available Spec Lists</h2>
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Available Spec Lists</h2>
+        <Link
+          href="/speclists/evals"
+          className="text-blue-600 hover:text-blue-800"
+        >
+          View Evaluations →
+        </Link>
+      </div>
 
       <div className="rounded-lg bg-white shadow-md">
         {specLists.length === 0 ? (
