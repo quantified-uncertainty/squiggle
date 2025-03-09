@@ -34,6 +34,9 @@ export default async function SpecListsPage() {
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -48,6 +51,9 @@ export default async function SpecListsPage() {
               {specLists.map((specList) => (
                 <tr key={specList.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+                    {specList.name}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {specList.id}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">

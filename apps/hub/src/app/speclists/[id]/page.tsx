@@ -11,9 +11,16 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  return {
-    title: `Spec List: ${(await params).id} - Squiggle Hub`,
-  };
+  try {
+    const specList = await getSpecListById((await params).id);
+    return {
+      title: `${specList.name} - Squiggle Hub`,
+    };
+  } catch (error) {
+    return {
+      title: `Spec List: ${(await params).id} - Squiggle Hub`,
+    };
+  }
 }
 
 export default async function SpecListDetailPage({
@@ -27,7 +34,10 @@ export default async function SpecListDetailPage({
     return (
       <div>
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Spec List: {specList.id}</h2>
+          <div>
+            <h2 className="text-xl font-semibold">{specList.name}</h2>
+            <p className="text-sm text-gray-500">ID: {specList.id}</p>
+          </div>
           <Link
             href="/speclists"
             className="text-sm text-blue-600 hover:text-blue-800"

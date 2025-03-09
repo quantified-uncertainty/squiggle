@@ -17,6 +17,8 @@ model SpecList {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    name String
+
     specs SpecsOnSpecLists[]
     evals Eval[]
 }

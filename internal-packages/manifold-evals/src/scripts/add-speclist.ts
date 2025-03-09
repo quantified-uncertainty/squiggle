@@ -34,6 +34,21 @@ async function addSpec(): Promise<string> {
 async function addSpecList() {
   console.log("Creating a new SpecList");
 
+  // Prompt for SpecList name
+  const { name } = await inquirer.prompt([
+    {
+      type: "input",
+      name: "name",
+      message: "Enter a name for this SpecList:",
+      validate: (input) => {
+        if (input.trim() === "") {
+          return "Name cannot be empty";
+        }
+        return true;
+      },
+    },
+  ]);
+
   const specIds: string[] = [];
   let addingSpecs = true;
 
@@ -55,6 +70,7 @@ async function addSpecList() {
 
   const specList = await prisma.specList.create({
     data: {
+      name,
       specs: {
         create: specIds.map((specId) => ({
           spec: {
@@ -76,6 +92,7 @@ async function addSpecList() {
 
   console.log("\nCreated SpecList:");
   console.log(`ID: ${specList.id}`);
+  console.log(`Name: ${specList.name}`);
   console.log("Specs:");
   for (const specOnList of specList.specs) {
     console.log(`- ${specOnList.spec.description} (${specOnList.spec.id})`);

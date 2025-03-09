@@ -2,6 +2,7 @@ import { getPrismaClient, Prisma } from "@quri/hub-db";
 
 const select = {
   id: true,
+  name: true,
   specs: {
     select: {
       spec: true,
