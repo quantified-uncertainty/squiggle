@@ -23,7 +23,7 @@
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
     "@quri/hub-db": "workspace:*",
-    "@quri/manifold-evals": "workspace:*",
+    "@quri/evals": "workspace:*",
     "@quri/squiggle-ai": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
