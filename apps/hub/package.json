@@ -22,8 +22,9 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
-    "@quri/hub-db": "workspace:*",
     "@quri/evals": "workspace:*",
+    "@quri/hub-api-client": "workspace:^",
+    "@quri/hub-db": "workspace:*",
     "@quri/squiggle-ai": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
@@ -63,6 +64,7 @@
     "@types/node": "^22.13.1",
     "@types/pako": "^2.0.3",
     "@types/react": "^19.0.8",
+    "@typescript/analyze-trace": "^0.10.1",
     "dotenv-cli": "^8.0.0",
     "esbuild": "^0.24.2",
     "eslint": "^9.19.0",

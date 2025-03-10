@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import React from "react";
 
-import { getEvalById } from "@quri/manifold-evals";
+import { getEvalById } from "@quri/evals";
 
 import { Link } from "@/components/ui/Link";
 

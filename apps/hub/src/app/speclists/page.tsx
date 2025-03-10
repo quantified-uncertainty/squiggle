@@ -1,6 +1,6 @@
 import React from "react";
 
-import { getAllSpecLists } from "@quri/manifold-evals";
+import { getAllSpecLists } from "@quri/evals";
 
 import { Link } from "@/components/ui/Link";
 
@@ -13,7 +13,7 @@ export default async function SpecListsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold">Available Spec Lists</h2>
         <Link
           href="/speclists/evals"

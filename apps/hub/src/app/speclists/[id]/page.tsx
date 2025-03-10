@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getSpecListById } from "@quri/manifold-evals";
+import { getSpecListById } from "@quri/evals";
 
 import { Link } from "@/components/ui/Link";
 
