@@ -1,9 +1,8 @@
 import { format } from "date-fns";
 import React from "react";
 
-import { getAllEvals } from "@quri/evals";
-
 import { StyledLink } from "@/components/ui/StyledLink";
+import { getAllEvals } from "@/evals/data/evals";
 import { evaluationRoute, speclistRoute } from "@/lib/routes";
 
 export const metadata = {

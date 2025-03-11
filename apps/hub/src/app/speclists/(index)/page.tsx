@@ -1,8 +1,7 @@
 import React from "react";
 
-import { getAllSpecLists } from "@quri/evals";
-
 import { StyledLink } from "@/components/ui/StyledLink";
+import { getAllSpecLists } from "@/evals/data/specLists";
 import { speclistRoute } from "@/lib/routes";
 
 export const metadata = {

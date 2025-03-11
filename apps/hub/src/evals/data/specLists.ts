@@ -1,4 +1,7 @@
-import { getPrismaClient, Prisma } from "@quri/hub-db";
+import { Prisma } from "@quri/hub-db";
+
+import { prisma } from "@/lib/server/prisma";
+import { checkRootUser } from "@/users/auth";
 
 const select = {
   id: true,
@@ -13,7 +16,8 @@ const select = {
 export type SpecList = Prisma.SpecListGetPayload<{ select: typeof select }>;
 
 export async function getSpecListById(id: string): Promise<SpecList> {
-  const prisma = getPrismaClient();
+  await checkRootUser();
+
   return prisma.specList.findUniqueOrThrow({
     where: { id },
     select,
@@ -21,7 +25,8 @@ export async function getSpecListById(id: string): Promise<SpecList> {
 }
 
 export async function getAllSpecLists(): Promise<SpecList[]> {
-  const prisma = getPrismaClient();
+  await checkRootUser();
+
   return prisma.specList.findMany({
     select,
   });

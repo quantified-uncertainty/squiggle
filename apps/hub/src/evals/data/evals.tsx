@@ -1,6 +1,9 @@
-import { Eval, EvalResult, getPrismaClient, Prisma, Spec } from "@quri/hub-db";
+import { Eval, EvalResult, Prisma, Spec } from "@quri/hub-db";
 
-import { SpecList } from "../specLists.js";
+import { prisma } from "@/lib/server/prisma.js";
+import { checkRootUser } from "@/users/auth.js";
+
+import { SpecList } from "./specLists.js";
 
 // Selection for fetching eval data with detailed information
 export const evalSelectWithDetails = {
@@ -40,7 +43,8 @@ export type EvalWithDetails = Prisma.EvalGetPayload<{
 }>;
 
 export async function getAllEvals() {
-  const prisma = getPrismaClient();
+  await checkRootUser();
+
   return prisma.eval.findMany({
     select: {
       id: true,
@@ -65,7 +69,8 @@ export async function getAllEvals() {
 }
 
 export async function getEvalById(id: string): Promise<EvalWithDetails> {
-  const prisma = getPrismaClient();
+  await checkRootUser();
+
   return prisma.eval.findUniqueOrThrow({
     where: { id },
     select: evalSelectWithDetails,
@@ -82,8 +87,9 @@ export async function runEvalOnSpecList(
   specList: SpecList,
   evaluator: Evaluator
 ): Promise<Eval> {
+  await checkRootUser();
+
   // create a new Eval record
-  const prisma = getPrismaClient();
   const evaluation = await prisma.eval.create({
     data: {
       evaluator: "anonymous", // TODO: named evaluators
@@ -132,23 +138,4 @@ export async function runEvalOnSpecList(
       id: evaluation.id,
     },
   });
-}
-
-export async function printEvalResultList(evaluation: Eval) {
-  const maxIdLength = 24;
-  const prisma = getPrismaClient();
-
-  const results = await prisma.evalResult.findMany({
-    where: {
-      evalId: evaluation.id,
-    },
-  });
-
-  for (const result of results) {
-    let specId = result.specId;
-    if (specId.length > maxIdLength) {
-      specId = specId.slice(0, maxIdLength - 3) + "...";
-    }
-    console.log(specId.padEnd(maxIdLength), result.code);
-  }
 }

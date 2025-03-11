@@ -2,9 +2,8 @@ import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import React from "react";
 
-import { getEvalById } from "@quri/evals";
-
 import { StyledLink } from "@/components/ui/StyledLink";
+import { getEvalById } from "@/evals/data/evals";
 import { evaluationsRoute, speclistRoute } from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";

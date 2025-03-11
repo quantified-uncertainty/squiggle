@@ -7,7 +7,7 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
-import { Evaluator } from "./index.js";
+import { Evaluator } from "./data/evals";
 
 function specToPrompt(spec: { id: string; description: string }) {
   return `Write a model for this question: ${spec.description}. Return the answer in the final expression.`;

@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
 
-import { getSpecListById } from "@quri/evals";
-
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { getSpecListById } from "@/evals/data/specLists";
 
 export const dynamicParams = true;
 

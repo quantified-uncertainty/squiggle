@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getSpecListById } from "@quri/evals";
+
+import { getSpecListById } from "@/evals/data/specLists";
 
 export async function GET(
   request: NextRequest,
@@ -7,7 +8,7 @@ export async function GET(
 ) {
   try {
     const specList = await getSpecListById(params.id);
-    
+
     return Response.json({
       id: specList.id,
       name: specList.name,
