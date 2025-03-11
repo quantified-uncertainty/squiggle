@@ -1,9 +1,9 @@
 import { Eval, EvalResult, Prisma, Spec } from "@quri/hub-db";
 
-import { prisma } from "@/lib/server/prisma.js";
-import { checkRootUser } from "@/users/auth.js";
+import { prisma } from "@/lib/server/prisma";
+import { checkRootUser } from "@/users/auth";
 
-import { SpecList } from "./specLists.js";
+import { SpecList } from "./specLists";
 
 // Selection for fetching eval data with detailed information
 export const evalSelectWithDetails = {
