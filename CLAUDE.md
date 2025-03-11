@@ -26,3 +26,7 @@
 - `packages/`: NPM-published packages (squiggle-lang, components, etc.)
 - `apps/`: Applications like website and hub
 - `internal-packages/`: Internal not-for-npm packages
+
+## Next.js Apps Best Practices
+
+Described in `apps/hub/docs/nextjs.md`.

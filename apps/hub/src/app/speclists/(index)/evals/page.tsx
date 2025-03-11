@@ -3,7 +3,8 @@ import React from "react";
 
 import { getAllEvals } from "@quri/evals";
 
-import { Link } from "@/components/ui/Link";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { evaluationRoute, speclistRoute } from "@/lib/routes";
 
 export const metadata = {
   title: "Evaluations - Squiggle Hub",
@@ -14,16 +15,6 @@ export default async function EvalsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Evaluations</h2>
-        <Link
-          href="/speclists"
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
-          ← Back to Spec Lists
-        </Link>
-      </div>
-
       <div className="rounded-lg bg-white shadow-md">
         {evals.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
@@ -54,35 +45,34 @@ export default async function EvalsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {evals.map((eval_) => (
-                <tr key={eval_.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                    {eval_.id}
+              {evals.map((evaluation) => (
+                <tr key={evaluation.id} className="hover:bg-gray-50">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm">
+                    <StyledLink href={evaluationRoute({ id: evaluation.id })}>
+                      {evaluation.id}
+                    </StyledLink>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {format(new Date(eval_.createdAt), "MMM d, yyyy h:mm a")}
+                    {format(
+                      new Date(evaluation.createdAt),
+                      "MMM d, yyyy h:mm a"
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {eval_.evaluator}
+                    {evaluation.evaluator}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <Link
-                      href={`/speclists/${eval_.specList.id}`}
-                      className="text-blue-600 hover:text-blue-800"
+                    <StyledLink
+                      href={speclistRoute({ id: evaluation.specList.id })}
                     >
-                      {eval_.specList.id}
-                    </Link>
+                      {evaluation.specList.name}
+                    </StyledLink>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {eval_._count.evalResults}
+                    {evaluation._count.evalResults}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <Link
-                      href={`/speclists/evals/${eval_.id}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </Link>
+                    (none)
                   </td>
                 </tr>
               ))}

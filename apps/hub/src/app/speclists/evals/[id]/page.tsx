@@ -4,7 +4,8 @@ import React from "react";
 
 import { getEvalById } from "@quri/evals";
 
-import { Link } from "@/components/ui/Link";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { evaluationsRoute, speclistRoute } from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";
 
@@ -32,12 +33,9 @@ export default async function EvalDetailPage({
       <div>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Evaluation: {evaluation.id}</h2>
-          <Link
-            href="/speclists/evals"
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
+          <StyledLink href={evaluationsRoute()}>
             ← Back to Evaluations
-          </Link>
+          </StyledLink>
         </div>
 
         <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
@@ -60,12 +58,11 @@ export default async function EvalDetailPage({
             <div>
               <p className="text-sm font-semibold text-gray-600">Spec List</p>
               <p className="text-sm">
-                <Link
-                  href={`/speclists/${evaluation.specList.id}`}
-                  className="text-blue-600 hover:text-blue-800"
+                <StyledLink
+                  href={speclistRoute({ id: evaluation.specList.id })}
                 >
                   {evaluation.specList.id}
-                </Link>
+                </StyledLink>
               </p>
             </div>
             <div>
@@ -103,21 +100,12 @@ export default async function EvalDetailPage({
 
                   {result.workflow && (
                     <div className="mt-4">
-                      <p className="mb-2 text-sm font-medium text-gray-700">
-                        AI Summary:
-                      </p>
-                      <div className="max-h-40 overflow-auto rounded bg-gray-50 p-3 text-sm">
-                        {result.workflow.markdown || "No summary available."}
-                      </div>
-                      <div className="mt-2">
-                        <Link
-                          href={`/ai/${result.workflow.id}`}
-                          className="text-xs text-blue-600 hover:text-blue-800"
-                          target="_blank"
-                        >
-                          View full AI workflow →
-                        </Link>
-                      </div>
+                      <StyledLink
+                        href={`/ai/${result.workflow.id}`} // FIXME - no such route
+                        target="_blank"
+                      >
+                        View full AI workflow →
+                      </StyledLink>
                     </div>
                   )}
                 </div>

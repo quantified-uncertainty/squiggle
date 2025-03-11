@@ -6,7 +6,7 @@ import { SquiggleViewer } from "@quri/squiggle-components";
 import { SqValue } from "@quri/squiggle-lang";
 import { versionedSquigglePackages } from "@quri/versioned-squiggle-components";
 
-import { Link } from "@/components/ui/Link";
+import { StyledLink } from "@/components/ui/StyledLink";
 import { getHubLinker } from "@/squiggle/linker";
 
 export const RunSquiggle: FC<{
@@ -51,13 +51,9 @@ export const RunSquiggle: FC<{
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-medium text-gray-700">Result:</h4>
-        <Link
-          href={playgroundUrl}
-          target="_blank"
-          className="text-xs text-blue-600 hover:text-blue-800"
-        >
+        <StyledLink href={playgroundUrl} target="_blank">
           Open in Playground →
-        </Link>
+        </StyledLink>
       </div>
 
       <div className="overflow-hidden rounded border bg-gray-50 p-3">

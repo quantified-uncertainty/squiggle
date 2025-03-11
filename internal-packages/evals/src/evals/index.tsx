@@ -11,6 +11,7 @@ export const evalSelectWithDetails = {
   specList: {
     select: {
       id: true,
+      name: true,
       specs: {
         select: {
           spec: true,
@@ -48,6 +49,7 @@ export async function getAllEvals() {
       specList: {
         select: {
           id: true,
+          name: true,
         },
       },
       _count: {

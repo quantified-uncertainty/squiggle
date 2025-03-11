@@ -2,7 +2,8 @@ import React from "react";
 
 import { getAllSpecLists } from "@quri/evals";
 
-import { Link } from "@/components/ui/Link";
+import { StyledLink } from "@/components/ui/StyledLink";
+import { speclistRoute } from "@/lib/routes";
 
 export const metadata = {
   title: "Spec Lists - Squiggle Hub",
@@ -13,16 +14,6 @@ export default async function SpecListsPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Available Spec Lists</h2>
-        <Link
-          href="/speclists/evals"
-          className="text-blue-600 hover:text-blue-800"
-        >
-          View Evaluations →
-        </Link>
-      </div>
-
       <div className="rounded-lg bg-white shadow-md">
         {specLists.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
@@ -51,7 +42,9 @@ export default async function SpecListsPage() {
               {specLists.map((specList) => (
                 <tr key={specList.id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                    {specList.name}
+                    <StyledLink href={speclistRoute({ id: specList.id })}>
+                      {specList.name}
+                    </StyledLink>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {specList.id}
@@ -60,12 +53,7 @@ export default async function SpecListsPage() {
                     {specList.specs.length}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <Link
-                      href={`/speclists/${specList.id}`}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </Link>
+                    (none)
                   </td>
                 </tr>
               ))}

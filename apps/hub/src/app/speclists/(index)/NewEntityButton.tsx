@@ -5,14 +5,14 @@ import { FC } from "react";
 import { PlusIcon } from "@quri/ui";
 
 import { LinkButton } from "@/components/ui/LinkButton";
-import { newModelRoute } from "@/lib/routes";
+import { createSpecListRoute } from "@/lib/routes";
 
-export const NewModelButton: FC<{ group: string }> = ({ group }) => {
+export const NewEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
 
-  const link = newModelRoute({ group });
+  const link = createSpecListRoute();
 
-  if (segment === "members" || segment === "invite-link") {
+  if (segment === "evals") {
     return null;
   }
 
@@ -20,7 +20,7 @@ export const NewModelButton: FC<{ group: string }> = ({ group }) => {
     <LinkButton href={link}>
       <div className="flex items-center gap-1">
         <PlusIcon size={16} />
-        New Model
+        New Spec List
       </div>
     </LinkButton>
   );

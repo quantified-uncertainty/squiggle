@@ -1,15 +1,21 @@
 import { PropsWithChildren } from "react";
 
-export default function SpecListsLayout({ children }: PropsWithChildren) {
+import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
+import { H1 } from "@/components/ui/Headers";
+import { checkRootUser } from "@/users/auth";
+
+export default async function SpecListsLayout({ children }: PropsWithChildren) {
+  await checkRootUser();
+
   return (
-    <div className="container mx-auto py-6 px-4">
+    <FullLayoutWithPadding>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Specs & Evals</h1>
-        <p className="text-gray-500 mt-1">
+        <H1 size="large">Specs & Evals</H1>
+        <p className="text-sm text-gray-500">
           Experimental feature - AI evaluations for spec lists
         </p>
       </div>
       {children}
-    </div>
+    </FullLayoutWithPadding>
   );
 }

@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 
 import { getSpecListById } from "@quri/evals";
 
-import { Link } from "@/components/ui/Link";
+import { H2 } from "@/components/ui/Headers";
+import { StyledLink } from "@/components/ui/StyledLink";
 
 export const dynamicParams = true;
 
@@ -35,21 +36,18 @@ export default async function SpecListDetailPage({
       <div>
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold">{specList.name}</h2>
+            <H2>{specList.name}</H2>
             <p className="text-sm text-gray-500">ID: {specList.id}</p>
           </div>
-          <Link
-            href="/speclists"
-            className="text-sm text-blue-600 hover:text-blue-800"
-          >
-            ← Back to Spec Lists
-          </Link>
+          <StyledLink href="/speclists">← Back to Spec Lists</StyledLink>
         </div>
 
         <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
-          <h3 className="mb-4 text-lg font-medium">
-            Specs ({specList.specs.length})
-          </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-medium">
+              Specs ({specList.specs.length})
+            </h3>
+          </div>
 
           {specList.specs.length === 0 ? (
             <p className="text-gray-500">This spec list has no specs.</p>
