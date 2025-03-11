@@ -79,37 +79,55 @@ export default async function EvalDetailPage({
               No results found for this evaluation.
             </p>
           ) : (
-            <div className="space-y-8">
-              {evaluation.evalResults.map((result) => (
-                <div key={result.id} className="border-b pb-6">
-                  <div className="mb-3">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {result.spec.description}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      ID: {result.spec.id}
-                    </p>
-                  </div>
-
-                  <div className="mt-3">
-                    <p className="mb-2 text-sm font-medium text-gray-700">
-                      Squiggle Model:
-                    </p>
-                    <RunSquiggle code={result.code} />
-                  </div>
-
-                  {result.workflow && (
-                    <div className="mt-4">
-                      <StyledLink
-                        href={`/ai/${result.workflow.id}`} // FIXME - no such route
-                        target="_blank"
-                      >
-                        View full AI workflow →
-                      </StyledLink>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="w-2/5 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                    >
+                      Spec Description
+                    </th>
+                    <th
+                      scope="col"
+                      className="w-3/5 px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                    >
+                      Squiggle Result
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {evaluation.evalResults.map((result) => (
+                    <tr key={result.id}>
+                      <td className="px-6 py-4 align-top">
+                        <div className="max-w-md space-y-2">
+                          <p className="text-sm font-semibold text-gray-900">
+                            {result.spec.description}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ID: {result.spec.id}
+                          </p>
+                          {result.workflow && (
+                            <div className="pt-2">
+                              <StyledLink
+                                href={`/ai/${result.workflow.id}`}
+                                target="_blank"
+                                className="text-xs"
+                              >
+                                View full AI workflow
+                              </StyledLink>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <RunSquiggle code={result.code} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

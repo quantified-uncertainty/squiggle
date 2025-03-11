@@ -48,31 +48,34 @@ export const RunSquiggle: FC<{
   }, [code, squiggle]);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium text-gray-700">Result:</h4>
-        <StyledLink href={playgroundUrl} target="_blank">
-          Open in Playground →
-        </StyledLink>
-      </div>
-
-      <div className="overflow-hidden rounded border bg-gray-50 p-3">
+    <div>
+      <div className="overflow-hidden rounded border bg-white p-3">
         {isLoading ? (
-          <div className="flex h-20 items-center justify-center">
-            <div className="text-gray-500">Running Squiggle code...</div>
+          <div className="flex h-16 items-center justify-center">
+            <div className="text-sm text-gray-500">
+              Running Squiggle code...
+            </div>
           </div>
         ) : error ? (
-          <div className="p-3 text-sm text-red-600">
-            <div className="font-semibold">Error running Squiggle code:</div>
+          <div className="text-sm text-red-600">
+            <div className="font-medium">Error running Squiggle code:</div>
             <div className="mt-1 whitespace-pre-wrap font-mono text-xs">
               {error}
             </div>
           </div>
         ) : result ? (
-          <SquiggleViewer value={result} />
+          <SquiggleViewer
+            value={result}
+            chartHeight={25} // the actual height will be 4x, because of "large" size rule
+          />
         ) : (
-          <div className="p-3 text-gray-500">No result</div>
+          <div className="text-sm text-gray-500">No result</div>
         )}
+      </div>
+      <div className="mt-2 flex justify-end">
+        <StyledLink href={playgroundUrl} target="_blank" className="text-xs">
+          Open in Playground
+        </StyledLink>
       </div>
     </div>
   );
