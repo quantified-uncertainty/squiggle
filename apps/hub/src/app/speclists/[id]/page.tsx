@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { getEvalsBySpecListId } from "@/evals/data/evals";
+import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
 import { getSpecListById } from "@/evals/data/specLists";
+import { evaluationsRoute } from "@/lib/routes";
 
 export const dynamicParams = true;
 
@@ -29,7 +32,9 @@ export default async function SpecListDetailPage({
   params: Promise<{ id: string }>;
 }) {
   try {
-    const specList = await getSpecListById((await params).id);
+    const id = (await params).id;
+    const specList = await getSpecListById(id);
+    const evals = await getEvalsBySpecListId(id);
 
     return (
       <div>
@@ -66,6 +71,25 @@ export default async function SpecListDetailPage({
               ))}
             </ul>
           )}
+        </div>
+
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-medium">
+              Evaluations ({evals.length})
+            </h3>
+            <StyledLink href={evaluationsRoute()}>
+              View All Evaluations
+            </StyledLink>
+          </div>
+
+          <div className="overflow-x-auto">
+            <EvaluationsTable 
+              evaluations={evals} 
+              showSpecList={false}
+              emptyMessage="No evaluations found for this spec list."
+            />
+          </div>
         </div>
       </div>
     );

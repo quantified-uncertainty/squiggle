@@ -68,6 +68,29 @@ export async function getAllEvals() {
   });
 }
 
+export async function getEvalsBySpecListId(specListId: string) {
+  await checkRootUser();
+
+  return prisma.eval.findMany({
+    where: {
+      specListId,
+    },
+    select: {
+      id: true,
+      createdAt: true,
+      evaluator: true,
+      _count: {
+        select: {
+          evalResults: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
 export async function getEvalById(id: string): Promise<EvalWithDetails> {
   await checkRootUser();
 
