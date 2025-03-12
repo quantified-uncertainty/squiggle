@@ -43,7 +43,8 @@ model Eval {
     updatedAt DateTime @updatedAt
 
     // metadata about the evaluator that was used
-    evaluator String
+    evaluator   Evaluator @relation(fields: [evaluatorId], references: [id])
+    evaluatorId String
 
     specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
     specListId String
@@ -72,4 +73,28 @@ model EvalResult {
 
     workflowId String?     @unique
     workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
+}
+
+enum EvaluatorType {
+    SquiggleAI
+}
+
+/**
+ * Evaluators are the configurations that produce evals.
+ * The main kind of evaluator is Squiggle AI evaluator, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
+ */
+model Evaluator {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    type EvaluatorType @default(SquiggleAI)
+
+    // Untyped, for now; validated by zod in the codebase.
+    // For AI, this should contain `LlmConfig` object.
+    config Json
+    Eval   Eval[]
 }

@@ -10,7 +10,13 @@ export const evalSelectWithDetails = {
   id: true,
   createdAt: true,
   updatedAt: true,
-  evaluator: true,
+  evaluator: {
+    select: {
+      id: true,
+      name: true,
+      type: true,
+    }
+  },
   specList: {
     select: {
       id: true,
@@ -49,7 +55,12 @@ export async function getAllEvals() {
     select: {
       id: true,
       createdAt: true,
-      evaluator: true,
+      evaluator: {
+        select: {
+          id: true,
+          name: true,
+        }
+      },
       specList: {
         select: {
           id: true,
@@ -78,7 +89,12 @@ export async function getEvalsBySpecListId(specListId: string) {
     select: {
       id: true,
       createdAt: true,
-      evaluator: true,
+      evaluator: {
+        select: {
+          id: true,
+          name: true,
+        }
+      },
       _count: {
         select: {
           evalResults: true,

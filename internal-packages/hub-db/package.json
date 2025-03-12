@@ -5,7 +5,8 @@
   "scripts": {
     "gen": "PRISMA_HIDE_UPDATE_MESSAGE=1 prisma generate --no-hints",
     "build:ts": "pnpm gen && tsc",
-    "build": "pnpm run build:ts"
+    "build": "pnpm run build:ts",
+    "dbshell": ". .env && psql $DATABASE_URL"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",

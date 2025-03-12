@@ -12,7 +12,7 @@ export const NewEntityButton: FC = () => {
 
   const link = createSpecListRoute();
 
-  if (segment === "evals") {
+  if (segment === "evals" || segment === "evaluators") {
     return null;
   }
 

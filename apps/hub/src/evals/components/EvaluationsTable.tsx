@@ -4,12 +4,15 @@ import { format } from "date-fns";
 import React from "react";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { evaluationRoute, speclistRoute } from "@/lib/routes";
+import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
 export interface EvaluationTableData {
   id: string;
   createdAt: Date | string;
-  evaluator: string;
+  evaluator: {
+    id: string;
+    name: string;
+  };
   _count: {
     evalResults: number;
   };
@@ -79,7 +82,9 @@ export function EvaluationsTable({
               )}
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {evaluation.evaluator}
+              <StyledLink href={evaluatorRoute({ id: evaluation.evaluator.id })}>
+                {evaluation.evaluator.name}
+              </StyledLink>
             </td>
             {showSpecList && evaluation.specList && (
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
@@ -94,10 +99,6 @@ export function EvaluationsTable({
               {evaluation._count.evalResults}
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {/* 
-                Note: The original page has "(none)" here, but for better usability
-                we're adding a View link to navigate to the evaluation details
-              */}
               <StyledLink href={evaluationRoute({ id: evaluation.id })}>
                 View
               </StyledLink>

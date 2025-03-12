@@ -4,7 +4,11 @@ import {
   StyledTabLink,
   StyledTabLinkList,
 } from "@/components/ui/StyledTabLink";
-import { evaluationsRoute, speclistsRoute } from "@/lib/routes";
+import {
+  evaluationsRoute,
+  evaluatorsRoute,
+  speclistsRoute,
+} from "@/lib/routes";
 
 import { NewEntityButton } from "./NewEntityButton";
 
@@ -15,6 +19,7 @@ export default async function FrontPageLayout({ children }: PropsWithChildren) {
         <StyledTabLinkList>
           <StyledTabLink name="Spec Lists" href={speclistsRoute()} prefetch />
           <StyledTabLink name="Evals" href={evaluationsRoute()} prefetch />
+          <StyledTabLink name="Evaluators" href={evaluatorsRoute()} prefetch />
         </StyledTabLinkList>
         <NewEntityButton />
       </div>

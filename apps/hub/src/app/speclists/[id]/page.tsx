@@ -4,6 +4,7 @@ import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getEvalsBySpecListId } from "@/evals/data/evals";
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
+import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
 import { getSpecListById } from "@/evals/data/specLists";
 import { evaluationsRoute } from "@/lib/routes";
 
@@ -43,7 +44,13 @@ export default async function SpecListDetailPage({
             <H2>{specList.name}</H2>
             <p className="text-sm text-gray-500">ID: {specList.id}</p>
           </div>
-          <StyledLink href="/speclists">← Back to Spec Lists</StyledLink>
+          <div className="flex items-center space-x-3">
+            <SpecListActionsButton 
+              specListId={specList.id} 
+              specListName={specList.name}
+            />
+            <StyledLink href="/speclists">← Back to Spec Lists</StyledLink>
+          </div>
         </div>
 
         <div className="mb-6 rounded-lg bg-white p-6 shadow-md">

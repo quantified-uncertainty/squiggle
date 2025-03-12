@@ -246,3 +246,11 @@ export function evaluationsRoute() {
 export function evaluationRoute({ id }: { id: string }) {
   return `/speclists/evals/${id}`;
 }
+
+export function evaluatorsRoute() {
+  return "/speclists/evaluators";
+}
+
+export function evaluatorRoute({ id }: { id: string }) {
+  return `/speclists/evaluators/${id}`;
+}

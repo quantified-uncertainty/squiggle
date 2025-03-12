@@ -34,6 +34,10 @@ Use `@quri/ui` components for icons and buttons.
 
 Use `react-hook-form` for form handling, usually combined with `next-safe-action` for server actions.
 
+Use `useToast` from `@quri/ui` for displaying notifications and errors.
+
+## Links
+
 Always use our custom `<Link>` component from `src/components/ui`, instead of the native Next.js `<Link>` component.
 
-Use `useToast` from `@quri/ui` for displaying notifications and errors.
+Don't hardcode routes. Use the route helpers in `src/routes.ts`.

@@ -4,7 +4,7 @@ import React from "react";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getEvalById } from "@/evals/data/evals";
-import { evaluationsRoute, speclistRoute } from "@/lib/routes";
+import { evaluationsRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";
 
@@ -52,7 +52,13 @@ export default async function EvalDetailPage({
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-600">Evaluator</p>
-              <p className="text-sm">{evaluation.evaluator}</p>
+              <p className="text-sm">
+                <StyledLink
+                  href={evaluatorRoute({ id: evaluation.evaluator.id })}
+                >
+                  {evaluation.evaluator.name}
+                </StyledLink>
+              </p>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-600">Spec List</p>

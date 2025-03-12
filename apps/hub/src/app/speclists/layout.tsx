@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react";
 import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 import { H1 } from "@/components/ui/Headers";
 import { Link } from "@/components/ui/Link";
-import { evaluationsRoute, speclistsRoute } from "@/lib/routes";
+import { evaluationsRoute, evaluatorsRoute, speclistsRoute } from "@/lib/routes";
 import { checkRootUser } from "@/users/auth";
 
 export default async function SpecListsLayout({ children }: PropsWithChildren) {
@@ -25,6 +25,13 @@ export default async function SpecListsLayout({ children }: PropsWithChildren) {
             className="text-gray-600 hover:underline"
           >
             Evals
+          </Link>{" "}
+          &{" "}
+          <Link
+            href={evaluatorsRoute()}
+            className="text-gray-600 hover:underline"
+          >
+            Evaluators
           </Link>
         </H1>
         <p className="text-sm text-gray-500">

@@ -1,6 +1,7 @@
 import React from "react";
 
 import { StyledLink } from "@/components/ui/StyledLink";
+import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
 import { getAllSpecLists } from "@/evals/data/specLists";
 import { speclistRoute } from "@/lib/routes";
 
@@ -52,7 +53,10 @@ export default async function SpecListsPage() {
                     {specList.specs.length}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    (none)
+                    <SpecListActionsButton 
+                      specListId={specList.id} 
+                      specListName={specList.name}
+                    />
                   </td>
                 </tr>
               ))}

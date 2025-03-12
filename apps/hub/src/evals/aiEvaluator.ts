@@ -1,5 +1,7 @@
+import { z } from "zod";
+
 import { getPrismaClient, Prisma } from "@quri/hub-db";
-import { LlmConfig } from "@quri/squiggle-ai";
+import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
   makeAiCodec,
@@ -7,7 +9,10 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
+import { checkRootUser } from "@/users/auth";
+
 import { Evaluator } from "./data/evals";
+import { getEvaluatorById } from "./data/evaluators";
 
 function specToPrompt(spec: { id: string; description: string }) {
   return `Write a model for this question: ${spec.description}. Return the answer in the final expression.`;
@@ -26,11 +31,7 @@ function serializeWorkflow(workflow: Workflow<any>): Prisma.InputJsonValue {
 }
 
 async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
-  // Create a stub user if we don't have user data
-  const evaluatorUserEmail = process.env["EVALUATOR_USER_EMAIL"];
-  if (!evaluatorUserEmail) {
-    throw new Error("EVALUATOR_USER_EMAIL is not set");
-  }
+  const user = await checkRootUser();
 
   const serialized = serializeWorkflow(workflow);
 
@@ -42,7 +43,7 @@ async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
       markdown: workflow.getFinalResult().logSummary || "",
       user: {
         connect: {
-          email: evaluatorUserEmail,
+          email: user.email,
         },
       },
     },
@@ -50,20 +51,28 @@ async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
 
   return dbWorkflow.id;
 }
-const llmConfig: LlmConfig = {
-  llmId: "Claude-Sonnet",
-  priceLimit: 0.8,
-  durationLimitMinutes: 6,
-  messagesInHistoryToKeep: 4,
-  numericSteps: 1,
-  styleGuideSteps: 1,
-};
+
+const configSchema = z.object({
+  llmId: z.enum(MODEL_CONFIGS.map((m) => m.id) as [LlmId, ...LlmId[]]),
+  priceLimit: z.number(),
+  durationLimitMinutes: z.number(),
+  messagesInHistoryToKeep: z.number(),
+  numericSteps: z.number(),
+  styleGuideSteps: z.number(),
+});
 
 export async function getAiEvaluator({
-  storeInDb = true,
+  id,
 }: {
-  storeInDb?: boolean;
-} = {}): Promise<Evaluator> {
+  id: string;
+}): Promise<Evaluator> {
+  const evaluatorData = await getEvaluatorById(id);
+  if (evaluatorData.type !== "SquiggleAI") {
+    throw new Error("Evaluator is not an AI evaluator");
+  }
+
+  const llmConfig = configSchema.parse(evaluatorData.config);
+
   const evaluator: Evaluator = async (spec) => {
     const workflow = createSquiggleWorkflowTemplate.instantiate({
       llmConfig,
@@ -75,11 +84,7 @@ export async function getAiEvaluator({
 
     await workflow.runToResult();
 
-    // Store workflow to database if enabled
-    let workflowId = workflow.id;
-    if (storeInDb) {
-      workflowId = await saveWorkflowToDb(workflow);
-    }
+    const workflowId = await saveWorkflowToDb(workflow);
 
     const workflowResult = workflow.getFinalResult();
 
