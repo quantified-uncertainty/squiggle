@@ -53,8 +53,8 @@ export default async function SpecListsPage() {
                     {specList.specs.length}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <SpecListActionsButton 
-                      specListId={specList.id} 
+                    <SpecListActionsButton
+                      specListId={specList.id}
                       specListName={specList.name}
                     />
                   </td>

@@ -9,11 +9,7 @@ import { evaluatorsRoute } from "@/lib/routes";
 
 export const dynamicParams = true;
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { id: string };
-}) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   try {
     const evaluator = await getEvaluatorById(params.id);
     return {
@@ -29,10 +25,11 @@ export async function generateMetadata({
 export default async function EvaluatorDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
-    const evaluator = await getEvaluatorById(params.id);
+    const { id } = await params;
+    const evaluator = await getEvaluatorById(id);
 
     return (
       <div>
@@ -48,7 +45,7 @@ export default async function EvaluatorDetailPage({
           <div className="mb-4">
             <h3 className="text-lg font-medium">Details</h3>
           </div>
-          
+
           <div className="mb-4 grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-medium text-gray-500">Type</p>
@@ -67,7 +64,9 @@ export default async function EvaluatorDetailPage({
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-500">Evaluations Count</p>
+              <p className="text-sm font-medium text-gray-500">
+                Evaluations Count
+              </p>
               <p className="text-gray-900">{evaluator._count.Eval}</p>
             </div>
           </div>
@@ -77,8 +76,8 @@ export default async function EvaluatorDetailPage({
           <div className="mb-4">
             <h3 className="text-lg font-medium">Configuration</h3>
           </div>
-          
-          <div className="overflow-auto bg-gray-50 p-4 rounded">
+
+          <div className="overflow-auto rounded bg-gray-50 p-4">
             <pre className="text-sm text-gray-800">
               {JSON.stringify(evaluator.config, null, 2)}
             </pre>

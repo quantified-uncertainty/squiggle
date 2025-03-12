@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { getPrismaClient, Prisma } from "@quri/hub-db";
+import { Prisma } from "@quri/hub-db";
 import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
@@ -9,6 +9,7 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
+import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
 import { Evaluator } from "./data/evals";
@@ -35,7 +36,7 @@ async function saveWorkflowToDb(workflow: Workflow<any>): Promise<string> {
 
   const serialized = serializeWorkflow(workflow);
 
-  const dbWorkflow = await getPrismaClient().aiWorkflow.create({
+  const dbWorkflow = await prisma.aiWorkflow.create({
     data: {
       id: workflow.id,
       format: "V2_0",
