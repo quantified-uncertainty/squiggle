@@ -45,36 +45,38 @@ export const evaluateSpecList = actionClient
       },
     });
 
-    // TODO - bring back Promise.all, or an async background job
-    for (const { spec } of specList.specs) {
-      const result = await evaluator(spec);
+    // Process all specs in parallel
+    await Promise.all(
+      specList.specs.map(async ({ spec }) => {
+        const result = await evaluator(spec);
 
-      // store result in db
-      await prisma.evalResult.create({
-        data: {
-          spec: {
-            connect: {
-              id: spec.id,
+        // store result in db
+        await prisma.evalResult.create({
+          data: {
+            spec: {
+              connect: {
+                id: spec.id,
+              },
             },
-          },
-          code: result.code,
-          eval: {
-            connect: {
-              id: evaluation.id,
+            code: result.code,
+            eval: {
+              connect: {
+                id: evaluation.id,
+              },
             },
-          },
-          ...(result.workflowId
-            ? {
-                workflow: {
-                  connect: {
-                    id: result.workflowId,
+            ...(result.workflowId
+              ? {
+                  workflow: {
+                    connect: {
+                      id: result.workflowId,
+                    },
                   },
-                },
-              }
-            : {}),
-        },
-      });
-    }
+                }
+              : {}),
+          },
+        });
+      })
+    );
 
     // reselect the Eval record from db
     const updatedEvaluation = await prisma.eval.findUniqueOrThrow({
