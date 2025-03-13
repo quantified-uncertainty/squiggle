@@ -28,3 +28,9 @@ export type {
   AntiGuardedSquigglePackages,
   GuardedSquigglePackages,
 } from "./predicates.js";
+
+export {
+  getPlaygroundUrl,
+  parsePlaygroundUrl,
+  type PlaygroundParams,
+} from "./playground.js";
