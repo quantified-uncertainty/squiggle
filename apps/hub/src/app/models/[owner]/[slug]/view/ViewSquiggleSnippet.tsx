@@ -1,13 +1,13 @@
 "use client";
 import { FC, use, useMemo } from "react";
 
+import { sqProjectWithHubLinker } from "@quri/hub-linker";
 import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
 import { ModelCardDTO } from "@/models/data/cards";
-import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
 type Props = {
   data: NonNullable<ModelCardDTO["currentRevision"]["squiggleSnippet"]>;

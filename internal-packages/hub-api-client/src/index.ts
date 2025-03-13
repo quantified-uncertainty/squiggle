@@ -1,17 +1,19 @@
 import { z } from "zod";
 
-const SERVER = "https://squigglehub.org";
+const DEFAULT_SERVER = "https://squigglehub.org";
 
 /**
  * Hub API client for interacting with Squiggle Hub
  */
-export const hubApi = {
+export class HubApiClient {
+  constructor(public readonly server: string = DEFAULT_SERVER) {}
+
   /**
    * Get Squiggle code by owner and slug.
    * Returns the Squiggle code as a string.
    */
   async getModelCode(owner: string, slug: string): Promise<string> {
-    const url = new URL("/api/get-source", SERVER);
+    const url = new URL("/api/get-source", this.server);
     url.searchParams.set("owner", owner);
     url.searchParams.set("slug", slug);
 
@@ -31,7 +33,7 @@ export const hubApi = {
     }
 
     return parsed.data.code;
-  },
+  }
 
   /**
    * Fetch all model slugs for a group.
@@ -39,7 +41,7 @@ export const hubApi = {
    */
   async getGroupModelSlugs(groupSlug: string): Promise<string[]> {
     const data = await fetch(
-      `${SERVER}/api/get-group-models?${new URLSearchParams({ slug: groupSlug })}`
+      `${this.server}/api/get-group-models?${new URLSearchParams({ slug: groupSlug })}`
     ).then((res) => res.json());
 
     const parsed = z
@@ -50,5 +52,8 @@ export const hubApi = {
     }
 
     return parsed.data.models.map((item) => item.slug);
-  },
-};
+  }
+}
+
+// API for default production server
+export const hubApi = new HubApiClient();

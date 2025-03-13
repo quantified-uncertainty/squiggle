@@ -1,13 +1,17 @@
 "use client";
 
-import { FC, use, useEffect, useState } from "react";
+import { FC, use, useEffect, useMemo, useState } from "react";
 
+import { getHubLinker } from "@quri/hub-linker";
 import { SquiggleViewer } from "@quri/squiggle-components";
 import { SqValue } from "@quri/squiggle-lang";
-import { versionedSquigglePackages } from "@quri/versioned-squiggle-components";
+import {
+  getPlaygroundUrl,
+  versionedSquigglePackages,
+} from "@quri/versioned-squiggle-components";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { getHubLinker } from "@/squiggle/linker";
+import { SQUIGGLE_PLAYGROUND } from "@/lib/constants";
 
 export const RunSquiggle: FC<{
   code: string;
@@ -19,7 +23,9 @@ export const RunSquiggle: FC<{
   const [isLoading, setIsLoading] = useState(true);
 
   // Generate playground URL
-  const playgroundUrl = `https://squiggle-language.com/playground?code=${encodeURIComponent(code)}`;
+  const playgroundUrl = useMemo(() => {
+    return getPlaygroundUrl({ code, baseUrl: SQUIGGLE_PLAYGROUND }).toString();
+  }, [code]);
 
   useEffect(() => {
     async function runCode() {
@@ -29,7 +35,9 @@ export const RunSquiggle: FC<{
 
         // Run the code
         const runResult = await squiggle.lang.run(code, {
-          linker: getHubLinker(squiggle) as any,
+          linker: getHubLinker(squiggle, {
+            hubServer: window.location.origin,
+          }) as any,
         });
 
         if (runResult.result.ok) {

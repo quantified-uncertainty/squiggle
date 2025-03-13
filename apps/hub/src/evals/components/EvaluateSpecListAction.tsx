@@ -1,12 +1,12 @@
 "use client";
-import { FC } from "react";
 import { useRouter } from "next/navigation";
+import { FC } from "react";
 
 import { DropdownMenuModalActionItem, PlayIcon } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
-import { evaluationRoute } from "@/lib/routes";
 import { evaluateSpecList } from "@/evals/actions/evaluateSpeclist";
+import { evaluationRoute } from "@/lib/routes";
 
 import { SelectEvaluator, SelectEvaluatorOption } from "./SelectEvaluator";
 
@@ -17,7 +17,10 @@ type Props = {
   specListName: string;
 };
 
-export const EvaluateSpecListAction: FC<Props> = ({ specListId, specListName }) => {
+export const EvaluateSpecListAction: FC<Props> = ({
+  specListId,
+  specListName,
+}) => {
   const router = useRouter();
 
   return (
@@ -41,16 +44,16 @@ export const EvaluateSpecListAction: FC<Props> = ({ specListId, specListName }) 
             router.push(evaluationRoute({ id }));
           }}
           initialFocus="evaluator"
-          showActionError
         >
           <div className="mb-4">
             <div className="mb-4">
-              This will evaluate all specs in this spec list using the selected evaluator.
-              This process may take some time depending on the number of specs.
+              This will evaluate all specs in this spec list using the selected
+              evaluator. This process may take some time depending on the number
+              of specs.
             </div>
-            <SelectEvaluator<FormShape> 
-              name="evaluator" 
-              label="Evaluator" 
+            <SelectEvaluator<FormShape>
+              name="evaluator"
+              label="Evaluator"
               required
             />
           </div>

@@ -99,6 +99,9 @@ importers:
       '@quri/hub-db':
         specifier: workspace:*
         version: link:../../internal-packages/hub-db
+      '@quri/hub-linker':
+        specifier: workspace:^
+        version: link:../../internal-packages/hub-linker
       '@quri/squiggle-ai':
         specifier: workspace:*
         version: link:../../internal-packages/ai
@@ -536,6 +539,9 @@ importers:
       '@quri/content':
         specifier: workspace:*
         version: link:../../internal-packages/content
+      '@quri/hub-linker':
+        specifier: workspace:^
+        version: link:../../internal-packages/hub-linker
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../../packages/components
@@ -794,6 +800,28 @@ importers:
         version: link:../configs
       '@types/node':
         specifier: ^22.13.9
+        version: 22.13.9
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
+  internal-packages/hub-linker:
+    dependencies:
+      '@quri/hub-api-client':
+        specifier: workspace:^
+        version: link:../hub-api-client
+      '@quri/versioned-squiggle-components':
+        specifier: workspace:^
+        version: link:../versioned-components
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
+    devDependencies:
+      '@quri/configs':
+        specifier: workspace:*
+        version: link:../configs
+      '@types/node':
+        specifier: ^22.13.1
         version: 22.13.9
       typescript:
         specifier: ^5.7.3
@@ -5917,9 +5945,6 @@ packages:
 
   '@types/node@14.18.63':
     resolution: {integrity: sha512-fAtCfv4jJg+ExtXhvCkCqUKZ+4ok/JQk01qDKhL5BDDoS3AxKXhV5/MAVUZyQnSEd2GT92fkgZl0pz0Q0AzcIQ==}
-
-  '@types/node@18.19.75':
-    resolution: {integrity: sha512-UIksWtThob6ZVSyxcOqCLOUNg/dyO1Qvx4McgeuhrEtHTLFTf7BBhEazaE4K806FGTPtzd/2sE90qn4fVr7cyw==}
 
   '@types/node@18.19.79':
     resolution: {integrity: sha512-90K8Oayimbctc5zTPHPfZloc/lGVs7f3phUAAMcTgEPtg8kKquGZDERC8K4vkBYkQQh48msiYUslYtxTWvqcAg==}
@@ -11209,6 +11234,7 @@ packages:
     engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
     deprecated: |-
       You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+
       (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   qs@6.12.1:
@@ -11895,19 +11921,19 @@ packages:
 
   shikiji-core@0.10.2:
     resolution: {integrity: sha512-9Of8HMlF96usXJHmCL3Gd0Fcf0EcyJUF9m8EoAKKd98mHXi0La2AZl1h6PegSFGtiYcBDK/fLuKbDa1l16r1fA==}
-    deprecated: Deprecated, use @shikijs/core instead
+    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
 
   shikiji-core@0.9.15:
     resolution: {integrity: sha512-7hqIcUKS15OMs/61Qp2GvO1fSajBB36bDqi8vexIg5kp80V6v6SGtBrlq+nLlo7erMG2d1kvIuTIq1bwKI6fEg==}
-    deprecated: Deprecated, use @shikijs/core instead
+    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
 
   shikiji@0.10.2:
     resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
-    deprecated: Deprecated, use shiki instead
+    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
 
   shikiji@0.9.15:
     resolution: {integrity: sha512-+inN4cN+nY7b0uCPOiqFHAk+cn2DEdM3AIQgPhAV7QKqhww/o7OGS5xvLh3SNnjke9C/HispALqGOQGYHVq7KQ==}
-    deprecated: Deprecated, use shiki instead
+    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
 
   should-equal@2.0.0:
     resolution: {integrity: sha512-ZP36TMrK9euEuWQYBig9W55WPC7uo37qzAEmbjHz4gfyuXrEUgF8cUvQVO+w+d3OMfPvSRQJ22lSm8MQJ43LTA==}
@@ -13616,7 +13642,7 @@ snapshots:
 
   '@anthropic-ai/sdk@0.18.0(encoding@0.1.12)':
     dependencies:
-      '@types/node': 18.19.75
+      '@types/node': 18.19.79
       '@types/node-fetch': 2.6.12
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
@@ -18936,10 +18962,6 @@ snapshots:
   '@types/node@12.20.55': {}
 
   '@types/node@14.18.63': {}
-
-  '@types/node@18.19.75':
-    dependencies:
-      undici-types: 5.26.5
 
   '@types/node@18.19.79':
     dependencies:
