@@ -56,7 +56,7 @@ export default async function SubmissionPage({ params }: Props) {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
                 {Object.entries(evaluation.scores).map(
                   ([key, score]: [any, any]) => (
                     <div key={key} className="rounded-lg bg-gray-50 p-4">
@@ -66,10 +66,8 @@ export default async function SubmissionPage({ params }: Props) {
                           {score.score.toFixed(1)}/10
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {score.explanation.length > 200
-                          ? `${score.explanation.substring(0, 200)}...`
-                          : score.explanation}
+                      <p className="prose prose-sm max-w-none overflow-auto rounded-lg bg-gray-50 p-4">
+                        <ReactMarkdown>{score.explanation}</ReactMarkdown>
                       </p>
                     </div>
                   )
