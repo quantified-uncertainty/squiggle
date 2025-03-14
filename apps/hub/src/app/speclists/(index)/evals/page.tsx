@@ -1,7 +1,7 @@
 import React from "react";
 
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
-import { getAllEvals } from "@/evals/data/evals";
+import { getAllEvals } from "@/evals/data/summaryEvals";
 
 export const metadata = {
   title: "Evaluations - Squiggle Hub",

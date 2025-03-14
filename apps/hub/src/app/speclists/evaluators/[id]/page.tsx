@@ -68,7 +68,7 @@ export default async function EvaluatorDetailPage({
               <p className="text-sm font-medium text-gray-500">
                 Evaluations Count
               </p>
-              <p className="text-gray-900">{evaluator._count.Eval}</p>
+              <p className="text-gray-900">{evaluator._count.evals}</p>
             </div>
           </div>
         </div>
@@ -78,7 +78,11 @@ export default async function EvaluatorDetailPage({
             <h3 className="text-lg font-medium">Configuration</h3>
           </div>
 
-          <EvaluatorConfigDisplay config={evaluator.config} />
+          {evaluator.config ? (
+            <EvaluatorConfigDisplay config={evaluator.config} />
+          ) : (
+            <p className="text-red-500">Configuration parsing error</p>
+          )}
         </div>
       </div>
     );

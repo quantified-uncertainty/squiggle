@@ -1,22 +1,11 @@
 "use client";
 import { FC } from "react";
 
-import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { LlmConfig, MODEL_CONFIGS } from "@quri/squiggle-ai";
 
-interface LlmConfig {
-  llmId: LlmId;
-  priceLimit: number;
-  durationLimitMinutes: number;
-  messagesInHistoryToKeep: number;
-  numericSteps: number;
-  styleGuideSteps: number;
-}
-
-interface Props {
+export const EvaluatorConfigDisplay: FC<{
   config: LlmConfig;
-}
-
-export const EvaluatorConfigDisplay: FC<Props> = ({ config }) => {
+}> = ({ config }) => {
   // Find the model details to display model name instead of just ID
   const modelConfig = MODEL_CONFIGS.find((model) => model.id === config.llmId);
 
@@ -26,8 +15,12 @@ export const EvaluatorConfigDisplay: FC<Props> = ({ config }) => {
         <div>
           <div className="font-medium text-gray-500">Model</div>
           <div>
-            <span className="font-semibold">{modelConfig?.name || config.llmId}</span> 
-            <span className="ml-1 text-sm text-gray-500">({modelConfig?.provider || "unknown"})</span>
+            <span className="font-semibold">
+              {modelConfig?.name || config.llmId}
+            </span>
+            <span className="ml-1 text-sm text-gray-500">
+              ({modelConfig?.provider || "unknown"})
+            </span>
           </div>
         </div>
 
@@ -38,7 +31,9 @@ export const EvaluatorConfigDisplay: FC<Props> = ({ config }) => {
 
         <div>
           <div className="font-medium text-gray-500">Duration Limit</div>
-          <div className="font-semibold">{config.durationLimitMinutes} minutes</div>
+          <div className="font-semibold">
+            {config.durationLimitMinutes} minutes
+          </div>
         </div>
 
         <div>

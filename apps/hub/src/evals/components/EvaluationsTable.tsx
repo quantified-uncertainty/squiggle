@@ -8,7 +8,7 @@ import { Table } from "@quri/ui";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
-import { type EvalSummaryDTO } from "../data/evals";
+import { type EvalSummaryDTO } from "../data/summaryEvals";
 
 interface EvaluationsTableProps {
   evaluations: EvalSummaryDTO[];

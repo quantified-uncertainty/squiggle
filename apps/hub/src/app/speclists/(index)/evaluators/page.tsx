@@ -52,7 +52,7 @@ export default async function EvaluatorsPage() {
                 <Table.Cell theme="text">
                   {format(new Date(evaluator.createdAt), "MMM d, yyyy h:mm a")}
                 </Table.Cell>
-                <Table.Cell theme="text">{evaluator._count.Eval}</Table.Cell>
+                <Table.Cell theme="text">{evaluator._count.evals}</Table.Cell>
               </Table.Row>
             ))}
           </Table.Body>

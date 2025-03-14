@@ -96,5 +96,5 @@ model Evaluator {
     // Untyped, for now; validated by zod in the codebase.
     // For AI, this should contain `LlmConfig` object.
     config Json
-    Eval   Eval[]
+    evals  Eval[]
 }

@@ -4,8 +4,8 @@ import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
 import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
-import { getEvalsBySpecListId } from "@/evals/data/evals";
 import { getSpecListById } from "@/evals/data/specLists";
+import { getEvalsBySpecListId } from "@/evals/data/summaryEvals";
 import { evaluationsRoute } from "@/lib/routes";
 
 export const dynamicParams = true;

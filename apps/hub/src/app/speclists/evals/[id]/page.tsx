@@ -5,7 +5,7 @@ import React from "react";
 import { Table } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/evals";
+import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/detailsEvals";
 import { evaluationsRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";
