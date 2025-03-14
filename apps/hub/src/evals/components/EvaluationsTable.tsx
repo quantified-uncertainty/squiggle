@@ -3,17 +3,19 @@
 import { format } from "date-fns";
 import React from "react";
 
-import { Table } from "@quri/ui";
 import { EvalState } from "@quri/hub-db";
+import { Table, TextTooltip } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
-import { TextTooltip } from "@quri/ui";
 
 import { type EvalSummaryDTO } from "../data/summaryEvals";
 
 // Helper function to render the state with appropriate styling
-function renderState(state: EvalState, errorMsg?: string | null): React.ReactNode {
+function renderState(
+  state: EvalState,
+  errorMsg?: string | null
+): React.ReactNode {
   let className = "";
   let label = state;
 
@@ -33,18 +35,16 @@ function renderState(state: EvalState, errorMsg?: string | null): React.ReactNod
   }
 
   const stateElement = (
-    <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${className}`}>
+    <span
+      className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${className}`}
+    >
       {label}
     </span>
   );
 
   // If there's an error message and state is Failed, show it in a tooltip
   if (state === "Failed" && errorMsg) {
-    return (
-      <TextTooltip text={errorMsg}>
-        {stateElement}
-      </TextTooltip>
-    );
+    return <TextTooltip text={errorMsg}>{stateElement}</TextTooltip>;
   }
 
   return stateElement;

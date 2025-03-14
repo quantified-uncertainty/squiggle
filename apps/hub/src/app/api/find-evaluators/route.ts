@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const evaluators = await getAllEvaluators();
-    
+
     // Filter evaluators by name if search term is provided
     const filtered = search
       ? evaluators.filter((evaluator) =>
@@ -25,6 +25,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching evaluators:", error);
-    return NextResponse.json({ error: "Failed to fetch evaluators" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch evaluators" },
+      { status: 500 }
+    );
   }
 }

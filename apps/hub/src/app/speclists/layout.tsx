@@ -3,7 +3,11 @@ import { PropsWithChildren } from "react";
 import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 import { H1 } from "@/components/ui/Headers";
 import { Link } from "@/components/ui/Link";
-import { evaluationsRoute, evaluatorsRoute, speclistsRoute } from "@/lib/routes";
+import {
+  evaluationsRoute,
+  evaluatorsRoute,
+  speclistsRoute,
+} from "@/lib/routes";
 import { checkRootUser } from "@/users/auth";
 
 export default async function SpecListsLayout({ children }: PropsWithChildren) {

@@ -5,8 +5,6 @@ import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-import { getAiEvaluator } from "../aiEvaluator";
-
 const evaluateSpeclistSchema = z.object({
   specListId: z.string(),
   evaluatorId: z.string(),
@@ -21,7 +19,7 @@ export const evaluateSpecList = actionClient
     const evaluatorExists = await prisma.evaluator.findUnique({
       where: { id: evaluatorId },
     });
-    
+
     if (!evaluatorExists) {
       throw new ActionError("Evaluator not found");
     }
@@ -30,7 +28,7 @@ export const evaluateSpecList = actionClient
     const specListExists = await prisma.specList.findUnique({
       where: { id: specListId },
     });
-    
+
     if (!specListExists) {
       throw new ActionError("Spec list not found");
     }
