@@ -2,8 +2,18 @@
 import clsx from "clsx";
 import { FC, use } from "react";
 
-import { FireIcon, useToast } from "@quri/ui";
+import {
+  CheckCircleIcon,
+  Dropdown,
+  DropdownMenu,
+  DropdownMenuActionItem,
+  EmptyIcon,
+  ExternalLinkIcon,
+  FireIcon,
+  useToast,
+} from "@quri/ui";
 
+import { DropdownMenuNextLinkItem } from "../ui/DropdownMenuNextLinkItem";
 import { AdminContext } from "./AdminProvider";
 
 const InnerAdminControls: FC = () => {
@@ -19,15 +29,33 @@ const InnerAdminControls: FC = () => {
   };
 
   return (
-    <div>
+    <Dropdown
+      render={({ close }) => (
+        <DropdownMenu>
+          <DropdownMenuActionItem
+            icon={isAdminMode ? CheckCircleIcon : EmptyIcon}
+            onClick={() => {
+              toggleAdminMode();
+              close();
+            }}
+            title="Admin Mode"
+          />
+          <DropdownMenuNextLinkItem
+            href="/admin"
+            icon={ExternalLinkIcon}
+            title="Admin Console"
+            close={close}
+          />
+        </DropdownMenu>
+      )}
+    >
       <FireIcon
         className={clsx(
           "h-6 w-6 cursor-pointer",
           isAdminMode ? "text-red-500" : "text-gray-500"
         )}
-        onClick={toggleAdminMode}
       />
-    </div>
+    </Dropdown>
   );
 };
 
