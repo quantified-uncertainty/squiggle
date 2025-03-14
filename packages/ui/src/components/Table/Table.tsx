@@ -64,7 +64,11 @@ type TableType = FC<PropsWithChildren> & {
 };
 
 const Table: TableType = ({ children }) => {
-  return <table className={clsx("min-w-full")}>{children}</table>;
+  return (
+    <table className={clsx("min-w-full rounded-lg bg-white shadow-md")}>
+      {children}
+    </table>
+  );
 };
 
 // Add components as properties of Table

@@ -11,13 +11,9 @@ export default async function EvalsPage() {
   const evals = await getAllEvals();
 
   return (
-    <div>
-      <div className="rounded-lg bg-white shadow-md">
-        <EvaluationsTable
-          evaluations={evals}
-          emptyMessage="No evaluations found. Run evaluations using the CLI tool."
-        />
-      </div>
-    </div>
+    <EvaluationsTable
+      evaluations={evals}
+      emptyMessage="No evaluations found. Run evaluations using the CLI tool."
+    />
   );
 }

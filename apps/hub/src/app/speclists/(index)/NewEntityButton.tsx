@@ -11,8 +11,6 @@ import { createSpecListRoute } from "@/lib/routes";
 export const NewEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
 
-  console.log({ segment });
-
   switch (segment) {
     case null:
       // default - speclists

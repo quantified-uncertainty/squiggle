@@ -80,7 +80,7 @@ export default async function EvalDetailPage({
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-6 shadow-md">
+      <div className="p-6">
         <h3 className="mb-4 text-lg font-medium">Evaluation Results</h3>
         {evaluation.evalResults.length === 0 ? (
           <p className="text-gray-500">No results found for this evaluation.</p>

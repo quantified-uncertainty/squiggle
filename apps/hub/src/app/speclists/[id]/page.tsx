@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { getEvalsBySpecListId } from "@/evals/data/evals";
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
 import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
+import { getEvalsBySpecListId } from "@/evals/data/evals";
 import { getSpecListById } from "@/evals/data/specLists";
 import { evaluationsRoute } from "@/lib/routes";
 
@@ -45,8 +45,8 @@ export default async function SpecListDetailPage({
             <p className="text-sm text-gray-500">ID: {specList.id}</p>
           </div>
           <div className="flex items-center space-x-3">
-            <SpecListActionsButton 
-              specListId={specList.id} 
+            <SpecListActionsButton
+              specListId={specList.id}
               specListName={specList.name}
             />
             <StyledLink href="/speclists">← Back to Spec Lists</StyledLink>
@@ -80,7 +80,7 @@ export default async function SpecListDetailPage({
           )}
         </div>
 
-        <div className="rounded-lg bg-white p-6 shadow-md">
+        <div className="p-6">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-medium">
               Evaluations ({evals.length})
@@ -90,13 +90,11 @@ export default async function SpecListDetailPage({
             </StyledLink>
           </div>
 
-          <div className="overflow-x-auto">
-            <EvaluationsTable 
-              evaluations={evals} 
-              showSpecList={false}
-              emptyMessage="No evaluations found for this spec list."
-            />
-          </div>
+          <EvaluationsTable
+            evaluations={evals}
+            showSpecList={false}
+            emptyMessage="No evaluations found for this spec list."
+          />
         </div>
       </div>
     );

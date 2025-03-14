@@ -16,45 +16,45 @@ export default async function SpecListsPage() {
 
   return (
     <div>
-      <div className="rounded-lg bg-white shadow-md">
-        {specLists.length === 0 ? (
+      {specLists.length === 0 ? (
+        <div className="rounded-lg bg-white shadow-md">
           <div className="p-6 text-center text-gray-500">
             No spec lists found. Create one by running the add-speclist.ts
             script.
           </div>
-        ) : (
-          <Table>
-            <Table.Header>
-              <Table.HeaderCell>Name</Table.HeaderCell>
-              <Table.HeaderCell>ID</Table.HeaderCell>
-              <Table.HeaderCell>Specs Count</Table.HeaderCell>
-              <Table.HeaderCell>Actions</Table.HeaderCell>
-            </Table.Header>
-            <Table.Body>
-              {specLists.map((specList) => (
-                <Table.Row key={specList.id}>
-                  <Table.Cell>
-                    <StyledLink
-                      href={speclistRoute({ id: specList.id })}
-                      className="text-sm font-medium"
-                    >
-                      {specList.name}
-                    </StyledLink>
-                  </Table.Cell>
-                  <Table.Cell theme="text">{specList.id}</Table.Cell>
-                  <Table.Cell theme="text">{specList.specs.length}</Table.Cell>
-                  <Table.Cell>
-                    <SpecListActionsButton
-                      specListId={specList.id}
-                      specListName={specList.name}
-                    />
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        )}
-      </div>
+        </div>
+      ) : (
+        <Table>
+          <Table.Header>
+            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell>ID</Table.HeaderCell>
+            <Table.HeaderCell>Specs Count</Table.HeaderCell>
+            <Table.HeaderCell>Actions</Table.HeaderCell>
+          </Table.Header>
+          <Table.Body>
+            {specLists.map((specList) => (
+              <Table.Row key={specList.id}>
+                <Table.Cell>
+                  <StyledLink
+                    href={speclistRoute({ id: specList.id })}
+                    className="text-sm font-medium"
+                  >
+                    {specList.name}
+                  </StyledLink>
+                </Table.Cell>
+                <Table.Cell theme="text">{specList.id}</Table.Cell>
+                <Table.Cell theme="text">{specList.specs.length}</Table.Cell>
+                <Table.Cell>
+                  <SpecListActionsButton
+                    specListId={specList.id}
+                    specListName={specList.name}
+                  />
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table>
+      )}
     </div>
   );
 }
