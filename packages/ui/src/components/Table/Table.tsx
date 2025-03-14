@@ -9,11 +9,16 @@ const Header: FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-const HeaderCell: FC<PropsWithChildren> = ({ children }) => {
+const HeaderCell: FC<
+  PropsWithChildren<{
+    className?: string;
+  }>
+> = ({ children, className }) => {
   return (
     <th
       className={clsx(
-        "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+        "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500",
+        className
       )}
     >
       {children}
@@ -34,13 +39,15 @@ const Row: FC<PropsWithChildren> = ({ children }) => {
 const Cell: FC<
   PropsWithChildren<{
     theme?: "plain" | "text";
+    align?: "top";
   }>
-> = ({ children, theme = "plain" }) => {
+> = ({ children, theme = "plain", align }) => {
   return (
     <td
       className={clsx(
-        "whitespace-nowrap px-6 py-4",
-        theme === "text" && "text-sm text-gray-500"
+        "px-6 py-4",
+        theme === "text" && "text-sm text-gray-500",
+        align === "top" && "align-top"
       )}
     >
       {children}
