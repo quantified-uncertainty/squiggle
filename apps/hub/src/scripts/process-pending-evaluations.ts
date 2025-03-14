@@ -14,7 +14,7 @@ async function main() {
   console.log("Starting processing of pending evaluations...");
 
   // Find all pending evaluations
-  const pendingEvals = await prisma.eval.findMany({
+  const pendingEvals = await prisma.evaluation.findMany({
     where: {
       state: {
         in: [
@@ -24,7 +24,7 @@ async function main() {
       },
     },
     include: {
-      evaluator: true,
+      runner: true,
       specList: {
         include: {
           specs: {

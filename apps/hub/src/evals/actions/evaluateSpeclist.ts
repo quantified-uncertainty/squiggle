@@ -7,21 +7,21 @@ import { checkRootUser } from "@/users/auth";
 
 const evaluateSpeclistSchema = z.object({
   specListId: z.string(),
-  evaluatorId: z.string(),
+  runnerId: z.string(),
 });
 
 export const evaluateSpecList = actionClient
   .schema(evaluateSpeclistSchema)
-  .action(async ({ parsedInput: { specListId, evaluatorId } }) => {
+  .action(async ({ parsedInput: { specListId, runnerId } }) => {
     await checkRootUser();
 
-    // Validate the evaluator exists
-    const evaluatorExists = await prisma.evaluator.findUnique({
-      where: { id: evaluatorId },
+    // Validate the runner exists
+    const runnerExists = await prisma.evalRunner.findUnique({
+      where: { id: runnerId },
     });
 
-    if (!evaluatorExists) {
-      throw new ActionError("Evaluator not found");
+    if (!runnerExists) {
+      throw new ActionError("Runner not found");
     }
 
     // Validate the speclist exists
@@ -34,12 +34,12 @@ export const evaluateSpecList = actionClient
     }
 
     // Create a new Eval record with Pending state
-    const evaluation = await prisma.eval.create({
+    const evaluation = await prisma.evaluation.create({
       data: {
         state: "Pending",
-        evaluator: {
+        runner: {
           connect: {
-            id: evaluatorId,
+            id: runnerId,
           },
         },
         specList: {

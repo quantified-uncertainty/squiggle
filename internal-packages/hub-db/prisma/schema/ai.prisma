@@ -20,8 +20,7 @@ model AiWorkflow {
 
     // TODO - remove default
     markdown String @default("")
-
-    metrics Json?
+    metrics  Json?
 
     evalResult EvalResult?
 }

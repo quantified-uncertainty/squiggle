@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/detailsEvals";
-import { evaluationsRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
+import { evalRunnerRoute, evaluationsRoute, speclistRoute } from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";
 
@@ -53,13 +53,13 @@ export default async function EvalDetailPage({
             value={format(new Date(evaluation.createdAt), "MMM d, yyyy h:mm a")}
           />
           <KeyValue
-            name="Evaluator"
+            name="Eval Runner"
             value={
               <StyledLink
-                href={evaluatorRoute({ id: evaluation.evaluator.id })}
+                href={evalRunnerRoute({ id: evaluation.runner.id })}
                 className="text-sm"
               >
-                {evaluation.evaluator.name}
+                {evaluation.runner.name}
               </StyledLink>
             }
           />
@@ -76,14 +76,14 @@ export default async function EvalDetailPage({
           />
           <KeyValue
             name="Results"
-            value={evaluation.evalResults.length.toString()}
+            value={evaluation.results.length.toString()}
           />
         </div>
       </Card>
 
       <div className="p-6">
         <h3 className="mb-4 text-lg font-medium">Evaluation Results</h3>
-        {evaluation.evalResults.length === 0 ? (
+        {evaluation.results.length === 0 ? (
           <p className="text-gray-500">No results found for this evaluation.</p>
         ) : (
           <Table>
@@ -96,7 +96,7 @@ export default async function EvalDetailPage({
               </Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {evaluation.evalResults.map((result) => (
+              {evaluation.results.map((result) => (
                 <Table.Row key={result.id}>
                   <Table.Cell align="top">
                     <div className="max-w-md space-y-2">

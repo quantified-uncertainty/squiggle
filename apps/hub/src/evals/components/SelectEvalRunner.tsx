@@ -4,25 +4,25 @@ import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-export type SelectEvaluatorOption = {
+export type SelectEvalRunnerOption = {
   id: string;
   name: string;
 };
 
-export function SelectEvaluator<TValues extends FieldValues>({
+export function SelectEvalRunner<TValues extends FieldValues>({
   name,
   label,
   required = true,
 }: {
-  name: FieldPathByValue<TValues, SelectEvaluatorOption | null>;
+  name: FieldPathByValue<TValues, SelectEvalRunnerOption | null>;
   label?: string;
   required?: boolean;
 }) {
   const loadOptions = async (
     inputValue: string
-  ): Promise<SelectEvaluatorOption[]> => {
+  ): Promise<SelectEvalRunnerOption[]> => {
     const result = await fetch(
-      `/api/find-evaluators?${new URLSearchParams({
+      `/api/find-eval-runners?${new URLSearchParams({
         search: inputValue,
       })}`
     ).then((r) => r.json());
@@ -40,7 +40,7 @@ export function SelectEvaluator<TValues extends FieldValues>({
   };
 
   return (
-    <SelectFormField<TValues, SelectEvaluatorOption | null>
+    <SelectFormField<TValues, SelectEvalRunnerOption | null>
       name={name}
       label={label}
       required={required}
@@ -48,7 +48,7 @@ export function SelectEvaluator<TValues extends FieldValues>({
       loadOptions={loadOptions}
       getOptionValue={(option) => option?.id}
       getOptionLabel={(option) => option?.name}
-      placeholder="Select an evaluator..."
+      placeholder="Select an eval runner..."
     />
   );
 }

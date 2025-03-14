@@ -247,10 +247,10 @@ export function evaluationRoute({ id }: { id: string }) {
   return `/speclists/evals/${id}`;
 }
 
-export function evaluatorsRoute() {
-  return "/speclists/evaluators";
+export function evalRunnersRoute() {
+  return "/speclists/eval-runners";
 }
 
-export function evaluatorRoute({ id }: { id: string }) {
-  return `/speclists/evaluators/${id}`;
+export function evalRunnerRoute({ id }: { id: string }) {
+  return `/speclists/eval-runners/${id}`;
 }

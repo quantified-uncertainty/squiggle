@@ -9,8 +9,8 @@ import {
 import { saveWorkflowToDb } from "@/ai/utils";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
-import { getEvaluatorById } from "./data/evaluators";
-import { Evaluator } from "./types";
+import { getEvalRunnerById } from "./data/evalRunners";
+import { EvalRunner } from "./types";
 
 function specToPrompt(spec: { id: string; description: string }) {
   return `Write a model for this question: ${spec.description}. Return the answer in the final expression.`;
@@ -25,19 +25,19 @@ const configSchema = z.object({
   styleGuideSteps: z.number(),
 });
 
-export async function getAiEvaluator({
+export async function getAiEvalRunner({
   id,
 }: {
   id: string;
-}): Promise<Evaluator> {
-  const evaluatorData = await getEvaluatorById(id);
-  if (evaluatorData.type !== "SquiggleAI") {
-    throw new Error("Evaluator is not an AI evaluator");
+}): Promise<EvalRunner> {
+  const runnerData = await getEvalRunnerById(id);
+  if (runnerData.type !== "SquiggleAI") {
+    throw new Error("Eval runner is not an AI runner");
   }
 
-  const llmConfig = configSchema.parse(evaluatorData.config);
+  const llmConfig = configSchema.parse(runnerData.config);
 
-  const evaluator: Evaluator = async (spec) => {
+  const evalRunner: EvalRunner = async (spec) => {
     const session = await getSessionOrRedirect();
     const user = await getSelf(session);
 
@@ -63,5 +63,5 @@ export async function getAiEvaluator({
     };
   };
 
-  return evaluator;
+  return evalRunner;
 }

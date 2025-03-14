@@ -3,9 +3,9 @@ import { FC, useState } from "react";
 
 import { Button, PlusIcon } from "@quri/ui";
 
-import { CreateEvaluatorModal } from "./CreateEvaluatorModal";
+import { CreateEvalRunnerModal } from "./CreateEvalRunnerModal";
 
-export const CreateEvaluatorButton: FC = () => {
+export const CreateEvalRunnerButton: FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -13,12 +13,12 @@ export const CreateEvaluatorButton: FC = () => {
       <Button onClick={() => setIsModalOpen(true)}>
         <div className="flex items-center gap-1">
           <PlusIcon size={16} />
-          Create Evaluator
+          Create Eval Runner
         </div>
       </Button>
 
       {isModalOpen && (
-        <CreateEvaluatorModal close={() => setIsModalOpen(false)} />
+        <CreateEvalRunnerModal close={() => setIsModalOpen(false)} />
       )}
     </>
   );

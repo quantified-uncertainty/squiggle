@@ -6,8 +6,8 @@ import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import { NumberFormField, SelectFormField, TextFormField } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
-import { createEvaluatorAction } from "@/evals/actions/createEvaluator";
-import { evaluatorRoute } from "@/lib/routes";
+import { createEvalRunnerAction } from "@/evals/actions/createEvalRunner";
+import { evalRunnerRoute } from "@/lib/routes";
 
 type LlmOption = {
   value: LlmId;
@@ -37,7 +37,7 @@ type Props = {
   close: () => void;
 };
 
-export const CreateEvaluatorModal: FC<Props> = ({ close }) => {
+export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
   const router = useRouter();
 
   const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === "Claude-Sonnet")!;
@@ -54,12 +54,12 @@ export const CreateEvaluatorModal: FC<Props> = ({ close }) => {
   };
 
   return (
-    <SafeActionFormModal<FormShape, typeof createEvaluatorAction>
+    <SafeActionFormModal<FormShape, typeof createEvalRunnerAction>
       close={close}
-      title="Create New Evaluator"
+      title="Create New Eval Runner"
       submitText="Create"
       defaultValues={defaultValues}
-      action={createEvaluatorAction}
+      action={createEvalRunnerAction}
       formDataToInput={(data) => ({
         name: data.name,
         config: {
@@ -72,15 +72,15 @@ export const CreateEvaluatorModal: FC<Props> = ({ close }) => {
         },
       })}
       onSuccess={({ id }) => {
-        router.push(evaluatorRoute({ id }));
+        router.push(evalRunnerRoute({ id }));
       }}
       initialFocus="name"
     >
       <div className="space-y-6">
         <TextFormField<FormShape>
           name="name"
-          label="Evaluator Name"
-          placeholder="Enter a name for this evaluator"
+          label="Eval Runner Name"
+          placeholder="Enter a name for this eval runner"
         />
 
         <div className="border-t border-gray-200 pt-4">

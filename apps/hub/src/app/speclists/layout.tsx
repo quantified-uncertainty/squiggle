@@ -4,8 +4,8 @@ import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding
 import { H1 } from "@/components/ui/Headers";
 import { Link } from "@/components/ui/Link";
 import {
+  evalRunnersRoute,
   evaluationsRoute,
-  evaluatorsRoute,
   speclistsRoute,
 } from "@/lib/routes";
 import { checkRootUser } from "@/users/auth";
@@ -32,10 +32,10 @@ export default async function SpecListsLayout({ children }: PropsWithChildren) {
           </Link>{" "}
           &{" "}
           <Link
-            href={evaluatorsRoute()}
+            href={evalRunnersRoute()}
             className="text-gray-600 hover:underline"
           >
-            Evaluators
+            Eval Runners
           </Link>
         </H1>
         <p className="text-sm text-gray-500">

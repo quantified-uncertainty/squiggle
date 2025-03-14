@@ -8,9 +8,9 @@ import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
 import { evaluateSpecList } from "@/evals/actions/evaluateSpeclist";
 import { evaluationRoute } from "@/lib/routes";
 
-import { SelectEvaluator, SelectEvaluatorOption } from "./SelectEvaluator";
+import { SelectEvalRunner, SelectEvalRunnerOption } from "./SelectEvalRunner";
 
-type FormShape = { evaluator: SelectEvaluatorOption | null };
+type FormShape = { runner: SelectEvalRunnerOption | null };
 
 type Props = {
   specListId: string;
@@ -33,27 +33,27 @@ export const EvaluateSpecListAction: FC<Props> = ({
           title={`Evaluate ${specListName}`}
           submitText="Start Evaluation"
           defaultValues={{
-            evaluator: null,
+            runner: null,
           }}
           action={evaluateSpecList}
           formDataToInput={(data) => ({
             specListId,
-            evaluatorId: data.evaluator?.id || "",
+            runnerId: data.runner?.id || "",
           })}
           onSuccess={({ id }) => {
             router.push(evaluationRoute({ id }));
           }}
-          initialFocus="evaluator"
+          initialFocus="runner"
         >
           <div className="mb-4">
             <div className="mb-4">
               This will evaluate all specs in this spec list using the selected
-              evaluator. This process may take some time depending on the number
-              of specs.
+              eval runner. This process may take some time depending on the
+              number of specs.
             </div>
-            <SelectEvaluator<FormShape>
-              name="evaluator"
-              label="Evaluator"
+            <SelectEvalRunner<FormShape>
+              name="runner"
+              label="Eval Runner"
               required
             />
           </div>

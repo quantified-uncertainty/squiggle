@@ -5,7 +5,7 @@ import { FC } from "react";
 import { PlusIcon } from "@quri/ui";
 
 import { LinkButton } from "@/components/ui/LinkButton";
-import { CreateEvaluatorButton } from "@/evals/components/CreateEvaluatorButton";
+import { CreateEvalRunnerButton } from "@/evals/components/CreateEvalRunnerButton";
 import { createSpecListRoute } from "@/lib/routes";
 
 export const NewEntityButton: FC = () => {
@@ -22,7 +22,7 @@ export const NewEntityButton: FC = () => {
           </div>
         </LinkButton>
       );
-    case "evaluators":
-      return <CreateEvaluatorButton />;
+    case "eval-runners":
+      return <CreateEvalRunnerButton />;
   }
 };

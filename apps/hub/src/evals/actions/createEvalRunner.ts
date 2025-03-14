@@ -7,19 +7,19 @@ import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-// Input schema for creating an evaluator
-const createEvaluatorSchema = z.object({
+// Input schema for creating an eval runner
+const createEvalRunnerSchema = z.object({
   name: z.string().min(1),
   config: llmConfigSchema,
 });
 
-export const createEvaluatorAction = actionClient
-  .schema(createEvaluatorSchema)
+export const createEvalRunnerAction = actionClient
+  .schema(createEvalRunnerSchema)
   .action(async ({ parsedInput }) => {
     await checkRootUser();
 
-    // Create the evaluator in the database
-    const evaluator = await prisma.evaluator.create({
+    // Create the eval runner in the database
+    const runner = await prisma.evalRunner.create({
       data: {
         name: parsedInput.name,
         type: "SquiggleAI",
@@ -27,5 +27,5 @@ export const createEvaluatorAction = actionClient
       },
     });
 
-    return evaluator;
+    return runner;
   });

@@ -3,17 +3,17 @@
 import { format } from "date-fns";
 import React from "react";
 
-import { EvalState } from "@quri/hub-db";
+import { EvaluationState } from "@quri/hub-db";
 import { Table, TextTooltip } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
+import { evalRunnerRoute, evaluationRoute, speclistRoute } from "@/lib/routes";
 
-import { type EvalSummaryDTO } from "../data/summaryEvals";
+import { type EvaluationSummaryDTO } from "../data/summaryEvals";
 
 // Helper function to render the state with appropriate styling
 function renderState(
-  state: EvalState,
+  state: EvaluationState,
   errorMsg?: string | null
 ): React.ReactNode {
   let className = "";
@@ -51,7 +51,7 @@ function renderState(
 }
 
 interface EvaluationsTableProps {
-  evaluations: EvalSummaryDTO[];
+  evaluations: EvaluationSummaryDTO[];
   showSpecList?: boolean;
   emptyMessage?: string;
 }
@@ -83,7 +83,7 @@ export function EvaluationsTable({
         <Table.HeaderCell>ID</Table.HeaderCell>
         <Table.HeaderCell>Created</Table.HeaderCell>
         <Table.HeaderCell>State</Table.HeaderCell>
-        <Table.HeaderCell>Evaluator</Table.HeaderCell>
+        <Table.HeaderCell>Eval Runner</Table.HeaderCell>
         {showSpecList && <Table.HeaderCell>Spec List</Table.HeaderCell>}
         <Table.HeaderCell>Results Count</Table.HeaderCell>
         <Table.HeaderCell>Total Cost</Table.HeaderCell>
@@ -109,10 +109,10 @@ export function EvaluationsTable({
             </Table.Cell>
             <Table.Cell>
               <StyledLink
-                href={evaluatorRoute({ id: evaluation.evaluator.id })}
+                href={evalRunnerRoute({ id: evaluation.runner.id })}
                 className="text-sm"
               >
-                {evaluation.evaluator.name}
+                {evaluation.runner.name}
               </StyledLink>
             </Table.Cell>
             {showSpecList && evaluation.specList && (
@@ -125,9 +125,7 @@ export function EvaluationsTable({
                 </StyledLink>
               </Table.Cell>
             )}
-            <Table.Cell theme="text">
-              {evaluation._count.evalResults}
-            </Table.Cell>
+            <Table.Cell theme="text">{evaluation._count.results}</Table.Cell>
             <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}
             </Table.Cell>

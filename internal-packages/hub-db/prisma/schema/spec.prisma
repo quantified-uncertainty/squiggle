@@ -19,8 +19,8 @@ model SpecList {
 
     name String
 
-    specs SpecsOnSpecLists[]
-    evals Eval[]
+    specs       SpecsOnSpecLists[]
+    evaluations Evaluation[]
 }
 
 model SpecsOnSpecLists {
@@ -37,33 +37,45 @@ model SpecsOnSpecLists {
     @@index([specListId])
 }
 
-enum EvalState {
+enum EvaluationState {
     Pending
     Running
     Completed
     Failed
+
+    @@map("EvalState")
 }
 
-// "Eval" is a shorthand for "collection of EvalResults on a SpecList"
-model Eval {
+// "Evaluation" is a shorthand for "collection of EvalResults on a SpecList"
+// In the codebase, we use "Evaluation" instead of shorter "Eval", because `eval` is a reserved word in JavaScript.
+model Evaluation {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    state    EvalState @default(Pending)
+    state    EvaluationState @default(Pending)
     errorMsg String? // Optional error message when state is 'Failed'
 
-    // metadata about the evaluator that was used
-    evaluator   Evaluator @relation(fields: [evaluatorId], references: [id])
-    evaluatorId String
+    // metadata about the runner that was used
+    runner   EvalRunner @relation(fields: [runnerId], references: [id])
+    runnerId String
 
     specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
     specListId String
 
-    evalResults EvalResult[]
+    results EvalResult[]
+
+    @@map("Eval")
 }
 
+/**
+ * EvalResult is similar to the `Variable` table or to the `Model` table.
+ * For the sake of simplicity, we assume that its value is the end expression of the Squiggle code.
+ * In the future it should be merged with them somehow.
+ * ---
+ * Note that it's not AI-specific: its `workflow` reference is optional.
+ */
 model EvalResult {
     id String @id @default(cuid())
 
@@ -80,7 +92,7 @@ model EvalResult {
      */
     code String
 
-    eval   Eval   @relation(fields: [evalId], references: [id])
+    eval   Evaluation @relation(fields: [evalId], references: [id])
     evalId String
 
     workflowId String?     @unique
@@ -89,15 +101,15 @@ model EvalResult {
     @@unique([specId, evalId])
 }
 
-enum EvaluatorType {
+enum EvalRunnerType {
     SquiggleAI
 }
 
 /**
- * Evaluators are the configurations that produce evals.
- * The main kind of evaluator is Squiggle AI evaluator, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
+ * EvalRunners are the configurations that produce evaluations.
+ * The main kind of eval runner is Squiggle AI runner, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
  */
-model Evaluator {
+model EvalRunner {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
@@ -105,10 +117,10 @@ model Evaluator {
 
     name String
 
-    type EvaluatorType @default(SquiggleAI)
+    type EvalRunnerType @default(SquiggleAI)
 
     // Untyped, for now; validated by zod in the codebase.
     // For AI, this should contain `LlmConfig` object.
-    config Json
-    evals  Eval[]
+    config      Json
+    evaluations Evaluation[]
 }

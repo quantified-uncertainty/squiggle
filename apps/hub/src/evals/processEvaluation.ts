@@ -1,18 +1,18 @@
-import { Eval } from "@quri/hub-db";
+import { Evaluation } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-import { getAiEvaluator } from "./aiEvaluator";
+import { getAiEvalRunner } from "./aiEvalRunner";
 
 /**
  * This function is usually called from a backend script; it's too slow for server actions or API routes.
  */
-export async function processEvaluation(evaluation: Eval) {
+export async function processEvaluation(evaluation: Evaluation) {
   await checkRootUser();
   console.log(`Processing evaluation ${evaluation.id}...`);
 
-  const fullEvaluation = await prisma.eval.findUniqueOrThrow({
+  const fullEvaluation = await prisma.evaluation.findUniqueOrThrow({
     where: { id: evaluation.id },
     include: {
       specList: {
@@ -29,17 +29,15 @@ export async function processEvaluation(evaluation: Eval) {
 
   try {
     // Update the state to Running
-    await prisma.eval.update({
+    await prisma.evaluation.update({
       where: { id: evaluation.id },
       data: { state: "Running" },
     });
 
-    // Get the evaluator
-    const evaluator = await getAiEvaluator({ id: evaluation.evaluatorId });
-    if (!evaluator) {
-      throw new Error(
-        `Failed to get evaluator with ID ${evaluation.evaluatorId}`
-      );
+    // Get the runner
+    const runner = await getAiEvalRunner({ id: evaluation.runnerId });
+    if (!runner) {
+      throw new Error(`Failed to get runner with ID ${evaluation.runnerId}`);
     }
 
     // Process all specs in parallel
@@ -49,7 +47,7 @@ export async function processEvaluation(evaluation: Eval) {
           console.log(
             `Processing spec ${spec.id} for evaluation ${evaluation.id}...`
           );
-          const result = await evaluator(spec);
+          const result = await runner(spec);
 
           // Store result in db
           await prisma.evalResult.create({
@@ -84,7 +82,7 @@ export async function processEvaluation(evaluation: Eval) {
     );
 
     // Update the state to Completed
-    await prisma.eval.update({
+    await prisma.evaluation.update({
       where: { id: evaluation.id },
       data: { state: "Completed" },
     });
@@ -94,7 +92,7 @@ export async function processEvaluation(evaluation: Eval) {
     console.error(`Error processing evaluation ${evaluation.id}:`, error);
 
     // Update the state to Failed and store the error message
-    await prisma.eval.update({
+    await prisma.evaluation.update({
       where: { id: evaluation.id },
       data: {
         state: "Failed",

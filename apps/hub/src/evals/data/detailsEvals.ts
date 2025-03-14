@@ -11,11 +11,11 @@ import {
 } from "./summaryEvals";
 
 // Selection for fetching eval data with detailed information
-export const evalSelectWithDetails = {
+export const evaluationSelectWithDetails = {
   id: true,
   createdAt: true,
   updatedAt: true,
-  evaluator: {
+  runner: {
     select: {
       id: true,
       name: true,
@@ -33,7 +33,7 @@ export const evalSelectWithDetails = {
       },
     },
   },
-  evalResults: {
+  results: {
     select: {
       id: true,
       code: true,
@@ -47,11 +47,11 @@ export const evalSelectWithDetails = {
       },
     },
   },
-} satisfies Prisma.EvalSelect;
+} satisfies Prisma.EvaluationSelect;
 
 // Base type for eval data from Prisma
-type DbEvalWithDetails = Prisma.EvalGetPayload<{
-  select: typeof evalSelectWithDetails;
+type DbEvalWithDetails = Prisma.EvaluationGetPayload<{
+  select: typeof evaluationSelectWithDetails;
 }>;
 
 // DTO type with aggregated metrics
@@ -59,7 +59,7 @@ export type EvalWithDetailsDTO = {
   id: string;
   createdAt: Date;
   updatedAt: Date;
-  evaluator: {
+  runner: {
     id: string;
     name: string;
     type: string;
@@ -68,7 +68,7 @@ export type EvalWithDetailsDTO = {
     id: string;
     name: string;
   };
-  evalResults: {
+  results: {
     id: string;
     code: string;
     spec: {
@@ -86,15 +86,15 @@ export type EvalWithDetailsDTO = {
 
 // Function to convert from DB type to DTO with aggregated metrics
 function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
-  const metrics = aggregateEvalMetrics(dbEval.evalResults);
+  const metrics = aggregateEvalMetrics(dbEval.results);
 
   return {
     id: dbEval.id,
     createdAt: dbEval.createdAt,
     updatedAt: dbEval.updatedAt,
-    evaluator: dbEval.evaluator,
+    runner: dbEval.runner,
     specList: dbEval.specList,
-    evalResults: dbEval.evalResults.map((result) => ({
+    results: dbEval.results.map((result) => ({
       id: result.id,
       code: result.code,
       spec: result.spec,
@@ -113,9 +113,9 @@ function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
 export async function getEvalById(id: string): Promise<EvalWithDetailsDTO> {
   await checkRootUser();
 
-  const dbEval = await prisma.eval.findUniqueOrThrow({
+  const dbEval = await prisma.evaluation.findUniqueOrThrow({
     where: { id },
-    select: evalSelectWithDetails,
+    select: evaluationSelectWithDetails,
   });
 
   return evalWithDetailsToDTO(dbEval);
