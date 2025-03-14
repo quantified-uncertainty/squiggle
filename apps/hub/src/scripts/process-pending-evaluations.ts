@@ -17,7 +17,10 @@ async function main() {
   const pendingEvals = await prisma.eval.findMany({
     where: {
       state: {
-        in: ["Pending", "Failed"],
+        in: [
+          "Pending",
+          // "Failed"
+        ],
       },
     },
     include: {

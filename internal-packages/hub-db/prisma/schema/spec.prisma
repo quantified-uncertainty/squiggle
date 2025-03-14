@@ -24,13 +24,15 @@ model SpecList {
 }
 
 model SpecsOnSpecLists {
+    id String @id @default(cuid())
+
     spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
     specId String
 
     specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
     specListId String
 
-    @@id([specId, specListId])
+    @@unique([specId, specListId])
     @@index([specId])
     @@index([specListId])
 }
@@ -49,8 +51,8 @@ model Eval {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    state     EvalState @default(Pending)
-    errorMsg  String?   // Optional error message when state is 'Failed'
+    state    EvalState @default(Pending)
+    errorMsg String? // Optional error message when state is 'Failed'
 
     // metadata about the evaluator that was used
     evaluator   Evaluator @relation(fields: [evaluatorId], references: [id])
@@ -83,6 +85,8 @@ model EvalResult {
 
     workflowId String?     @unique
     workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
+
+    @@unique([specId, evalId])
 }
 
 enum EvaluatorType {

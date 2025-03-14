@@ -19,10 +19,7 @@ export default async function SpecListsPage() {
     <div>
       {specLists.length === 0 ? (
         <Card theme="big">
-          <div className="text-center text-gray-500">
-            No spec lists found. Create one by running the add-speclist.ts
-            script.
-          </div>
+          <div className="text-center text-gray-500">No spec lists found.</div>
         </Card>
       ) : (
         <Table>

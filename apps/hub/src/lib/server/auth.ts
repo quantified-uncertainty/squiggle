@@ -69,7 +69,7 @@ function buildAuthConfig(): NextAuthConfig {
 }
 
 function makeAuth(): NextAuthResult {
-  const makeCliMock = (name: string) => {
+  const makeCliMock = (name: string) => () => {
     throw new Error(`${name} is not supported in CLI mode`);
   };
 

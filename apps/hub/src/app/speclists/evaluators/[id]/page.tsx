@@ -2,11 +2,11 @@ import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import React from "react";
 
+import { LlmConfigDisplay } from "@/ai/components/LlmConfigDisplay";
 import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { EvaluatorConfigDisplay } from "@/evals/components/EvaluatorConfigDisplay";
 import { getEvaluatorById } from "@/evals/data/evaluators";
 import { evaluatorsRoute } from "@/lib/routes";
 
@@ -78,7 +78,7 @@ export default async function EvaluatorDetailPage({
           </div>
 
           {evaluator.config ? (
-            <EvaluatorConfigDisplay config={evaluator.config} />
+            <LlmConfigDisplay config={evaluator.config} />
           ) : (
             <p className="text-red-500">Configuration parsing error</p>
           )}

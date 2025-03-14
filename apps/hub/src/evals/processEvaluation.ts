@@ -1,10 +1,31 @@
 import { Eval } from "@quri/hub-db";
 
+import { prisma } from "@/lib/server/prisma";
+import { checkRootUser } from "@/users/auth";
+
+import { getAiEvaluator } from "./aiEvaluator";
+
 /**
  * This function is usually called from a backend script; it's too slow for server actions or API routes.
  */
 export async function processEvaluation(evaluation: Eval) {
+  await checkRootUser();
   console.log(`Processing evaluation ${evaluation.id}...`);
+
+  const fullEvaluation = await prisma.eval.findUniqueOrThrow({
+    where: { id: evaluation.id },
+    include: {
+      specList: {
+        include: {
+          specs: {
+            include: {
+              spec: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
   try {
     // Update the state to Running
@@ -23,7 +44,7 @@ export async function processEvaluation(evaluation: Eval) {
 
     // Process all specs in parallel
     await Promise.all(
-      evaluation.specList.specs.map(async ({ spec }) => {
+      fullEvaluation.specList.specs.map(async ({ spec }) => {
         try {
           console.log(
             `Processing spec ${spec.id} for evaluation ${evaluation.id}...`

@@ -5,7 +5,7 @@ import { LlmConfig, MODEL_CONFIGS } from "@quri/squiggle-ai";
 
 import { KeyValue } from "@/components/ui/KeyValue";
 
-export const EvaluatorConfigDisplay: FC<{
+export const LlmConfigDisplay: FC<{
   config: LlmConfig;
 }> = ({ config }) => {
   // Find the model details to display model name instead of just ID
