@@ -5,23 +5,26 @@ import { FC } from "react";
 import { PlusIcon } from "@quri/ui";
 
 import { LinkButton } from "@/components/ui/LinkButton";
+import { CreateEvaluatorButton } from "@/evals/components/CreateEvaluatorButton";
 import { createSpecListRoute } from "@/lib/routes";
 
 export const NewEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
 
-  const link = createSpecListRoute();
+  console.log({ segment });
 
-  if (segment === "evals" || segment === "evaluators") {
-    return null;
+  switch (segment) {
+    case null:
+      // default - speclists
+      return (
+        <LinkButton href={createSpecListRoute()}>
+          <div className="flex items-center gap-1">
+            <PlusIcon size={16} />
+            New Spec List
+          </div>
+        </LinkButton>
+      );
+    case "evaluators":
+      return <CreateEvaluatorButton />;
   }
-
-  return (
-    <LinkButton href={link}>
-      <div className="flex items-center gap-1">
-        <PlusIcon size={16} />
-        New Spec List
-      </div>
-    </LinkButton>
-  );
 };

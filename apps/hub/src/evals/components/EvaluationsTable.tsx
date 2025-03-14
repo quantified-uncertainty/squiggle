@@ -104,9 +104,7 @@ export function EvaluationsTable({
               {formatRunCount(evaluation.metrics?.llmRunCount)}
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <StyledLink href={evaluationRoute({ id: evaluation.id })}>
-                View
-              </StyledLink>
+              (none)
             </td>
           </tr>
         ))}

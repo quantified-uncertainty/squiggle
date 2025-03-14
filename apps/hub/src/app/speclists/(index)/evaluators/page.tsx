@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import React from "react";
 
+import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getAllEvaluators } from "@/evals/data/evaluators";
 import { evaluatorRoute } from "@/lib/routes";
@@ -14,10 +15,14 @@ export default async function EvaluatorsPage() {
 
   return (
     <div>
+      <div className="mb-6 flex items-center justify-between">
+        <H2>Evaluators</H2>
+      </div>
+
       <div className="rounded-lg bg-white shadow-md">
         {evaluators.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
-            No evaluators found.
+            {`No evaluators found. Use the "Create Evaluator" button to add one.`}
           </div>
         ) : (
           <table className="min-w-full">

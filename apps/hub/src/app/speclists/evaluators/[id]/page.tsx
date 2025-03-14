@@ -4,6 +4,7 @@ import React from "react";
 
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { EvaluatorConfigDisplay } from "@/evals/components/EvaluatorConfigDisplay";
 import { getEvaluatorById } from "@/evals/data/evaluators";
 import { evaluatorsRoute } from "@/lib/routes";
 
@@ -77,11 +78,7 @@ export default async function EvaluatorDetailPage({
             <h3 className="text-lg font-medium">Configuration</h3>
           </div>
 
-          <div className="overflow-auto rounded bg-gray-50 p-4">
-            <pre className="text-sm text-gray-800">
-              {JSON.stringify(evaluator.config, null, 2)}
-            </pre>
-          </div>
+          <EvaluatorConfigDisplay config={evaluator.config} />
         </div>
       </div>
     );
