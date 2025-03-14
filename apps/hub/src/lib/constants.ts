@@ -21,7 +21,8 @@ export const XY_POINT_LENGTH_DEFAULT = 1000;
 export const DEFAULT_SEED = "DEFAULT_SEED";
 
 export const SQUIGGLE_LANGUAGE_WEBSITE =
-  process.env["SQUIGGLE_LANGUAGE_WEBSITE"] || "https://squiggle-language.com";
+  process.env["NEXT_PUBLIC_SQUIGGLE_LANGUAGE_WEBSITE"] ||
+  "https://squiggle-language.com";
 
 export const SQUIGGLE_PLAYGROUND = `${SQUIGGLE_LANGUAGE_WEBSITE}/playground`;
 

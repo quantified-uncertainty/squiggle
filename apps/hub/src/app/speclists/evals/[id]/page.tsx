@@ -113,6 +113,17 @@ export default async function EvalDetailPage({
                           <p className="text-xs text-gray-500">
                             ID: {result.spec.id}
                           </p>
+                          {result.workflow?.metrics?.totalPrice && (
+                            <p className="text-xs text-gray-500">
+                              Cost: $
+                              {result.workflow.metrics.totalPrice.toFixed(2)}
+                            </p>
+                          )}
+                          {result.workflow?.metrics?.llmRunCount && (
+                            <p className="text-xs text-gray-500">
+                              LLM runs: {result.workflow.metrics.llmRunCount}
+                            </p>
+                          )}
                           {result.workflow && (
                             <div className="pt-2">
                               <StyledLink

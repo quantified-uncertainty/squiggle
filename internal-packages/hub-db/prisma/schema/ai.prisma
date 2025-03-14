@@ -15,10 +15,13 @@ model AiWorkflow {
     // TODO - upgrade to V2_0
     format AiWorkflowFormat @default(V1_0)
 
+    // Full serialized workflow
     workflow Json
 
     // TODO - remove default
     markdown String @default("")
+
+    metrics Json?
 
     evalResult EvalResult?
 }

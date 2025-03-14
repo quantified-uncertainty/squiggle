@@ -40,7 +40,7 @@
     "lodash": "^4.17.21",
     "next": "^15.2.2",
     "next-auth": "5.0.0-beta.25",
-    "next-safe-action": "^7.9.9",
+    "next-safe-action": "^7.10.4",
     "pako": "^2.1.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",

@@ -23,7 +23,7 @@ export type Evaluator = Prisma.EvaluatorGetPayload<{
   select: typeof evaluatorSelect;
 }>;
 
-export async function getAllEvaluators() {
+export async function getAllEvaluators(): Promise<Evaluator[]> {
   await checkRootUser();
 
   return prisma.evaluator.findMany({

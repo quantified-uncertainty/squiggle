@@ -13,8 +13,8 @@ export default async function EvalsPage() {
   return (
     <div>
       <div className="rounded-lg bg-white shadow-md">
-        <EvaluationsTable 
-          evaluations={evals} 
+        <EvaluationsTable
+          evaluations={evals}
           emptyMessage="No evaluations found. Run evaluations using the CLI tool."
         />
       </div>

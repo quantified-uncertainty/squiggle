@@ -6,24 +6,10 @@ import React from "react";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
-export interface EvaluationTableData {
-  id: string;
-  createdAt: Date | string;
-  evaluator: {
-    id: string;
-    name: string;
-  };
-  _count: {
-    evalResults: number;
-  };
-  specList?: {
-    id: string;
-    name: string;
-  };
-}
+import { type EvalSummaryDTO } from "../data/evals";
 
 interface EvaluationsTableProps {
-  evaluations: EvaluationTableData[];
+  evaluations: EvalSummaryDTO[];
   showSpecList?: boolean;
   emptyMessage?: string;
 }
@@ -34,12 +20,20 @@ export function EvaluationsTable({
   emptyMessage = "No evaluations found.",
 }: EvaluationsTableProps) {
   if (evaluations.length === 0) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        {emptyMessage}
-      </div>
-    );
+    return <div className="p-6 text-center text-gray-500">{emptyMessage}</div>;
   }
+
+  // Format cost to display as currency
+  const formatCost = (price: number | undefined): string => {
+    if (price === undefined) return "N/A";
+    return `$${price.toFixed(2)}`;
+  };
+
+  // Format LLM run count
+  const formatRunCount = (count: number | undefined): string => {
+    if (count === undefined) return "N/A";
+    return count.toString();
+  };
 
   return (
     <table className="min-w-full">
@@ -63,6 +57,12 @@ export function EvaluationsTable({
             Results Count
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            Total Cost
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+            LLM Runs
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
             Actions
           </th>
         </tr>
@@ -76,13 +76,12 @@ export function EvaluationsTable({
               </StyledLink>
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              {format(
-                new Date(evaluation.createdAt),
-                "MMM d, yyyy h:mm a"
-              )}
+              {format(new Date(evaluation.createdAt), "MMM d, yyyy h:mm a")}
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              <StyledLink href={evaluatorRoute({ id: evaluation.evaluator.id })}>
+              <StyledLink
+                href={evaluatorRoute({ id: evaluation.evaluator.id })}
+              >
                 {evaluation.evaluator.name}
               </StyledLink>
             </td>
@@ -97,6 +96,12 @@ export function EvaluationsTable({
             )}
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               {evaluation._count.evalResults}
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              {formatCost(evaluation.metrics?.totalPrice)}
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              {formatRunCount(evaluation.metrics?.llmRunCount)}
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
               <StyledLink href={evaluationRoute({ id: evaluation.id })}>
