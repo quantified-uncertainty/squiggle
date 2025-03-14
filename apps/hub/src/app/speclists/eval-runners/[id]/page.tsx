@@ -12,15 +12,20 @@ import { evalRunnersRoute } from "@/lib/routes";
 
 export const dynamicParams = true;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   try {
-    const evalRunner = await getEvalRunnerById(params.id);
+    const evalRunner = await getEvalRunnerById(id);
     return {
       title: `${evalRunner.name} Eval Runner - Squiggle Hub`,
     };
   } catch (error) {
     return {
-      title: `Eval Runner: ${params.id} - Squiggle Hub`,
+      title: `Eval Runner: ${id} - Squiggle Hub`,
     };
   }
 }
