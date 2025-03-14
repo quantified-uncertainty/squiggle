@@ -35,12 +35,22 @@ model SpecsOnSpecLists {
     @@index([specListId])
 }
 
+enum EvalState {
+    Pending
+    Running
+    Completed
+    Failed
+}
+
 // "Eval" is a shorthand for "collection of EvalResults on a SpecList"
 model Eval {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    state     EvalState @default(Pending)
+    errorMsg  String?   // Optional error message when state is 'Failed'
 
     // metadata about the evaluator that was used
     evaluator   Evaluator @relation(fields: [evaluatorId], references: [id])

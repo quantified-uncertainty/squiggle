@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Prisma } from "@quri/hub-db";
+import { Prisma, EvalState } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
@@ -66,6 +66,8 @@ export function aggregateEvalMetrics(
 const selectEvalSummary = {
   id: true,
   createdAt: true,
+  state: true,
+  errorMsg: true,
   evaluator: {
     select: {
       id: true,
@@ -103,6 +105,8 @@ type DbEvalSummary = Prisma.EvalGetPayload<{
 export type EvalSummaryDTO = {
   id: string;
   createdAt: Date;
+  state: EvalState;
+  errorMsg?: string | null;
   metrics: EvalMetrics;
   evaluator: {
     id: string;
@@ -123,6 +127,8 @@ function evalSummaryToDTO(dbEval: DbEvalSummary): EvalSummaryDTO {
   return {
     id: dbEval.id,
     createdAt: dbEval.createdAt,
+    state: dbEval.state,
+    errorMsg: dbEval.errorMsg,
     evaluator: dbEval.evaluator,
     specList: dbEval.specList,
     _count: dbEval._count,

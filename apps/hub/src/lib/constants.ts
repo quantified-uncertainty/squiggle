@@ -27,3 +27,5 @@ export const SQUIGGLE_LANGUAGE_WEBSITE =
 export const SQUIGGLE_PLAYGROUND = `${SQUIGGLE_LANGUAGE_WEBSITE}/playground`;
 
 export const SQUIGGLE_DOCS_URL = `${SQUIGGLE_LANGUAGE_WEBSITE}/docs/Api/Dist`;
+
+export const CLI_MODE = process.env["CLI_MODE"] === "true";

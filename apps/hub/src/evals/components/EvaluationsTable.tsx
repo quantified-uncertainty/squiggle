@@ -4,11 +4,51 @@ import { format } from "date-fns";
 import React from "react";
 
 import { Table } from "@quri/ui";
+import { EvalState } from "@quri/hub-db";
 
 import { StyledLink } from "@/components/ui/StyledLink";
 import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
+import { TextTooltip } from "@quri/ui";
 
 import { type EvalSummaryDTO } from "../data/summaryEvals";
+
+// Helper function to render the state with appropriate styling
+function renderState(state: EvalState, errorMsg?: string | null): React.ReactNode {
+  let className = "";
+  let label = state;
+
+  switch (state) {
+    case "Pending":
+      className = "bg-yellow-100 text-yellow-800";
+      break;
+    case "Running":
+      className = "bg-blue-100 text-blue-800";
+      break;
+    case "Completed":
+      className = "bg-green-100 text-green-800";
+      break;
+    case "Failed":
+      className = "bg-red-100 text-red-800";
+      break;
+  }
+
+  const stateElement = (
+    <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${className}`}>
+      {label}
+    </span>
+  );
+
+  // If there's an error message and state is Failed, show it in a tooltip
+  if (state === "Failed" && errorMsg) {
+    return (
+      <TextTooltip text={errorMsg}>
+        {stateElement}
+      </TextTooltip>
+    );
+  }
+
+  return stateElement;
+}
 
 interface EvaluationsTableProps {
   evaluations: EvalSummaryDTO[];
@@ -42,6 +82,7 @@ export function EvaluationsTable({
       <Table.Header>
         <Table.HeaderCell>ID</Table.HeaderCell>
         <Table.HeaderCell>Created</Table.HeaderCell>
+        <Table.HeaderCell>State</Table.HeaderCell>
         <Table.HeaderCell>Evaluator</Table.HeaderCell>
         {showSpecList && <Table.HeaderCell>Spec List</Table.HeaderCell>}
         <Table.HeaderCell>Results Count</Table.HeaderCell>
@@ -62,6 +103,9 @@ export function EvaluationsTable({
             </Table.Cell>
             <Table.Cell theme="text">
               {format(new Date(evaluation.createdAt), "MMM d, yyyy h:mm a")}
+            </Table.Cell>
+            <Table.Cell>
+              {renderState(evaluation.state, evaluation.errorMsg)}
             </Table.Cell>
             <Table.Cell>
               <StyledLink

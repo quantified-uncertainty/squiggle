@@ -3,12 +3,16 @@ import { redirect } from "next/navigation";
 
 import { User } from "@quri/hub-db";
 
+import { CLI_MODE } from "@/lib/constants";
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 
 export async function getSessionOrRedirect() {
   const session = await auth();
   if (!isSignedIn(session)) {
+    if (CLI_MODE) {
+      throw new Error("Unauthorized");
+    }
     redirect("/api/auth/signin"); // TODO - callbackUrl
   }
 

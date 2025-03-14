@@ -17,21 +17,28 @@ export const evaluateSpecList = actionClient
   .action(async ({ parsedInput: { specListId, evaluatorId } }) => {
     await checkRootUser();
 
-    // Get the evaluator
-    const evaluator = await getAiEvaluator({ id: evaluatorId });
-    if (!evaluator) {
+    // Validate the evaluator exists
+    const evaluatorExists = await prisma.evaluator.findUnique({
+      where: { id: evaluatorId },
+    });
+    
+    if (!evaluatorExists) {
       throw new ActionError("Evaluator not found");
     }
 
-    // Get the speclist
-    const specList = await prisma.specList.findUniqueOrThrow({
+    // Validate the speclist exists
+    const specListExists = await prisma.specList.findUnique({
       where: { id: specListId },
-      include: { specs: { include: { spec: true } } },
     });
+    
+    if (!specListExists) {
+      throw new ActionError("Spec list not found");
+    }
 
-    // create a new Eval record
+    // Create a new Eval record with Pending state
     const evaluation = await prisma.eval.create({
       data: {
+        state: "Pending",
         evaluator: {
           connect: {
             id: evaluatorId,
@@ -45,45 +52,7 @@ export const evaluateSpecList = actionClient
       },
     });
 
-    // Process all specs in parallel
-    await Promise.all(
-      specList.specs.map(async ({ spec }) => {
-        const result = await evaluator(spec);
-
-        // store result in db
-        await prisma.evalResult.create({
-          data: {
-            spec: {
-              connect: {
-                id: spec.id,
-              },
-            },
-            code: result.code,
-            eval: {
-              connect: {
-                id: evaluation.id,
-              },
-            },
-            ...(result.workflowId
-              ? {
-                  workflow: {
-                    connect: {
-                      id: result.workflowId,
-                    },
-                  },
-                }
-              : {}),
-          },
-        });
-      })
-    );
-
-    // reselect the Eval record from db
-    const updatedEvaluation = await prisma.eval.findUniqueOrThrow({
-      where: {
-        id: evaluation.id,
-      },
-    });
-
-    return updatedEvaluation;
+    // Return the created evaluation without processing specs
+    // The background job will handle the actual processing
+    return evaluation;
   });
