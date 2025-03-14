@@ -5,6 +5,7 @@ import { FormProvider } from "react-hook-form";
 
 import { Button, TextFormField } from "@quri/ui";
 
+import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { createSpecListAction } from "@/evals/actions/createSpecListAction";
@@ -50,7 +51,7 @@ export default function CreateSpecListPage() {
         <StyledLink href={speclistsRoute()}>← Back to Spec Lists</StyledLink>
       </div>
 
-      <div className="rounded-lg bg-white p-6 shadow-md">
+      <Card theme="big">
         <FormProvider {...form}>
           <form onSubmit={onSubmit}>
             <div className="mb-4">
@@ -75,7 +76,7 @@ export default function CreateSpecListPage() {
             </div>
           </form>
         </FormProvider>
-      </div>
+      </Card>
     </div>
   );
 }

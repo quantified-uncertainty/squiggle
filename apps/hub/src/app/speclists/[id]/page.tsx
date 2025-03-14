@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
@@ -53,7 +54,7 @@ export default async function SpecListDetailPage({
           </div>
         </div>
 
-        <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
+        <Card theme="big">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-medium">
               Specs ({specList.specs.length})
@@ -78,7 +79,7 @@ export default async function SpecListDetailPage({
               ))}
             </ul>
           )}
-        </div>
+        </Card>
 
         <div className="p-6">
           <div className="mb-4 flex items-center justify-between">

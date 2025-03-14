@@ -2,7 +2,9 @@ import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import React from "react";
 
+import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
+import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvaluatorConfigDisplay } from "@/evals/components/EvaluatorConfigDisplay";
 import { getEvaluatorById } from "@/evals/data/evaluators";
@@ -33,8 +35,8 @@ export default async function EvaluatorDetailPage({
     const evaluator = await getEvaluatorById(id);
 
     return (
-      <div>
-        <div className="mb-6 flex items-center justify-between">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
             <H2>{evaluator.name}</H2>
             <p className="text-sm text-gray-500">ID: {evaluator.id}</p>
@@ -42,38 +44,35 @@ export default async function EvaluatorDetailPage({
           <StyledLink href={evaluatorsRoute()}>← Back to Evaluators</StyledLink>
         </div>
 
-        <div className="mb-6 rounded-lg bg-white p-6 shadow-md">
+        <Card theme="big">
           <div className="mb-4">
-            <h3 className="text-lg font-medium">Details</h3>
+            <h3 className="text-lg font-medium">Evaluator Details</h3>
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Type</p>
-              <p className="text-gray-900">{evaluator.type}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Created</p>
-              <p className="text-gray-900">
-                {format(new Date(evaluator.createdAt), "MMM d, yyyy h:mm a")}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Last Updated</p>
-              <p className="text-gray-900">
-                {format(new Date(evaluator.updatedAt), "MMM d, yyyy h:mm a")}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">
-                Evaluations Count
-              </p>
-              <p className="text-gray-900">{evaluator._count.evals}</p>
-            </div>
+            <KeyValue name="Type" value={evaluator.type} />
+            <KeyValue
+              name="Created"
+              value={format(
+                new Date(evaluator.createdAt),
+                "MMM d, yyyy h:mm a"
+              )}
+            />
+            <KeyValue
+              name="Last Updated"
+              value={format(
+                new Date(evaluator.updatedAt),
+                "MMM d, yyyy h:mm a"
+              )}
+            />
+            <KeyValue
+              name="Evaluations Count"
+              value={evaluator._count.evals.toString()}
+            />
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg bg-white p-6 shadow-md">
+        <Card theme="big">
           <div className="mb-4">
             <h3 className="text-lg font-medium">Configuration</h3>
           </div>
@@ -83,7 +82,7 @@ export default async function EvaluatorDetailPage({
           ) : (
             <p className="text-red-500">Configuration parsing error</p>
           )}
-        </div>
+        </Card>
       </div>
     );
   } catch (error) {

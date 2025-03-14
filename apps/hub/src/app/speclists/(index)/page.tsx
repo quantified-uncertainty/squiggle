@@ -2,6 +2,7 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
+import { Card } from "@/components/ui/Card";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
 import { getAllSpecLists } from "@/evals/data/specLists";
@@ -17,12 +18,12 @@ export default async function SpecListsPage() {
   return (
     <div>
       {specLists.length === 0 ? (
-        <div className="rounded-lg bg-white shadow-md">
-          <div className="p-6 text-center text-gray-500">
+        <Card theme="big">
+          <div className="text-center text-gray-500">
             No spec lists found. Create one by running the add-speclist.ts
             script.
           </div>
-        </div>
+        </Card>
       ) : (
         <Table>
           <Table.Header>

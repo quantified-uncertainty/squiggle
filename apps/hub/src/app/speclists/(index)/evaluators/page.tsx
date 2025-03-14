@@ -3,6 +3,7 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
+import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getAllEvaluators } from "@/evals/data/evaluators";
@@ -22,11 +23,11 @@ export default async function EvaluatorsPage() {
       </div>
 
       {evaluators.length === 0 ? (
-        <div className="rounded-lg bg-white shadow-md">
-          <div className="p-6 text-center text-gray-500">
+        <Card theme="big">
+          <div className="text-center text-gray-500">
             {`No evaluators found. Use the "Create Evaluator" button to add one.`}
           </div>
-        </div>
+        </Card>
       ) : (
         <Table>
           <Table.Header>
