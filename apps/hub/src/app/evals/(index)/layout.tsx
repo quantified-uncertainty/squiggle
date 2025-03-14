@@ -17,8 +17,8 @@ export default async function FrontPageLayout({ children }: PropsWithChildren) {
     <div>
       <div className="flex items-center gap-2">
         <StyledTabLinkList>
-          <StyledTabLink name="Spec Lists" href={speclistsRoute()} prefetch />
           <StyledTabLink name="Evals" href={evaluationsRoute()} prefetch />
+          <StyledTabLink name="Spec Lists" href={speclistsRoute()} prefetch />
           <StyledTabLink
             name="Eval Runners"
             href={evalRunnersRoute()}

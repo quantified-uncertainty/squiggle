@@ -46,6 +46,12 @@ const InnerAdminControls: FC = () => {
             title="Admin Console"
             close={close}
           />
+          <DropdownMenuNextLinkItem
+            href="/speclists"
+            icon={ExternalLinkIcon}
+            title="Evals"
+            close={close}
+          />
         </DropdownMenu>
       )}
     >

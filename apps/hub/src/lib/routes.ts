@@ -228,29 +228,29 @@ export function groupInviteLink(params: {
 }
 
 export function speclistsRoute() {
-  return "/speclists";
+  return "/evals/speclists";
 }
 
 export function speclistRoute({ id }: { id: string }) {
-  return `/speclists/${id}`;
+  return `/evals/speclists/${id}`;
 }
 
 export function createSpecListRoute() {
-  return "/speclists/create";
+  return "/evals/speclists/create";
 }
 
 export function evaluationsRoute() {
-  return "/speclists/evals";
+  return "/evals";
 }
 
 export function evaluationRoute({ id }: { id: string }) {
-  return `/speclists/evals/${id}`;
+  return `/evals/eval/${id}`;
 }
 
 export function evalRunnersRoute() {
-  return "/speclists/eval-runners";
+  return "/evals/eval-runners";
 }
 
 export function evalRunnerRoute({ id }: { id: string }) {
-  return `/speclists/eval-runners/${id}`;
+  return `/evals/eval-runners/${id}`;
 }

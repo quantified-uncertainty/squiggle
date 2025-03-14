@@ -18,17 +18,17 @@ export default async function SpecListsLayout({ children }: PropsWithChildren) {
       <div className="mb-6">
         <H1 size="large">
           <Link
-            href={speclistsRoute()}
-            className="text-gray-600 hover:underline"
-          >
-            Specs
-          </Link>{" "}
-          &{" "}
-          <Link
             href={evaluationsRoute()}
             className="text-gray-600 hover:underline"
           >
             Evals
+          </Link>{" "}
+          &{" "}
+          <Link
+            href={speclistsRoute()}
+            className="text-gray-600 hover:underline"
+          >
+            Spec Lists
           </Link>{" "}
           &{" "}
           <Link
