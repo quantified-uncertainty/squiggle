@@ -3,6 +3,8 @@
 import { format } from "date-fns";
 import React from "react";
 
+import { Table } from "@quri/ui";
+
 import { StyledLink } from "@/components/ui/StyledLink";
 import { evaluationRoute, evaluatorRoute, speclistRoute } from "@/lib/routes";
 
@@ -36,79 +38,62 @@ export function EvaluationsTable({
   };
 
   return (
-    <table className="min-w-full">
-      <thead>
-        <tr className="border-b bg-gray-50">
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            ID
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            Created
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            Evaluator
-          </th>
-          {showSpecList && (
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              Spec List
-            </th>
-          )}
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            Results Count
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            Total Cost
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            LLM Runs
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-            Actions
-          </th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200 bg-white">
+    <Table>
+      <Table.Header>
+        <Table.HeaderCell>ID</Table.HeaderCell>
+        <Table.HeaderCell>Created</Table.HeaderCell>
+        <Table.HeaderCell>Evaluator</Table.HeaderCell>
+        {showSpecList && <Table.HeaderCell>Spec List</Table.HeaderCell>}
+        <Table.HeaderCell>Results Count</Table.HeaderCell>
+        <Table.HeaderCell>Total Cost</Table.HeaderCell>
+        <Table.HeaderCell>LLM Runs</Table.HeaderCell>
+        <Table.HeaderCell>Actions</Table.HeaderCell>
+      </Table.Header>
+      <Table.Body>
         {evaluations.map((evaluation) => (
-          <tr key={evaluation.id} className="hover:bg-gray-50">
-            <td className="whitespace-nowrap px-6 py-4 text-sm">
-              <StyledLink href={evaluationRoute({ id: evaluation.id })}>
+          <Table.Row key={evaluation.id}>
+            <Table.Cell>
+              <StyledLink
+                href={evaluationRoute({ id: evaluation.id })}
+                className="text-sm"
+              >
                 {evaluation.id}
               </StyledLink>
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            </Table.Cell>
+            <Table.Cell theme="text">
               {format(new Date(evaluation.createdAt), "MMM d, yyyy h:mm a")}
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            </Table.Cell>
+            <Table.Cell>
               <StyledLink
                 href={evaluatorRoute({ id: evaluation.evaluator.id })}
+                className="text-sm"
               >
                 {evaluation.evaluator.name}
               </StyledLink>
-            </td>
+            </Table.Cell>
             {showSpecList && evaluation.specList && (
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+              <Table.Cell>
                 <StyledLink
                   href={speclistRoute({ id: evaluation.specList.id })}
+                  className="text-sm"
                 >
                   {evaluation.specList.name}
                 </StyledLink>
-              </td>
+              </Table.Cell>
             )}
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            <Table.Cell theme="text">
               {evaluation._count.evalResults}
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            </Table.Cell>
+            <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+            </Table.Cell>
+            <Table.Cell theme="text">
               {formatRunCount(evaluation.metrics?.llmRunCount)}
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-              (none)
-            </td>
-          </tr>
+            </Table.Cell>
+            <Table.Cell theme="text">(none)</Table.Cell>
+          </Table.Row>
         ))}
-      </tbody>
-    </table>
+      </Table.Body>
+    </Table>
   );
 }
