@@ -7,3 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo ${{ secrets.GITHUB_TOKEN }} | wc
+
+  prod_secrets:
+    environment: Production
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ secrets.DATABASE_DIRECT_URL }} | wc
+
+  preview_secrets:
+    environment: Preview
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ secrets.DATABASE_DIRECT_URL }} | wc
