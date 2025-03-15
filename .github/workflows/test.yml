@@ -1,0 +1,9 @@
+name: Test actions
+
+on: pull_request
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ secrets.GITHUB_TOKEN }} | wc
