@@ -13,6 +13,8 @@ import {
   useToast,
 } from "@quri/ui";
 
+import { evaluationsRoute } from "@/lib/routes";
+
 import { DropdownMenuNextLinkItem } from "../ui/DropdownMenuNextLinkItem";
 import { AdminContext } from "./AdminProvider";
 
@@ -47,7 +49,7 @@ const InnerAdminControls: FC = () => {
             close={close}
           />
           <DropdownMenuNextLinkItem
-            href="/speclists"
+            href={evaluationsRoute()}
             icon={ExternalLinkIcon}
             title="Evals"
             close={close}
