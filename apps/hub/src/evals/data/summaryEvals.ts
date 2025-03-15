@@ -78,6 +78,11 @@ const select = {
     select: {
       id: true,
       name: true,
+      _count: {
+        select: {
+          specs: true,
+        },
+      },
     },
   },
   _count: {
@@ -112,9 +117,10 @@ export type EvaluationSummaryDTO = {
     id: string;
     name: string;
   };
-  specList?: {
+  specList: {
     id: string;
     name: string;
+    specCount: number;
   };
   _count: {
     results: number;
@@ -130,7 +136,11 @@ function evalSummaryToDTO(dbEval: DbEvalSummary): EvaluationSummaryDTO {
     state: dbEval.state,
     errorMsg: dbEval.errorMsg,
     runner: dbEval.runner,
-    specList: dbEval.specList,
+    specList: {
+      id: dbEval.specList.id,
+      name: dbEval.specList.name,
+      specCount: dbEval.specList._count.specs,
+    },
     _count: dbEval._count,
     metrics,
   };

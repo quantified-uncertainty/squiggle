@@ -28,9 +28,9 @@ export const evaluationSelectWithDetails = {
     select: {
       id: true,
       name: true,
-      specs: {
+      _count: {
         select: {
-          spec: true,
+          specs: true,
         },
       },
     },
@@ -71,6 +71,7 @@ export type EvalWithDetailsDTO = {
   specList: {
     id: string;
     name: string;
+    specCount: number;
   };
   results: {
     id: string;
@@ -99,7 +100,11 @@ function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
     state: dbEval.state,
     errorMsg: dbEval.errorMsg,
     runner: dbEval.runner,
-    specList: dbEval.specList,
+    specList: {
+      id: dbEval.specList.id,
+      name: dbEval.specList.name,
+      specCount: dbEval.specList._count.specs,
+    },
     results: dbEval.results.map((result) => ({
       id: result.id,
       code: result.code,

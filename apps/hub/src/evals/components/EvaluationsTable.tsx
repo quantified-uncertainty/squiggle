@@ -89,7 +89,9 @@ export function EvaluationsTable({
                 </StyledLink>
               </Table.Cell>
             )}
-            <Table.Cell theme="text">{evaluation._count.results}</Table.Cell>
+            <Table.Cell theme="text">
+              {evaluation._count.results} / {evaluation.specList.specCount}
+            </Table.Cell>
             <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}
             </Table.Cell>

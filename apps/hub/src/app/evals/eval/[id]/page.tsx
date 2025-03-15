@@ -78,7 +78,7 @@ export default async function EvalDetailPage({
           />
           <KeyValue
             name="Results"
-            value={evaluation.results.length.toString()}
+            value={`${evaluation.results.length} / ${evaluation.specList.specCount}`}
           />
           <KeyValue
             name="State"
