@@ -10,6 +10,7 @@ for (const name of [
     platform: "node",
     format: "esm",
     sourcemap: true,
+    // temporarily disabled for the sake of debugging; not a big deal on server either way
     // minify: true,
     bundle: true,
     // via https://github.com/evanw/esbuild/pull/2067#issuecomment-1073039746
