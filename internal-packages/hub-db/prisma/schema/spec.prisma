@@ -1,0 +1,126 @@
+// "Spec" == "Definition" == "Question", a node in the ontology graph that can be responded to with a value.
+model Spec {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    description String
+
+    specLists   SpecsOnSpecLists[]
+    evalResults EvalResult[]
+}
+
+model SpecList {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    specs       SpecsOnSpecLists[]
+    evaluations Evaluation[]
+}
+
+model SpecsOnSpecLists {
+    id String @id @default(cuid())
+
+    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
+    specId String
+
+    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
+    specListId String
+
+    @@unique([specId, specListId])
+    @@index([specId])
+    @@index([specListId])
+}
+
+enum EvaluationState {
+    Pending
+    Running
+    Completed
+    Failed
+
+    @@map("EvalState")
+}
+
+// "Evaluation" is a shorthand for "collection of EvalResults on a SpecList"
+// In the codebase, we use "Evaluation" instead of shorter "Eval", because `eval` is a reserved word in JavaScript.
+model Evaluation {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    state    EvaluationState @default(Pending)
+    errorMsg String? // Optional error message when state is 'Failed'
+
+    // metadata about the runner that was used
+    runner   EvalRunner @relation(fields: [runnerId], references: [id])
+    runnerId String
+
+    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
+    specListId String
+
+    results EvalResult[]
+
+    @@map("Eval")
+}
+
+/**
+ * EvalResult is similar to the `Variable` table or to the `Model` table.
+ * For the sake of simplicity, we assume that its value is the end expression of the Squiggle code.
+ * In the future it should be merged with them somehow.
+ * ---
+ * Note that it's not AI-specific: its `workflow` reference is optional.
+ */
+model EvalResult {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
+    specId String
+
+    /**
+     * All eval results are Squiggle models.
+     * Simple approach, Squiggle code is copy-pasted here from AiWorkflow outputs.
+     * Ideally, we should store each result as a Model or a Variable table. But that part of codebase is too complicated to bother for now, because of revisions.
+     */
+    code String
+
+    eval   Evaluation @relation(fields: [evalId], references: [id])
+    evalId String
+
+    workflowId String?     @unique
+    workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
+
+    @@unique([specId, evalId])
+}
+
+enum EvalRunnerType {
+    SquiggleAI
+}
+
+/**
+ * EvalRunners are the configurations that produce evaluations.
+ * The main kind of eval runner is Squiggle AI runner, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
+ */
+model EvalRunner {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    type EvalRunnerType @default(SquiggleAI)
+
+    // Untyped, for now; validated by zod in the codebase.
+    // For AI, this should contain `LlmConfig` object.
+    config      Json
+    evaluations Evaluation[]
+}

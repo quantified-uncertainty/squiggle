@@ -29,8 +29,11 @@ export function getPlaygroundUrl({
   code,
   version,
   showSummary,
-}: PlaygroundParams): URL {
-  const url = new URL("https://squiggle-language.com/playground");
+  baseUrl = "https://squiggle-language.com/playground",
+}: PlaygroundParams & {
+  baseUrl?: string;
+}): URL {
+  const url = new URL(baseUrl);
   if (version) {
     url.searchParams.set("v", version);
   }

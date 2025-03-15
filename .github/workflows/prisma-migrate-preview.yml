@@ -27,7 +27,7 @@ jobs:
             exit 0
           fi
 
-          git diff --name-only origin/${{ github.base_ref }} HEAD | grep -q "apps/hub/prisma/schema.prisma" && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
+          git diff --name-only origin/${{ github.base_ref }} HEAD | grep -q "internal-packages/hub-db/prisma/schema.prisma" && echo "changed=true" >> $GITHUB_OUTPUT || echo "changed=false" >> $GITHUB_OUTPUT
 
   migrate-hub:
     needs: check-changes
@@ -49,7 +49,7 @@ jobs:
         run: pnpm install
 
       - name: Migrate Hub
-        working-directory: ./apps/hub
+        working-directory: ./internal-packages/hub-db
         env:
           DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
         run: npx prisma migrate deploy

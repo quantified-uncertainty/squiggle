@@ -21,7 +21,15 @@ export async function GET(request: NextRequest) {
 
   const code = model.currentRevision.squiggleSnippet.code;
 
-  return Response.json({
-    code,
-  });
+  return Response.json(
+    {
+      code,
+    },
+    {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+      },
+    }
+  );
 }

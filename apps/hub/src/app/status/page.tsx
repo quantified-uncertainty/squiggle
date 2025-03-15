@@ -1,29 +1,37 @@
 import { Metadata } from "next";
 import { FC } from "react";
 
+import { Table } from "@quri/ui";
+
 import { getGlobalStatistics } from "@/lib/server/globalStatistics";
 
 const StatRow: FC<{ name: string; value: number }> = ({ name, value }) => (
-  <tr className="border">
-    <td className="p-4 font-bold">{name}</td>
-    <td className="p-4">{value}</td>
-  </tr>
+  <Table.Row>
+    <Table.Cell>
+      <div className="font-bold">{name}</div>
+    </Table.Cell>
+    <Table.Cell>{value}</Table.Cell>
+  </Table.Row>
 );
 
 export default async function OuterFrontPage() {
   const stats = await getGlobalStatistics();
 
   return (
-    <table className="mt-8 table-auto bg-white">
-      <tbody>
+    <Table>
+      <Table.Header>
+        <Table.HeaderCell>Entity Type</Table.HeaderCell>
+        <Table.HeaderCell>Count</Table.HeaderCell>
+      </Table.Header>
+      <Table.Body>
         <StatRow name="Users" value={stats.users} />
         <StatRow name="Models" value={stats.models} />
         <StatRow
           name="Relative Values Definitions"
           value={stats.relativeValuesDefinitions}
         />
-      </tbody>
-    </table>
+      </Table.Body>
+    </Table>
   );
 }
 

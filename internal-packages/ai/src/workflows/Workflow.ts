@@ -1,4 +1,5 @@
 import { ReadableStream } from "stream/web";
+import { z } from "zod";
 
 import { generateSummary } from "../generateSummary.js";
 import { calculatePriceMultipleCalls, LLMClient } from "../LLMClient/index.js";
@@ -6,7 +7,7 @@ import { LlmMetrics, Message } from "../LLMClient/types.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
-import { LlmId } from "../modelConfigs.js";
+import { LlmId, MODEL_CONFIGS } from "../modelConfigs.js";
 import {
   AiDeserializationVisitor,
   AiSerializationVisitor,
@@ -26,14 +27,16 @@ import {
   type WorkflowTemplate,
 } from "./WorkflowTemplate.js";
 
-export type LlmConfig = {
-  llmId: LlmId;
-  priceLimit: number;
-  durationLimitMinutes: number;
-  messagesInHistoryToKeep: number;
-  numericSteps: number;
-  styleGuideSteps: number;
-};
+export const llmConfigSchema = z.object({
+  llmId: z.enum(MODEL_CONFIGS.map((m) => m.id) as [LlmId, ...LlmId[]]),
+  priceLimit: z.number().min(0),
+  durationLimitMinutes: z.number().min(0),
+  messagesInHistoryToKeep: z.number().int().min(0),
+  numericSteps: z.number().int().min(0),
+  styleGuideSteps: z.number().int().min(0),
+});
+
+export type LlmConfig = z.infer<typeof llmConfigSchema>;
 
 export const llmConfigDefault: LlmConfig = {
   llmId: "Claude-Sonnet",

@@ -1,6 +1,7 @@
 import * as fs from "fs";
 
-import { fetchCodeFromHub, fetchGroupModels } from "../squiggleHubHelpers.js";
+import { hubApi } from "@quri/hub-api-client";
+
 import { examplesToImport } from "./favoriteExamples.js";
 
 interface ProcessedModel {
@@ -31,7 +32,7 @@ function processModel(code: string): ProcessedModel {
 async function fetchAndProcessGroupModels(
   groupSlug: string
 ): Promise<ProcessedModel[]> {
-  const rawModels = await fetchGroupModels(groupSlug);
+  const rawModels = await hubApi.getGroupModelSlugs(groupSlug);
   return rawModels.map(processModel);
 }
 
@@ -95,7 +96,7 @@ async function processFavoriteExamples(): Promise<ProcessedModel[]> {
   for (const example of examplesToImport) {
     const [owner, slug] = example.id.split("/");
     try {
-      const code = await fetchCodeFromHub(owner, slug);
+      const code = await hubApi.getModelCode(owner, slug);
       processedExamples.push({
         prompt: example.prompt,
         response: code.trim(),

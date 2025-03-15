@@ -34,7 +34,7 @@ jobs:
         run: pnpm install
 
       - name: Migrate Hub
-        working-directory: ./apps/hub
+        working-directory: ./internal-packages/hub-db
         env:
           DATABASE_URL: "${{ secrets.DATABASE_DIRECT_URL }}"
         run: npx prisma migrate deploy
