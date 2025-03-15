@@ -22,17 +22,7 @@ jobs:
       group: ci-build-test-lint-${{ github.ref }}
       cancel-in-progress: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/install
 
       - name: Turbo run
         run: npx turbo run build test lint --env-mode=loose
