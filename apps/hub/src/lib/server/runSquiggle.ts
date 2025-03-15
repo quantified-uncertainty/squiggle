@@ -42,6 +42,8 @@ type SquiggleOutput = {
 );
 
 // Note that this linker is different from the one in @quri/hub-linker: it loads models directly from the database.
+// TODO : explore the possibility of implementing an alternative API client that supports `HubApiClient` interface but requests models from the database.
+// If we had such a client, we could parameterize the linker with it.
 const squiggleLinker: SqLinker = {
   resolve(name) {
     return name;
