@@ -1,4 +1,4 @@
-import { Prisma } from "@quri/hub-db";
+import { EvaluationState, Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
@@ -15,6 +15,8 @@ export const evaluationSelectWithDetails = {
   id: true,
   createdAt: true,
   updatedAt: true,
+  state: true,
+  errorMsg: true,
   runner: {
     select: {
       id: true,
@@ -59,6 +61,8 @@ export type EvalWithDetailsDTO = {
   id: string;
   createdAt: Date;
   updatedAt: Date;
+  state: EvaluationState;
+  errorMsg: string | null;
   runner: {
     id: string;
     name: string;
@@ -92,6 +96,8 @@ function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
     id: dbEval.id,
     createdAt: dbEval.createdAt,
     updatedAt: dbEval.updatedAt,
+    state: dbEval.state,
+    errorMsg: dbEval.errorMsg,
     runner: dbEval.runner,
     specList: dbEval.specList,
     results: dbEval.results.map((result) => ({

@@ -5,8 +5,10 @@ import React from "react";
 import { Table } from "@quri/ui";
 
 import { Card } from "@/components/ui/Card";
+import { H2 } from "@/components/ui/Headers";
 import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
+import { EvaluationStateDisplay } from "@/evals/components/EvaluationStateDisplay";
 import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/detailsEvals";
 import { evalRunnerRoute, evaluationsRoute, speclistRoute } from "@/lib/routes";
 
@@ -40,7 +42,7 @@ export default async function EvalDetailPage({
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Evaluation: {evaluation.id}</h2>
+        <H2>{evaluation.id}</H2>
         <StyledLink href={evaluationsRoute()}>← Back to Evaluations</StyledLink>
       </div>
 
@@ -77,6 +79,15 @@ export default async function EvalDetailPage({
           <KeyValue
             name="Results"
             value={evaluation.results.length.toString()}
+          />
+          <KeyValue
+            name="State"
+            value={
+              <EvaluationStateDisplay
+                state={evaluation.state}
+                errorMsg={evaluation.errorMsg}
+              />
+            }
           />
         </div>
       </Card>
