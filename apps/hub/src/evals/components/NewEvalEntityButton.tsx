@@ -8,12 +8,11 @@ import { LinkButton } from "@/components/ui/LinkButton";
 import { CreateEvalRunnerButton } from "@/evals/components/CreateEvalRunnerButton";
 import { createSpecListRoute } from "@/lib/routes";
 
-export const NewEntityButton: FC = () => {
+export const NewEvalEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
 
   switch (segment) {
-    case null:
-      // default - speclists
+    case "speclists":
       return (
         <LinkButton href={createSpecListRoute()}>
           <div className="flex items-center gap-1">
@@ -24,5 +23,7 @@ export const NewEntityButton: FC = () => {
       );
     case "eval-runners":
       return <CreateEvalRunnerButton />;
+    default:
+      return null;
   }
 };

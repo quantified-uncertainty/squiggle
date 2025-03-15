@@ -4,7 +4,6 @@ import React from "react";
 import { Table } from "@quri/ui";
 
 import { Card } from "@/components/ui/Card";
-import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getAllEvalRunners } from "@/evals/data/evalRunners";
 import { evalRunnerRoute } from "@/lib/routes";
@@ -18,10 +17,6 @@ export default async function EvalRunnersPage() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <H2>Eval Runners</H2>
-      </div>
-
       {runners.length === 0 ? (
         <Card theme="big">
           <div className="text-center text-gray-500">
