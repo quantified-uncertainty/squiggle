@@ -8,18 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: Preview
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/install
 
       - name: Reset
         working-directory: ./apps/hub

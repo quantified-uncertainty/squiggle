@@ -23,19 +23,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js 18.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/install
 
       - name: Build changelog script
         working-directory: internal-packages/ops
