@@ -31,8 +31,6 @@ const schema = z.object({
   code: z.string().optional(),
 });
 
-// This action is tightly coupled with the form in NewModel.tsx.
-// In particular, it uses the default code, and redirects to the newly created model.
 export const createModelAction = actionClient
   .schema(schema)
   .action(async ({ parsedInput: input }) => {

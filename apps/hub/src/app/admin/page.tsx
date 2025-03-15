@@ -9,6 +9,9 @@ export default async function OuterAdminPage() {
     <div className="flex flex-col gap-2">
       <StyledLink href="/admin/search">Search</StyledLink>
       <StyledLink href="/admin/upgrade-versions">Upgrade versions</StyledLink>
+      {process.env.NODE_ENV === "development" && (
+        <StyledLink href="/admin/seed">Seed database</StyledLink>
+      )}
     </div>
   );
 }

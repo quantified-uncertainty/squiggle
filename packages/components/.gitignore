@@ -6,6 +6,5 @@
 # misc
 npm-debug.log*
 storybook-static
-dist
 
 /.vscode

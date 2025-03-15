@@ -1,7 +1,7 @@
 import "server-only";
 
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import NextAuth, { NextAuthConfig } from "next-auth";
+import NextAuth, { NextAuthConfig, NextAuthResult, Session } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import { Provider } from "next-auth/providers/index";
 import Resend from "next-auth/providers/resend";
@@ -9,6 +9,8 @@ import { cache } from "react";
 
 import { prisma } from "@/lib/server/prisma";
 import { indexUserId } from "@/search/helpers";
+
+import { CLI_MODE } from "../constants";
 
 function buildAuthConfig(): NextAuthConfig {
   const providers: Provider[] = [];
@@ -66,7 +68,58 @@ function buildAuthConfig(): NextAuthConfig {
   return config;
 }
 
-const nextAuth = NextAuth(buildAuthConfig());
+function makeAuth(): NextAuthResult {
+  const makeCliMock = (name: string) => () => {
+    throw new Error(`${name} is not supported in CLI mode`);
+  };
+
+  if (CLI_MODE) {
+    // This code doesn't guarantee that CLI scripts will always work, but in basic cases it has a decent chance.
+    // See also: `docs/cli.md` file.
+    const cliUserEmail = process.env["CLI_USER_EMAIL"];
+    return {
+      auth: (async (): Promise<Session | null> => {
+        if (!cliUserEmail) {
+          return null;
+        }
+        const user = await prisma.user.findUnique({
+          where: {
+            email: cliUserEmail,
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            emailVerified: true,
+            image: true,
+            asOwner: {
+              select: {
+                slug: true,
+              },
+            },
+          },
+        });
+        return {
+          user: {
+            ...user,
+            username: user?.asOwner?.slug,
+          },
+          expires: new Date(Date.now() + 86400 * 1000 * 365).toISOString(),
+        } satisfies Session;
+      }) as any,
+      signIn: makeCliMock("signIn"),
+      signOut: makeCliMock("signOut"),
+      handlers: {
+        GET: makeCliMock("GET"),
+        POST: makeCliMock("POST"),
+      },
+      unstable_update: makeCliMock("unstable_update"),
+    };
+  }
+  return NextAuth(buildAuthConfig());
+}
+
+const nextAuth = makeAuth();
 export const { handlers, signIn, signOut } = nextAuth;
 
 // current next-auth v5 beta doesn't cache the session, unsure if intentionally

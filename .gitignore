@@ -1,5 +1,8 @@
 node_modules
+dist
 .cache
+.env*
+.next
 .DS_Store
 **/.sync.ffs_db
 .direnv

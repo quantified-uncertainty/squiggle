@@ -127,3 +127,5 @@ export {
 } from "./components/TailwindProvider.js";
 
 export { generateProvider } from "./generateProvider.js";
+
+export { Table } from "./components/Table/Table.js";

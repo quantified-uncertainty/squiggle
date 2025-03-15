@@ -226,3 +226,31 @@ export function groupInviteLink(params: {
     slug: params.groupSlug,
   })}/invite-link?token=${token}`;
 }
+
+export function speclistsRoute() {
+  return "/evals/speclists";
+}
+
+export function speclistRoute({ id }: { id: string }) {
+  return `/evals/speclists/${id}`;
+}
+
+export function createSpecListRoute() {
+  return "/evals/speclists/create";
+}
+
+export function evaluationsRoute() {
+  return "/evals";
+}
+
+export function evaluationRoute({ id }: { id: string }) {
+  return `/evals/eval/${id}`;
+}
+
+export function evalRunnersRoute() {
+  return "/evals/eval-runners";
+}
+
+export function evalRunnerRoute({ id }: { id: string }) {
+  return `/evals/eval-runners/${id}`;
+}

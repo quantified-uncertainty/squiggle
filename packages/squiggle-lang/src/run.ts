@@ -1,5 +1,5 @@
 import { defaultEnv, Env } from "./dists/env.js";
-import { defaultLinker } from "./public/SqLinker.js";
+import { defaultLinker, SqLinker } from "./public/SqLinker.js";
 import { SqProject } from "./public/SqProject/index.js";
 import { SqModule } from "./public/SqProject/SqModule.js";
 import { SqModuleOutput } from "./public/SqProject/SqModuleOutput.js";
@@ -9,11 +9,12 @@ export async function run(
   code: string,
   options?: {
     environment?: Env;
+    linker?: SqLinker;
   }
 ): Promise<SqModuleOutput> {
   const project = new SqProject({
     environment: options?.environment ?? defaultEnv,
-    linker: defaultLinker,
+    linker: options?.linker ?? defaultLinker,
   });
 
   project.setHead("root", {

@@ -11,6 +11,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: registry.k8s.quantifieduncertainty.org
   REGISTRY_USERNAME: quri
@@ -44,7 +48,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+          # no need for pnpm cache, we only install turbo-ignore
+          # cache: pnpm
 
       - name: Install turbo-ignore
         run: pnpm install -g turbo-ignore@2.4.0

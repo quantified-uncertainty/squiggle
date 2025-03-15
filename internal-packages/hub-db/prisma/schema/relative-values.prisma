@@ -1,0 +1,83 @@
+// Definitions are polymorphic, but organized differently from Models, without content types.
+// Reasoning: https://github.com/quantified-uncertainty/squiggle/issues/1828#issuecomment-1563596166
+model RelativeValuesDefinition {
+    id String @id @default(cuid())
+
+    slug String @db.Citext
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    owner   Owner  @relation(fields: [ownerId], references: [id])
+    ownerId String
+
+    // technically nullable, but won't ever be null in practice after the initial migration
+    currentRevision   RelativeValuesDefinitionRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+    currentRevisionId String?                           @unique
+
+    revisions RelativeValuesDefinitionRevision[]
+
+    modelExports RelativeValuesExport[]
+    searchable   Searchable?
+
+    @@unique([slug, ownerId])
+    @@index([createdAt])
+    @@index([ownerId])
+}
+
+model RelativeValuesDefinitionRevision {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+
+    definition   RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+    definitionId String
+
+    title String
+
+    items           Json
+    clusters        Json
+    recommendedUnit String?
+
+    // required by Prisma, but unused since `model` field should point at the same entity
+    relativeValuesDefinition RelativeValuesDefinition? @relation("CurrentRevision")
+
+    @@index([definitionId])
+}
+
+// Note that model revisions are associated with definitions (and not definition revisions).
+// Associating model revisions with definition revisions would be better, but it's more complicated.
+model RelativeValuesExport {
+    id String @id @default(cuid())
+
+    modelRevision   ModelRevision            @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+    modelRevisionId String
+    definition      RelativeValuesDefinition @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+    definitionId    String
+
+    variableName String
+
+    cache RelativeValuesPairCache[]
+
+    @@unique([modelRevisionId, definitionId, variableName], name: "uniqueKey")
+    @@index([modelRevisionId]) // duplicates the @@unique above and probably not necessary, but doesn't hurt
+    @@index([definitionId])
+}
+
+model RelativeValuesPairCache {
+    id String @id @default(cuid())
+
+    export   RelativeValuesExport @relation(fields: [exportId], references: [id], onDelete: Cascade)
+    exportId String
+
+    firstItem  String
+    secondItem String
+
+    error String?
+
+    // { median, mean, min, max, uncertainty } object.
+    // Maybe this should be split into postgres columns later.
+    result Json?
+
+    @@index([exportId])
+}

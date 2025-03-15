@@ -1,0 +1,70 @@
+model Group {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships UserGroupMembership[]
+  invites     GroupInvite[]
+
+  asOwner Owner  @relation(fields: [ownerId], references: [id])
+  ownerId String @unique
+
+  reusableInviteToken String?
+
+  searchable Searchable?
+}
+
+enum MembershipRole {
+  Admin
+  Member
+}
+
+model UserGroupMembership {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role MembershipRole
+
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
+}
+
+enum GroupInviteStatus {
+  Pending
+  Accepted
+  Declined
+  Canceled
+}
+
+model GroupInvite {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Polymorphic, one and only one of `userId` and `email` must be set; type safety guaranteed by GraphQL code.
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String?
+
+  email String?
+
+  role MembershipRole
+
+  status      GroupInviteStatus @default(Pending)
+  processedAt DateTime?
+
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId String
+
+  @@index([groupId])
+  @@index([userId])
+}
