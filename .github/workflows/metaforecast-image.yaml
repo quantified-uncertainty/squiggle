@@ -100,17 +100,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built.
-      # It increases supply chain security for people who consume the image.
-      # For more information, see https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds
-      - name: Generate artifact attestation
-        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
-
   update-image-tag:
     needs: build-and-push-image
     runs-on: ubuntu-latest
