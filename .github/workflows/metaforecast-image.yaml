@@ -137,4 +137,5 @@ jobs:
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
           curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
           argocd app set metaforecast --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
