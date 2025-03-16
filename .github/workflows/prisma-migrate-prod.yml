@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: Production
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install
 
       - name: Migrate Metaforecast

@@ -9,6 +9,7 @@ on:
 # Note: we don't have a metaforecast db in preview environment, so we don't need to migrate it.
 
 jobs:
+  # TODO - use `on:` condition instead of manual `git diff` check
   check-changes:
     if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
@@ -35,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: Preview
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/install
 
       - name: Migrate Hub
