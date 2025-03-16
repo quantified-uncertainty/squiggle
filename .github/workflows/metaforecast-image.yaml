@@ -131,13 +131,10 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           repository: ${{ github.repository_owner }}/ops
 
-      - name: Commit new image tag to ops repo
+      - name: Update image.tag helm var
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ARGOCD_SERVER: argo.k8s.quantifieduncertainty.org
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          echo -e "image:\n  tag: ${{ needs.build-and-push-image.outputs.image-tag }}" >./k8s/tags/metaforecast.yaml
-          git config --global user.email "ops@quantifieduncertainty.org"
-          git config --global user.name "GitHub Actions"
-          git add .
-          git commit -m 'Update image tag'
-          git push origin master
+          curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+          argocd app set metaforecast --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
