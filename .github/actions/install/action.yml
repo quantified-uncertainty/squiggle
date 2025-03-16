@@ -1,0 +1,23 @@
+name: Install Squiggle monorepo
+description: Prepare Squiggle monorepo for workflows
+
+inputs:
+  fetch-depth:
+    description: "Fetch depth for checkout"
+    required: false
+    default: "1"
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v4
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - name: Install dependencies
+      run: pnpm install
+      shell: bash

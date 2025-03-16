@@ -9,6 +9,7 @@ on:
 # Note: we don't have a metaforecast db in preview environment, so we don't need to migrate it.
 
 jobs:
+  # TODO - use `on:` condition instead of manual `git diff` check
   check-changes:
     if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
@@ -36,17 +37,7 @@ jobs:
     environment: Preview
     steps:
       - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: ./.github/actions/install
 
       - name: Migrate Hub
         working-directory: ./apps/hub

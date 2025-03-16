@@ -11,6 +11,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: registry.k8s.quantifieduncertainty.org
   REGISTRY_USERNAME: quri
@@ -44,7 +48,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+          # no need for pnpm cache, we only install turbo-ignore
+          # cache: pnpm
 
       - name: Install turbo-ignore
         run: pnpm install -g turbo-ignore@2.4.0
@@ -109,30 +114,14 @@ jobs:
   update-image-tag:
     needs: build-and-push-image
     runs-on: ubuntu-latest
-    if: needs.build-and-push-image.outputs.should-build
+    if: needs.build-and-push-image.outputs.should-build == 'true'
 
     steps:
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ops
-
-      - name: Checkout ops repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ steps.app-token.outputs.token }}
-          repository: ${{ github.repository_owner }}/ops
-
-      - name: Commit new image tag to ops repo
+      - name: Update image.tag helm var
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ARGOCD_SERVER: argo.k8s.quantifieduncertainty.org
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
-          echo -e "image:\n  tag: ${{ needs.build-and-push-image.outputs.image-tag }}" >./k8s/tags/metaforecast.yaml
-          git config --global user.email "ops@quantifieduncertainty.org"
-          git config --global user.name "GitHub Actions"
-          git add .
-          git commit -m 'Update image tag'
-          git push origin master
+          curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+          argocd app set metaforecast --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
