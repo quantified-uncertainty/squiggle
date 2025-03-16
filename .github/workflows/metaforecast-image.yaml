@@ -17,7 +17,7 @@ concurrency:
 
 env:
   REGISTRY: harbor.k8s.quantifieduncertainty.org
-  REGISTRY_USERNAME: for-upload
+  REGISTRY_USERNAME: robot$for-upload
   IMAGE_NAME: metaforecast
   APP_DIR: apps/metaforecast
 
