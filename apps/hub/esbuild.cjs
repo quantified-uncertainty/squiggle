@@ -3,7 +3,6 @@ const esbuild = require("esbuild");
 for (const name of [
   "buildRecentModelRevision/worker",
   "buildRecentModelRevision/main",
-  "print-schema",
 ]) {
   esbuild.buildSync({
     entryPoints: [`./src/scripts/${name}.ts`],
