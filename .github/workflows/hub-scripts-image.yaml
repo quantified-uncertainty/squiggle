@@ -58,7 +58,7 @@ jobs:
       - name: Check if build can be skipped
         id: turbo-ignore
         run: |
-          if turbo-ignore metaforecast; then
+          if turbo-ignore @quri/hub; then
             echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
           else
             echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
