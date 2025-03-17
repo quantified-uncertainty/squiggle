@@ -1,6 +1,7 @@
 "use client";
 import { FC, use } from "react";
 
+import { sqProjectWithHubLinker } from "@quri/hub-linker";
 import {
   defaultSquiggleVersion,
   useAdjustSquiggleVersion,
@@ -10,7 +11,6 @@ import {
 
 import { ModelFullDTO } from "@/models/data/full";
 import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
-import { sqProjectWithHubLinker } from "@/squiggle/linker";
 
 export const UpgradeableModel: FC<{
   model: ModelFullDTO;

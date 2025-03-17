@@ -24,6 +24,7 @@
     "@anthropic-ai/sdk": "^0.29.0",
     "@quri/configs": "workspace:*",
     "@quri/content": "workspace:*",
+    "@quri/hub-api-client": "workspace:^",
     "@quri/prettier-plugin-squiggle": "workspace:*",
     "@quri/serializer": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",

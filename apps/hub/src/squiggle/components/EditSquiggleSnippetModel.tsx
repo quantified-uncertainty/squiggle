@@ -12,6 +12,11 @@ import {
 import { FormProvider, useFieldArray } from "react-hook-form";
 
 import {
+  getHubLinker,
+  parseSourceId,
+  serializeSourceId,
+} from "@quri/hub-linker";
+import {
   DropdownMenuActionItem,
   DropdownMenuHeader,
   LinkIcon,
@@ -41,11 +46,6 @@ import { modelRoute, variableRoute } from "@/lib/routes";
 import { updateSquiggleSnippetModelAction } from "@/models/actions/updateSquiggleSnippetModelAction";
 import { ModelFullDTO } from "@/models/data/full";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
-import {
-  getHubLinker,
-  parseSourceId,
-  serializeSourceId,
-} from "@/squiggle/linker";
 
 import { SaveButton, SaveButtonHandle } from "./SaveButton";
 import {

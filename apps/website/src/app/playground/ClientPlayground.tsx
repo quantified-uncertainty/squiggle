@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { FC, use, useEffect, useState } from "react";
 
+import { getHubLinker } from "@quri/hub-linker";
 import {
   checkSquiggleVersion,
   defaultSquiggleVersion,
@@ -102,6 +103,9 @@ export const ClientPlayground: FC = () => {
           </div>
         )}
         onCodeChange={(code) => updateUrl({ code })}
+        linker={getHubLinker(squiggle, {
+          hubServer: process.env["NEXT_PUBLIC_HUB_SERVER"],
+        })}
         onSettingsChange={(settings) => {
           const showSummary = settings.distributionChartSettings?.showSummary;
           updateUrl({ showSummary });

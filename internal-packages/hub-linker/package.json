@@ -1,0 +1,25 @@
+{
+  "name": "@quri/hub-linker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:ts": "tsc",
+    "build": "pnpm run build:ts"
+  },
+  "dependencies": {
+    "@quri/hub-api-client": "workspace:^",
+    "@quri/versioned-squiggle-components": "workspace:^",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@quri/configs": "workspace:*",
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  }
+}

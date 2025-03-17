@@ -1,7 +1,5 @@
-.DS_Store
 .cpuprofile
 *.cache
-/dist
 *.coverage
 coverage
 .nyc_output/

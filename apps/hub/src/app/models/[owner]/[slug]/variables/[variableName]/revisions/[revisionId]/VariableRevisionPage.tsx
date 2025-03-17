@@ -1,6 +1,7 @@
 "use client";
 import { FC, use } from "react";
 
+import { sqProjectWithHubLinker } from "@quri/hub-linker";
 import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
@@ -8,7 +9,6 @@ import {
   versionSupportsSqPathV2,
 } from "@quri/versioned-squiggle-components";
 
-import { sqProjectWithHubLinker } from "@/squiggle/linker";
 import { VariableRevisionFullDTO } from "@/variables/data/fullVariableRevision";
 
 type SquiggleProps = {

@@ -1,18 +1,11 @@
-import { fromByteArray } from "base64-js";
-import { deflate } from "pako";
 import { FC, Fragment } from "react";
 
 import { NumberShower, SquiggleChart } from "@quri/squiggle-components";
+import { getPlaygroundUrl } from "@quri/versioned-squiggle-components";
 
+import { SQUIGGLE_PLAYGROUND } from "@/lib/constants";
 import { Item } from "@/relative-values/types";
 import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
-
-function codeToPlaygroundUrl(code: string) {
-  const text = JSON.stringify({ initialSquiggleString: code });
-  const HASH_PREFIX = "https://www.squiggle-language.com/playground#code=";
-  const compressed = deflate(text, { level: 9 });
-  return HASH_PREFIX + encodeURIComponent(fromByteArray(compressed));
-}
 
 interface TableRowProps {
   label: string;
@@ -161,7 +154,10 @@ export const ItemSideBar: FC<Props> = ({
         </div>
 
         <a
-          href={codeToPlaygroundUrl(squggleCode)}
+          href={getPlaygroundUrl({
+            code: squggleCode,
+            baseUrl: SQUIGGLE_PLAYGROUND,
+          }).toString()}
           className="text-slate-400 underline"
         >
           Open in Playground

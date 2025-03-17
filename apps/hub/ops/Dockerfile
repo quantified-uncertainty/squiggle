@@ -29,9 +29,6 @@ RUN turbo prune @quri/hub --docker
 FROM base AS runner
 WORKDIR /app
 
-# FIXME - non-production env is needed for the build, add more docker stages?
-# ENV NODE_ENV=production
-
 COPY --from=builder /app/out/json/ .
 # TODO: --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store/v3
 RUN pnpm install --frozen-lockfile
