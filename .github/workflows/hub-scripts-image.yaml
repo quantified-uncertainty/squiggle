@@ -10,9 +10,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - hub-scripts-harbor # temporary - for debugging before merging
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
