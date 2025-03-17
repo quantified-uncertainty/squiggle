@@ -1,0 +1,116 @@
+name: Docker image for Hub scripts
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        type: boolean
+        description: "Force build and push image even when turbo-ignore would skip it"
+        default: false
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: harbor.k8s.quantifieduncertainty.org
+  REGISTRY_USERNAME: robot$for-upload
+  IMAGE_NAME: main/hub-scripts
+  APP_DIR: apps/hub
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    # Allow image push and artifact attestation
+    permissions:
+      packages: write
+      attestations: write
+      id-token: write
+
+    outputs:
+      should-build: ${{ steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force }}
+      image-tag: ${{ steps.meta.outputs.json && format('sha-{0}', fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision']) || '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # for turbo-ignore
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          # no need for pnpm cache, we only install turbo-ignore
+          # cache: pnpm
+
+      - name: Install turbo-ignore
+        run: pnpm install -g turbo-ignore@2.4.0
+
+      # Run turbo-ignore check
+      - name: Check if build can be skipped
+        id: turbo-ignore
+        run: |
+          if turbo-ignore metaforecast; then
+            echo "SHOULD_BUILD=false" >> $GITHUB_OUTPUT
+          else
+            echo "SHOULD_BUILD=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to registry
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ secrets.HARBOR_REGISTRY_PASSWORD }}
+
+      # This step uses [docker/metadata-action](https://github.com/docker/metadata-action#about) to extract tags and labels that will be applied to the specified image. The `id` "meta" allows the output of this step to be referenced in a subsequent step. The `images` value provides the base name for the tags and labels.
+      - name: Extract metadata (tags, labels) for Docker
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+
+      - name: Set up Docker Buildx
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        if: steps.turbo-ignore.outputs.SHOULD_BUILD == 'true' || inputs.force
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ env.APP_DIR }}/ops/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  update-image-tag:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    if: needs.build-and-push-image.outputs.should-build == 'true'
+
+    steps:
+      - name: Update image.tag helm var
+        env:
+          ARGOCD_SERVER: argo.k8s.quantifieduncertainty.org
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+          argocd app set squiggle --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
