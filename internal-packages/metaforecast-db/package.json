@@ -9,7 +9,7 @@
     "build": "pnpm run build:ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.3.1",
+    "@prisma/client": "^6.5.0",
     "prisma": "^6.3.1"
   },
   "devDependencies": {
