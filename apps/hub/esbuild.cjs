@@ -3,14 +3,15 @@ const esbuild = require("esbuild");
 for (const name of [
   "buildRecentModelRevision/worker",
   "buildRecentModelRevision/main",
-  "print-schema",
+  "process-pending-evaluations",
 ]) {
   esbuild.buildSync({
     entryPoints: [`./src/scripts/${name}.ts`],
     platform: "node",
     format: "esm",
     sourcemap: true,
-    minify: true,
+    // temporarily disabled for the sake of debugging; not a big deal on server either way
+    // minify: true,
     bundle: true,
     // via https://github.com/evanw/esbuild/pull/2067#issuecomment-1073039746
     banner: {

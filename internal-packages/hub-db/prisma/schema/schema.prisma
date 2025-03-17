@@ -1,0 +1,11 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../generated"
+  previewFeatures = ["postgresqlExtensions", "fullTextSearchPostgres", "prismaSchemaFolder"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [citext]
+}

@@ -7,45 +7,14 @@ import {
   Workflow,
 } from "@quri/squiggle-ai/server";
 
-import { workflowToV2_0Json } from "@/ai/data/v2_0";
+import { saveWorkflowToDb, updateDbWorkflow } from "@/ai/utils";
 import { auth } from "@/lib/server/auth";
-import { prisma } from "@/lib/server/prisma";
 import { getSelf, isSignedIn } from "@/users/auth";
 
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
 export const maxDuration = 300;
-
-async function updateDbWorkflow(
-  workflow: Workflow<any>,
-  opts: { final?: boolean } = {}
-) {
-  const v2Workflow = workflowToV2_0Json(workflow);
-
-  console.log(
-    `Update workflow ${workflow.id}: ${workflow.getStepCount()} steps, final: ${opts.final ?? false}`
-  );
-  const startTime = Date.now();
-
-  // We were doing both create and update with `upsert`, but Claude recommended to separate them for performance.
-  await prisma.aiWorkflow.update({
-    select: {
-      id: true,
-    },
-    where: {
-      id: workflow.id,
-    },
-    data: {
-      format: "V2_0",
-      workflow: v2Workflow,
-      ...(opts.final && { markdown: workflow.getFinalResult().logSummary }),
-    },
-  });
-  console.log(
-    `Updated workflow ${workflow.id}: ${workflow.getStepCount()} steps, final: ${opts.final ?? false}, ${Date.now() - startTime}ms`
-  );
-}
 
 function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
   // Save workflow to the database on each update.
@@ -65,39 +34,6 @@ function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
   workflow.addEventListener("allStepsFinished", () => {
     updateDbWorkflow(workflow, { final: true });
   });
-}
-
-async function createDbWorkflow(
-  workflow: Workflow<any>,
-  user: Awaited<ReturnType<typeof getSelf>>
-) {
-  const v2Workflow = workflowToV2_0Json(workflow);
-
-  console.log(
-    `Create DB workflow ${workflow.id}: ${workflow.getStepCount()} steps`
-  );
-  const startTime = Date.now();
-
-  // try/catch is not necessary, but Next.js is logging some weird errors that I tried to debug here.
-  // See this thread: https://www.reddit.com/r/nextjs/comments/1gkxdqe/typeerror_the_payload_argument_must_be_of_type/
-  // "Created DB workflow" is logged, though, so it's _probably_ working correctly.
-  try {
-    await prisma.aiWorkflow.create({
-      data: {
-        id: workflow.id,
-        user: {
-          connect: { id: user.id },
-        },
-        format: "V2_0",
-        workflow: v2Workflow,
-      },
-    });
-    console.log(
-      `Created DB workflow ${workflow.id}: ${workflow.getStepCount()} steps, ${Date.now() - startTime}ms`
-    );
-  } catch (error) {
-    console.error(`Error creating DB workflow ${workflow.id}: ${error}`);
-  }
 }
 
 function aiRequestToWorkflow(request: AiRequestBody) {
@@ -154,7 +90,7 @@ export async function POST(req: Request) {
 
     const workflow = aiRequestToWorkflow(request);
 
-    await createDbWorkflow(workflow, user);
+    await saveWorkflowToDb(workflow, user);
 
     saveWorkflowToDbOnUpdates(workflow);
 

@@ -1,0 +1,92 @@
+// Models are polymorphic.
+// Polymorphism schema inspired by https://stackoverflow.com/a/73140073
+enum ModelType {
+    SquiggleSnippet
+}
+
+model Model {
+    id String @id @default(cuid())
+
+    slug String @db.Citext
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    owner   Owner  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String
+
+    isPrivate Boolean @default(false)
+
+    revisions ModelRevision[] @relation("Revisions")
+
+    // technically nullable, but won't ever be null in practice
+    currentRevision   ModelRevision? @relation("CurrentRevision", fields: [currentRevisionId], references: [id])
+    currentRevisionId String?        @unique
+
+    searchable Searchable?
+    variables  Variable[]
+
+    @@unique([slug, ownerId])
+    @@index([createdAt])
+    @@index([ownerId])
+}
+
+model ModelRevision {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+
+    model   Model  @relation("Revisions", fields: [modelId], references: [id], onDelete: Cascade)
+    modelId String
+
+    // optional until we populate old rows after migration
+    author   User?   @relation(fields: [authorId], references: [id])
+    authorId String?
+    comment  String  @default("")
+
+    contentType ModelType
+
+    squiggleSnippet SquiggleSnippet? @relation(fields: [contentId], references: [id], map: "squiggleSnippet_contentId")
+    contentId       String?          @unique
+
+    relativeValuesExports RelativeValuesExport[]
+    variableRevisions     VariableRevision[]
+
+    // required by Prisma, but unused since `model` field should point at the same entity
+    currentRevisionModel Model?               @relation("CurrentRevision")
+    builds               ModelRevisionBuild[]
+
+    @@index([modelId])
+}
+
+model ModelRevisionBuild {
+    id              String        @id @default(cuid())
+    createdAt       DateTime      @default(now())
+    modelRevision   ModelRevision @relation(fields: [modelRevisionId], references: [id], onDelete: Cascade)
+    modelRevisionId String
+    runSeconds      Float
+    errors          String[]
+
+    @@index([modelRevisionId])
+}
+
+model SquiggleSnippet {
+    id String @id @default(cuid())
+
+    code          String
+    version       String
+    seed          String
+    autorunMode   Boolean?
+    sampleCount   Int?
+    xyPointLength Int?
+
+    revision ModelRevision?
+}
+
+model SquiggleCache {
+    id       String  @id
+    ok       Boolean
+    error    String?
+    result   Json?
+    bindings Json?
+}

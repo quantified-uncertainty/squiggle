@@ -2,11 +2,11 @@ import clsx from "clsx";
 import { FC, useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
+import { parseSourceId } from "@quri/hub-linker";
+
 import { loadModelCardAction } from "@/models/actions/loadModelCardAction";
 import { ModelCard } from "@/models/components/ModelCard";
 import { ModelCardDTO } from "@/models/data/cards";
-
-import { parseSourceId } from "../linker";
 
 type Props = {
   importId: string;

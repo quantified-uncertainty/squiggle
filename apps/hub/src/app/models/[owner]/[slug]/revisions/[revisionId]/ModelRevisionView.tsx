@@ -2,13 +2,13 @@
 
 import { FC, use } from "react";
 
+import { getHubLinker } from "@quri/hub-linker";
 import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
 
 import { ModelRevisionFullDTO } from "@/models/data/fullRevision";
-import { getHubLinker } from "@/squiggle/linker";
 
 export const ModelRevisionView: FC<{
   revision: ModelRevisionFullDTO;

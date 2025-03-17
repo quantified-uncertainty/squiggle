@@ -19,6 +19,7 @@
     "@content-collections/mdx": "^0.2.0",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/content": "workspace:*",
+    "@quri/hub-linker": "workspace:^",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",

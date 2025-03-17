@@ -1,12 +1,11 @@
 "use client";
-import { fromByteArray } from "base64-js";
-import { deflate } from "pako";
 import { FC, useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { Button, CheckIcon, ErrorIcon, RefreshIcon } from "@quri/ui";
 import {
+  getPlaygroundUrl,
   SquiggleVersion,
   squiggleVersions,
   versionedSquigglePackages,
@@ -15,17 +14,7 @@ import {
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H1, H2 } from "@/components/ui/Headers";
-
-function getPlaygroundUrl(version: SquiggleVersion, code: string) {
-  const HASH_PREFIX = "#code=";
-  const text = JSON.stringify({ defaultCode: code });
-  const compressed = deflate(text, { level: 9 });
-  return (
-    `https://squiggle-language.com/playground?v=${version}` +
-    HASH_PREFIX +
-    encodeURIComponent(fromByteArray(compressed))
-  );
-}
+import { SQUIGGLE_PLAYGROUND } from "@/lib/constants";
 
 type Outcome = {
   time: number;
@@ -123,7 +112,11 @@ const Benchmark: FC<{ version: SquiggleVersion; code: string }> = ({
             <ErrorIcon className="text-red-500" />
           )}
           <a
-            href={getPlaygroundUrl(version, code)}
+            href={getPlaygroundUrl({
+              code,
+              version,
+              baseUrl: SQUIGGLE_PLAYGROUND,
+            }).toString()}
             className="text-blue-500 hover:underline"
           >
             {outcome.time}s
