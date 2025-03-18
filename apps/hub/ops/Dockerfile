@@ -45,3 +45,5 @@ WORKDIR /app/apps/hub
 RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
     --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
     turbo run bundle
+
+# TODO - ship only `dist` directory, without `node_modules` and other code
