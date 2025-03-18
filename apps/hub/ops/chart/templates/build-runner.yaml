@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-build-runner
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-build-runner
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-build-runner
+    spec:
+      imagePullSecrets:
+      - name: dockerconfig
+      containers:
+        - name: server
+          image: "harbor.k8s.quantifieduncertainty.org/main/hub-scripts:{{ required "tag is required" .Values.image.tag }}"
+          imagePullPolicy: Always
+          envFrom:
+          - secretRef:
+              name: squiggle-hub-env # configured in QURI ops repo by terraform
+          command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
