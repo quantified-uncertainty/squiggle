@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
+import { Command } from "@commander-js/extra-typings";
+
 /**
  * This script processes all pending evaluations.
  * It can be run as a cron job or via some other scheduler.
  *
  * Usage: pnpm tsx --conditions=react-server src/scripts/process-pending-evaluations.ts
  */
-
 import { processEvaluation } from "@/evals/processEvaluation";
 import { prisma } from "@/lib/server/prisma";
+import { sleep } from "@/lib/sleep";
 
-async function main() {
-  console.log("Starting processing of pending evaluations...");
-
+async function act() {
   // Find all pending evaluations
   const pendingEvals = await prisma.evaluation.findMany({
     where: {
@@ -41,6 +41,23 @@ async function main() {
 
   for (const evaluation of pendingEvals) {
     await processEvaluation(evaluation);
+  }
+}
+
+async function main() {
+  const program = new Command().option("-l, --loop");
+  program.parse();
+  const options = program.opts();
+
+  console.log("Starting processing of pending evaluations...");
+
+  if (options.loop) {
+    while (true) {
+      await act();
+      await sleep(1000);
+    }
+  } else {
+    await act();
   }
 
   console.log("Finished processing pending evaluations.");
