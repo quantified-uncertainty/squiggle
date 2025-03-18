@@ -20,6 +20,8 @@ env:
   REGISTRY_USERNAME: robot$for-upload
   IMAGE_NAME: main/hub-scripts
   APP_DIR: apps/hub
+  ARGOCD_SERVER: argo.k8s.quantifieduncertainty.org
+  ARGOCD_APP: squiggle-hub
 
 jobs:
   build-and-push-image:
@@ -108,9 +110,9 @@ jobs:
     steps:
       - name: Update image.tag helm var
         env:
-          ARGOCD_SERVER: argo.k8s.quantifieduncertainty.org
+          ARGOCD_SERVER: ${{ env.ARGOCD_SERVER }}
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
         run: |
           curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
           chmod +x /usr/local/bin/argocd
-          argocd app set squiggle --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
+          argocd app set ${{ env.ARGOCD_APP }} --helm-set image.tag=${{ needs.build-and-push-image.outputs.image-tag }}
