@@ -1,10 +1,14 @@
 image:
+  name: harbor.k8s.quantifieduncertainty.org/main/hub-scripts
   # Image tag, filled by `argocd app set` through GitHub Actions workflow.
   # Required.
   tag: ""
 
 deployments:
   build-runner:
-      command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
+    command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
   process-pending-evaluations:
     command: ["node", "--conditions=react-server", "dist/scripts/process-pending-evaluations.mjs", "--loop"]
+
+# Configured in QURI ops repo by terraform.
+envSecretName: squiggle-hub-env

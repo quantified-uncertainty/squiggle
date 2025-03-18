@@ -1,3 +1,5 @@
+# ================================ Base image ================================
+
 # Use the official Node.js 22 image for builds
 ARG DOCKER_NODE_VERSION=22-bookworm-slim
 
@@ -19,11 +21,14 @@ RUN npm install -g pnpm@9.13.2
 # FIXME - how to install the exact version from package.json?
 RUN npm install -g turbo@2.4.4
 
+# ================================ Builder ================================
 # Pruned files
 FROM base AS builder
 WORKDIR /app
 COPY . .
 RUN turbo prune @quri/hub --docker
+
+# ================================ Runner ================================
 
 # Install dependencies and build
 FROM base AS runner
@@ -36,4 +41,7 @@ RUN pnpm install --frozen-lockfile
 COPY --from=builder /app/out/full/ .
 
 WORKDIR /app/apps/hub
-RUN turbo run bundle
+
+RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN \
+    --mount=type=secret,id=TURBO_TEAM,env=TURBO_TEAM \
+    turbo run bundle

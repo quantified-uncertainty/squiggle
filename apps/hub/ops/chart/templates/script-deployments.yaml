@@ -2,26 +2,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-{{ $jobname }}
+  name: {{ $.Release.Name }}-{{ $jobname }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-{{ $jobname }}
+      app: {{ $.Release.Name }}-{{ $jobname }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-{{ $jobname }}
+        app: {{ $.Release.Name }}-{{ $jobname }}
     spec:
       imagePullSecrets:
       - name: dockerconfig
       containers:
         - name: server
-          image: "harbor.k8s.quantifieduncertainty.org/main/hub-scripts:{{ required "tag is required" .Values.image.tag }}"
+          image: "{{ $.Values.image.name }}:{{ required "tag is required" $.Values.image.tag }}"
           imagePullPolicy: Always
           envFrom:
           - secretRef:
-              name: squiggle-hub-env # configured in QURI ops repo by terraform
+              name: {{ $.Values.envSecretName }}
           command: 
             {{- $job.command | required "command is required" | toYaml | nindent 10 }}
 ---
 {{- end }}
+ 
