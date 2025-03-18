@@ -1,15 +1,16 @@
+{{- range $jobname, $job := .Values.deployments }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-build-runner
+  name: {{ .Release.Name }}-{{ $jobname }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-build-runner
+      app: {{ .Release.Name }}-{{ $jobname }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-build-runner
+        app: {{ .Release.Name }}-{{ $jobname }}
     spec:
       imagePullSecrets:
       - name: dockerconfig
@@ -20,4 +21,7 @@ spec:
           envFrom:
           - secretRef:
               name: squiggle-hub-env # configured in QURI ops repo by terraform
-          command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
+          command: 
+            {{- $job.command | required "command is required" | toYaml | nindent 10 }}
+---
+{{- end }}

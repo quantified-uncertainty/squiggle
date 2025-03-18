@@ -2,3 +2,9 @@ image:
   # Image tag, filled by `argocd app set` through GitHub Actions workflow.
   # Required.
   tag: ""
+
+deployments:
+  build-runner:
+      command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
+  process-pending-evaluations:
+    command: ["node", "--conditions=react-server", "dist/scripts/process-pending-evaluations.mjs", "--loop"]
