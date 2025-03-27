@@ -5,22 +5,22 @@ import { Table } from "@quri/ui";
 
 import { Card } from "@/components/ui/Card";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { getAllEvalRunners } from "@/evals/data/evalRunners";
-import { evalRunnerRoute } from "@/lib/routes";
+import { getAllEpistemicAgents } from "@/evals/data/epistemicAgents";
+import { epistemicAgentRoute } from "@/lib/routes";
 
 export const metadata = {
-  title: "Eval Runners - Squiggle Hub",
+  title: "Epistemic Agents - Squiggle Hub",
 };
 
 export default async function EvalRunnersPage() {
-  const runners = await getAllEvalRunners();
+  const runners = await getAllEpistemicAgents();
 
   return (
     <div>
       {runners.length === 0 ? (
         <Card theme="big">
           <div className="text-center text-gray-500">
-            {`No eval runners found. Use the "Create Eval Runner" button to add one.`}
+            {`No epistemic agents found. Use the "Create Epistemic Agent" button to add one.`}
           </div>
         </Card>
       ) : (
@@ -37,7 +37,7 @@ export default async function EvalRunnersPage() {
               <Table.Row key={runner.id}>
                 <Table.Cell>
                   <StyledLink
-                    href={evalRunnerRoute({ id: runner.id })}
+                    href={epistemicAgentRoute({ id: runner.id })}
                     className="text-sm font-medium"
                   >
                     {runner.name}

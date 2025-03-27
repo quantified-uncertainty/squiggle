@@ -7,9 +7,9 @@ import { ButtonWithDropdown, DropdownMenu, PlusIcon } from "@quri/ui";
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { CreateEvalRunnerButton } from "@/evals/components/CreateEvalRunnerButton";
 import {
-  createSpecListFromGitHubIssuesRoute,
-  createSpecListFromMetaforecastRoute,
-  createSpecListRoute,
+  createQuestionSetFromGitHubIssuesRoute,
+  createQuestionSetFromMetaforecastRoute,
+  createQuestionSetRoute,
 } from "@/lib/routes";
 
 export const NewEvalEntityButton: FC = () => {
@@ -22,15 +22,15 @@ export const NewEvalEntityButton: FC = () => {
           renderDropdown={({ close }) => (
             <DropdownMenu>
               <DropdownMenuNextLinkItem
-                href={createSpecListRoute()}
+                href={createQuestionSetRoute()}
                 title="Manually"
               />
               <DropdownMenuNextLinkItem
-                href={createSpecListFromMetaforecastRoute()}
+                href={createQuestionSetFromMetaforecastRoute()}
                 title="From Metaforecast"
               />
               <DropdownMenuNextLinkItem
-                href={createSpecListFromGitHubIssuesRoute()}
+                href={createQuestionSetFromGitHubIssuesRoute()}
                 title="From GitHub Issues"
               />
             </DropdownMenu>
@@ -38,7 +38,7 @@ export const NewEvalEntityButton: FC = () => {
         >
           <div className="flex items-center gap-1">
             <PlusIcon size={16} />
-            New Spec List
+            New Question Set
           </div>
         </ButtonWithDropdown>
       );

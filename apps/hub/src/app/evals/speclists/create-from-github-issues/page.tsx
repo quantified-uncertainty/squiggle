@@ -7,7 +7,7 @@ import { Button } from "@quri/ui";
 import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { speclistsRoute } from "@/lib/routes";
+import { questionSetsRoute } from "@/lib/routes";
 
 export default function CreateSpecListFromGitHubIssuesPage() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function CreateSpecListFromGitHubIssuesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <H2>Create Spec List from GitHub Issues (TODO)</H2>
-        <StyledLink href={speclistsRoute()}>← Back to Spec Lists</StyledLink>
+        <StyledLink href={questionSetsRoute()}>← Back to Spec Lists</StyledLink>
       </div>
 
       <Card theme="big">
@@ -31,7 +31,10 @@ export default function CreateSpecListFromGitHubIssuesPage() {
           issue&quot;.
         </p>
         <div className="mt-6">
-          <Button theme="primary" onClick={() => router.push(speclistsRoute())}>
+          <Button
+            theme="primary"
+            onClick={() => router.push(questionSetsRoute())}
+          >
             Back to Spec Lists
           </Button>
         </div>

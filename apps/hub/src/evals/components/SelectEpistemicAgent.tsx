@@ -4,25 +4,25 @@ import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-export type SelectEvalRunnerOption = {
+export type SelectEpistemicAgentOption = {
   id: string;
   name: string;
 };
 
-export function SelectEvalRunner<TValues extends FieldValues>({
+export function SelectEpistemicAgent<TValues extends FieldValues>({
   name,
   label,
   required = true,
 }: {
-  name: FieldPathByValue<TValues, SelectEvalRunnerOption | null>;
+  name: FieldPathByValue<TValues, SelectEpistemicAgentOption | null>;
   label?: string;
   required?: boolean;
 }) {
   const loadOptions = async (
     inputValue: string
-  ): Promise<SelectEvalRunnerOption[]> => {
+  ): Promise<SelectEpistemicAgentOption[]> => {
     const result = await fetch(
-      `/api/find-eval-runners?${new URLSearchParams({
+      `/api/find-epistemic-agents?${new URLSearchParams({
         search: inputValue,
       })}`
     ).then((r) => r.json());
@@ -40,7 +40,7 @@ export function SelectEvalRunner<TValues extends FieldValues>({
   };
 
   return (
-    <SelectFormField<TValues, SelectEvalRunnerOption | null>
+    <SelectFormField<TValues, SelectEpistemicAgentOption | null>
       name={name}
       label={label}
       required={required}
@@ -48,7 +48,7 @@ export function SelectEvalRunner<TValues extends FieldValues>({
       loadOptions={loadOptions}
       getOptionValue={(option) => option?.id}
       getOptionLabel={(option) => option?.name}
-      placeholder="Select an eval runner..."
+      placeholder="Select an epistemic agent..."
     />
   );
 }

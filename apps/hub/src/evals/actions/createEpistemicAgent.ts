@@ -7,19 +7,19 @@ import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-// Input schema for creating an eval runner
-const createEvalRunnerSchema = z.object({
+// Input schema for creating an epistemic agent
+const createEpistemicAgentSchema = z.object({
   name: z.string().min(1),
   config: llmConfigSchema,
 });
 
-export const createEvalRunnerAction = actionClient
-  .schema(createEvalRunnerSchema)
+export const createEpistemicAgentAction = actionClient
+  .schema(createEpistemicAgentSchema)
   .action(async ({ parsedInput }) => {
     await checkRootUser();
 
-    // Create the eval runner in the database
-    const runner = await prisma.evalRunner.create({
+    // Create the epistemic agent in the database
+    const agent = await prisma.epistemicAgent.create({
       data: {
         name: parsedInput.name,
         type: "SquiggleAI",
@@ -27,5 +27,5 @@ export const createEvalRunnerAction = actionClient
       },
     });
 
-    return runner;
+    return agent;
   });

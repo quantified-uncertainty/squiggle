@@ -10,7 +10,11 @@ import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvaluationStateDisplay } from "@/evals/components/EvaluationStateDisplay";
 import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/detailsEvals";
-import { evalRunnerRoute, evaluationsRoute, speclistRoute } from "@/lib/routes";
+import {
+  epistemicAgentRoute,
+  evaluationsRoute,
+  questionSetRoute,
+} from "@/lib/routes";
 
 import { RunSquiggle } from "./RunSquiggle";
 
@@ -58,10 +62,10 @@ export default async function EvalDetailPage({
             name="Eval Runner"
             value={
               <StyledLink
-                href={evalRunnerRoute({ id: evaluation.runner.id })}
+                href={epistemicAgentRoute({ id: evaluation.agent.id })}
                 className="text-sm"
               >
-                {evaluation.runner.name}
+                {evaluation.agent.name}
               </StyledLink>
             }
           />
@@ -69,16 +73,16 @@ export default async function EvalDetailPage({
             name="Spec List"
             value={
               <StyledLink
-                href={speclistRoute({ id: evaluation.specList.id })}
+                href={questionSetRoute({ id: evaluation.questionSet.id })}
                 className="text-sm"
               >
-                {evaluation.specList.id}
+                {evaluation.questionSet.id}
               </StyledLink>
             }
           />
           <KeyValue
             name="Results"
-            value={`${evaluation.results.length} / ${evaluation.specList.specCount}`}
+            value={`${evaluation.values.length} / ${evaluation.questionSet.questionCount}`}
           />
           <KeyValue
             name="State"
@@ -94,7 +98,7 @@ export default async function EvalDetailPage({
 
       <div className="p-6">
         <h3 className="mb-4 text-lg font-medium">Evaluation Results</h3>
-        {evaluation.results.length === 0 ? (
+        {evaluation.values.length === 0 ? (
           <p className="text-gray-500">No results found for this evaluation.</p>
         ) : (
           <Table>
@@ -107,15 +111,15 @@ export default async function EvalDetailPage({
               </Table.HeaderCell>
             </Table.Header>
             <Table.Body>
-              {evaluation.results.map((result) => (
+              {evaluation.values.map((result) => (
                 <Table.Row key={result.id}>
                   <Table.Cell align="top">
                     <div className="max-w-md space-y-2">
                       <p className="text-sm font-semibold text-gray-900">
-                        {result.spec.description}
+                        {result.question.description}
                       </p>
                       <p className="text-xs text-gray-500">
-                        ID: {result.spec.id}
+                        ID: {result.question.id}
                       </p>
                       {result.workflow?.metrics?.totalPrice && (
                         <p className="text-xs text-gray-500">

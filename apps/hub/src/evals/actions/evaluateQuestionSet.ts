@@ -5,46 +5,46 @@ import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-const evaluateSpeclistSchema = z.object({
-  specListId: z.string(),
-  runnerId: z.string(),
+const evaluateQuestionSetSchema = z.object({
+  questionSetId: z.string(),
+  agentId: z.string(),
 });
 
-export const evaluateSpecList = actionClient
-  .schema(evaluateSpeclistSchema)
-  .action(async ({ parsedInput: { specListId, runnerId } }) => {
+export const evaluateQuestionSet = actionClient
+  .schema(evaluateQuestionSetSchema)
+  .action(async ({ parsedInput: { questionSetId, agentId } }) => {
     await checkRootUser();
 
     // Validate the runner exists
-    const runnerExists = await prisma.evalRunner.findUnique({
-      where: { id: runnerId },
+    const agentExists = await prisma.epistemicAgent.findUnique({
+      where: { id: agentId },
     });
 
-    if (!runnerExists) {
-      throw new ActionError("Runner not found");
+    if (!agentExists) {
+      throw new ActionError("Epistemic agent not found");
     }
 
     // Validate the speclist exists
-    const specListExists = await prisma.specList.findUnique({
-      where: { id: specListId },
+    const questionSetExists = await prisma.questionSet.findUnique({
+      where: { id: questionSetId },
     });
 
-    if (!specListExists) {
-      throw new ActionError("Spec list not found");
+    if (!questionSetExists) {
+      throw new ActionError("Question set not found");
     }
 
     // Create a new Eval record with Pending state
     const evaluation = await prisma.evaluation.create({
       data: {
         state: "Pending",
-        runner: {
+        agent: {
           connect: {
-            id: runnerId,
+            id: agentId,
           },
         },
-        specList: {
+        questionSet: {
           connect: {
-            id: specListId,
+            id: questionSetId,
           },
         },
       },

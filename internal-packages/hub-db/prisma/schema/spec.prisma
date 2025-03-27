@@ -1,5 +1,5 @@
-// "Spec" == "Definition" == "Question", a node in the ontology graph that can be responded to with a value.
-model Spec {
+// "Question" == "Spec" == "Definition", a node in the ontology graph that can be responded to with a value.
+model Question {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
@@ -7,11 +7,11 @@ model Spec {
 
     description String
 
-    specLists   SpecsOnSpecLists[]
-    evalResults EvalResult[]
+    questionSets QuestionsOnQuestionSets[]
+    evalResults  Value[]
 }
 
-model SpecList {
+model QuestionSet {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
@@ -19,22 +19,22 @@ model SpecList {
 
     name String
 
-    specs       SpecsOnSpecLists[]
+    questions   QuestionsOnQuestionSets[]
     evaluations Evaluation[]
 }
 
-model SpecsOnSpecLists {
+model QuestionsOnQuestionSets {
     id String @id @default(cuid())
 
-    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
-    specId String
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
 
-    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
-    specListId String
+    questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+    questionSetId String
 
-    @@unique([specId, specListId])
-    @@index([specId])
-    @@index([specListId])
+    @@unique([questionId, questionSetId])
+    @@index([questionId])
+    @@index([questionSetId])
 }
 
 enum EvaluationState {
@@ -42,12 +42,10 @@ enum EvaluationState {
     Running
     Completed
     Failed
-
-    @@map("EvalState")
 }
 
-// "Evaluation" is a shorthand for "collection of EvalResults on a SpecList"
-// In the codebase, we use "Evaluation" instead of shorter "Eval", because `eval` is a reserved word in JavaScript.
+// `Evaluation` is a run that produced multiple `Value`s from a `QuestionSet`.
+// In the codebase, we use `Evaluation` instead of shorter `Eval`, because `eval` is a reserved word in JavaScript.
 model Evaluation {
     id String @id @default(cuid())
 
@@ -58,58 +56,57 @@ model Evaluation {
     errorMsg String? // Optional error message when state is 'Failed'
 
     // metadata about the runner that was used
-    runner   EvalRunner @relation(fields: [runnerId], references: [id])
-    runnerId String
+    agent   EpistemicAgent @relation(fields: [agentId], references: [id])
+    agentId String
 
-    specList   SpecList @relation(fields: [specListId], references: [id], onDelete: Cascade)
-    specListId String
+    questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+    questionSetId String
 
-    results EvalResult[]
-
-    @@map("Eval")
+    // Evaluations are not instant, so there's no guarantee that `values` contains all values from the question set.
+    values Value[]
 }
 
 /**
- * EvalResult is similar to the `Variable` table or to the `Model` table.
+ * `Value` is similar to the `Variable` table or to the `Model` table.
  * For the sake of simplicity, we assume that its value is the end expression of the Squiggle code.
  * In the future it should be merged with them somehow.
  * ---
  * Note that it's not AI-specific: its `workflow` reference is optional.
  */
-model EvalResult {
+model Value {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    spec   Spec   @relation(fields: [specId], references: [id], onDelete: Cascade)
-    specId String
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
 
     /**
      * All eval results are Squiggle models.
      * Simple approach, Squiggle code is copy-pasted here from AiWorkflow outputs.
-     * Ideally, we should store each result as a Model or a Variable table. But that part of codebase is too complicated to bother for now, because of revisions.
+     * TODO: this should be a reference to the `Model` table. (And we should retire the old `Variable` table.)
      */
     code String
 
-    eval   Evaluation @relation(fields: [evalId], references: [id])
-    evalId String
+    evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+    evaluationId String
 
     workflowId String?     @unique
     workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
 
-    @@unique([specId, evalId])
+    @@unique([questionId, evaluationId])
 }
 
-enum EvalRunnerType {
+enum EpistemicAgentType {
     SquiggleAI
 }
 
 /**
- * EvalRunners are the configurations that produce evaluations.
- * The main kind of eval runner is Squiggle AI runner, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
+ * Epistemic agents are the configurations that produce evaluations, i.e. values based on questions.
+ * The main kind of epistemic agent is Squiggle AI, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
  */
-model EvalRunner {
+model EpistemicAgent {
     id String @id @default(cuid())
 
     createdAt DateTime @default(now())
@@ -117,7 +114,7 @@ model EvalRunner {
 
     name String
 
-    type EvalRunnerType @default(SquiggleAI)
+    type EpistemicAgentType @default(SquiggleAI)
 
     // Untyped, for now; validated by zod in the codebase.
     // For AI, this should contain `LlmConfig` object.

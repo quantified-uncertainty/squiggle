@@ -17,29 +17,29 @@ export const evaluationSelectWithDetails = {
   updatedAt: true,
   state: true,
   errorMsg: true,
-  runner: {
+  agent: {
     select: {
       id: true,
       name: true,
       type: true,
     },
   },
-  specList: {
+  questionSet: {
     select: {
       id: true,
       name: true,
       _count: {
         select: {
-          specs: true,
+          questions: true,
         },
       },
     },
   },
-  results: {
+  values: {
     select: {
       id: true,
       code: true,
-      spec: true,
+      question: true,
       workflow: {
         select: {
           id: true,
@@ -63,20 +63,20 @@ export type EvalWithDetailsDTO = {
   updatedAt: Date;
   state: EvaluationState;
   errorMsg: string | null;
-  runner: {
+  agent: {
     id: string;
     name: string;
     type: string;
   };
-  specList: {
+  questionSet: {
     id: string;
     name: string;
-    specCount: number;
+    questionCount: number;
   };
-  results: {
+  values: {
     id: string;
     code: string;
-    spec: {
+    question: {
       id: string;
       description: string;
     };
@@ -91,7 +91,7 @@ export type EvalWithDetailsDTO = {
 
 // Function to convert from DB type to DTO with aggregated metrics
 function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
-  const metrics = aggregateEvalMetrics(dbEval.results);
+  const metrics = aggregateEvalMetrics(dbEval.values);
 
   return {
     id: dbEval.id,
@@ -99,21 +99,21 @@ function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
     updatedAt: dbEval.updatedAt,
     state: dbEval.state,
     errorMsg: dbEval.errorMsg,
-    runner: dbEval.runner,
-    specList: {
-      id: dbEval.specList.id,
-      name: dbEval.specList.name,
-      specCount: dbEval.specList._count.specs,
+    agent: dbEval.agent,
+    questionSet: {
+      id: dbEval.questionSet.id,
+      name: dbEval.questionSet.name,
+      questionCount: dbEval.questionSet._count.questions,
     },
-    results: dbEval.results.map((result) => ({
-      id: result.id,
-      code: result.code,
-      spec: result.spec,
-      workflow: result.workflow
+    values: dbEval.values.map((value) => ({
+      id: value.id,
+      code: value.code,
+      question: value.question,
+      workflow: value.workflow
         ? {
-            id: result.workflow.id,
-            markdown: result.workflow.markdown,
-            metrics: parseWorkflowMetrics(result.workflow.metrics),
+            id: value.workflow.id,
+            markdown: value.workflow.markdown,
+            metrics: parseWorkflowMetrics(value.workflow.metrics),
           }
         : undefined,
     })),

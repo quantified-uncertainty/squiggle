@@ -6,7 +6,11 @@ import React from "react";
 import { Table } from "@quri/ui";
 
 import { StyledLink } from "@/components/ui/StyledLink";
-import { evalRunnerRoute, evaluationRoute, speclistRoute } from "@/lib/routes";
+import {
+  epistemicAgentRoute,
+  evaluationRoute,
+  questionSetRoute,
+} from "@/lib/routes";
 
 import { type EvaluationSummaryDTO } from "../data/summaryEvals";
 import { EvaluationStateDisplay } from "./EvaluationStateDisplay";
@@ -73,24 +77,25 @@ export function EvaluationsTable({
             </Table.Cell>
             <Table.Cell>
               <StyledLink
-                href={evalRunnerRoute({ id: evaluation.runner.id })}
+                href={epistemicAgentRoute({ id: evaluation.agent.id })}
                 className="text-sm"
               >
-                {evaluation.runner.name}
+                {evaluation.agent.name}
               </StyledLink>
             </Table.Cell>
-            {showSpecList && evaluation.specList && (
+            {showSpecList && evaluation.questionSet && (
               <Table.Cell>
                 <StyledLink
-                  href={speclistRoute({ id: evaluation.specList.id })}
+                  href={questionSetRoute({ id: evaluation.questionSet.id })}
                   className="text-sm"
                 >
-                  {evaluation.specList.name}
+                  {evaluation.questionSet.name}
                 </StyledLink>
               </Table.Cell>
             )}
             <Table.Cell theme="text">
-              {evaluation._count.results} / {evaluation.specList.specCount}
+              {evaluation._count.values} /{" "}
+              {evaluation.questionSet.questionCount}
             </Table.Cell>
             <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}

@@ -1,14 +1,14 @@
 import React from "react";
 
 import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
-import { getAllEvals } from "@/evals/data/summaryEvals";
+import { getAllEvaluations } from "@/evals/data/summaryEvals";
 
 export const metadata = {
   title: "Evaluations - Squiggle Hub",
 };
 
 export default async function EvalsPage() {
-  const evals = await getAllEvals();
+  const evals = await getAllEvaluations();
 
   return (
     <EvaluationsTable

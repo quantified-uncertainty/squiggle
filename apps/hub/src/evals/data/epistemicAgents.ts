@@ -18,14 +18,14 @@ const select = {
       evaluations: true,
     },
   },
-} satisfies Prisma.EvalRunnerSelect;
+} satisfies Prisma.EpistemicAgentSelect;
 
 // Type for eval runner data
-type DbEvalRunner = Prisma.EvalRunnerGetPayload<{
+type DbEpistemicAgent = Prisma.EpistemicAgentGetPayload<{
   select: typeof select;
 }>;
 
-export type EvalRunnerDTO = {
+export type EpistemicAgentDTO = {
   id: string;
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +37,7 @@ export type EvalRunnerDTO = {
   };
 };
 
-function runnerToDTO(dbRow: DbEvalRunner): EvalRunnerDTO {
+function agentToDTO(dbRow: DbEpistemicAgent): EpistemicAgentDTO {
   const config = llmConfigSchema.safeParse(dbRow.config);
 
   return {
@@ -46,26 +46,28 @@ function runnerToDTO(dbRow: DbEvalRunner): EvalRunnerDTO {
   };
 }
 
-export async function getAllEvalRunners(): Promise<EvalRunnerDTO[]> {
+export async function getAllEpistemicAgents(): Promise<EpistemicAgentDTO[]> {
   await checkRootUser();
 
-  const rows = await prisma.evalRunner.findMany({
+  const rows = await prisma.epistemicAgent.findMany({
     select,
     orderBy: {
       name: "asc",
     },
   });
 
-  return rows.map(runnerToDTO);
+  return rows.map(agentToDTO);
 }
 
-export async function getEvalRunnerById(id: string): Promise<EvalRunnerDTO> {
+export async function getEpistemicAgentById(
+  id: string
+): Promise<EpistemicAgentDTO> {
   await checkRootUser();
 
-  const row = await prisma.evalRunner.findUniqueOrThrow({
+  const row = await prisma.epistemicAgent.findUniqueOrThrow({
     where: { id },
     select,
   });
 
-  return runnerToDTO(row);
+  return agentToDTO(row);
 }

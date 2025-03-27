@@ -5,9 +5,9 @@ import {
 } from "@/components/ui/StyledTabLink";
 import { NewEvalEntityButton } from "@/evals/components/NewEvalEntityButton";
 import {
-  evalRunnersRoute,
+  epistemicAgentsRoute,
   evaluationsRoute,
-  speclistsRoute,
+  questionSetsRoute,
 } from "@/lib/routes";
 
 function isSubpath(pathname: string, route: string) {
@@ -29,15 +29,15 @@ export const EvalsTabs = () => {
         />
         <StyledTabLink
           name="Spec Lists"
-          href={speclistsRoute()}
+          href={questionSetsRoute()}
           prefetch
-          selected={(pathname) => isSubpath(pathname, speclistsRoute())}
+          selected={(pathname) => isSubpath(pathname, questionSetsRoute())}
         />
         <StyledTabLink
-          name="Eval Runners"
-          href={evalRunnersRoute()}
+          name="Epistemic Agents"
+          href={epistemicAgentsRoute()}
           prefetch
-          selected={(pathname) => isSubpath(pathname, evalRunnersRoute())}
+          selected={(pathname) => isSubpath(pathname, epistemicAgentsRoute())}
         />
       </StyledTabLinkList>
       <NewEvalEntityButton />

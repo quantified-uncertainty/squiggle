@@ -1,5 +1,5 @@
 import { Link } from "@/components/ui/Link";
-import { speclistsRoute } from "@/lib/routes";
+import { questionSetsRoute } from "@/lib/routes";
 
 export default function SpecListNotFound() {
   return (
@@ -9,7 +9,7 @@ export default function SpecListNotFound() {
         {`The spec list you're looking for doesn't exist or has been removed.`}
       </p>
       <Link
-        href={speclistsRoute()}
+        href={questionSetsRoute()}
         className="rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
       >
         Back to Spec Lists

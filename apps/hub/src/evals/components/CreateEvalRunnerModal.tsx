@@ -6,8 +6,8 @@ import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import { NumberFormField, SelectFormField, TextFormField } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
-import { createEvalRunnerAction } from "@/evals/actions/createEvalRunner";
-import { evalRunnerRoute } from "@/lib/routes";
+import { createEpistemicAgentAction } from "@/evals/actions/createEpistemicAgent";
+import { epistemicAgentRoute } from "@/lib/routes";
 
 type LlmOption = {
   value: LlmId;
@@ -54,12 +54,12 @@ export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
   };
 
   return (
-    <SafeActionFormModal<FormShape, typeof createEvalRunnerAction>
+    <SafeActionFormModal<FormShape, typeof createEpistemicAgentAction>
       close={close}
       title="Create New Eval Runner"
       submitText="Create"
       defaultValues={defaultValues}
-      action={createEvalRunnerAction}
+      action={createEpistemicAgentAction}
       formDataToInput={(data) => ({
         name: data.name,
         config: {
@@ -72,7 +72,7 @@ export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
         },
       })}
       onSuccess={({ id }) => {
-        router.push(evalRunnerRoute({ id }));
+        router.push(epistemicAgentRoute({ id }));
       }}
       initialFocus="name"
     >

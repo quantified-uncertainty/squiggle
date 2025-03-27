@@ -5,21 +5,24 @@ import { FC } from "react";
 import { DropdownMenuModalActionItem, PlayIcon } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
-import { evaluateSpecList } from "@/evals/actions/evaluateSpeclist";
+import { evaluateQuestionSet } from "@/evals/actions/evaluateQuestionSet";
 import { evaluationRoute } from "@/lib/routes";
 
-import { SelectEvalRunner, SelectEvalRunnerOption } from "./SelectEvalRunner";
+import {
+  SelectEpistemicAgent,
+  SelectEpistemicAgentOption,
+} from "./SelectEpistemicAgent";
 
-type FormShape = { runner: SelectEvalRunnerOption | null };
+type FormShape = { agent: SelectEpistemicAgentOption | null };
 
 type Props = {
-  specListId: string;
-  specListName: string;
+  questionSetId: string;
+  questionSetName: string;
 };
 
-export const EvaluateSpecListAction: FC<Props> = ({
-  specListId,
-  specListName,
+export const EvaluateQuestionSetAction: FC<Props> = ({
+  questionSetId,
+  questionSetName,
 }) => {
   const router = useRouter();
 
@@ -28,32 +31,32 @@ export const EvaluateSpecListAction: FC<Props> = ({
       title="Evaluate..."
       icon={PlayIcon}
       render={({ close }) => (
-        <SafeActionFormModal<FormShape, typeof evaluateSpecList>
+        <SafeActionFormModal<FormShape, typeof evaluateQuestionSet>
           close={close}
-          title={`Evaluate ${specListName}`}
+          title={`Evaluate ${questionSetName}`}
           submitText="Start Evaluation"
           defaultValues={{
-            runner: null,
+            agent: null,
           }}
-          action={evaluateSpecList}
+          action={evaluateQuestionSet}
           formDataToInput={(data) => ({
-            specListId,
-            runnerId: data.runner?.id || "",
+            questionSetId,
+            agentId: data.agent?.id || "",
           })}
           onSuccess={({ id }) => {
             router.push(evaluationRoute({ id }));
           }}
-          initialFocus="runner"
+          initialFocus="agent"
         >
           <div className="mb-4">
             <div className="mb-4">
-              This will evaluate all specs in this spec list using the selected
-              eval runner. This process may take some time depending on the
-              number of specs.
+              This will evaluate all questions in this question set using the
+              selected epistemic agent. This process may take some time
+              depending on the number of questions.
             </div>
-            <SelectEvalRunner<FormShape>
-              name="runner"
-              label="Eval Runner"
+            <SelectEpistemicAgent<FormShape>
+              name="agent"
+              label="Epistemic Agent"
               required
             />
           </div>

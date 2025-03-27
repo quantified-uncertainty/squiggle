@@ -7,8 +7,8 @@ import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { getEvalRunnerById } from "@/evals/data/evalRunners";
-import { evalRunnersRoute } from "@/lib/routes";
+import { getEpistemicAgentById } from "@/evals/data/epistemicAgents";
+import { epistemicAgentsRoute } from "@/lib/routes";
 
 export const dynamicParams = true;
 
@@ -19,13 +19,13 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   try {
-    const evalRunner = await getEvalRunnerById(id);
+    const epistemicAgent = await getEpistemicAgentById(id);
     return {
-      title: `${evalRunner.name} Eval Runner - Squiggle Hub`,
+      title: `${epistemicAgent.name} Epistemic Agent - Squiggle Hub`,
     };
   } catch (error) {
     return {
-      title: `Eval Runner: ${id} - Squiggle Hub`,
+      title: `Epistemic Agent: ${id} - Squiggle Hub`,
     };
   }
 }
@@ -37,17 +37,17 @@ export default async function EvalRunnerDetailPage({
 }) {
   try {
     const { id } = await params;
-    const runner = await getEvalRunnerById(id);
+    const epistemicAgent = await getEpistemicAgentById(id);
 
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <H2>{runner.name}</H2>
-            <p className="text-sm text-gray-500">ID: {runner.id}</p>
+            <H2>{epistemicAgent.name}</H2>
+            <p className="text-sm text-gray-500">ID: {epistemicAgent.id}</p>
           </div>
-          <StyledLink href={evalRunnersRoute()}>
-            ← Back to Eval Runners
+          <StyledLink href={epistemicAgentsRoute()}>
+            ← Back to Epistemic Agents
           </StyledLink>
         </div>
 
@@ -57,18 +57,24 @@ export default async function EvalRunnerDetailPage({
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-4">
-            <KeyValue name="Type" value={runner.type} />
+            <KeyValue name="Type" value={epistemicAgent.type} />
             <KeyValue
               name="Created"
-              value={format(new Date(runner.createdAt), "MMM d, yyyy h:mm a")}
+              value={format(
+                new Date(epistemicAgent.createdAt),
+                "MMM d, yyyy h:mm a"
+              )}
             />
             <KeyValue
               name="Last Updated"
-              value={format(new Date(runner.updatedAt), "MMM d, yyyy h:mm a")}
+              value={format(
+                new Date(epistemicAgent.updatedAt),
+                "MMM d, yyyy h:mm a"
+              )}
             />
             <KeyValue
               name="Evaluations Count"
-              value={runner._count.evaluations.toString()}
+              value={epistemicAgent._count.evaluations.toString()}
             />
           </div>
         </Card>
@@ -78,8 +84,8 @@ export default async function EvalRunnerDetailPage({
             <h3 className="text-lg font-medium">Configuration</h3>
           </div>
 
-          {runner.config ? (
-            <LlmConfigDisplay config={runner.config} />
+          {epistemicAgent.config ? (
+            <LlmConfigDisplay config={epistemicAgent.config} />
           ) : (
             <p className="text-red-500">Configuration parsing error</p>
           )}
