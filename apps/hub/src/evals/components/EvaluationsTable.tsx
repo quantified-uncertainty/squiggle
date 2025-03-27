@@ -49,11 +49,10 @@ export function EvaluationsTable({
         <Table.HeaderCell>ID</Table.HeaderCell>
         <Table.HeaderCell>Created</Table.HeaderCell>
         <Table.HeaderCell>State</Table.HeaderCell>
-        <Table.HeaderCell>Epistemic Agent</Table.HeaderCell>
+        <Table.HeaderCell>Agent</Table.HeaderCell>
         {showQuestionSet && <Table.HeaderCell>Question Set</Table.HeaderCell>}
-        <Table.HeaderCell>Results Count</Table.HeaderCell>
-        <Table.HeaderCell>Total Cost</Table.HeaderCell>
-        <Table.HeaderCell>LLM Runs</Table.HeaderCell>
+        <Table.HeaderCell>Values</Table.HeaderCell>
+        <Table.HeaderCell>Cost</Table.HeaderCell>
         <Table.HeaderCell>Actions</Table.HeaderCell>
       </Table.Header>
       <Table.Body>
@@ -100,9 +99,6 @@ export function EvaluationsTable({
             </Table.Cell>
             <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}
-            </Table.Cell>
-            <Table.Cell theme="text">
-              {formatRunCount(evaluation.metrics?.llmRunCount)}
             </Table.Cell>
             <Table.Cell theme="text">(none)</Table.Cell>
           </Table.Row>

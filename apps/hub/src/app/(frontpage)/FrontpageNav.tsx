@@ -4,7 +4,6 @@ import {
   StyledTabLink,
   StyledTabLinkList,
 } from "@/components/ui/StyledTabLink";
-import { NewEvalEntityButton } from "@/evals/components/NewEvalEntityButton";
 import {
   definitionsRoute,
   epistemicAgentsRoute,
@@ -34,7 +33,6 @@ export const FrontpageNav: FC = () => {
           prefetch
         />
       </StyledTabLinkList>
-      <NewEvalEntityButton />
     </div>
   );
 };

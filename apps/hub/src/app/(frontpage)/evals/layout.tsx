@@ -4,7 +4,7 @@ import { FrontpageMainAreaLayout } from "../FrontpageMainAreaLayout";
 
 export default function EvalsLayout({ children }: PropsWithChildren) {
   return (
-    <FrontpageMainAreaLayout title="Evaluations">
+    <FrontpageMainAreaLayout title="Evaluations" theme="wide">
       {children}
     </FrontpageMainAreaLayout>
   );
