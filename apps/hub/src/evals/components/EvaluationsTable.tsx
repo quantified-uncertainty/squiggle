@@ -17,13 +17,13 @@ import { EvaluationStateDisplay } from "./EvaluationStateDisplay";
 
 interface EvaluationsTableProps {
   evaluations: EvaluationSummaryDTO[];
-  showSpecList?: boolean;
+  showQuestionSet?: boolean;
   emptyMessage?: string;
 }
 
 export function EvaluationsTable({
   evaluations,
-  showSpecList = true,
+  showQuestionSet = true,
   emptyMessage = "No evaluations found.",
 }: EvaluationsTableProps) {
   if (evaluations.length === 0) {
@@ -48,8 +48,8 @@ export function EvaluationsTable({
         <Table.HeaderCell>ID</Table.HeaderCell>
         <Table.HeaderCell>Created</Table.HeaderCell>
         <Table.HeaderCell>State</Table.HeaderCell>
-        <Table.HeaderCell>Eval Runner</Table.HeaderCell>
-        {showSpecList && <Table.HeaderCell>Spec List</Table.HeaderCell>}
+        <Table.HeaderCell>Epistemic Agent</Table.HeaderCell>
+        {showQuestionSet && <Table.HeaderCell>Question Set</Table.HeaderCell>}
         <Table.HeaderCell>Results Count</Table.HeaderCell>
         <Table.HeaderCell>Total Cost</Table.HeaderCell>
         <Table.HeaderCell>LLM Runs</Table.HeaderCell>
@@ -83,7 +83,7 @@ export function EvaluationsTable({
                 {evaluation.agent.name}
               </StyledLink>
             </Table.Cell>
-            {showSpecList && evaluation.questionSet && (
+            {showQuestionSet && evaluation.questionSet && (
               <Table.Cell>
                 <StyledLink
                   href={questionSetRoute({ id: evaluation.questionSet.id })}

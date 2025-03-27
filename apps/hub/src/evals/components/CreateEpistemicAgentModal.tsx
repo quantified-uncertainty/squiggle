@@ -37,7 +37,7 @@ type Props = {
   close: () => void;
 };
 
-export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
+export const CreateEpistemicAgentModal: FC<Props> = ({ close }) => {
   const router = useRouter();
 
   const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === "Claude-Sonnet")!;
@@ -56,7 +56,7 @@ export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
   return (
     <SafeActionFormModal<FormShape, typeof createEpistemicAgentAction>
       close={close}
-      title="Create New Eval Runner"
+      title="Create New Epistemic Agent"
       submitText="Create"
       defaultValues={defaultValues}
       action={createEpistemicAgentAction}
@@ -79,8 +79,8 @@ export const CreateEvalRunnerModal: FC<Props> = ({ close }) => {
       <div className="space-y-6">
         <TextFormField<FormShape>
           name="name"
-          label="Eval Runner Name"
-          placeholder="Enter a name for this eval runner"
+          label="Epistemic Agent Name"
+          placeholder="Enter a name for this epistemic agent"
         />
 
         <div className="border-t border-gray-200 pt-4">

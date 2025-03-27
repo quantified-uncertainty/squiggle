@@ -3,7 +3,7 @@ import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
-import { EvaluateQuestionSetAction } from "./EvaluateSpecListAction";
+import { EvaluateQuestionSetAction } from "./EvaluateQuestionSetAction";
 
 type Props = {
   questionSetId: string;

@@ -5,7 +5,7 @@ import { FC } from "react";
 import { ButtonWithDropdown, DropdownMenu, PlusIcon } from "@quri/ui";
 
 import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
-import { CreateEvalRunnerButton } from "@/evals/components/CreateEvalRunnerButton";
+import { CreateEpistemicAgentButton } from "@/evals/components/CreateEpistemicAgentButton";
 import {
   createQuestionSetFromGitHubIssuesRoute,
   createQuestionSetFromMetaforecastRoute,
@@ -43,7 +43,7 @@ export const NewEvalEntityButton: FC = () => {
         </ButtonWithDropdown>
       );
     case "eval-runners":
-      return <CreateEvalRunnerButton />;
+      return <CreateEpistemicAgentButton />;
     default:
       return null;
   }

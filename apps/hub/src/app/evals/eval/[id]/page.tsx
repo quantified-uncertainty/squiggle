@@ -59,7 +59,7 @@ export default async function EvalDetailPage({
             value={format(new Date(evaluation.createdAt), "MMM d, yyyy h:mm a")}
           />
           <KeyValue
-            name="Eval Runner"
+            name="Epistemic Agent"
             value={
               <StyledLink
                 href={epistemicAgentRoute({ id: evaluation.agent.id })}
@@ -70,7 +70,7 @@ export default async function EvalDetailPage({
             }
           />
           <KeyValue
-            name="Spec List"
+            name="Question Set"
             value={
               <StyledLink
                 href={questionSetRoute({ id: evaluation.questionSet.id })}
@@ -104,7 +104,7 @@ export default async function EvalDetailPage({
           <Table>
             <Table.Header>
               <Table.HeaderCell className="w-2/5">
-                Spec Description
+                Question Description
               </Table.HeaderCell>
               <Table.HeaderCell className="w-3/5">
                 Squiggle Result

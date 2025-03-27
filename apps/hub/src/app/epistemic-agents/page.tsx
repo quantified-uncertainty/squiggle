@@ -12,7 +12,7 @@ export const metadata = {
   title: "Epistemic Agents - Squiggle Hub",
 };
 
-export default async function EvalRunnersPage() {
+export default async function EpistemicAgentsPage() {
   const runners = await getAllEpistemicAgents();
 
   return (

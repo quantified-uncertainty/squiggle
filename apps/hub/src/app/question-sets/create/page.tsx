@@ -8,8 +8,8 @@ import { Button, TextFormField } from "@quri/ui";
 import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { createQuestionSetAction } from "@/evals/actions/createSpecListAction";
-import { SpecsFieldArray } from "@/evals/components/SpecsFieldArray";
+import { createQuestionSetAction } from "@/evals/actions/createQuestionSetAction";
+import { QuestionsFieldArray } from "@/evals/components/QuestionsFieldArray";
 import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 import { questionSetRoute, questionSetsRoute } from "@/lib/routes";
 
@@ -20,7 +20,7 @@ type FormShape = {
   }[];
 };
 
-export default function CreateSpecListPage() {
+export default function CreateQuestionSetPage() {
   const router = useRouter();
 
   const { form, onSubmit, inFlight } = useSafeActionForm<
@@ -49,8 +49,10 @@ export default function CreateSpecListPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <H2>Create New Spec List</H2>
-        <StyledLink href={questionSetsRoute()}>← Back to Spec Lists</StyledLink>
+        <H2>Create New Question Set</H2>
+        <StyledLink href={questionSetsRoute()}>
+          ← Back to Question Sets
+        </StyledLink>
       </div>
 
       <Card theme="big">
@@ -65,7 +67,7 @@ export default function CreateSpecListPage() {
               />
             </div>
 
-            <SpecsFieldArray name="questions" />
+            <QuestionsFieldArray name="questions" />
 
             <div className="mt-6">
               <Button

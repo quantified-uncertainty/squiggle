@@ -9,21 +9,23 @@ import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { questionSetsRoute } from "@/lib/routes";
 
-export default function CreateSpecListFromGitHubIssuesPage() {
+export default function CreateQuestionSetFromGitHubIssuesPage() {
   const router = useRouter();
 
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <H2>Create Spec List from GitHub Issues (TODO)</H2>
-        <StyledLink href={questionSetsRoute()}>← Back to Spec Lists</StyledLink>
+        <H2>Create Question Set from GitHub Issues (TODO)</H2>
+        <StyledLink href={questionSetsRoute()}>
+          ← Back to Question Sets
+        </StyledLink>
       </div>
 
       <Card theme="big">
         <p className="mb-4">
           This page will prompt the user to enter a GitHub repository URL, and
           then select one or more issues from the repository to create a new
-          spec list.
+          question set.
         </p>
         <p className="mb-4">
           It will also contain a textarea that would convert the issues into
@@ -35,7 +37,7 @@ export default function CreateSpecListFromGitHubIssuesPage() {
             theme="primary"
             onClick={() => router.push(questionSetsRoute())}
           >
-            Back to Spec Lists
+            Back to Question Sets
           </Button>
         </div>
       </Card>

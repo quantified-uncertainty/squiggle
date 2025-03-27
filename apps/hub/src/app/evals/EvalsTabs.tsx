@@ -28,7 +28,7 @@ export const EvalsTabs = () => {
           }
         />
         <StyledTabLink
-          name="Spec Lists"
+          name="Question Sets"
           href={questionSetsRoute()}
           prefetch
           selected={(pathname) => isSubpath(pathname, questionSetsRoute())}

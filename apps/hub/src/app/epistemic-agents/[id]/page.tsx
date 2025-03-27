@@ -30,7 +30,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function EvalRunnerDetailPage({
+export default async function EpistemicAgentDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -53,7 +53,7 @@ export default async function EvalRunnerDetailPage({
 
         <Card theme="big">
           <div className="mb-4">
-            <h3 className="text-lg font-medium">Eval Runner Details</h3>
+            <h3 className="text-lg font-medium">Epistemic Agent Details</h3>
           </div>
 
           <div className="mb-4 grid grid-cols-2 gap-4">

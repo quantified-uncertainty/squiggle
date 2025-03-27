@@ -21,12 +21,12 @@ export async function generateMetadata({
     };
   } catch (error) {
     return {
-      title: `Spec List: ${(await params).id} - Squiggle Hub`,
+      title: `Question Set: ${(await params).id} - Squiggle Hub`,
     };
   }
 }
 
-export default async function SpecListDetailPage({
+export default async function QuestionSetDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -61,7 +61,7 @@ export default async function SpecListDetailPage({
         </div>
 
         {questionSet.questions.length === 0 ? (
-          <p className="text-gray-500">This spec list has no questions.</p>
+          <p className="text-gray-500">This question set has no questions.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
             {questionSet.questions.map((questionItem) => (
@@ -90,8 +90,8 @@ export default async function SpecListDetailPage({
 
         <EvaluationsTable
           evaluations={evals}
-          showSpecList={false}
-          emptyMessage="No evaluations found for this spec list."
+          showQuestionSet={false}
+          emptyMessage="No evaluations found for this question set."
         />
       </div>
     </div>
