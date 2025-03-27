@@ -36,6 +36,8 @@ Use `react-hook-form` for form handling, usually combined with `next-safe-action
 
 Use `useToast` from `@quri/ui` for displaying notifications and errors.
 
+For dropdown menus, use `@quri/ui`'s `Dropdown` component. See [Dropdown.stories.tsx](../../../packages/ui/src/stories/Dropdown.stories.tsx) for examples. For internal links, use [DropdownMenuNextLinkItem](../src/components/ui/DropdownMenuNextLinkItem.tsx).
+
 ## Links
 
 Always use our custom `<Link>` component from `src/components/ui`, instead of the native Next.js `<Link>` component.

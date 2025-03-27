@@ -239,6 +239,14 @@ export function createSpecListRoute() {
   return "/evals/speclists/create";
 }
 
+export function createSpecListFromMetaforecastRoute() {
+  return "/evals/speclists/create-from-metaforecast";
+}
+
+export function createSpecListFromGitHubIssuesRoute() {
+  return "/evals/speclists/create-from-github-issues";
+}
+
 export function evaluationsRoute() {
   return "/evals";
 }

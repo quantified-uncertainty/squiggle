@@ -5,7 +5,7 @@ import { EvaluationsTable } from "@/evals/components/EvaluationsTable";
 import { SpecListActionsButton } from "@/evals/components/SpecListActionsButton";
 import { getSpecListById } from "@/evals/data/specLists";
 import { getEvalsBySpecListId } from "@/evals/data/summaryEvals";
-import { evaluationsRoute } from "@/lib/routes";
+import { evaluationsRoute, speclistsRoute } from "@/lib/routes";
 
 export const dynamicParams = true;
 
@@ -47,7 +47,7 @@ export default async function SpecListDetailPage({
             specListId={specList.id}
             specListName={specList.name}
           />
-          <StyledLink href="/speclists">← Back to Spec Lists</StyledLink>
+          <StyledLink href={speclistsRoute()}>← Back to Spec Lists</StyledLink>
         </div>
       </div>
 

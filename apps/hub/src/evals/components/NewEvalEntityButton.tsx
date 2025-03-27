@@ -2,11 +2,15 @@
 import { useSelectedLayoutSegment } from "next/navigation";
 import { FC } from "react";
 
-import { PlusIcon } from "@quri/ui";
+import { ButtonWithDropdown, DropdownMenu, PlusIcon } from "@quri/ui";
 
-import { LinkButton } from "@/components/ui/LinkButton";
+import { DropdownMenuNextLinkItem } from "@/components/ui/DropdownMenuNextLinkItem";
 import { CreateEvalRunnerButton } from "@/evals/components/CreateEvalRunnerButton";
-import { createSpecListRoute } from "@/lib/routes";
+import {
+  createSpecListFromGitHubIssuesRoute,
+  createSpecListFromMetaforecastRoute,
+  createSpecListRoute,
+} from "@/lib/routes";
 
 export const NewEvalEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
@@ -14,12 +18,29 @@ export const NewEvalEntityButton: FC = () => {
   switch (segment) {
     case "speclists":
       return (
-        <LinkButton href={createSpecListRoute()}>
+        <ButtonWithDropdown
+          renderDropdown={({ close }) => (
+            <DropdownMenu>
+              <DropdownMenuNextLinkItem
+                href={createSpecListRoute()}
+                title="Manually"
+              />
+              <DropdownMenuNextLinkItem
+                href={createSpecListFromMetaforecastRoute()}
+                title="From Metaforecast"
+              />
+              <DropdownMenuNextLinkItem
+                href={createSpecListFromGitHubIssuesRoute()}
+                title="From GitHub Issues"
+              />
+            </DropdownMenu>
+          )}
+        >
           <div className="flex items-center gap-1">
             <PlusIcon size={16} />
             New Spec List
           </div>
-        </LinkButton>
+        </ButtonWithDropdown>
       );
     case "eval-runners":
       return <CreateEvalRunnerButton />;
