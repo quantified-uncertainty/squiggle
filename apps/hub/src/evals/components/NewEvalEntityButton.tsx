@@ -16,10 +16,10 @@ export const NewEvalEntityButton: FC = () => {
   const segment = useSelectedLayoutSegment();
 
   switch (segment) {
-    case "speclists":
+    case "question-sets":
       return (
         <ButtonWithDropdown
-          renderDropdown={({ close }) => (
+          renderDropdown={() => (
             <DropdownMenu>
               <DropdownMenuNextLinkItem
                 href={createQuestionSetRoute()}
@@ -42,7 +42,7 @@ export const NewEvalEntityButton: FC = () => {
           </div>
         </ButtonWithDropdown>
       );
-    case "eval-runners":
+    case "epistemic-agents":
       return <CreateEpistemicAgentButton />;
     default:
       return null;

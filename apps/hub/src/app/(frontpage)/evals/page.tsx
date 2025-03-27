@@ -13,7 +13,7 @@ export default async function EvalsPage() {
   return (
     <EvaluationsTable
       evaluations={evals}
-      emptyMessage="No evaluations found. Run evaluations using the CLI tool."
+      emptyMessage="No evaluations found. You can produce new evaluations running some epistemic agent on a question set."
     />
   );
 }

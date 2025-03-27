@@ -3,7 +3,7 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
-import { Card } from "@/components/ui/Card";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { getAllEpistemicAgents } from "@/evals/data/epistemicAgents";
 import { epistemicAgentRoute } from "@/lib/routes";
@@ -18,11 +18,9 @@ export default async function EpistemicAgentsPage() {
   return (
     <div>
       {runners.length === 0 ? (
-        <Card theme="big">
-          <div className="text-center text-gray-500">
-            {`No epistemic agents found. Use the "Create Epistemic Agent" button to add one.`}
-          </div>
-        </Card>
+        <NoEntitiesCard>
+          {`No epistemic agents found. Use the "Create Epistemic Agent" button to add one.`}
+        </NoEntitiesCard>
       ) : (
         <Table>
           <Table.Header>

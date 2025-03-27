@@ -5,6 +5,7 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { StyledLink } from "@/components/ui/StyledLink";
 import {
   epistemicAgentRoute,
@@ -27,7 +28,7 @@ export function EvaluationsTable({
   emptyMessage = "No evaluations found.",
 }: EvaluationsTableProps) {
   if (evaluations.length === 0) {
-    return <div className="p-6 text-center text-gray-500">{emptyMessage}</div>;
+    return <NoEntitiesCard>{emptyMessage}</NoEntitiesCard>;
   }
 
   // Format cost to display as currency
