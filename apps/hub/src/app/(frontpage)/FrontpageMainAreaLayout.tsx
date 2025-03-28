@@ -11,7 +11,7 @@ export const FrontpageMainAreaLayout: FC<
   return (
     <div
       className={clsx(
-        "mx-auto mb-8 mt-8 max-w-4xl",
+        "mx-auto mb-8 mt-8 max-w-4xl px-2",
         theme === "wide" && "max-w-6xl"
       )}
     >

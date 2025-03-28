@@ -1,19 +1,16 @@
 "use client";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import { FC } from "react";
+import { FC, PropsWithChildren, useState } from "react";
+
+import { DotsHorizontalIcon } from "@quri/ui";
 
 import { Link } from "@/components/ui/Link";
-import {
-  definitionsRoute,
-  epistemicAgentsRoute,
-  evaluationsRoute,
-  groupsRoute,
-  questionSetsRoute,
-  variablesRoute,
-} from "@/lib/routes";
 
-const NavItem: FC<{ name: string; href: string }> = ({ name, href }) => {
+export const PageMenuLink: FC<{ name: string; href: string }> = ({
+  name,
+  href,
+}) => {
   const pathname = usePathname();
   const isSelected = pathname === href;
 
@@ -40,21 +37,29 @@ const NavItem: FC<{ name: string; href: string }> = ({ name, href }) => {
   );
 };
 
-const Separator: FC = () => {
+export const PageMenuSeparator: FC = () => {
   return <div className="-mx-1 my-1 h-px bg-slate-200" />;
 };
 
-export const DesktopFrontpageNav: FC = () => {
+export const PageMenu: FC<PropsWithChildren> = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="flex flex-col">
-      <NavItem name="Models" href="/" />
-      <NavItem name="Variables" href={variablesRoute()} />
-      <NavItem name="Definitions" href={definitionsRoute()} />
-      <NavItem name="Groups" href={groupsRoute()} />
-      <Separator />
-      <NavItem name="Evals" href={evaluationsRoute()} />
-      <NavItem name="Question Sets" href={questionSetsRoute()} />
-      <NavItem name="Epistemic Agents" href={epistemicAgentsRoute()} />
+    <div>
+      <div
+        className="flex h-12 cursor-pointer items-center justify-end md:hidden"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <DotsHorizontalIcon className="h-6 w-6 text-slate-500" />
+      </div>
+      <div
+        className={clsx(
+          "flex flex-col md:pointer-events-auto md:block",
+          isOpen ? "block" : "hidden"
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 };

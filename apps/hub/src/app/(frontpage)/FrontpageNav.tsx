@@ -1,12 +1,13 @@
+"use client";
 import { FC } from "react";
 
 import {
-  StyledTabLink,
-  StyledTabLinkList,
-} from "@/components/ui/StyledTabLink";
+  PageMenu,
+  PageMenuLink,
+  PageMenuSeparator,
+} from "@/components/ui/PageMenu";
 import {
   definitionsRoute,
-  epistemicAgentsRoute,
   evaluationsRoute,
   groupsRoute,
   questionSetsRoute,
@@ -15,24 +16,14 @@ import {
 
 export const FrontpageNav: FC = () => {
   return (
-    <div className="flex items-center gap-2">
-      <StyledTabLinkList>
-        <StyledTabLink name="Models" href="/" prefetch />
-        <StyledTabLink name="Variables" href={variablesRoute()} prefetch />
-        <StyledTabLink name="Definitions" href={definitionsRoute()} prefetch />
-        <StyledTabLink name="Groups" href={groupsRoute()} prefetch />
-        <StyledTabLink name="Evals" href={evaluationsRoute()} prefetch />
-        <StyledTabLink
-          name="Question Sets"
-          href={questionSetsRoute()}
-          prefetch
-        />
-        <StyledTabLink
-          name="Epistemic Agents"
-          href={epistemicAgentsRoute()}
-          prefetch
-        />
-      </StyledTabLinkList>
-    </div>
+    <PageMenu>
+      <PageMenuLink name="Models" href="/" />
+      <PageMenuLink name="Variables" href={variablesRoute()} />
+      <PageMenuLink name="Definitions" href={definitionsRoute()} />
+      <PageMenuLink name="Groups" href={groupsRoute()} />
+      <PageMenuSeparator />
+      <PageMenuLink name="Evals" href={evaluationsRoute()} />
+      <PageMenuLink name="Question Sets" href={questionSetsRoute()} />
+    </PageMenu>
   );
 };

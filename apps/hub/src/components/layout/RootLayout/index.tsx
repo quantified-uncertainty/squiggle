@@ -8,13 +8,10 @@ import { auth } from "@/lib/server/auth";
 import { isAdminUser } from "@/users/auth";
 
 import { ReactRoot } from "../../ReactRoot";
-import { PageFooterIfNecessary } from "./PageFooterIfNecessary";
-import { PageMenu } from "./PageMenu";
+import { SiteFooterIfNecessary } from "./SiteFooterIfNecessary";
+import { TopMenu } from "./TopMenu";
 
-const WrappedPageMenu: FC = async () => {
-  // TODO - we wait for the session, and then we do another GraphQL query in
-  // `<PageMenu />`, sequentially.  We could select all relevant session data
-  // through GraphQL, or avoid GraphQL queries altogether.
+const WrappedTopMenu: FC = async () => {
   const session = await auth();
   const username = session?.user?.username;
   const groups = username
@@ -23,7 +20,7 @@ const WrappedPageMenu: FC = async () => {
 
   const isAdmin = session?.user ? isAdminUser(session.user) : false;
 
-  return <PageMenu session={session} groups={groups} isAdmin={isAdmin} />;
+  return <TopMenu session={session} groups={groups} isAdmin={isAdmin} />;
 };
 
 const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
@@ -38,7 +35,7 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
         </div>
         {/* Top menu is not essential for fetching and rendering other content, so we render it in a Suspense boundary */}
         <Suspense fallback={null}>
-          <WrappedPageMenu />
+          <WrappedTopMenu />
         </Suspense>
       </div>
       <div
@@ -49,7 +46,7 @@ const InnerRootLayout: FC<PropsWithChildren> = ({ children }) => {
       >
         {children}
       </div>
-      <PageFooterIfNecessary />
+      <SiteFooterIfNecessary />
     </div>
   );
 };

@@ -18,7 +18,7 @@ import logoPic from "@/public/logo.png";
 
 const linkClasses = "items-center flex hover:text-gray-900";
 
-export const PageFooter: FC = () => {
+export const SiteFooter: FC = () => {
   const logoSection = (
     <div className="flex h-16 items-center gap-x-5">
       <Image

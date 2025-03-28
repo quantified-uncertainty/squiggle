@@ -27,16 +27,16 @@ import { GlobalSearch } from "../../GlobalSearch";
 import { DesktopUserControls } from "./DesktopUserControls";
 import { DropdownWithArrow } from "./DropdownWithArrow";
 import { MyGroupsMenu } from "./MyGroupsMenu";
-import { MenuLinkModeProps, PageMenuLink } from "./PageMenuLink";
+import { MenuLinkModeProps, TopMenuLink } from "./TopMenuLink";
 import { useForceChooseUsername } from "./useForceChooseUsername";
 import { UserControlsMenu } from "./UserControlsMenu";
 
 const AboutMenuLink: FC<MenuLinkModeProps> = (props) => {
-  return <PageMenuLink {...props} href={aboutRoute()} title="About" />;
+  return <TopMenuLink {...props} href={aboutRoute()} title="About" />;
 };
 
 const DocsMenuLink: FC<MenuLinkModeProps> = (props) => (
-  <PageMenuLink
+  <TopMenuLink
     {...props}
     href={SQUIGGLE_DOCS_URL}
     icon={BookOpenIcon}
@@ -46,12 +46,12 @@ const DocsMenuLink: FC<MenuLinkModeProps> = (props) => (
 );
 
 const AiMenuLink: FC<MenuLinkModeProps> = (props) => (
-  <PageMenuLink {...props} href={aiRoute()} icon={BoltIcon} title="AI" />
+  <TopMenuLink {...props} href={aiRoute()} icon={BoltIcon} title="AI" />
 );
 
 const NewModelMenuLink: FC<MenuLinkModeProps> = (props) => {
   return (
-    <PageMenuLink
+    <TopMenuLink
       {...props}
       href={newModelRoute()}
       icon={PlusIcon}
@@ -151,7 +151,7 @@ const MobileMenu: FC<MenuProps> = ({ groups, session }) => {
   );
 };
 
-export const PageMenu: FC<MenuProps> = (props) => {
+export const TopMenu: FC<MenuProps> = (props) => {
   // TODO - if redirecting, return a custom menu; right now we render the
   // confused version where "New Model" button is visible, but "Sign In" button
   // is visible too

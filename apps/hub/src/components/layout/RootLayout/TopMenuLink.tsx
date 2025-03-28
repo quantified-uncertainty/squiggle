@@ -24,7 +24,7 @@ type Props = {
   prefetch?: boolean;
 } & MenuLinkModeProps;
 
-export const PageMenuLink: FC<Props> = ({
+export const TopMenuLink: FC<Props> = ({
   mode,
   close,
   title,
