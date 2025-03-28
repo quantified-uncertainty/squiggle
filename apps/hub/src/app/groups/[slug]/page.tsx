@@ -4,7 +4,7 @@ import { hasGroupMembership } from "@/groups/data/helpers";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
 
-import { NewModelButton } from "./NewModelButton";
+import { NewModelButton } from "../../../components/NewModelButton";
 
 type Props = {
   params: Promise<{ slug: string }>;

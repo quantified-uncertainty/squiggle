@@ -2,10 +2,8 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { WithNavMenuLayout } from "@/components/layout/WithNavMenuLayout";
 import { loadGroupCard } from "@/groups/data/groupCards";
-import { hasGroupMembership } from "@/groups/data/helpers";
 
 import { GroupNav } from "./GroupNav";
 
@@ -20,13 +18,10 @@ export default async function GroupLayout({ params, children }: Props) {
     notFound();
   }
 
-  const isMember = await hasGroupMembership(slug);
-
   return (
     <WithNavMenuLayout menu={<GroupNav group={group} />}>
-      <NarrowPageLayout>{children}</NarrowPageLayout>
+      {children}
     </WithNavMenuLayout>
-    // {isMember && <NewModelButton group={group.slug} />}
   );
 }
 

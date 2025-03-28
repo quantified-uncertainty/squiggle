@@ -1,12 +1,10 @@
 import { FC, Suspense } from "react";
 
-import { LinkButton } from "@/components/ui/LinkButton";
-import { newModelRoute } from "@/lib/routes";
+import { MainAreaLayout } from "@/components/layout/MainAreaLayout";
+import { NewModelButton } from "@/components/NewModelButton";
 import { auth } from "@/lib/server/auth";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
-
-import { MainAreaLayout } from "../../components/layout/MainAreaLayout";
 
 const MainArea: FC = async () => {
   const page = await loadModelCards();
@@ -21,11 +19,7 @@ const Actions: FC = async () => {
     return null;
   }
 
-  return (
-    <LinkButton href={newModelRoute()} theme="primary">
-      New Model
-    </LinkButton>
-  );
+  return <NewModelButton />;
 };
 
 export default function FrontPage() {

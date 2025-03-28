@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { WithNavMenuLayout } from "@/components/layout/WithNavMenuLayout";
 import { auth } from "@/lib/server/auth";
 import { loadLayoutUser } from "@/users/data/layoutUser";
@@ -27,7 +26,7 @@ export default async function OuterUserLayout({
 
   return (
     <WithNavMenuLayout menu={<UserNav user={user} isMe={isMe} />}>
-      <NarrowPageLayout>{children}</NarrowPageLayout>
+      {children}
     </WithNavMenuLayout>
   );
 }

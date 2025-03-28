@@ -35,7 +35,6 @@ const FrontpageNavEvalsIfRoot: FC = async () => {
 
   return (
     <>
-      <PageMenuSubheader>Experimental</PageMenuSubheader>
       <PageMenuLink name="Question Sets" href={questionSetsRoute()} />
       <PageMenuLink name="Evals" href={evaluationsRoute()} />
       <PageMenuLink name="Epistemic Agents" href={epistemicAgentsRoute()} />
@@ -51,8 +50,9 @@ export const FrontpageNav: FC = () => {
     >
       <PageMenuLink name="Models" href="/" />
       <PageMenuLink name="Variables" href={variablesRoute()} />
-      <PageMenuLink name="Definitions" href={definitionsRoute()} />
       <PageMenuLink name="Groups" href={groupsRoute()} />
+      <PageMenuSubheader>Experimental</PageMenuSubheader>
+      <PageMenuLink name="Definitions" href={definitionsRoute()} />
       <Suspense>
         <FrontpageNavEvalsIfRoot />
       </Suspense>

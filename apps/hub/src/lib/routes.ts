@@ -183,7 +183,7 @@ export function groupMembersRoute({ slug }: { slug: string }) {
   return `${groupRoute({ slug })}/members`;
 }
 
-export function newModelRoute(params?: { group: string }) {
+export function newModelRoute(params?: { group?: string }) {
   const paramsString = params?.group
     ? "?" + new URLSearchParams({ group: params.group }).toString()
     : "";

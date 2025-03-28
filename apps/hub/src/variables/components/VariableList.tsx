@@ -17,7 +17,9 @@ export const VariableList: FC<Props> = ({ page: initialPage }) => {
   const page = usePaginator(initialPage);
 
   return page.items.length === 0 ? (
-    <NoEntitiesCard>No variables found.</NoEntitiesCard>
+    <NoEntitiesCard>
+      No variables found. To create a variable, export a variable from a model.
+    </NoEntitiesCard>
   ) : (
     <div>
       <div className="grid gap-x-4 gap-y-8 md:grid-cols-2">

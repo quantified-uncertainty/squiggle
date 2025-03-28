@@ -8,6 +8,7 @@ import { MainAreaLayout } from "../../../components/layout/MainAreaLayout";
 
 export default async function GroupsLayout({ children }: PropsWithChildren) {
   const session = await auth();
+
   return (
     <MainAreaLayout
       title="Groups"

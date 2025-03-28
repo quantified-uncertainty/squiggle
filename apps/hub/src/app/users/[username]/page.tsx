@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 
 import { MainAreaLayout } from "@/components/layout/MainAreaLayout";
+import { NewModelButton } from "@/components/NewModelButton";
 import { NoEntitiesCard } from "@/components/NoEntitiesCard";
-import { LinkButton } from "@/components/ui/LinkButton";
-import { newModelRoute } from "@/lib/routes";
 import { auth } from "@/lib/server/auth";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
@@ -23,13 +22,7 @@ export default async function UserPage({ params }: Props) {
   return (
     <MainAreaLayout
       title={`Models by ${username}`}
-      actions={
-        isMe && (
-          <LinkButton href={newModelRoute()} theme="primary">
-            New Model
-          </LinkButton>
-        )
-      }
+      actions={isMe && <NewModelButton />}
     >
       {page.items.length ? (
         <ModelList page={page} showOwner={false} />
