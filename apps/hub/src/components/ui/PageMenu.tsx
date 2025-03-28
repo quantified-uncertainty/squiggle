@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { FC, PropsWithChildren, ReactNode, useEffect, useState } from "react";
 
-import { Bars3Icon, XIcon } from "@quri/ui";
+import { Bars3Icon, IconProps, XIcon } from "@quri/ui";
 
 import { Link } from "@/components/ui/Link";
 
@@ -42,7 +42,21 @@ export const PageMenuSeparator: FC = () => {
   return <div className="-mx-1 my-1 h-px bg-slate-200" />;
 };
 
-export const PageMenuHeader: FC<PropsWithChildren> = ({ children }) => {
+// based on EntityInfo styles
+export const PageManuDesktopHeader: FC<{
+  icon: FC<IconProps>;
+  title: string;
+}> = ({ icon: Icon, title }) => {
+  return (
+    <div className="mb-2 flex items-center border-b border-slate-200 px-2 pb-4">
+      <Icon className="mr-2 text-gray-700 opacity-50" size={18} />
+      <div className="overflow-hidden text-ellipsis whitespace-nowrap text-gray-600">
+        {title}
+      </div>
+    </div>
+  );
+};
+export const PageMenuSubheader: FC<PropsWithChildren> = ({ children }) => {
   // similar to DropdownMenuHeader
   return (
     <div className="bg-slate-100 px-2 py-1.5 text-sm font-semibold">

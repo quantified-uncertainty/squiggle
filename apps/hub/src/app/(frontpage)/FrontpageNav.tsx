@@ -2,10 +2,13 @@
 import { usePathname } from "next/navigation";
 import { FC } from "react";
 
+import { GlobeIcon } from "@quri/ui";
+
 import {
+  PageManuDesktopHeader,
   PageMenu,
-  PageMenuHeader,
   PageMenuLink,
+  PageMenuSubheader,
 } from "@/components/ui/PageMenu";
 import {
   definitionsRoute,
@@ -49,12 +52,17 @@ const MobileNavHeader: FC = () => {
 
 export const FrontpageNav: FC = () => {
   return (
-    <PageMenu mobileHeader={<MobileNavHeader />}>
+    <PageMenu
+      mobileHeader={<MobileNavHeader />}
+      desktopHeader={
+        <PageManuDesktopHeader icon={GlobeIcon} title="All Entities" />
+      }
+    >
       <PageMenuLink name="Models" href="/" />
       <PageMenuLink name="Variables" href={variablesRoute()} />
       <PageMenuLink name="Definitions" href={definitionsRoute()} />
       <PageMenuLink name="Groups" href={groupsRoute()} />
-      <PageMenuHeader>Experimental</PageMenuHeader>
+      <PageMenuSubheader>Experimental</PageMenuSubheader>
       <PageMenuLink name="Question Sets" href={questionSetsRoute()} />
       <PageMenuLink name="Evals" href={evaluationsRoute()} />
       <PageMenuLink name="Epistemic Agents" href={epistemicAgentsRoute()} />
