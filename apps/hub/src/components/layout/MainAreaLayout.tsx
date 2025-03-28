@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { FC, PropsWithChildren, ReactNode } from "react";
+import { FC, PropsWithChildren, ReactNode, Suspense } from "react";
+import Skeleton from "react-loading-skeleton";
 
 export const MainAreaLayout: FC<
   PropsWithChildren<{
@@ -19,7 +20,9 @@ export const MainAreaLayout: FC<
         <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
         {actions && <div>{actions}</div>}
       </div>
-      {children}
+      <Suspense fallback={<Skeleton count={10} height={24} />}>
+        {children}
+      </Suspense>
     </div>
   );
 };
