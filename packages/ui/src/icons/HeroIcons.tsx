@@ -109,6 +109,17 @@ export const Bars3CenterLeftIcon: FC<IconProps> = (props) => (
   </Icon>
 );
 
+// patched with Sonnet to match Bars3CenterLeftIcon
+export const Bars3Icon: FC<IconProps> = (props) => (
+  <Icon {...props}>
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
+    />
+  </Icon>
+);
+
 export const BookOpenIcon: FC<IconProps> = (props) => (
   <Icon {...props}>
     <path d="M10.75 16.82A7.462 7.462 0 0115 15.5c.71 0 1.396.098 2.046.282A.75.75 0 0018 15.06v-11a.75.75 0 00-.546-.721A9.006 9.006 0 0015 3a8.963 8.963 0 00-4.25 1.065V16.82zM9.25 4.065A8.963 8.963 0 005 3c-.85 0-1.673.118-2.454.339A.75.75 0 002 4.06v11a.75.75 0 00.954.721A7.506 7.506 0 015 15.5c1.579 0 3.042.487 4.25 1.32V4.065z" />

@@ -53,6 +53,7 @@ export {
   BackwardIcon,
   BarChartIcon,
   Bars3CenterLeftIcon,
+  Bars3Icon,
   Bars4Icon,
   BoltIcon,
   BookOpenIcon,

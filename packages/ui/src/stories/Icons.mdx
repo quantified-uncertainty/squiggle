@@ -1,25 +1,172 @@
 import { Meta } from "@storybook/blocks";
-
 import {
-  ChevronRightIcon,
-  ChevronLeftIcon,
+  // Hero Icons
+  AdjustmentsHorizontalIcon,
+  AdjustmentsVerticalIcon,
+  ArchiveBoxIcon,
+  BackwardIcon,
+  BarChartIcon,
+  Bars3CenterLeftIcon,
+  Bars3Icon,
+  Bars4Icon,
+  BoltIcon,
+  BookOpenIcon,
+  CalculatorIcon,
+  CheckIcon,
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ChevronUpIcon,
+  ClipboardCopyIcon,
+  CodeBracketIcon,
+  CodeBracketSquareIcon,
+  Cog8ToothIcon,
+  CommandLineIcon,
+  CommentIcon,
+  CubeTransparentIcon,
+  CurlyBracketsIcon,
+  DocumentTextIcon,
+  FireIcon,
+  GlobeIcon,
+  GroupIcon,
+  HashIcon,
+  HelpIcon,
+  LinkIcon,
+  ListBulletIcon,
+  LockIcon,
+  PauseIcon,
+  PlayIcon,
+  PuzzleIcon,
+  RectangleStackIcon,
+  ResetIcon,
+  RightArrowIcon,
+  ScaleIcon,
+  ScatterPlotIcon,
+  SearchIcon,
+  ShareIcon,
+  SquareBracketIcon,
+  TableCellsIcon,
+  UserCircleIcon,
+  UserIcon,
+  VariableIcon,
+  WrenchIcon,
+  // Die Icons
+  Die1Icon,
+  Die2Icon,
+  Die3Icon,
+  Die4Icon,
+  Die5Icon,
+  Die6Icon,
+  // Other Icons
+  CheckCircleIcon,
+  DotsHorizontalIcon,
+  EditIcon,
+  EmptyIcon,
+  ErrorIcon,
+  ExternalLinkIcon,
+  FocusIcon,
+  PlusIcon,
+  RefreshIcon,
+  SignOutIcon,
+  TrashIcon,
+  TriangleIcon,
+  XIcon,
 } from "../index.ts";
 
 <Meta title="UI/Icons" />
 
+export const IconDisplay = ({ icon: Icon, name }) => {
+  return (<div className="flex flex-col items-center justify-start bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-100">
+    <div className="flex items-center justify-center h-10 w-10 text-slate-700">
+      <Icon className="h-6 w-6" />
+    </div>
+    <span className="!text-sm text-gray-700 font-medium mt-2 text-center">{name}</span>
+  </div>);
+};
+
 # Icons
 
-Add lists of icons here (it's more convenient than creating separate story files for each icon.)
+Below are all available icons in the UI package. Hover over an icon to highlight it.
 
-## Chevron icons
+## Hero Icons
 
-<ChevronRightIcon />
-<ChevronLeftIcon />
-<ChevronDownIcon />
-<ChevronUpIcon />
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-6">
+  <IconDisplay icon={AdjustmentsHorizontalIcon} name="AdjustmentsHorizontalIcon" />
+  <IconDisplay icon={AdjustmentsVerticalIcon} name="AdjustmentsVerticalIcon" />
+  <IconDisplay icon={ArchiveBoxIcon} name="ArchiveBoxIcon" />
+  <IconDisplay icon={BackwardIcon} name="BackwardIcon" />
+  <IconDisplay icon={BarChartIcon} name="BarChartIcon" />
+  <IconDisplay icon={Bars3CenterLeftIcon} name="Bars3CenterLeftIcon" />
+  <IconDisplay icon={Bars3Icon} name="Bars3Icon" />
+  <IconDisplay icon={Bars4Icon} name="Bars4Icon" />
+  <IconDisplay icon={BoltIcon} name="BoltIcon" />
+  <IconDisplay icon={BookOpenIcon} name="BookOpenIcon" />
+  <IconDisplay icon={CalculatorIcon} name="CalculatorIcon" />
+  <IconDisplay icon={CheckIcon} name="CheckIcon" />
+  <IconDisplay icon={ChevronDownIcon} name="ChevronDownIcon" />
+  <IconDisplay icon={ChevronLeftIcon} name="ChevronLeftIcon" />
+  <IconDisplay icon={ChevronRightIcon} name="ChevronRightIcon" />
+  <IconDisplay icon={ChevronUpIcon} name="ChevronUpIcon" />
+  <IconDisplay icon={ClipboardCopyIcon} name="ClipboardCopyIcon" />
+  <IconDisplay icon={CodeBracketIcon} name="CodeBracketIcon" />
+  <IconDisplay icon={CodeBracketSquareIcon} name="CodeBracketSquareIcon" />
+  <IconDisplay icon={Cog8ToothIcon} name="Cog8ToothIcon" />
+  <IconDisplay icon={CommandLineIcon} name="CommandLineIcon" />
+  <IconDisplay icon={CommentIcon} name="CommentIcon" />
+  <IconDisplay icon={CubeTransparentIcon} name="CubeTransparentIcon" />
+  <IconDisplay icon={CurlyBracketsIcon} name="CurlyBracketsIcon" />
+  <IconDisplay icon={DocumentTextIcon} name="DocumentTextIcon" />
+  <IconDisplay icon={FireIcon} name="FireIcon" />
+  <IconDisplay icon={GlobeIcon} name="GlobeIcon" />
+  <IconDisplay icon={GroupIcon} name="GroupIcon" />
+  <IconDisplay icon={HashIcon} name="HashIcon" />
+  <IconDisplay icon={HelpIcon} name="HelpIcon" />
+  <IconDisplay icon={LinkIcon} name="LinkIcon" />
+  <IconDisplay icon={ListBulletIcon} name="ListBulletIcon" />
+  <IconDisplay icon={LockIcon} name="LockIcon" />
+  <IconDisplay icon={PauseIcon} name="PauseIcon" />
+  <IconDisplay icon={PlayIcon} name="PlayIcon" />
+  <IconDisplay icon={PuzzleIcon} name="PuzzleIcon" />
+  <IconDisplay icon={RectangleStackIcon} name="RectangleStackIcon" />
+  <IconDisplay icon={ResetIcon} name="ResetIcon" />
+  <IconDisplay icon={RightArrowIcon} name="RightArrowIcon" />
+  <IconDisplay icon={ScaleIcon} name="ScaleIcon" />
+  <IconDisplay icon={ScatterPlotIcon} name="ScatterPlotIcon" />
+  <IconDisplay icon={SearchIcon} name="SearchIcon" />
+  <IconDisplay icon={ShareIcon} name="ShareIcon" />
+  <IconDisplay icon={SquareBracketIcon} name="SquareBracketIcon" />
+  <IconDisplay icon={TableCellsIcon} name="TableCellsIcon" />
+  <IconDisplay icon={UserCircleIcon} name="UserCircleIcon" />
+  <IconDisplay icon={UserIcon} name="UserIcon" />
+  <IconDisplay icon={VariableIcon} name="VariableIcon" />
+  <IconDisplay icon={WrenchIcon} name="WrenchIcon" />
+</div>
 
-## TODO
+## Die Icons
 
-Other icons.
+<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
+  <IconDisplay icon={Die1Icon} name="Die1Icon" />
+  <IconDisplay icon={Die2Icon} name="Die2Icon" />
+  <IconDisplay icon={Die3Icon} name="Die3Icon" />
+  <IconDisplay icon={Die4Icon} name="Die4Icon" />
+  <IconDisplay icon={Die5Icon} name="Die5Icon" />
+  <IconDisplay icon={Die6Icon} name="Die6Icon" />
+</div>
+
+## Other Icons
+
+<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mt-6">
+  <IconDisplay icon={CheckCircleIcon} name="CheckCircleIcon" />
+  <IconDisplay icon={DotsHorizontalIcon} name="DotsHorizontalIcon" />
+  <IconDisplay icon={EditIcon} name="EditIcon" />
+  <IconDisplay icon={EmptyIcon} name="EmptyIcon" />
+  <IconDisplay icon={ErrorIcon} name="ErrorIcon" />
+  <IconDisplay icon={ExternalLinkIcon} name="ExternalLinkIcon" />
+  <IconDisplay icon={FocusIcon} name="FocusIcon" />
+  <IconDisplay icon={PlusIcon} name="PlusIcon" />
+  <IconDisplay icon={RefreshIcon} name="RefreshIcon" />
+  <IconDisplay icon={SignOutIcon} name="SignOutIcon" />
+  <IconDisplay icon={TrashIcon} name="TrashIcon" />
+  <IconDisplay icon={TriangleIcon} name="TriangleIcon" />
+  <IconDisplay icon={XIcon} name="XIcon" />
+</div>
