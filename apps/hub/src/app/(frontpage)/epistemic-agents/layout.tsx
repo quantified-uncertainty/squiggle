@@ -3,7 +3,7 @@ import { PropsWithChildren } from "react";
 import { CreateEpistemicAgentButton } from "@/evals/components/CreateEpistemicAgentButton";
 import { auth } from "@/lib/server/auth";
 
-import { FrontpageMainAreaLayout } from "../FrontpageMainAreaLayout";
+import { MainAreaLayout } from "../../../components/layout/MainAreaLayout";
 
 export default async function EpistemicAgentsLayout({
   children,
@@ -11,11 +11,11 @@ export default async function EpistemicAgentsLayout({
   const session = await auth();
 
   return (
-    <FrontpageMainAreaLayout
+    <MainAreaLayout
       title="Epistemic Agents"
       actions={session && <CreateEpistemicAgentButton />}
     >
       {children}
-    </FrontpageMainAreaLayout>
+    </MainAreaLayout>
   );
 }

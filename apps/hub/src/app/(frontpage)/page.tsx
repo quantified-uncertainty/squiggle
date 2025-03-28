@@ -4,7 +4,7 @@ import { auth } from "@/lib/server/auth";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
 
-import { FrontpageMainAreaLayout } from "./FrontpageMainAreaLayout";
+import { MainAreaLayout } from "../../components/layout/MainAreaLayout";
 
 export default async function FrontPage() {
   const page = await loadModelCards();
@@ -12,7 +12,7 @@ export default async function FrontPage() {
   const session = await auth();
 
   return (
-    <FrontpageMainAreaLayout
+    <MainAreaLayout
       title="Models"
       actions={
         session && (
@@ -23,6 +23,6 @@ export default async function FrontPage() {
       }
     >
       <ModelList page={page} showOwner={true} />
-    </FrontpageMainAreaLayout>
+    </MainAreaLayout>
   );
 }

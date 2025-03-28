@@ -1,9 +1,11 @@
 import { PropsWithChildren } from "react";
 
-import { WithMenuLayout } from "@/components/layout/WithMenuLayout";
+import { WithNavMenuLayout } from "@/components/layout/WithNavMenuLayout";
 
 import { FrontpageNav } from "./FrontpageNav";
 
 export default function FrontPageLayout({ children }: PropsWithChildren) {
-  return <WithMenuLayout menu={<FrontpageNav />}>{children}</WithMenuLayout>;
+  return (
+    <WithNavMenuLayout menu={<FrontpageNav />}>{children}</WithNavMenuLayout>
+  );
 }

@@ -54,8 +54,9 @@ export const PageMenuHeader: FC<PropsWithChildren> = ({ children }) => {
 export const PageMenu: FC<
   PropsWithChildren<{
     mobileHeader?: ReactNode;
+    desktopHeader?: ReactNode;
   }>
-> = ({ children, mobileHeader = null }) => {
+> = ({ children, mobileHeader = null, desktopHeader = null }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const Icon = isOpen ? XIcon : Bars3Icon;
@@ -73,9 +74,10 @@ export const PageMenu: FC<
         className="flex h-12 cursor-pointer items-center justify-between px-2 md:hidden md:px-2"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div>{mobileHeader}</div>
+        <div className="overflow-hidden">{mobileHeader}</div>
         <Icon className="h-5 w-5 text-slate-400 hover:text-slate-500" />
       </div>
+      <div className="hidden md:block">{desktopHeader}</div>
       <div
         className={clsx(
           "flex flex-col pb-2 md:pointer-events-auto md:block",

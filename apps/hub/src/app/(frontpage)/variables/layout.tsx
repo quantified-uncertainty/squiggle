@@ -1,11 +1,7 @@
 import { PropsWithChildren } from "react";
 
-import { FrontpageMainAreaLayout } from "../FrontpageMainAreaLayout";
+import { MainAreaLayout } from "../../../components/layout/MainAreaLayout";
 
 export default function VariablesLayout({ children }: PropsWithChildren) {
-  return (
-    <FrontpageMainAreaLayout title="Variables">
-      {children}
-    </FrontpageMainAreaLayout>
-  );
+  return <MainAreaLayout title="Variables">{children}</MainAreaLayout>;
 }

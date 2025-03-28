@@ -1,14 +1,14 @@
 import { PropsWithChildren } from "react";
 
-import { FrontpageMainAreaLayout } from "../FrontpageMainAreaLayout";
+import { MainAreaLayout } from "../../../components/layout/MainAreaLayout";
 import { LayoutActions } from "./LayoutActions";
 
 export default async function QuestionSetsLayout({
   children,
 }: PropsWithChildren) {
   return (
-    <FrontpageMainAreaLayout title="Question Sets" actions={<LayoutActions />}>
+    <MainAreaLayout title="Question Sets" actions={<LayoutActions />}>
       {children}
-    </FrontpageMainAreaLayout>
+    </MainAreaLayout>
   );
 }

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FC, PropsWithChildren, ReactNode } from "react";
 
-export const FrontpageMainAreaLayout: FC<
+export const MainAreaLayout: FC<
   PropsWithChildren<{
     title: string;
     actions?: ReactNode;
