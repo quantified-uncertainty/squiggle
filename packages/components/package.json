@@ -86,7 +86,7 @@
     "storybook": "8.5.3",
     "tailwindcss": "^3.4.3",
     "typescript": "5.7.3",
-    "vite": "^6.2.3"
+    "vite": "^6.2.4"
   },
   "peerDependencies": {
     "react": "^18 | ^19",
