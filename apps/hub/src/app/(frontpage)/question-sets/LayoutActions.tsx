@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { FC } from "react";
 
 import { ButtonWithDropdown, DropdownMenu, PlusIcon } from "@quri/ui";
@@ -11,6 +12,8 @@ import {
 } from "@/lib/routes";
 
 export const LayoutActions: FC = () => {
+  const router = useRouter();
+
   return (
     <ButtonWithDropdown
       renderDropdown={() => (
@@ -29,6 +32,9 @@ export const LayoutActions: FC = () => {
           />
         </DropdownMenu>
       )}
+      onClick={() => {
+        router.push(createQuestionSetRoute());
+      }}
     >
       <div className="flex items-center gap-1">
         <PlusIcon size={16} />

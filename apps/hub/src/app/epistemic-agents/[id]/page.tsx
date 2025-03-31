@@ -47,7 +47,7 @@ export default async function EpistemicAgentDetailPage({
             <p className="text-sm text-gray-500">ID: {epistemicAgent.id}</p>
           </div>
           <StyledLink href={epistemicAgentsRoute()}>
-            ← Back to Epistemic Agents
+            ← All Epistemic Agents
           </StyledLink>
         </div>
 

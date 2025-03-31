@@ -2,7 +2,7 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
-import { Card } from "@/components/ui/Card";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { QuestionSetActionsButton } from "@/evals/components/QuestionSetActionsButton";
 import { getAllQuestionSets } from "@/evals/data/questionSets";
@@ -18,11 +18,7 @@ export default async function QuestionSetsPage() {
   return (
     <div>
       {questionSets.length === 0 ? (
-        <Card theme="big">
-          <div className="text-center text-gray-500">
-            No question sets found.
-          </div>
-        </Card>
+        <NoEntitiesCard>No question sets found.</NoEntitiesCard>
       ) : (
         <Table>
           <Table.Header>
