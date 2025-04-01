@@ -734,7 +734,7 @@ importers:
         version: 0.7.3(typescript@5.7.3)
       '@fumadocs/content-collections':
         specifier: ^1.1.5
-        version: 1.1.5(@content-collections/core@0.7.3(typescript@5.7.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(fumadocs-core@14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3))
+        version: 1.1.5(@content-collections/core@0.7.3(typescript@5.7.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(fumadocs-core@14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3))
       '@quri/squiggle-lang':
         specifier: workspace:*
         version: link:../../packages/squiggle-lang
@@ -1509,8 +1509,8 @@ importers:
         specifier: workspace:*
         version: link:../../internal-packages/configs
       '@storybook/addon-docs':
-        specifier: ^8.5.3
-        version: 8.5.3(@types/react@19.0.10)(storybook@8.5.3(prettier@3.4.2))
+        specifier: ^8.6.11
+        version: 8.6.11(@types/react@19.0.10)(storybook@8.5.3(prettier@3.4.2))
       '@storybook/addon-essentials':
         specifier: ^8.5.3
         version: 8.5.3(@types/react@19.0.10)(storybook@8.5.3(prettier@3.4.2))
@@ -5566,6 +5566,11 @@ packages:
     peerDependencies:
       storybook: ^8.5.3
 
+  '@storybook/addon-docs@8.6.11':
+    resolution: {integrity: sha512-gTSF1m3HJkeU7GKPYhe8grO48FbpulvIWZ213PtnWedgVkTNieok3oBmmigv17ua/QXH0u5EbaoMSxaAyrsAzg==}
+    peerDependencies:
+      storybook: ^8.6.11
+
   '@storybook/addon-essentials@8.5.3':
     resolution: {integrity: sha512-0zbEWQQZCiYRUxMo6FrfwQER/vi+B8mCLLivdjbSVSvZsjmlpcaBA5uBjbsXfIRcedHlou4QiJXn+nR8thDlKA==}
     peerDependencies:
@@ -5617,6 +5622,18 @@ packages:
       react-dom:
         optional: true
 
+  '@storybook/blocks@8.6.11':
+    resolution: {integrity: sha512-2IyS3nB6SoEjIt0nWUMxtRIjJRUvDU8EF/eMbM4F/FuwIM402P3kNQ4n4+q1xZtYjvoMr5QUq+K8YF4ZlxIz0A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      storybook: ^8.6.11
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
   '@storybook/builder-vite@8.5.3':
     resolution: {integrity: sha512-MxriwzZSVidaXj3kpH/jCOJZUdF7ofcvxmvrMrNehH9UvXIGM6b73CBC5ucnptbnQ7qxYKdAZiMhQbPHZ9cqOQ==}
     peerDependencies:
@@ -5641,6 +5658,11 @@ packages:
     peerDependencies:
       storybook: ^8.5.3
 
+  '@storybook/csf-plugin@8.6.11':
+    resolution: {integrity: sha512-NC/o+SSjSC29hcQrPNoLCDRkqRTagkcAgFf0xEybX3mkLT0q+w3ZHJg1HQz7TtaigIzZ06iIPncif2xKvYgETw==}
+    peerDependencies:
+      storybook: ^8.6.11
+
   '@storybook/csf@0.1.12':
     resolution: {integrity: sha512-9/exVhabisyIVL0VxTCxo01Tdm8wefIXKXfltAPTSr8cbLn5JAxGQ6QV3mjdecLGEOucfoVhAKtJfVHxEK1iqw==}
 
@@ -5649,6 +5671,13 @@ packages:
 
   '@storybook/icons@1.3.2':
     resolution: {integrity: sha512-t3xcbCKkPvqyef8urBM0j/nP6sKtnlRkVgC+8JTbTAZQjaTmOjes3byEgzs89p4B/K6cJsg9wLW2k3SknLtYJw==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+
+  '@storybook/icons@1.4.0':
+    resolution: {integrity: sha512-Td73IeJxOyalzvjQL+JXx72jlIYHgs+REaHiREOqfpo3A2AYYG71AUbcv+lg7mEDIweKVCxsMQ0UKo634c8XeA==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
@@ -5670,6 +5699,13 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
       storybook: ^8.5.3
+
+  '@storybook/react-dom-shim@8.6.11':
+    resolution: {integrity: sha512-giwqwx0PO70SyqoZ25CBM2tpAjJX5sjPm7uWKknYcFGl3H2PYDqqnvH7NfEXENQMq5DpAJisCZ0KkRvNHzLV2w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0-beta
+      storybook: ^8.6.11
 
   '@storybook/react-vite@8.5.3':
     resolution: {integrity: sha512-F30u2Xf+X774wrfQzWgg7vRVJmmJFbBVGdULsAGonkdy1FUeYo7puPiD2Qg6hBYNDyIyxDXVOukkOvTlG7IBRg==}
@@ -5782,8 +5818,8 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
-  '@swc/types@0.1.20':
-    resolution: {integrity: sha512-/rlIpxwKrhz4BIplXf6nsEHtqlhzuNN34/k3kMAXH4/lvVoA3cdq+60aqVNnyvw2uITEaCi0WV3pxBe4dQqoXQ==}
+  '@swc/types@0.1.21':
+    resolution: {integrity: sha512-2YEtj5HJVbKivud9N4bpPBAyZhj4S2Ipe5LkUG94alTpr7in/GU/EARgPAd3BwU+YOmFVJC2+kjqhGRi3r0ZpQ==}
 
   '@tailwindcss/forms@0.5.10':
     resolution: {integrity: sha512-utI1ONF6uf/pPNO68kmN1b8rEwNXv3czukalo8VtJH8ksIkZXr3Q3VYudZLkCsDd4Wku120uF02hYK25XGPorw==}
@@ -6435,6 +6471,11 @@ packages:
 
   acorn@8.14.0:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.14.1:
+    resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -15280,6 +15321,18 @@ snapshots:
       - acorn
       - supports-color
 
+  '@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@content-collections/core': 0.7.3(typescript@5.7.3)
+      esbuild: 0.21.5
+      mdx-bundler: 10.0.3(acorn@8.14.1)(esbuild@0.21.5)
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - acorn
+      - supports-color
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -15853,17 +15906,17 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.7.3(typescript@5.7.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(fumadocs-core@14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3))':
-    dependencies:
-      '@content-collections/core': 0.7.3(typescript@5.7.3)
-      '@content-collections/mdx': 0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      fumadocs-core: 14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3)
-
   '@fumadocs/content-collections@1.1.5(@content-collections/core@0.7.3(typescript@5.7.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(fumadocs-core@14.0.2(@opentelemetry/api@1.9.0)(@types/react@19.0.10))':
     dependencies:
       '@content-collections/core': 0.7.3(typescript@5.7.3)
       '@content-collections/mdx': 0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       fumadocs-core: 14.0.2(@opentelemetry/api@1.9.0)(@types/react@19.0.10)
+
+  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.7.3(typescript@5.7.3))(@content-collections/mdx@0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(fumadocs-core@14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3))':
+    dependencies:
+      '@content-collections/core': 0.7.3(typescript@5.7.3)
+      '@content-collections/mdx': 0.2.0(@content-collections/core@0.7.3(typescript@5.7.3))(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      fumadocs-core: 14.0.2(@opentelemetry/api@1.9.0)(@types/react@18.3.3)
 
   '@graphql-codegen/add@3.2.3(graphql@16.10.0)':
     dependencies:
@@ -16954,6 +17007,18 @@ snapshots:
       - acorn
       - supports-color
 
+  '@mdx-js/esbuild@3.1.0(acorn@8.14.1)(esbuild@0.21.5)':
+    dependencies:
+      '@mdx-js/mdx': 3.1.0(acorn@8.14.1)
+      '@types/unist': 3.0.3
+      esbuild: 0.21.5
+      source-map: 0.7.4
+      vfile: 6.0.3
+      vfile-message: 4.0.2
+    transitivePeerDependencies:
+      - acorn
+      - supports-color
+
   '@mdx-js/language-service@0.6.2':
     dependencies:
       '@types/estree': 1.0.6
@@ -17004,11 +17069,47 @@ snapshots:
       - acorn
       - supports-color
 
+  '@mdx-js/mdx@3.1.0(acorn@8.14.1)':
+    dependencies:
+      '@types/estree': 1.0.7
+      '@types/estree-jsx': 1.0.5
+      '@types/hast': 3.0.4
+      '@types/mdx': 2.0.13
+      collapse-white-space: 2.1.0
+      devlop: 1.1.0
+      estree-util-is-identifier-name: 3.0.0
+      estree-util-scope: 1.0.0
+      estree-walker: 3.0.3
+      hast-util-to-jsx-runtime: 2.3.2
+      markdown-extensions: 2.0.0
+      recma-build-jsx: 1.0.0
+      recma-jsx: 1.0.0(acorn@8.14.1)
+      recma-stringify: 1.0.0
+      rehype-recma: 1.0.0
+      remark-mdx: 3.1.0
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.1
+      source-map: 0.7.4
+      unified: 11.0.5
+      unist-util-position-from-estree: 2.0.0
+      unist-util-stringify-position: 4.0.0
+      unist-util-visit: 5.0.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - acorn
+      - supports-color
+
   '@mdx-js/react@3.1.0(@types/react@19.0.10)(react@18.3.1)':
     dependencies:
       '@types/mdx': 2.0.13
       '@types/react': 19.0.10
       react: 18.3.1
+
+  '@mdx-js/react@3.1.0(@types/react@19.0.10)(react@19.0.0)':
+    dependencies:
+      '@types/mdx': 2.0.13
+      '@types/react': 19.0.10
+      react: 19.0.0
 
   '@mdx-js/typescript-plugin@0.0.8':
     dependencies:
@@ -18657,6 +18758,19 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
+  '@storybook/addon-docs@8.6.11(@types/react@19.0.10)(storybook@8.5.3(prettier@3.4.2))':
+    dependencies:
+      '@mdx-js/react': 3.1.0(@types/react@19.0.10)(react@19.0.0)
+      '@storybook/blocks': 8.6.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.3(prettier@3.4.2))
+      '@storybook/csf-plugin': 8.6.11(storybook@8.5.3(prettier@3.4.2))
+      '@storybook/react-dom-shim': 8.6.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.3(prettier@3.4.2))
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+      storybook: 8.5.3(prettier@3.4.2)
+      ts-dedent: 2.2.0
+    transitivePeerDependencies:
+      - '@types/react'
+
   '@storybook/addon-essentials@8.5.3(@types/react@19.0.10)(storybook@8.5.3(prettier@3.4.2))':
     dependencies:
       '@storybook/addon-actions': 8.5.3(storybook@8.5.3(prettier@3.4.2))
@@ -18728,6 +18842,15 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
+  '@storybook/blocks@8.6.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.3(prettier@3.4.2))':
+    dependencies:
+      '@storybook/icons': 1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      storybook: 8.5.3(prettier@3.4.2)
+      ts-dedent: 2.2.0
+    optionalDependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
   '@storybook/builder-vite@8.5.3(storybook@8.5.3(prettier@3.4.2))(vite@6.2.3(@types/node@22.13.9)(jiti@2.4.2)(tsx@4.19.3)(yaml@2.7.0))':
     dependencies:
       '@storybook/csf-plugin': 8.5.3(storybook@8.5.3(prettier@3.4.2))
@@ -18765,6 +18888,11 @@ snapshots:
       storybook: 8.5.3(prettier@3.4.2)
       unplugin: 1.16.1
 
+  '@storybook/csf-plugin@8.6.11(storybook@8.5.3(prettier@3.4.2))':
+    dependencies:
+      storybook: 8.5.3(prettier@3.4.2)
+      unplugin: 1.16.1
+
   '@storybook/csf@0.1.12':
     dependencies:
       type-fest: 2.19.0
@@ -18777,6 +18905,11 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
   '@storybook/icons@1.3.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+
+  '@storybook/icons@1.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -18796,6 +18929,12 @@ snapshots:
       storybook: 8.5.3(prettier@3.4.2)
 
   '@storybook/react-dom-shim@8.5.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.3(prettier@3.4.2))':
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+      storybook: 8.5.3(prettier@3.4.2)
+
+  '@storybook/react-dom-shim@8.6.11(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(storybook@8.5.3(prettier@3.4.2))':
     dependencies:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -18872,7 +19011,7 @@ snapshots:
   '@swc/core@1.10.1(@swc/helpers@0.5.15)':
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/types': 0.1.20
+      '@swc/types': 0.1.21
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.10.1
       '@swc/core-darwin-x64': 1.10.1
@@ -18898,7 +19037,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@swc/types@0.1.20':
+  '@swc/types@0.1.21':
     dependencies:
       '@swc/counter': 0.1.3
     optional: true
@@ -19642,6 +19781,10 @@ snapshots:
     dependencies:
       acorn: 8.14.0
 
+  acorn-jsx@5.3.2(acorn@8.14.1):
+    dependencies:
+      acorn: 8.14.1
+
   acorn-walk@7.2.0: {}
 
   acorn-walk@8.3.4:
@@ -19651,6 +19794,8 @@ snapshots:
   acorn@7.4.1: {}
 
   acorn@8.14.0: {}
+
+  acorn@8.14.1: {}
 
   agent-base@6.0.2:
     dependencies:
@@ -21552,7 +21697,7 @@ snapshots:
   esast-util-from-js@2.0.1:
     dependencies:
       '@types/estree-jsx': 1.0.5
-      acorn: 8.14.0
+      acorn: 8.14.1
       esast-util-from-estree: 2.0.0
       vfile-message: 4.0.2
 
@@ -24572,6 +24717,22 @@ snapshots:
       - acorn
       - supports-color
 
+  mdx-bundler@10.0.3(acorn@8.14.1)(esbuild@0.21.5):
+    dependencies:
+      '@babel/runtime': 7.26.7
+      '@esbuild-plugins/node-resolve': 0.2.2(esbuild@0.21.5)
+      '@fal-works/esbuild-plugin-global-externals': 2.1.2
+      '@mdx-js/esbuild': 3.1.0(acorn@8.14.1)(esbuild@0.21.5)
+      esbuild: 0.21.5
+      gray-matter: 4.0.3
+      remark-frontmatter: 5.0.0
+      remark-mdx-frontmatter: 4.0.0
+      uuid: 9.0.1
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - acorn
+      - supports-color
+
   memoize-one@6.0.0: {}
 
   memoizee@0.4.17:
@@ -26766,6 +26927,16 @@ snapshots:
     transitivePeerDependencies:
       - acorn
 
+  recma-jsx@1.0.0(acorn@8.14.1):
+    dependencies:
+      acorn-jsx: 5.3.2(acorn@8.14.1)
+      estree-util-to-js: 2.0.0
+      recma-parse: 1.0.0
+      recma-stringify: 1.0.0
+      unified: 11.0.5
+    transitivePeerDependencies:
+      - acorn
+
   recma-parse@1.0.0:
     dependencies:
       '@types/estree': 1.0.7
@@ -28264,7 +28435,7 @@ snapshots:
 
   unplugin@1.16.1:
     dependencies:
-      acorn: 8.14.0
+      acorn: 8.14.1
       webpack-virtual-modules: 0.6.2
 
   untildify@4.0.0: {}
