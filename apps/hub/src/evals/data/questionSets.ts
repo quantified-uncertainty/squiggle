@@ -5,6 +5,7 @@ import { checkRootUser } from "@/users/auth";
 
 import { QuestionDTO, selectQuestion, toQuestionDTO } from "./questions";
 
+// TODO - separate "summary" and "full" question set types
 const selectQuestionRow = {
   id: true,
   name: true,
@@ -13,6 +14,11 @@ const selectQuestionRow = {
       question: {
         select: selectQuestion,
       },
+    },
+  },
+  _count: {
+    select: {
+      evaluations: true,
     },
   },
 } satisfies Prisma.QuestionSetSelect;
@@ -25,6 +31,7 @@ export type QuestionSetDTO = {
   id: string;
   name: string;
   questions: QuestionDTO[];
+  evaluationsCount: number;
 };
 
 function toQuestionSetDTO(row: QuestionSetRow): QuestionSetDTO {
@@ -33,6 +40,7 @@ function toQuestionSetDTO(row: QuestionSetRow): QuestionSetDTO {
     name: row.name,
     // simplified - no need for proxy table
     questions: row.questions.map((q) => toQuestionDTO(q.question)),
+    evaluationsCount: row._count.evaluations,
   };
 }
 

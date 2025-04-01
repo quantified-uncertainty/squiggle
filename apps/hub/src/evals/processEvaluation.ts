@@ -40,46 +40,55 @@ export async function processEvaluation(evaluation: Evaluation) {
       throw new Error(`Failed to get runner with ID ${evaluation.agentId}`);
     }
 
-    // Process all specs in parallel
-    await Promise.all(
-      fullEvaluation.questionSet.questions.map(async ({ question }) => {
-        try {
-          console.log(
-            `Processing question ${question.id} for evaluation ${evaluation.id}...`
-          );
-          const result = await runner(question);
+    // Process questions with a concurrency limit of 5
+    const questions = fullEvaluation.questionSet.questions;
+    const concurrencyLimit = 5;
 
-          // Store result in db
-          await prisma.value.create({
-            data: {
-              question: {
-                connect: {
-                  id: question.id,
+    // Process questions in batches
+    for (let i = 0; i < questions.length; i += concurrencyLimit) {
+      const batch = questions.slice(i, i + concurrencyLimit);
+
+      console.log(`Processing batch ${i} of ${questions.length}...`);
+      await Promise.all(
+        batch.map(async ({ question }) => {
+          try {
+            console.log(
+              `Processing question ${question.id} for evaluation ${evaluation.id}...`
+            );
+            const result = await runner(question);
+
+            // Store result in db
+            await prisma.value.create({
+              data: {
+                question: {
+                  connect: {
+                    id: question.id,
+                  },
                 },
-              },
-              code: result.code,
-              evaluation: {
-                connect: {
-                  id: evaluation.id,
+                code: result.code,
+                evaluation: {
+                  connect: {
+                    id: evaluation.id,
+                  },
                 },
-              },
-              ...(result.workflowId
-                ? {
-                    workflow: {
-                      connect: {
-                        id: result.workflowId,
+                ...(result.workflowId
+                  ? {
+                      workflow: {
+                        connect: {
+                          id: result.workflowId,
+                        },
                       },
-                    },
-                  }
-                : {}),
-            },
-          });
-        } catch (error) {
-          console.error(`Error processing question ${question.id}:`, error);
-          throw error; // Re-throw to be caught by outer try/catch
-        }
-      })
-    );
+                    }
+                  : {}),
+              },
+            });
+          } catch (error) {
+            console.error(`Error processing question ${question.id}:`, error);
+            throw error; // Re-throw to be caught by outer try/catch
+          }
+        })
+      );
+    }
 
     // Update the state to Completed
     await prisma.evaluation.update({

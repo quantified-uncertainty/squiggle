@@ -24,7 +24,8 @@ export default async function QuestionSetsPage() {
           <Table.Header>
             <Table.HeaderCell>Name</Table.HeaderCell>
             <Table.HeaderCell>ID</Table.HeaderCell>
-            <Table.HeaderCell>Questions Count</Table.HeaderCell>
+            <Table.HeaderCell>Questions</Table.HeaderCell>
+            <Table.HeaderCell>Evaluations</Table.HeaderCell>
             <Table.HeaderCell>Actions</Table.HeaderCell>
           </Table.Header>
           <Table.Body>
@@ -41,6 +42,9 @@ export default async function QuestionSetsPage() {
                 <Table.Cell theme="text">{questionSet.id}</Table.Cell>
                 <Table.Cell theme="text">
                   {questionSet.questions.length}
+                </Table.Cell>
+                <Table.Cell theme="text">
+                  {questionSet.evaluationsCount}
                 </Table.Cell>
                 <Table.Cell>
                   <QuestionSetActionsButton

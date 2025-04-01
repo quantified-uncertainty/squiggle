@@ -262,3 +262,11 @@ export function epistemicAgentsRoute() {
 export function epistemicAgentRoute({ id }: { id: string }) {
   return `/epistemic-agents/${id}`;
 }
+
+export function createEpistemicAgentRoute() {
+  return "/epistemic-agents/create";
+}
+
+export function createSquiggleAiEpistemicAgentRoute() {
+  return "/epistemic-agents/create";
+}
