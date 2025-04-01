@@ -78,7 +78,7 @@
     "next-plausible": "^3.12.3",
     "nprogress": "^0.2.0",
     "open": "^10.1.0",
-    "pg": "^8.13.3",
+    "pg": "^8.14.1",
     "postcss": "^8.5.3",
     "prettier": "^3.4.2",
     "re-resizable": "^6.10.0",
