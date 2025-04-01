@@ -28,5 +28,6 @@
   ],
   "files.associations": {
     "turbo.json": "jsonc"
-  }
+  },
+  "typescript.tsdk": "apps/hub/node_modules/typescript/lib"
 }
