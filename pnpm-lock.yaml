@@ -264,7 +264,7 @@ importers:
     dependencies:
       '@atmina/urql-custom-scalars-exchange':
         specifier: ^1.1.0
-        version: 1.1.1(@urql/core@5.0.8(graphql@16.10.0))(graphql@16.10.0)(wonka@6.3.4)
+        version: 1.1.1(@urql/core@5.0.8(graphql@16.10.0))(graphql@16.10.0)(wonka@6.3.5)
       '@elastic/elasticsearch':
         specifier: ^8.17.1
         version: 8.17.1
@@ -327,7 +327,7 @@ importers:
         version: 5.0.8(graphql@16.10.0)
       '@urql/next':
         specifier: ^1.1.2
-        version: 1.1.3(next@15.1.6(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(urql@4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0))
+        version: 1.1.3(next@15.1.6(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(urql@4.2.2(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0))
       airtable:
         specifier: ^0.12.2
         version: 0.12.2(encoding@0.1.12)
@@ -470,8 +470,8 @@ importers:
         specifier: ^0.0.6
         version: 0.0.6
       urql:
-        specifier: ^4.2.0
-        version: 4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0)
+        specifier: ^4.2.2
+        version: 4.2.2(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0)
       victory:
         specifier: ^37.3.1
         version: 37.3.6(react@19.0.0)
@@ -5782,8 +5782,8 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
-  '@swc/types@0.1.20':
-    resolution: {integrity: sha512-/rlIpxwKrhz4BIplXf6nsEHtqlhzuNN34/k3kMAXH4/lvVoA3cdq+60aqVNnyvw2uITEaCi0WV3pxBe4dQqoXQ==}
+  '@swc/types@0.1.21':
+    resolution: {integrity: sha512-2YEtj5HJVbKivud9N4bpPBAyZhj4S2Ipe5LkUG94alTpr7in/GU/EARgPAd3BwU+YOmFVJC2+kjqhGRi3r0ZpQ==}
 
   '@tailwindcss/forms@0.5.10':
     resolution: {integrity: sha512-utI1ONF6uf/pPNO68kmN1b8rEwNXv3czukalo8VtJH8ksIkZXr3Q3VYudZLkCsDd4Wku120uF02hYK25XGPorw==}
@@ -13029,8 +13029,8 @@ packages:
   urlpattern-polyfill@10.0.0:
     resolution: {integrity: sha512-H/A06tKD7sS1O1X2SshBVeA5FLycRpjqiBeqGKmBwBDBy28EnRjORxTNe269KSSr5un5qyWi1iL61wLxpd+ZOg==}
 
-  urql@4.2.1:
-    resolution: {integrity: sha512-Y/cVi1rsR96kbF3VX6YgfHw1V3kJ287nR1TqpjGzVPyAmXuwRvBvABI+sHY2WOquWCNh+kvFapM/LLYeiC3wig==}
+  urql@4.2.2:
+    resolution: {integrity: sha512-3GgqNa6iF7bC4hY/ImJKN4REQILcSU9VKcKL8gfELZM8mM5BnLH1BsCc8kBdnVGD1LIFOs4W3O2idNHhON1r0w==}
     peerDependencies:
       '@urql/core': ^5.0.0
       react: '>= 16.8.0'
@@ -13546,6 +13546,9 @@ packages:
   wonka@6.3.4:
     resolution: {integrity: sha512-CjpbqNtBGNAeyNS/9W6q3kSkKE52+FjIj7AkFlLr11s/VWGUu6a2CdYSdGxocIhIVjaW/zchesBQUKPVU69Cqg==}
 
+  wonka@6.3.5:
+    resolution: {integrity: sha512-SSil+ecw6B4/Dm7Pf2sAshKQ5hWFvfyGlfPbEd6A14dOH6VDjrmbY86u6nZvy9omGwwIPFR8V41+of1EezgoUw==}
+
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
@@ -13952,11 +13955,11 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.3
       lru-cache: 10.4.3
 
-  '@atmina/urql-custom-scalars-exchange@1.1.1(@urql/core@5.0.8(graphql@16.10.0))(graphql@16.10.0)(wonka@6.3.4)':
+  '@atmina/urql-custom-scalars-exchange@1.1.1(@urql/core@5.0.8(graphql@16.10.0))(graphql@16.10.0)(wonka@6.3.5)':
     dependencies:
       '@urql/core': 5.0.8(graphql@16.10.0)
       graphql: 16.10.0
-      wonka: 6.3.4
+      wonka: 6.3.5
 
   '@auth/core@0.37.2(nodemailer@6.9.13)':
     dependencies:
@@ -18872,7 +18875,7 @@ snapshots:
   '@swc/core@1.10.1(@swc/helpers@0.5.15)':
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/types': 0.1.20
+      '@swc/types': 0.1.21
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.10.1
       '@swc/core-darwin-x64': 1.10.1
@@ -18898,7 +18901,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@swc/types@0.1.20':
+  '@swc/types@0.1.21':
     dependencies:
       '@swc/counter': 0.1.3
     optional: true
@@ -19470,11 +19473,11 @@ snapshots:
     transitivePeerDependencies:
       - graphql
 
-  '@urql/next@1.1.3(next@15.1.6(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(urql@4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0))':
+  '@urql/next@1.1.3(next@15.1.6(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(urql@4.2.2(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0))':
     dependencies:
       next: 15.1.6(@babel/core@7.26.7)(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
-      urql: 4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0)
+      urql: 4.2.2(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0)
 
   '@vercel/analytics@1.3.1(next@15.1.3(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)':
     dependencies:
@@ -28304,11 +28307,11 @@ snapshots:
 
   urlpattern-polyfill@10.0.0: {}
 
-  urql@4.2.1(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0):
+  urql@4.2.2(@urql/core@5.0.8(graphql@16.10.0))(react@19.0.0):
     dependencies:
       '@urql/core': 5.0.8(graphql@16.10.0)
       react: 19.0.0
-      wonka: 6.3.4
+      wonka: 6.3.5
 
   use-callback-ref@1.3.2(@types/react@18.3.3)(react@19.0.0):
     dependencies:
@@ -28886,6 +28889,8 @@ snapshots:
   window-size@0.1.4: {}
 
   wonka@6.3.4: {}
+
+  wonka@6.3.5: {}
 
   word-wrap@1.2.5: {}
 
