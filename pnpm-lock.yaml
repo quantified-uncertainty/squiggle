@@ -284,8 +284,8 @@ importers:
         specifier: ^4.3.1
         version: 4.4.0(@pothos/core@4.3.0(graphql@16.10.0))(@prisma/client@6.4.1(prisma@6.4.1(typescript@5.7.3))(typescript@5.7.3))(graphql@16.10.0)(typescript@5.7.3)
       '@pothos/plugin-relay':
-        specifier: ^4.3.0
-        version: 4.3.0(@pothos/core@4.3.0(graphql@16.10.0))(graphql@16.10.0)
+        specifier: ^4.4.1
+        version: 4.4.1(@pothos/core@4.3.0(graphql@16.10.0))(graphql@16.10.0)
       '@quri/metaforecast-db':
         specifier: workspace:*
         version: link:../../internal-packages/metaforecast-db
@@ -4676,8 +4676,8 @@ packages:
       graphql: '>=16.6.0'
       typescript: '>=4.7.2'
 
-  '@pothos/plugin-relay@4.3.0':
-    resolution: {integrity: sha512-sa8PWNQJLSNf7AVY43T3rSq4EnspuAcrPWcH3mCyocaqKzCqZA8DOdJ0tTWeGCJp1lsWkKFSrdb81g9FVJGTIg==}
+  '@pothos/plugin-relay@4.4.1':
+    resolution: {integrity: sha512-npjyLH008eHZ4KNxtyt5bUXjgvJt4tyNYrhmj+DCWBLmid75C+Cf+wVIkDDDVO8qGz07WhDyJlNwbDv1z+jIeQ==}
     peerDependencies:
       '@pothos/core': '*'
       graphql: '>=16.6.0'
@@ -5782,8 +5782,8 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
-  '@swc/types@0.1.20':
-    resolution: {integrity: sha512-/rlIpxwKrhz4BIplXf6nsEHtqlhzuNN34/k3kMAXH4/lvVoA3cdq+60aqVNnyvw2uITEaCi0WV3pxBe4dQqoXQ==}
+  '@swc/types@0.1.21':
+    resolution: {integrity: sha512-2YEtj5HJVbKivud9N4bpPBAyZhj4S2Ipe5LkUG94alTpr7in/GU/EARgPAd3BwU+YOmFVJC2+kjqhGRi3r0ZpQ==}
 
   '@tailwindcss/forms@0.5.10':
     resolution: {integrity: sha512-utI1ONF6uf/pPNO68kmN1b8rEwNXv3czukalo8VtJH8ksIkZXr3Q3VYudZLkCsDd4Wku120uF02hYK25XGPorw==}
@@ -17311,7 +17311,7 @@ snapshots:
       graphql: 16.10.0
       typescript: 5.7.3
 
-  '@pothos/plugin-relay@4.3.0(@pothos/core@4.3.0(graphql@16.10.0))(graphql@16.10.0)':
+  '@pothos/plugin-relay@4.4.1(@pothos/core@4.3.0(graphql@16.10.0))(graphql@16.10.0)':
     dependencies:
       '@pothos/core': 4.3.0(graphql@16.10.0)
       graphql: 16.10.0
@@ -18872,7 +18872,7 @@ snapshots:
   '@swc/core@1.10.1(@swc/helpers@0.5.15)':
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/types': 0.1.20
+      '@swc/types': 0.1.21
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.10.1
       '@swc/core-darwin-x64': 1.10.1
@@ -18898,7 +18898,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@swc/types@0.1.20':
+  '@swc/types@0.1.21':
     dependencies:
       '@swc/counter': 0.1.3
     optional: true
