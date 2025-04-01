@@ -11,10 +11,7 @@ export const MainAreaLayout: FC<
 > = ({ children, title, actions, theme = "default" }) => {
   return (
     <div
-      className={clsx(
-        "mx-auto mb-8 mt-8 max-w-4xl px-2",
-        theme === "wide" && "max-w-6xl"
-      )}
+      className={clsx("mx-auto my-8 px-4", theme === "default" && "max-w-4xl")}
     >
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">{title}</h1>

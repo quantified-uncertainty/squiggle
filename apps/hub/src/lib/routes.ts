@@ -270,3 +270,7 @@ export function createEpistemicAgentRoute() {
 export function createSquiggleAiEpistemicAgentRoute() {
   return "/epistemic-agents/create";
 }
+
+export function createManifoldEpistemicAgentRoute() {
+  return "/epistemic-agents/create/manifold";
+}

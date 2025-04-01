@@ -8,19 +8,16 @@ import { Command } from "@commander-js/extra-typings";
  *
  * Usage: pnpm tsx --conditions=react-server src/scripts/process-pending-evaluations.ts
  */
-import { processEvaluation } from "@/evals/processEvaluation";
+import { processEvaluation } from "@/evals/lib/processEvaluation";
 import { prisma } from "@/lib/server/prisma";
 import { sleep } from "@/lib/sleep";
 
-async function act() {
+async function act(options: { restartFailed?: boolean }) {
   // Find all pending evaluations
   const pendingEvals = await prisma.evaluation.findMany({
     where: {
       state: {
-        in: [
-          "Pending",
-          // "Failed"
-        ],
+        in: ["Pending", ...(options.restartFailed ? ["Failed" as const] : [])],
       },
     },
     include: {
@@ -45,19 +42,19 @@ async function act() {
 }
 
 async function main() {
-  const program = new Command().option("-l, --loop");
+  const program = new Command().option("-l, --loop").option("--restart-failed");
   program.parse();
-  const options = program.opts();
+  const { loop, ...options } = program.opts();
 
   console.log("Starting processing of pending evaluations...");
 
-  if (options.loop) {
+  if (loop) {
     while (true) {
-      await act();
+      await act(options);
       await sleep(1000);
     }
   } else {
-    await act();
+    await act(options);
   }
 
   console.log("Finished processing pending evaluations.");

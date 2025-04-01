@@ -30,7 +30,7 @@ export const QuestionSetActionsButton: FC<Props> = ({
         </DropdownMenu>
       )}
     >
-      <Button>Actions...</Button>
+      <Button>Actions</Button>
     </Dropdown>
   );
 };

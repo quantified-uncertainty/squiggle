@@ -8,7 +8,7 @@ import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-import { parseQuestionMetadata } from "../questionMetadata";
+import { parseQuestionMetadata } from "../lib/questionMetadata";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),

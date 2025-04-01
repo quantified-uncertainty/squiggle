@@ -25,7 +25,7 @@ export const DeleteQuestionSetAction: FC<Props> = ({
 
   return (
     <DropdownMenuModalActionItem
-      title="Delete..."
+      title="Delete"
       icon={TrashIcon}
       render={({ close }) => (
         <SafeActionFormModal<FormShape, typeof deleteQuestionSet>

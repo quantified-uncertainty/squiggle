@@ -1,6 +1,9 @@
 import { Prisma } from "@quri/hub-db";
 
-import { parseQuestionMetadata, QuestionMetadata } from "../questionMetadata";
+import {
+  parseQuestionMetadata,
+  QuestionMetadata,
+} from "../lib/questionMetadata";
 
 export const selectQuestion = {
   id: true,

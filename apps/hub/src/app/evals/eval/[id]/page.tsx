@@ -107,9 +107,7 @@ export default async function EvalDetailPage({
               <Table.HeaderCell className="w-2/5">
                 Question Description
               </Table.HeaderCell>
-              <Table.HeaderCell className="w-3/5">
-                Squiggle Result
-              </Table.HeaderCell>
+              <Table.HeaderCell className="w-3/5">Result</Table.HeaderCell>
             </Table.Header>
             <Table.Body>
               {evaluation.values.map((result) => (

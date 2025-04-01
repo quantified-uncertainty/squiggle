@@ -3,7 +3,8 @@ import { Evaluation } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-import { getAiEvalRunner } from "./aiEvalRunner";
+import { toQuestionDTO } from "../data/questions";
+import { getEpistemicAgentRunner } from "./runners";
 
 /**
  * This function is usually called from a backend script; it's too slow for server actions or API routes.
@@ -35,13 +36,12 @@ export async function processEvaluation(evaluation: Evaluation) {
     });
 
     // Get the runner
-    const runner = await getAiEvalRunner({ id: evaluation.agentId });
-    if (!runner) {
-      throw new Error(`Failed to get runner with ID ${evaluation.agentId}`);
-    }
+    const runner = await getEpistemicAgentRunner({ id: evaluation.agentId });
 
     // Process questions with a concurrency limit of 5
-    const questions = fullEvaluation.questionSet.questions;
+    const questions = fullEvaluation.questionSet.questions.map((question) =>
+      toQuestionDTO(question.question)
+    );
     const concurrencyLimit = 5;
 
     // Process questions in batches
@@ -50,7 +50,7 @@ export async function processEvaluation(evaluation: Evaluation) {
 
       console.log(`Processing batch ${i} of ${questions.length}...`);
       await Promise.all(
-        batch.map(async ({ question }) => {
+        batch.map(async (question) => {
           try {
             console.log(
               `Processing question ${question.id} for evaluation ${evaluation.id}...`
