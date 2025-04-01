@@ -3,15 +3,16 @@ import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import { FC, PropsWithChildren, ReactNode, useEffect, useState } from "react";
 
-import { Bars3Icon, IconProps, XIcon } from "@quri/ui";
+import { Bars3Icon, EmptyIcon, IconProps, XIcon } from "@quri/ui";
 
 import { Link } from "@/components/ui/Link";
 
 // TODO - convert this component to RSC with Suspense until the pathname is resolved
-export const PageMenuLink: FC<{ name: string; href: string }> = ({
-  name,
-  href,
-}) => {
+export const PageMenuLink: FC<{
+  name: string;
+  href: string;
+  icon?: ReactNode; // should be `<Icon size={16} />`. We can't enforce the size here because the icon is rendered in the parent component that's usually an RSC.
+}> = ({ name, href, icon }) => {
   const pathname = usePathname();
   const isSelected = pathname === href;
 
@@ -23,6 +24,15 @@ export const PageMenuLink: FC<{ name: string; href: string }> = ({
           isSelected ? "bg-blue-100" : "bg-white hover:bg-blue-100"
         )}
       >
+        <div
+          className={clsx(
+            isSelected
+              ? "text-slate-900"
+              : "text-slate-400 group-hover:text-slate-900"
+          )}
+        >
+          {icon ?? <EmptyIcon size={16} />}
+        </div>
         <div
           className={clsx(
             "flex-1 text-sm font-medium",

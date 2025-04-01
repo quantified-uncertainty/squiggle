@@ -1,6 +1,15 @@
 import { FC, Suspense } from "react";
 
 import {
+  BookOpenIcon,
+  CodeBracketSquareIcon,
+  CommandLineIcon,
+  GroupIcon,
+  ScaleIcon,
+  ShareIcon,
+} from "@quri/ui";
+
+import {
   PageMenu,
   PageMenuLink,
   PageMenuSubheader,
@@ -36,9 +45,21 @@ const FrontpageNavEvalsIfRoot: FC = async () => {
   return (
     <>
       <PageMenuSubheader>Evals</PageMenuSubheader>
-      <PageMenuLink name="Question Sets" href={questionSetsRoute()} />
-      <PageMenuLink name="Evaluations" href={evaluationsRoute()} />
-      <PageMenuLink name="Epistemic Agents" href={epistemicAgentsRoute()} />
+      <PageMenuLink
+        name="Question Sets"
+        href={questionSetsRoute()}
+        icon={<BookOpenIcon size={16} />}
+      />
+      <PageMenuLink
+        name="Evaluations"
+        href={evaluationsRoute()}
+        icon={<ShareIcon size={16} />}
+      />
+      <PageMenuLink
+        name="Epistemic Agents"
+        href={epistemicAgentsRoute()}
+        icon={<CommandLineIcon size={16} />}
+      />
     </>
   );
 };
@@ -49,11 +70,27 @@ export const FrontpageNav: FC = () => {
       mobileHeader={<MobileFrontpageNavHeader />}
       desktopHeader={<FrontpageNavDesktopHeader />}
     >
-      <PageMenuLink name="Models" href="/" />
-      <PageMenuLink name="Variables" href={variablesRoute()} />
-      <PageMenuLink name="Groups" href={groupsRoute()} />
+      <PageMenuLink
+        name="Models"
+        href="/"
+        icon={<CodeBracketSquareIcon size={16} />}
+      />
+      <PageMenuLink
+        name="Variables"
+        href={variablesRoute()}
+        icon={<ShareIcon size={16} />}
+      />
+      <PageMenuLink
+        name="Groups"
+        href={groupsRoute()}
+        icon={<GroupIcon size={16} />}
+      />
       <PageMenuSubheader>Experimental</PageMenuSubheader>
-      <PageMenuLink name="Definitions" href={definitionsRoute()} />
+      <PageMenuLink
+        name="Definitions"
+        href={definitionsRoute()}
+        icon={<ScaleIcon size={16} />}
+      />
       <Suspense>
         <FrontpageNavEvalsIfRoot />
       </Suspense>

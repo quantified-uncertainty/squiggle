@@ -2,7 +2,13 @@
 import { usePathname } from "next/navigation";
 import { FC } from "react";
 
-import { UserCircleIcon } from "@quri/ui";
+import {
+  CodeBracketSquareIcon,
+  GroupIcon,
+  ScaleIcon,
+  ShareIcon,
+  UserCircleIcon,
+} from "@quri/ui";
 
 import { PageMenu, PageMenuLink } from "@/components/ui/PageMenu";
 import {
@@ -63,24 +69,28 @@ export const UserNav: FC<{ user: UserLayoutDTO; isMe: boolean }> = ({
         <PageMenuLink
           name="Models"
           href={userRoute({ username: user.username })}
+          icon={<CodeBracketSquareIcon size={16} />}
         />
       ) : null}
       {isMe || user.hasVariables ? (
         <PageMenuLink
           name="Variables"
           href={userVariablesRoute({ username: user.username })}
+          icon={<ShareIcon size={16} />}
         />
       ) : null}
       {isMe || user.hasDefinitions ? (
         <PageMenuLink
           name="Definitions"
           href={userDefinitionsRoute({ username: user.username })}
+          icon={<ScaleIcon size={16} />}
         />
       ) : null}
       {isMe || user.hasGroups ? (
         <PageMenuLink
           name="Groups"
           href={userGroupsRoute({ username: user.username })}
+          icon={<GroupIcon size={16} />}
         />
       ) : null}
     </PageMenu>

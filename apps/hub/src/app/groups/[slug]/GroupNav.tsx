@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation";
 import { FC } from "react";
 
-import { GroupIcon } from "@quri/ui";
+import { CodeBracketSquareIcon, GroupIcon, UserIcon } from "@quri/ui";
 
 import {
   PageManuDesktopHeader,
@@ -41,10 +41,15 @@ export const GroupNav: FC<{ group: GroupCardDTO }> = ({ group }) => {
         <PageManuDesktopHeader icon={GroupIcon} title={group.slug} />
       }
     >
-      <PageMenuLink name="Models" href={groupRoute({ slug: group.slug })} />
+      <PageMenuLink
+        name="Models"
+        href={groupRoute({ slug: group.slug })}
+        icon={<CodeBracketSquareIcon size={16} />}
+      />
       <PageMenuLink
         name="Members"
         href={groupMembersRoute({ slug: group.slug })}
+        icon={<UserIcon size={16} />}
       />
     </PageMenu>
   );
