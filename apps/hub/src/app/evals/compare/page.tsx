@@ -1,5 +1,4 @@
-import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
-import { H1 } from "@/components/ui/Headers";
+import { ErrorBox } from "@/components/ui/ErrorBox";
 import { EvaluationDetails } from "@/evals/components/EvaluationDetails";
 import { QuestionItem } from "@/evals/components/QuestionItem";
 import { getEvalById } from "@/evals/data/detailsEvals";
@@ -16,17 +15,7 @@ export default async function CompareEvaluationsPage({
 
   if (evaluationIds.length !== 2) {
     return (
-      <FullLayoutWithPadding>
-        <div className="mb-6">
-          <H1>Compare Evaluations</H1>
-        </div>
-        <div className="rounded-md border border-red-300 bg-red-50 p-4 text-red-800">
-          <p className="font-medium">Error: Invalid comparison request</p>
-          <p className="mt-2">
-            Please select exactly two evaluations to compare.
-          </p>
-        </div>
-      </FullLayoutWithPadding>
+      <ErrorBox>Please select exactly two evaluations to compare.</ErrorBox>
     );
   }
 
@@ -34,16 +23,19 @@ export default async function CompareEvaluationsPage({
     evaluationIds.map((id) => getEvalById(id))
   );
 
-  return (
-    <FullLayoutWithPadding>
-      <div className="mb-6">
-        <H1>Compare Evaluations</H1>
-      </div>
+  const questionSetIds = evaluations.map((e) => e.questionSet.id);
+  if (questionSetIds.some((id) => id !== questionSetIds[0])) {
+    return (
+      <ErrorBox>Please select evaluations from the same question set.</ErrorBox>
+    );
+  }
 
+  return (
+    <div>
       <div className="flex gap-4">
         {evaluations.map((evaluation) => (
           <div key={evaluation.id} className="flex-1">
-            <EvaluationDetails evaluation={evaluation} />
+            <EvaluationDetails evaluation={evaluation} linkToEvaluation />
           </div>
         ))}
       </div>
@@ -74,6 +66,6 @@ export default async function CompareEvaluationsPage({
           ))
         }
       </div>
-    </FullLayoutWithPadding>
+    </div>
   );
 }
