@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@content-collections/cli": "^0.1.5",
-    "@content-collections/core": "^0.7.2",
+    "@content-collections/core": "^0.8.2",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-lang": "workspace:*",
     "@types/node": "^22.13.9",
