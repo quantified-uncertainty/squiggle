@@ -53,7 +53,7 @@
     "@types/textversionjs": "^1.1.4",
     "@types/tunnel": "^0.0.7",
     "@urql/core": "5.0.8",
-    "@urql/next": "^1.1.2",
+    "@urql/next": "^1.1.5",
     "airtable": "^0.12.2",
     "ajv": "^8.17.1",
     "api": "^5.0.7",
