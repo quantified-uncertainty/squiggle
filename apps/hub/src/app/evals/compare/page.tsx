@@ -1,9 +1,9 @@
 import { ErrorBox } from "@/components/ui/ErrorBox";
-import { EvaluationDetails } from "@/evals/components/EvaluationDetails";
 import { QuestionItem } from "@/evals/components/QuestionItem";
 import { getEvalById } from "@/evals/data/detailsEvals";
 
 import { RunSquiggle } from "../eval/[id]/RunSquiggle";
+import { StickyComparisonHeader } from "./StickyComparisonHeader";
 
 export default async function CompareEvaluationsPage({
   searchParams,
@@ -32,13 +32,7 @@ export default async function CompareEvaluationsPage({
 
   return (
     <div>
-      <div className="flex gap-4">
-        {evaluations.map((evaluation) => (
-          <div key={evaluation.id} className="flex-1">
-            <EvaluationDetails evaluation={evaluation} linkToEvaluation />
-          </div>
-        ))}
-      </div>
+      <StickyComparisonHeader evaluations={evaluations} />
 
       <div className="mt-8 divide-y divide-slate-200">
         {
