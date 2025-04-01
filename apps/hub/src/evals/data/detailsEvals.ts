@@ -3,6 +3,7 @@ import { EvaluationState, Prisma } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
+import { QuestionDTO, selectQuestion, toQuestionDTO } from "./questions";
 import {
   aggregateEvalMetrics,
   EvalMetrics,
@@ -39,7 +40,9 @@ export const evaluationSelectWithDetails = {
     select: {
       id: true,
       code: true,
-      question: true,
+      question: {
+        select: selectQuestion,
+      },
       workflow: {
         select: {
           id: true,
@@ -76,10 +79,7 @@ export type EvalWithDetailsDTO = {
   values: {
     id: string;
     code: string;
-    question: {
-      id: string;
-      description: string;
-    };
+    question: QuestionDTO;
     workflow?: {
       id: string;
       markdown: string;
@@ -108,7 +108,7 @@ function evalWithDetailsToDTO(dbEval: DbEvalWithDetails): EvalWithDetailsDTO {
     values: dbEval.values.map((value) => ({
       id: value.id,
       code: value.code,
-      question: value.question,
+      question: toQuestionDTO(value.question),
       workflow: value.workflow
         ? {
             id: value.workflow.id,

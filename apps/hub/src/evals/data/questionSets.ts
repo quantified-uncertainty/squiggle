@@ -3,33 +3,56 @@ import { Prisma } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
-const select = {
+import { QuestionDTO, selectQuestion, toQuestionDTO } from "./questions";
+
+const selectQuestionRow = {
   id: true,
   name: true,
   questions: {
     select: {
-      question: true,
+      question: {
+        select: selectQuestion,
+      },
     },
   },
 } satisfies Prisma.QuestionSetSelect;
 
-export type QuestionSet = Prisma.QuestionSetGetPayload<{
-  select: typeof select;
+type QuestionSetRow = Prisma.QuestionSetGetPayload<{
+  select: typeof selectQuestionRow;
 }>;
 
-export async function getQuestionSetById(id: string): Promise<QuestionSet> {
-  await checkRootUser();
+export type QuestionSetDTO = {
+  id: string;
+  name: string;
+  questions: QuestionDTO[];
+};
 
-  return prisma.questionSet.findUniqueOrThrow({
-    where: { id },
-    select,
-  });
+function toQuestionSetDTO(row: QuestionSetRow): QuestionSetDTO {
+  return {
+    id: row.id,
+    name: row.name,
+    // simplified - no need for proxy table
+    questions: row.questions.map((q) => toQuestionDTO(q.question)),
+  };
 }
 
-export async function getAllQuestionSets(): Promise<QuestionSet[]> {
+export async function getQuestionSetById(id: string): Promise<QuestionSetDTO> {
   await checkRootUser();
 
-  return prisma.questionSet.findMany({
-    select,
+  const rows = await prisma.questionSet.findUniqueOrThrow({
+    where: { id },
+    select: selectQuestionRow,
   });
+
+  return toQuestionSetDTO(rows);
+}
+
+export async function getAllQuestionSets(): Promise<QuestionSetDTO[]> {
+  await checkRootUser();
+
+  const rows = await prisma.questionSet.findMany({
+    select: selectQuestionRow,
+  });
+
+  return rows.map(toQuestionSetDTO);
 }

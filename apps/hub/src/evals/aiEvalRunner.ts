@@ -13,7 +13,12 @@ import { getEpistemicAgentById } from "./data/epistemicAgents";
 import { EvalRunner } from "./types";
 
 function questionToPrompt(question: { id: string; description: string }) {
-  return `Write a model for this question: ${question.description}. Return the answer in the final expression.`;
+  return `Write a model for the following question. Return the answer in the final expression.
+
+The answer should be either a single number or a probability distribution between 0 and 1.
+  
+Question:
+${question.description}`;
 }
 
 const configSchema = z.object({

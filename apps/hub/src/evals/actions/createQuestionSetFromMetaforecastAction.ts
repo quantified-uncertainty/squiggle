@@ -8,6 +8,8 @@ import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { checkRootUser } from "@/users/auth";
 
+import { parseQuestionMetadata } from "../questionMetadata";
+
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   manifoldMarketIds: z
@@ -30,6 +32,7 @@ export const createQuestionSetFromMetaforecastAction = actionClient
         id: true,
         question: true,
         textDescription: true,
+        url: true,
       },
     });
 
@@ -55,6 +58,12 @@ ${market.textDescription}
         const newQuestion = await tx.question.create({
           data: {
             description,
+            metadata: parseQuestionMetadata({
+              manifold: {
+                marketId: market.id,
+                marketUrl: market.url,
+              },
+            }),
           },
         });
 

@@ -4,11 +4,13 @@ import { FC, useState } from "react";
 
 import { Button } from "@quri/ui";
 
-import { QuestionSet } from "@/evals/data/questionSets";
+import { QuestionDTO } from "../data/questions";
 
-export const QuestionItem: FC<{
-  question: QuestionSet["questions"][number]["question"];
-}> = ({ question }) => {
+type Props = {
+  question: QuestionDTO;
+};
+
+export const QuestionItem: FC<Props> = ({ question }) => {
   const firstLine = question.description.split("\n")[0];
   const isMultiline = question.description.split("\n").length > 1;
   const [expanded, setExpanded] = useState(false);
@@ -25,8 +27,20 @@ export const QuestionItem: FC<{
         )}
       </div>
       {expanded && (
-        <div className="whitespace-pre text-xs text-gray-500">
+        <div className="whitespace-pre-wrap text-xs text-gray-500">
           {question.description.split("\n").slice(1).join("\n")}
+        </div>
+      )}
+      {question.metadata?.manifold && (
+        <div>
+          <a
+            href={question.metadata.manifold.marketUrl}
+            target="_blank"
+            className="rounded-md bg-blue-100 px-2 py-0.5 text-xs text-blue-700 hover:bg-blue-200"
+            rel="noopener noreferrer"
+          >
+            Manifold
+          </a>
         </div>
       )}
     </div>

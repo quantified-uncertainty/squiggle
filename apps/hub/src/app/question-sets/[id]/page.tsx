@@ -8,7 +8,7 @@ import { getQuestionSetById } from "@/evals/data/questionSets";
 import { getEvaluationsByQuestionSetId } from "@/evals/data/summaryEvals";
 import { evaluationsRoute, questionSetsRoute } from "@/lib/routes";
 
-import { QuestionItem } from "./QuestionItem";
+import { QuestionItem } from "../../../evals/components/QuestionItem";
 
 export const dynamicParams = true;
 
@@ -18,9 +18,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   try {
-    const specList = await getQuestionSetById((await params).id);
+    const questionSet = await getQuestionSetById((await params).id);
     return {
-      title: `${specList.name} - Squiggle Hub`,
+      title: `${questionSet.name} - Squiggle Hub`,
     };
   } catch (error) {
     return {
@@ -67,9 +67,9 @@ export default async function QuestionSetDetailPage({
           <p className="text-gray-500">This question set has no questions.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {questionSet.questions.map((questionItem) => (
-              <li key={questionItem.question.id} className="py-4">
-                <QuestionItem question={questionItem.question} />
+            {questionSet.questions.map((question) => (
+              <li key={question.id} className="py-4">
+                <QuestionItem question={question} />
               </li>
             ))}
           </ul>

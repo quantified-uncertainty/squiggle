@@ -9,6 +9,7 @@ import { H2 } from "@/components/ui/Headers";
 import { KeyValue } from "@/components/ui/KeyValue";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { EvaluationStateDisplay } from "@/evals/components/EvaluationStateDisplay";
+import { QuestionItem } from "@/evals/components/QuestionItem";
 import { EvalWithDetailsDTO, getEvalById } from "@/evals/data/detailsEvals";
 import {
   epistemicAgentRoute,
@@ -115,9 +116,7 @@ export default async function EvalDetailPage({
                 <Table.Row key={result.id}>
                   <Table.Cell align="top">
                     <div className="max-w-md space-y-2">
-                      <p className="text-sm font-semibold text-gray-900">
-                        {result.question.description}
-                      </p>
+                      <QuestionItem question={result.question} />
                       <p className="text-xs text-gray-500">
                         ID: {result.question.id}
                       </p>
