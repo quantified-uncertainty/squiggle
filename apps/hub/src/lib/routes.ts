@@ -240,11 +240,11 @@ export function createQuestionSetRoute() {
 }
 
 export function createQuestionSetFromMetaforecastRoute() {
-  return "/question-sets/create-from-metaforecast";
+  return "/question-sets/create/metaforecast";
 }
 
 export function createQuestionSetFromGitHubIssuesRoute() {
-  return "/question-sets/create-from-github-issues";
+  return "/question-sets/create/github";
 }
 
 export function evaluationsRoute() {

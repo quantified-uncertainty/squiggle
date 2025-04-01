@@ -104,7 +104,8 @@ model Value {
 }
 
 enum EpistemicAgentType {
-    SquiggleAI
+    SquiggleAI // run Squiggle AI workflow on the question's description
+    Manifold // load resolved results or the current forecast from Manifold
 }
 
 /**
