@@ -5,7 +5,12 @@ model Question {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // For now, this is the full question description (so it can be long).
     description String
+
+    // Free-form, question-specific metadata. For example, this can contain the URL to the question source.
+    // (This is for quick prototyping, and should be migrated to more structured metadata fields over time.)
+    metadata Json?
 
     questionSets QuestionsOnQuestionSets[]
     evalResults  Value[]
