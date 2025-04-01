@@ -37,7 +37,7 @@
     "commander": "^13.1.0",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
-    "immutable": "^5.0.3",
+    "immutable": "^5.1.1",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
     "next": "^15.2.2",
