@@ -53,7 +53,7 @@
     "@lezer/lr": "^1.4.2",
     "@quri/configs": "workspace:*",
     "@storybook/addon-essentials": "8.5.3",
-    "@storybook/addon-links": "8.5.3",
+    "@storybook/addon-links": "8.6.11",
     "@storybook/react": "8.5.3",
     "@storybook/react-vite": "8.5.3",
     "@testing-library/jest-dom": "^6.4.2",
