@@ -102,6 +102,9 @@ importers:
       '@quri/hub-linker':
         specifier: workspace:^
         version: link:../../internal-packages/hub-linker
+      '@quri/metaforecast-db':
+        specifier: workspace:^
+        version: link:../../internal-packages/metaforecast-db
       '@quri/squiggle-ai':
         specifier: workspace:*
         version: link:../../internal-packages/ai

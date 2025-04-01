@@ -3,6 +3,7 @@ import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
+import { DeleteQuestionSetAction } from "./DeleteQuestionSetAction";
 import { EvaluateQuestionSetAction } from "./EvaluateQuestionSetAction";
 
 type Props = {
@@ -19,6 +20,10 @@ export const QuestionSetActionsButton: FC<Props> = ({
       render={() => (
         <DropdownMenu>
           <EvaluateQuestionSetAction
+            questionSetId={questionSetId}
+            questionSetName={questionSetName}
+          />
+          <DeleteQuestionSetAction
             questionSetId={questionSetId}
             questionSetName={questionSetName}
           />
