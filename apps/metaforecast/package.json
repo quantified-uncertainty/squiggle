@@ -81,7 +81,7 @@
     "pg": "^8.13.3",
     "postcss": "^8.5.3",
     "prettier": "^3.4.2",
-    "re-resizable": "^6.10.0",
+    "re-resizable": "^6.11.2",
     "react": "19.0.0",
     "react-component-export-image": "^1.0.6",
     "react-compound-slider": "^3.4.0",
