@@ -35,8 +35,9 @@ const FrontpageNavEvalsIfRoot: FC = async () => {
 
   return (
     <>
+      <PageMenuSubheader>Evals</PageMenuSubheader>
       <PageMenuLink name="Question Sets" href={questionSetsRoute()} />
-      <PageMenuLink name="Evals" href={evaluationsRoute()} />
+      <PageMenuLink name="Evaluations" href={evaluationsRoute()} />
       <PageMenuLink name="Epistemic Agents" href={epistemicAgentsRoute()} />
     </>
   );
