@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
 
+import { EpistemicAgentsHelp } from "@/app/evals/EpistemicAgentsHelp";
 import { CreateEpistemicAgentButton } from "@/evals/components/CreateEpistemicAgentButton";
 import { auth } from "@/lib/server/auth";
 
@@ -13,6 +14,7 @@ export default async function EpistemicAgentsLayout({
   return (
     <MainAreaLayout
       title="Epistemic Agents"
+      help={<EpistemicAgentsHelp />}
       actions={session && <CreateEpistemicAgentButton />}
     >
       {children}

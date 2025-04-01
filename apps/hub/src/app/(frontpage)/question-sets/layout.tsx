@@ -1,5 +1,7 @@
 import { PropsWithChildren } from "react";
 
+import { QuestionSetsHelp } from "@/app/evals/QuestionSetsHelp";
+
 import { MainAreaLayout } from "../../../components/layout/MainAreaLayout";
 import { LayoutActions } from "./LayoutActions";
 
@@ -7,7 +9,11 @@ export default async function QuestionSetsLayout({
   children,
 }: PropsWithChildren) {
   return (
-    <MainAreaLayout title="Question Sets" actions={<LayoutActions />}>
+    <MainAreaLayout
+      help={<QuestionSetsHelp />}
+      title="Question Sets"
+      actions={<LayoutActions />}
+    >
       {children}
     </MainAreaLayout>
   );

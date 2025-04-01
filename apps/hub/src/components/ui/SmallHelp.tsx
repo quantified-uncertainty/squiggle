@@ -2,7 +2,7 @@ import { FC } from "react";
 
 import { HelpIcon, TextTooltip } from "@quri/ui";
 
-export const Help: FC<{
+export const SmallHelp: FC<{
   text: string;
 }> = ({ text }) => {
   return (

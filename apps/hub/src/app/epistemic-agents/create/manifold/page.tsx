@@ -6,6 +6,8 @@ import { FormProvider } from "react-hook-form";
 import { Button, TextFormField } from "@quri/ui";
 
 import { Card } from "@/components/ui/Card";
+import { ExplanationBox } from "@/components/ui/ExplanationBox";
+import { StyledA } from "@/components/ui/StyledA";
 import { createManifoldEpistemicAgentAction } from "@/evals/actions/createManifoldEpistemicAgent";
 import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 import { epistemicAgentRoute } from "@/lib/routes";
@@ -37,13 +39,20 @@ export default function CreateManifoldEpistemicAgentPage() {
 
   return (
     <Card theme="big">
-      <div className="mb-6 rounded-md bg-blue-50 p-4 text-sm text-blue-800">
-        <p className="mb-2 font-medium">About Manifold Agents</p>
-        <p>
+      <ExplanationBox title="About Manifold Agents">
+        <p className="mb-2">
           Manifold agents snapshot the current forecasted or resolved values
-          from Manifold Markets when used in an evaluation.
+          from Manifold Markets when used in an evaluation. The values are
+          loaded from the{" "}
+          <StyledA href="https://metaforecast.org" target="_blank">
+            Metaforecast
+          </StyledA>{" "}
+          database.
         </p>
-      </div>
+        <p className="mb-2">
+          {`Manifold agents don't have any configuration. So you won't need more than one agent of this type.`}
+        </p>
+      </ExplanationBox>
 
       <FormProvider {...form}>
         <form onSubmit={onSubmit}>
