@@ -10,7 +10,7 @@ export const getBasePath = () => {
     return process.env["NEXT_PUBLIC_SITE_URL"];
   }
 
-  return "http://localhost:3000";
+  return "http://localhost:3002";
 };
 
 export const cleanText = (text: string): string => {
