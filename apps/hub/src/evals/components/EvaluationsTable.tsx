@@ -5,25 +5,30 @@ import React from "react";
 
 import { Table } from "@quri/ui";
 
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { StyledLink } from "@/components/ui/StyledLink";
-import { evalRunnerRoute, evaluationRoute, speclistRoute } from "@/lib/routes";
+import {
+  epistemicAgentRoute,
+  evaluationRoute,
+  questionSetRoute,
+} from "@/lib/routes";
 
 import { type EvaluationSummaryDTO } from "../data/summaryEvals";
 import { EvaluationStateDisplay } from "./EvaluationStateDisplay";
 
 interface EvaluationsTableProps {
   evaluations: EvaluationSummaryDTO[];
-  showSpecList?: boolean;
+  showQuestionSet?: boolean;
   emptyMessage?: string;
 }
 
 export function EvaluationsTable({
   evaluations,
-  showSpecList = true,
+  showQuestionSet = true,
   emptyMessage = "No evaluations found.",
 }: EvaluationsTableProps) {
   if (evaluations.length === 0) {
-    return <div className="p-6 text-center text-gray-500">{emptyMessage}</div>;
+    return <NoEntitiesCard>{emptyMessage}</NoEntitiesCard>;
   }
 
   // Format cost to display as currency
@@ -44,11 +49,10 @@ export function EvaluationsTable({
         <Table.HeaderCell>ID</Table.HeaderCell>
         <Table.HeaderCell>Created</Table.HeaderCell>
         <Table.HeaderCell>State</Table.HeaderCell>
-        <Table.HeaderCell>Eval Runner</Table.HeaderCell>
-        {showSpecList && <Table.HeaderCell>Spec List</Table.HeaderCell>}
-        <Table.HeaderCell>Results Count</Table.HeaderCell>
-        <Table.HeaderCell>Total Cost</Table.HeaderCell>
-        <Table.HeaderCell>LLM Runs</Table.HeaderCell>
+        <Table.HeaderCell>Agent</Table.HeaderCell>
+        {showQuestionSet && <Table.HeaderCell>Question Set</Table.HeaderCell>}
+        <Table.HeaderCell>Values</Table.HeaderCell>
+        <Table.HeaderCell>Cost</Table.HeaderCell>
         <Table.HeaderCell>Actions</Table.HeaderCell>
       </Table.Header>
       <Table.Body>
@@ -73,30 +77,28 @@ export function EvaluationsTable({
             </Table.Cell>
             <Table.Cell>
               <StyledLink
-                href={evalRunnerRoute({ id: evaluation.runner.id })}
+                href={epistemicAgentRoute({ id: evaluation.agent.id })}
                 className="text-sm"
               >
-                {evaluation.runner.name}
+                {evaluation.agent.name}
               </StyledLink>
             </Table.Cell>
-            {showSpecList && evaluation.specList && (
+            {showQuestionSet && evaluation.questionSet && (
               <Table.Cell>
                 <StyledLink
-                  href={speclistRoute({ id: evaluation.specList.id })}
+                  href={questionSetRoute({ id: evaluation.questionSet.id })}
                   className="text-sm"
                 >
-                  {evaluation.specList.name}
+                  {evaluation.questionSet.name}
                 </StyledLink>
               </Table.Cell>
             )}
             <Table.Cell theme="text">
-              {evaluation._count.results} / {evaluation.specList.specCount}
+              {evaluation._count.values} /{" "}
+              {evaluation.questionSet.questionCount}
             </Table.Cell>
             <Table.Cell theme="text">
               {formatCost(evaluation.metrics?.totalPrice)}
-            </Table.Cell>
-            <Table.Cell theme="text">
-              {formatRunCount(evaluation.metrics?.llmRunCount)}
             </Table.Cell>
             <Table.Cell theme="text">(none)</Table.Cell>
           </Table.Row>

@@ -10,28 +10,28 @@ export const seedDatabase = actionClient.action(async () => {
     throw new Error("Seeding is only allowed in development mode");
   }
 
-  const specListExists = await prisma.specList.findFirst({
+  const questionSetExists = await prisma.questionSet.findFirst({
     where: {
-      name: "Test Spec List",
+      name: "Test Question Set",
     },
   });
 
-  if (!specListExists) {
-    await prisma.specList.create({
+  if (!questionSetExists) {
+    await prisma.questionSet.create({
       data: {
-        name: "Test Spec List",
-        specs: {
+        name: "Test Question Set",
+        questions: {
           create: [
-            { spec: { create: { description: "2+2" } } },
+            { question: { create: { description: "2+2" } } },
             {
-              spec: {
+              question: {
                 create: {
                   description: "How many piano tuners are there in the world?",
                 },
               },
             },
             {
-              spec: {
+              question: {
                 create: { description: "How many people were ever alive?" },
               },
             },

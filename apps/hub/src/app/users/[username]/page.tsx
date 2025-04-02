@@ -1,5 +1,9 @@
 import { Metadata } from "next";
 
+import { MainAreaLayout } from "@/components/layout/MainAreaLayout";
+import { NewModelButton } from "@/components/NewModelButton";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
+import { auth } from "@/lib/server/auth";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
 
@@ -12,15 +16,20 @@ export default async function UserPage({ params }: Props) {
   const page = await loadModelCards({
     ownerSlug: username,
   });
+  const session = await auth();
+  const isMe = username === session?.user.username;
 
   return (
-    <div>
+    <MainAreaLayout
+      title={`Models by ${username}`}
+      actions={isMe && <NewModelButton />}
+    >
       {page.items.length ? (
         <ModelList page={page} showOwner={false} />
       ) : (
-        <div className="text-slate-500">No models to show.</div>
+        <NoEntitiesCard>No models to show.</NoEntitiesCard>
       )}
-    </div>
+    </MainAreaLayout>
   );
 }
 

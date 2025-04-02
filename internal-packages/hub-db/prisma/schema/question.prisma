@@ -1,0 +1,123 @@
+// "Question" == "Spec" == "Definition", a node in the ontology graph that can be responded to with a value.
+model Question {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    description String
+
+    questionSets QuestionsOnQuestionSets[]
+    evalResults  Value[]
+}
+
+model QuestionSet {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    questions   QuestionsOnQuestionSets[]
+    evaluations Evaluation[]
+}
+
+model QuestionsOnQuestionSets {
+    id String @id @default(cuid())
+
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
+
+    questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+    questionSetId String
+
+    @@unique([questionId, questionSetId])
+    @@index([questionId])
+    @@index([questionSetId])
+}
+
+enum EvaluationState {
+    Pending
+    Running
+    Completed
+    Failed
+}
+
+// `Evaluation` is a run that produced multiple `Value`s from a `QuestionSet`.
+// In the codebase, we use `Evaluation` instead of shorter `Eval`, because `eval` is a reserved word in JavaScript.
+model Evaluation {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    state    EvaluationState @default(Pending)
+    errorMsg String? // Optional error message when state is 'Failed'
+
+    // metadata about the runner that was used
+    agent   EpistemicAgent @relation(fields: [agentId], references: [id])
+    agentId String
+
+    questionSet   QuestionSet @relation(fields: [questionSetId], references: [id], onDelete: Cascade)
+    questionSetId String
+
+    // Evaluations are not instant, so there's no guarantee that `values` contains all values from the question set.
+    values Value[]
+}
+
+/**
+ * `Value` is similar to the `Variable` table or to the `Model` table.
+ * For the sake of simplicity, we assume that its value is the end expression of the Squiggle code.
+ * In the future it should be merged with them somehow.
+ * ---
+ * Note that it's not AI-specific: its `workflow` reference is optional.
+ */
+model Value {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
+
+    /**
+     * All eval results are Squiggle models.
+     * Simple approach, Squiggle code is copy-pasted here from AiWorkflow outputs.
+     * TODO: this should be a reference to the `Model` table. (And we should retire the old `Variable` table.)
+     */
+    code String
+
+    evaluation   Evaluation @relation(fields: [evaluationId], references: [id])
+    evaluationId String
+
+    workflowId String?     @unique
+    workflow   AiWorkflow? @relation(fields: [workflowId], references: [id])
+
+    @@unique([questionId, evaluationId])
+}
+
+enum EpistemicAgentType {
+    SquiggleAI
+}
+
+/**
+ * Epistemic agents are the configurations that produce evaluations, i.e. values based on questions.
+ * The main kind of epistemic agent is Squiggle AI, but we can add more (e.g. prompting a human to evaluate, or loading resolved results from Metaforecast database).
+ */
+model EpistemicAgent {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name String
+
+    type EpistemicAgentType @default(SquiggleAI)
+
+    // Untyped, for now; validated by zod in the codebase.
+    // For AI, this should contain `LlmConfig` object.
+    config      Json
+    evaluations Evaluation[]
+}

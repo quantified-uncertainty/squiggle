@@ -15,11 +15,11 @@ export async function processEvaluation(evaluation: Evaluation) {
   const fullEvaluation = await prisma.evaluation.findUniqueOrThrow({
     where: { id: evaluation.id },
     include: {
-      specList: {
+      questionSet: {
         include: {
-          specs: {
+          questions: {
             include: {
-              spec: true,
+              question: true,
             },
           },
         },
@@ -35,30 +35,30 @@ export async function processEvaluation(evaluation: Evaluation) {
     });
 
     // Get the runner
-    const runner = await getAiEvalRunner({ id: evaluation.runnerId });
+    const runner = await getAiEvalRunner({ id: evaluation.agentId });
     if (!runner) {
-      throw new Error(`Failed to get runner with ID ${evaluation.runnerId}`);
+      throw new Error(`Failed to get runner with ID ${evaluation.agentId}`);
     }
 
     // Process all specs in parallel
     await Promise.all(
-      fullEvaluation.specList.specs.map(async ({ spec }) => {
+      fullEvaluation.questionSet.questions.map(async ({ question }) => {
         try {
           console.log(
-            `Processing spec ${spec.id} for evaluation ${evaluation.id}...`
+            `Processing question ${question.id} for evaluation ${evaluation.id}...`
           );
-          const result = await runner(spec);
+          const result = await runner(question);
 
           // Store result in db
-          await prisma.evalResult.create({
+          await prisma.value.create({
             data: {
-              spec: {
+              question: {
                 connect: {
-                  id: spec.id,
+                  id: question.id,
                 },
               },
               code: result.code,
-              eval: {
+              evaluation: {
                 connect: {
                   id: evaluation.id,
                 },
@@ -75,7 +75,7 @@ export async function processEvaluation(evaluation: Evaluation) {
             },
           });
         } catch (error) {
-          console.error(`Error processing spec ${spec.id}:`, error);
+          console.error(`Error processing question ${question.id}:`, error);
           throw error; // Re-throw to be caught by outer try/catch
         }
       })

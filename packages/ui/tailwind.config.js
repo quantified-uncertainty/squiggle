@@ -1,7 +1,7 @@
 import formsPlugin from "@tailwindcss/forms";
 
 const config = {
-  content: ["./src/**/*.tsx"],
+  content: ["./src/**/*.tsx", "./src/**/*.mdx"],
   plugins: [formsPlugin],
 };
 

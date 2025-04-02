@@ -2,6 +2,7 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { usePaginator } from "@/lib/hooks/usePaginator";
 import { Paginated } from "@/lib/types";
 import { ModelCardDTO } from "@/models/data/cards";
@@ -16,7 +17,9 @@ type Props = {
 export const ModelList: FC<Props> = ({ page, showOwner }) => {
   const { items: models, loadNext } = usePaginator(page);
 
-  return (
+  return models.length === 0 ? (
+    <NoEntitiesCard>No models found.</NoEntitiesCard>
+  ) : (
     <div>
       <div className="grid gap-y-8">
         {models.map((model) => (

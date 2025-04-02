@@ -24,12 +24,12 @@ async function act() {
       },
     },
     include: {
-      runner: true,
-      specList: {
+      agent: true,
+      questionSet: {
         include: {
-          specs: {
+          questions: {
             include: {
-              spec: true,
+              question: true,
             },
           },
         },

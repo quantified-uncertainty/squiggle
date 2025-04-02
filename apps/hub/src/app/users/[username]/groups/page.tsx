@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { GroupList } from "@/groups/components/GroupList";
 import { loadGroupCards } from "@/groups/data/groupCards";
 
@@ -16,7 +17,7 @@ export default async function OuterUserGroupsPage({ params }: Props) {
       {page.items.length ? (
         <GroupList page={page} />
       ) : (
-        <div className="text-slate-500">No groups to show.</div>
+        <NoEntitiesCard>No groups to show.</NoEntitiesCard>
       )}
     </div>
   );

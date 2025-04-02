@@ -183,7 +183,7 @@ export function groupMembersRoute({ slug }: { slug: string }) {
   return `${groupRoute({ slug })}/members`;
 }
 
-export function newModelRoute(params?: { group: string }) {
+export function newModelRoute(params?: { group?: string }) {
   const paramsString = params?.group
     ? "?" + new URLSearchParams({ group: params.group }).toString()
     : "";
@@ -227,16 +227,24 @@ export function groupInviteLink(params: {
   })}/invite-link?token=${token}`;
 }
 
-export function speclistsRoute() {
-  return "/evals/speclists";
+export function questionSetsRoute() {
+  return "/question-sets";
 }
 
-export function speclistRoute({ id }: { id: string }) {
-  return `/evals/speclists/${id}`;
+export function questionSetRoute({ id }: { id: string }) {
+  return `/question-sets/${id}`;
 }
 
-export function createSpecListRoute() {
-  return "/evals/speclists/create";
+export function createQuestionSetRoute() {
+  return "/question-sets/create";
+}
+
+export function createQuestionSetFromMetaforecastRoute() {
+  return "/question-sets/create-from-metaforecast";
+}
+
+export function createQuestionSetFromGitHubIssuesRoute() {
+  return "/question-sets/create-from-github-issues";
 }
 
 export function evaluationsRoute() {
@@ -247,10 +255,10 @@ export function evaluationRoute({ id }: { id: string }) {
   return `/evals/eval/${id}`;
 }
 
-export function evalRunnersRoute() {
-  return "/evals/eval-runners";
+export function epistemicAgentsRoute() {
+  return "/epistemic-agents";
 }
 
-export function evalRunnerRoute({ id }: { id: string }) {
-  return `/evals/eval-runners/${id}`;
+export function epistemicAgentRoute({ id }: { id: string }) {
+  return `/epistemic-agents/${id}`;
 }

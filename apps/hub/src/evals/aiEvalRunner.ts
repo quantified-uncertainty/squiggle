@@ -9,11 +9,11 @@ import {
 import { saveWorkflowToDb } from "@/ai/utils";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
-import { getEvalRunnerById } from "./data/evalRunners";
+import { getEpistemicAgentById } from "./data/epistemicAgents";
 import { EvalRunner } from "./types";
 
-function specToPrompt(spec: { id: string; description: string }) {
-  return `Write a model for this question: ${spec.description}. Return the answer in the final expression.`;
+function questionToPrompt(question: { id: string; description: string }) {
+  return `Write a model for this question: ${question.description}. Return the answer in the final expression.`;
 }
 
 const configSchema = z.object({
@@ -30,21 +30,21 @@ export async function getAiEvalRunner({
 }: {
   id: string;
 }): Promise<EvalRunner> {
-  const runnerData = await getEvalRunnerById(id);
-  if (runnerData.type !== "SquiggleAI") {
-    throw new Error("Eval runner is not an AI runner");
+  const agentData = await getEpistemicAgentById(id);
+  if (agentData.type !== "SquiggleAI") {
+    throw new Error("Epistemic agent is not an AI agent");
   }
 
-  const llmConfig = configSchema.parse(runnerData.config);
+  const llmConfig = configSchema.parse(agentData.config);
 
-  const evalRunner: EvalRunner = async (spec) => {
+  const runner: EvalRunner = async (question) => {
     const session = await getSessionOrRedirect();
     const user = await getSelf(session);
 
     const workflow = createSquiggleWorkflowTemplate.instantiate({
       llmConfig,
       inputs: {
-        prompt: new PromptArtifact(specToPrompt(spec)),
+        prompt: new PromptArtifact(questionToPrompt(question)),
       },
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
     });
@@ -57,11 +57,11 @@ export async function getAiEvalRunner({
     const workflowResult = workflow.getFinalResult();
 
     return {
-      specId: spec.id,
+      questionId: question.id,
       code: workflowResult.code,
       workflowId: dbWorkflow.id,
     };
   };
 
-  return evalRunner;
+  return runner;
 }

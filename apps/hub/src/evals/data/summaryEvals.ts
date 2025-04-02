@@ -68,30 +68,30 @@ const select = {
   createdAt: true,
   state: true,
   errorMsg: true,
-  runner: {
+  agent: {
     select: {
       id: true,
       name: true,
     },
   },
-  specList: {
+  questionSet: {
     select: {
       id: true,
       name: true,
       _count: {
         select: {
-          specs: true,
+          questions: true,
         },
       },
     },
   },
   _count: {
     select: {
-      results: true,
+      values: true,
     },
   },
   // Need to include evalResults with their workflows to calculate metrics
-  results: {
+  values: {
     select: {
       workflow: {
         select: {
@@ -102,7 +102,7 @@ const select = {
   },
 } satisfies Prisma.EvaluationSelect;
 
-type DbEvalSummary = Prisma.EvaluationGetPayload<{
+type DbEvaluationSummary = Prisma.EvaluationGetPayload<{
   select: typeof select;
 }>;
 
@@ -113,40 +113,40 @@ export type EvaluationSummaryDTO = {
   state: EvaluationState;
   errorMsg?: string | null;
   metrics: EvalMetrics;
-  runner: {
+  agent: {
     id: string;
     name: string;
   };
-  specList: {
+  questionSet: {
     id: string;
     name: string;
-    specCount: number;
+    questionCount: number;
   };
   _count: {
-    results: number;
+    values: number;
   };
 };
 
-function evalSummaryToDTO(dbEval: DbEvalSummary): EvaluationSummaryDTO {
-  const metrics = aggregateEvalMetrics(dbEval.results);
+function evalSummaryToDTO(dbEval: DbEvaluationSummary): EvaluationSummaryDTO {
+  const metrics = aggregateEvalMetrics(dbEval.values);
 
   return {
     id: dbEval.id,
     createdAt: dbEval.createdAt,
     state: dbEval.state,
     errorMsg: dbEval.errorMsg,
-    runner: dbEval.runner,
-    specList: {
-      id: dbEval.specList.id,
-      name: dbEval.specList.name,
-      specCount: dbEval.specList._count.specs,
+    agent: dbEval.agent,
+    questionSet: {
+      id: dbEval.questionSet.id,
+      name: dbEval.questionSet.name,
+      questionCount: dbEval.questionSet._count.questions,
     },
     _count: dbEval._count,
     metrics,
   };
 }
 
-export async function getAllEvals(): Promise<EvaluationSummaryDTO[]> {
+export async function getAllEvaluations(): Promise<EvaluationSummaryDTO[]> {
   await checkRootUser();
 
   // First get all evals with their result counts
@@ -160,14 +160,14 @@ export async function getAllEvals(): Promise<EvaluationSummaryDTO[]> {
   return rows.map(evalSummaryToDTO);
 }
 
-export async function getEvalsBySpecListId(
-  specListId: string
+export async function getEvaluationsByQuestionSetId(
+  questionSetId: string
 ): Promise<EvaluationSummaryDTO[]> {
   await checkRootUser();
 
   const rows = await prisma.evaluation.findMany({
     where: {
-      specListId,
+      questionSetId,
     },
     select: select,
     orderBy: {

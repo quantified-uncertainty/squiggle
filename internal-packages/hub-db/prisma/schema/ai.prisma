@@ -22,5 +22,5 @@ model AiWorkflow {
     markdown String @default("")
     metrics  Json?
 
-    evalResult EvalResult?
+    value Value?
 }

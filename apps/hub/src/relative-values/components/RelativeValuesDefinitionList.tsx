@@ -3,6 +3,7 @@
 import { FC } from "react";
 
 import { LoadMore } from "@/components/LoadMore";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { usePaginator } from "@/lib/hooks/usePaginator";
 import { Paginated } from "@/lib/types";
 import { RelativeValuesDefinitionCardDTO } from "@/relative-values/data/cards";
@@ -21,7 +22,7 @@ export const RelativeValuesDefinitionList: FC<Props> = ({
   const page = usePaginator(initialPage);
 
   if (!page.items.length) {
-    return <div className="text-slate-500">No definitions to show.</div>;
+    return <NoEntitiesCard>No definitions to show.</NoEntitiesCard>;
   }
 
   return (

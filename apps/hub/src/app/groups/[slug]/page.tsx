@@ -1,6 +1,10 @@
+import { MainAreaLayout } from "@/components/layout/MainAreaLayout";
+import { NoEntitiesCard } from "@/components/NoEntitiesCard";
 import { hasGroupMembership } from "@/groups/data/helpers";
 import { ModelList } from "@/models/components/ModelList";
 import { loadModelCards } from "@/models/data/cards";
+
+import { NewModelButton } from "../../../components/NewModelButton";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -15,16 +19,19 @@ export default async function OuterGroupPage({ params }: Props) {
   const isMember = await hasGroupMembership(slug);
 
   return (
-    <div>
+    <MainAreaLayout
+      title={`Models in ${slug}`}
+      actions={isMember && <NewModelButton group={slug} />}
+    >
       {page.items.length ? (
         <ModelList page={page} showOwner={false} />
       ) : (
-        <div className="text-slate-500">
+        <NoEntitiesCard>
           {isMember
             ? "This group doesn't have any models."
             : "This group does not have any public models."}
-        </div>
+        </NoEntitiesCard>
       )}
-    </div>
+    </MainAreaLayout>
   );
 }
