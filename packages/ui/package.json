@@ -38,8 +38,8 @@
   "types": "./dist/index.d.ts",
   "source": "./src/index.ts",
   "peerDependencies": {
-    "react": "^18 | ^19",
-    "react-dom": "^18 | ^19",
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
     "react-hook-form": "^7.53.2"
   },
   "dependencies": {
