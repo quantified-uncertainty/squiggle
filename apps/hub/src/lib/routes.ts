@@ -256,7 +256,7 @@ export function evaluationRoute({ id }: { id: string }) {
 }
 
 export function compareEvaluationsRoute({ ids }: { ids: string[] }) {
-  return `/evals/compare?ids=${ids.join(',')}`;
+  return `/evals/compare?ids=${ids.join(",")}`;
 }
 
 export function epistemicAgentsRoute() {
