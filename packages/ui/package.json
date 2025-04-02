@@ -43,13 +43,13 @@
     "react-hook-form": "^7.53.2"
   },
   "dependencies": {
-    "@floating-ui/react": "^0.26.28",
+    "@floating-ui/react": "^0.27.6",
     "@headlessui/react": "^2.2.0",
     "clsx": "^2.1.1",
-    "framer-motion": "^11.15.0",
+    "framer-motion": "^12.6.3",
     "react-colorful": "^5.6.1",
     "react-select": "^5.9.0",
-    "react-textarea-autosize": "8.5.7",
+    "react-textarea-autosize": "8.5.9",
     "react-use": "^17.6.0"
   },
   "devDependencies": {
