@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
+import { getWriteableOwnerOrSelf } from "@/owners/data/auth";
 import { checkRootUser } from "@/users/auth";
 
 const questionSchema = z.object({
@@ -22,12 +23,16 @@ export const createQuestionSetAction = actionClient
   .action(async ({ parsedInput: input }) => {
     await checkRootUser();
 
+    // TODO - support group-owned question sets
+    const owner = await getWriteableOwnerOrSelf();
+
     // Create the question set and questions in a transaction
     const questionSet = await prisma.$transaction(async (tx) => {
       // Create questionSet
       const newQuestionSet = await tx.questionSet.create({
         data: {
           name: input.name,
+          ownerId: owner.id,
         },
         select: { id: true },
       });

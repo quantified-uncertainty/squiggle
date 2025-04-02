@@ -17,11 +17,15 @@ export const createSquiggleAiEpistemicAgentAction = actionClient
   .action(async ({ parsedInput }) => {
     await checkRootUser();
 
+    // TODO - support group-owned agents
+    const owner = await getWriteableOwnerOrSelf();
+
     const agent = await prisma.epistemicAgent.create({
       data: {
         name: parsedInput.name,
         type: "SquiggleAI",
         config: parsedInput.config,
+        ownerId: owner.id,
       },
     });
 
