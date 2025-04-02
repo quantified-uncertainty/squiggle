@@ -87,7 +87,7 @@ export const FrontpageNav: FC = () => {
       />
       <PageMenuSubheader>Experimental</PageMenuSubheader>
       <PageMenuLink
-        name="Definitions"
+        name="RV Definitions"
         href={definitionsRoute()}
         icon={<ScaleIcon size={16} />}
       />

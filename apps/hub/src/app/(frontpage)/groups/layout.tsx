@@ -1,5 +1,7 @@
 import { PropsWithChildren } from "react";
 
+import { PlusIcon } from "@quri/ui";
+
 import { LinkButton } from "@/components/ui/LinkButton";
 import { ModalHelp } from "@/components/ui/ModalHelp";
 import { newGroupRoute } from "@/lib/routes";
@@ -29,7 +31,10 @@ export default async function GroupsLayout({ children }: PropsWithChildren) {
       actions={
         session && (
           <LinkButton href={newGroupRoute()} theme="primary">
-            New Group
+            <div className="flex items-center gap-1">
+              <PlusIcon size={16} />
+              New Group
+            </div>
           </LinkButton>
         )
       }

@@ -16,7 +16,7 @@ export const CreateEpistemicAgentButton: FC = () => {
     >
       <div className="flex items-center gap-1">
         <PlusIcon size={16} />
-        Create Epistemic Agent
+        New Epistemic Agent
       </div>
     </Button>
   );
