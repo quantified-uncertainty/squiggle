@@ -1,9 +1,8 @@
-import { cacheExchange, fetchExchange } from "urql";
-
 import customScalarsExchange from "@atmina/urql-custom-scalars-exchange";
 import { createClient } from "@urql/core";
 import { SSRExchange } from "@urql/next";
 import { registerUrql } from "@urql/next/rsc";
+import { cacheExchange, fetchExchange } from "urql";
 
 import schema from "../graphql/introspection.json";
 import { getBasePath } from "./utils";

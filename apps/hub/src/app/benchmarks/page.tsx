@@ -161,8 +161,9 @@ export default function BenchmarksPage() {
     <NarrowPageLayout>
       <H1>Squiggle benchmarks</H1>
       <div className="space-y-8">
-        <ReactMarkdown className="prose max-w-4xl" remarkPlugins={[remarkGfm]}>
-          {`
+        <div className="prose max-w-4xl">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {`
 Important considerations:
 
 - Keep this page in the foreground when you run benchmarks, otherwise your browser or OS might throttle the execution
@@ -171,7 +172,8 @@ Important considerations:
 - Some variance between runs is expected, try not to over-update on small differences
 - These benchmarks are memory-intense; also, JS will run garbage collection after the test has finished
 `}
-        </ReactMarkdown>
+          </ReactMarkdown>
+        </div>
         <hr />
         {codes.map((code) => (
           <BenchmarkTable key={code} code={code} />

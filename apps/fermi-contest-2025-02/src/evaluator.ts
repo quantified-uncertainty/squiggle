@@ -229,6 +229,9 @@ export class FermiContestEvaluator {
       ],
     });
 
+    if (response.content[0].type !== "text") {
+      throw new Error("Expected a text block");
+    }
     const result = response.content[0].text;
     return this.extractScoreAndExplanation(result);
   }

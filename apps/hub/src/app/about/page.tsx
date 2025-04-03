@@ -58,9 +58,9 @@ Support our endeavor to develop Squiggle and Squiggle Hub by donating to QURI [h
 export default function About() {
   return (
     <NarrowPageLayout>
-      <ReactMarkdown className="prose max-w-4xl" remarkPlugins={[remarkGfm]}>
-        {markdown}
-      </ReactMarkdown>
+      <div className="prose max-w-4xl">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+      </div>
     </NarrowPageLayout>
   );
 }

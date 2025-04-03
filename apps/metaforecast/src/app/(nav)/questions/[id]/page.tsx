@@ -43,12 +43,13 @@ export default async function QuestionPage({
 
       <div className="mx-auto max-w-prose space-y-8">
         <Section title="Question description" id="description">
-          <ReactMarkdown
-            rehypePlugins={[[rehypeExternalLinks, { target: "_blank" }]]}
-            className="font-normal text-gray-900"
-          >
-            {question.description.replaceAll("---", "")}
-          </ReactMarkdown>
+          <div className="font-normal text-gray-900">
+            <ReactMarkdown
+              rehypePlugins={[[rehypeExternalLinks, { target: "_blank" }]]}
+            >
+              {question.description.replaceAll("---", "")}
+            </ReactMarkdown>
+          </div>
         </Section>
         <Section title="Indicators" id="indicators">
           <IndicatorsTable question={question} />
