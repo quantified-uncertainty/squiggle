@@ -6,7 +6,7 @@ import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import { NumberFormField, SelectFormField, TextFormField } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
-import { createEpistemicAgentAction } from "@/evals/actions/createEpistemicAgent";
+import { createSquiggleAiEpistemicAgentAction } from "@/evals/actions/createSquiggleAiEpistemicAgent";
 import { epistemicAgentRoute } from "@/lib/routes";
 
 type LlmOption = {
@@ -54,12 +54,12 @@ export const CreateEpistemicAgentModal: FC<Props> = ({ close }) => {
   };
 
   return (
-    <SafeActionFormModal<FormShape, typeof createEpistemicAgentAction>
+    <SafeActionFormModal<FormShape, typeof createSquiggleAiEpistemicAgentAction>
       close={close}
       title="Create New Epistemic Agent"
       submitText="Create"
       defaultValues={defaultValues}
-      action={createEpistemicAgentAction}
+      action={createSquiggleAiEpistemicAgentAction}
       formDataToInput={(data) => ({
         name: data.name,
         config: {

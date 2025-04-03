@@ -3,6 +3,8 @@ import { FC } from "react";
 
 import { Button, Dropdown, DropdownMenu } from "@quri/ui";
 
+import { CompareEvaluationsAction } from "./CompareEvaluationsAction";
+import { DeleteQuestionSetAction } from "./DeleteQuestionSetAction";
 import { EvaluateQuestionSetAction } from "./EvaluateQuestionSetAction";
 
 type Props = {
@@ -22,10 +24,18 @@ export const QuestionSetActionsButton: FC<Props> = ({
             questionSetId={questionSetId}
             questionSetName={questionSetName}
           />
+          <CompareEvaluationsAction
+            questionSetId={questionSetId}
+            questionSetName={questionSetName}
+          />
+          <DeleteQuestionSetAction
+            questionSetId={questionSetId}
+            questionSetName={questionSetName}
+          />
         </DropdownMenu>
       )}
     >
-      <Button>Actions...</Button>
+      <Button>Actions</Button>
     </Dropdown>
   );
 };

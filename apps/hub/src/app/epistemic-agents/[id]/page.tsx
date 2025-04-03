@@ -47,7 +47,7 @@ export default async function EpistemicAgentDetailPage({
             <p className="text-sm text-gray-500">ID: {epistemicAgent.id}</p>
           </div>
           <StyledLink href={epistemicAgentsRoute()}>
-            ← Back to Epistemic Agents
+            ← All Epistemic Agents
           </StyledLink>
         </div>
 
@@ -79,17 +79,15 @@ export default async function EpistemicAgentDetailPage({
           </div>
         </Card>
 
-        <Card theme="big">
-          <div className="mb-4">
-            <h3 className="text-lg font-medium">Configuration</h3>
-          </div>
+        {epistemicAgent.config && epistemicAgent.type === "SquiggleAI" && (
+          <Card theme="big">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium">Configuration</h3>
+            </div>
 
-          {epistemicAgent.config ? (
             <LlmConfigDisplay config={epistemicAgent.config} />
-          ) : (
-            <p className="text-red-500">Configuration parsing error</p>
-          )}
-        </Card>
+          </Card>
+        )}
       </div>
     );
   } catch (error) {

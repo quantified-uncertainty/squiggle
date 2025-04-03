@@ -1,3 +1,4 @@
+import { FullLayoutWithPadding } from "@/components/layout/FullLayoutWithPadding";
 import { Card } from "@/components/ui/Card";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
@@ -7,6 +8,8 @@ import { getQuestionSetById } from "@/evals/data/questionSets";
 import { getEvaluationsByQuestionSetId } from "@/evals/data/summaryEvals";
 import { evaluationsRoute, questionSetsRoute } from "@/lib/routes";
 
+import { QuestionItem } from "../../../evals/components/QuestionItem";
+
 export const dynamicParams = true;
 
 export async function generateMetadata({
@@ -15,9 +18,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   try {
-    const specList = await getQuestionSetById((await params).id);
+    const questionSet = await getQuestionSetById((await params).id);
     return {
-      title: `${specList.name} - Squiggle Hub`,
+      title: `${questionSet.name} - Squiggle Hub`,
     };
   } catch (error) {
     return {
@@ -36,7 +39,7 @@ export default async function QuestionSetDetailPage({
   const evals = await getEvaluationsByQuestionSetId(id);
 
   return (
-    <div>
+    <FullLayoutWithPadding>
       <div className="mb-6 flex items-center justify-between">
         <div>
           <H2>{questionSet.name}</H2>
@@ -64,23 +67,16 @@ export default async function QuestionSetDetailPage({
           <p className="text-gray-500">This question set has no questions.</p>
         ) : (
           <ul className="divide-y divide-gray-200">
-            {questionSet.questions.map((questionItem) => (
-              <li key={questionItem.question.id} className="py-4">
-                <div className="flex flex-col space-y-1">
-                  <div className="text-sm font-medium text-gray-900">
-                    {questionItem.question.description}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    ID: {questionItem.question.id}
-                  </div>
-                </div>
+            {questionSet.questions.map((question) => (
+              <li key={question.id} className="py-4">
+                <QuestionItem question={question} />
               </li>
             ))}
           </ul>
         )}
       </Card>
 
-      <div className="p-6">
+      <div className="mb-8 mt-12">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-medium">Evaluations ({evals.length})</h3>
           <StyledLink href={evaluationsRoute()}>
@@ -94,6 +90,6 @@ export default async function QuestionSetDetailPage({
           emptyMessage="No evaluations found for this question set."
         />
       </div>
-    </div>
+    </FullLayoutWithPadding>
   );
 }

@@ -4,6 +4,7 @@ import { MainAreaLayout } from "@/components/layout/MainAreaLayout";
 import { NewModelButton } from "@/components/NewModelButton";
 import { auth } from "@/lib/server/auth";
 import { ModelList } from "@/models/components/ModelList";
+import { ModelsHelp } from "@/models/components/ModelsHelp";
 import { loadModelCards } from "@/models/data/cards";
 
 const MainArea: FC = async () => {
@@ -26,6 +27,7 @@ export default function FrontPage() {
   return (
     <MainAreaLayout
       title="Models"
+      help={<ModelsHelp />}
       actions={
         <Suspense>
           <Actions />

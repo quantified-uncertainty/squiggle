@@ -45,6 +45,7 @@ export function useSafeActionForm<
 
   const { executeAsync, isPending, hasSucceeded } = useAction(action, {
     onSuccess: ({ data }) => {
+      console.log("data", data);
       if (data) {
         onSuccess?.(data);
       }

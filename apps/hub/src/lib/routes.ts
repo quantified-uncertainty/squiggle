@@ -240,11 +240,11 @@ export function createQuestionSetRoute() {
 }
 
 export function createQuestionSetFromMetaforecastRoute() {
-  return "/question-sets/create-from-metaforecast";
+  return "/question-sets/create/metaforecast";
 }
 
 export function createQuestionSetFromGitHubIssuesRoute() {
-  return "/question-sets/create-from-github-issues";
+  return "/question-sets/create/github";
 }
 
 export function evaluationsRoute() {
@@ -255,10 +255,26 @@ export function evaluationRoute({ id }: { id: string }) {
   return `/evals/eval/${id}`;
 }
 
+export function compareEvaluationsRoute({ ids }: { ids: string[] }) {
+  return `/evals/compare?ids=${ids.join(",")}`;
+}
+
 export function epistemicAgentsRoute() {
   return "/epistemic-agents";
 }
 
 export function epistemicAgentRoute({ id }: { id: string }) {
   return `/epistemic-agents/${id}`;
+}
+
+export function createEpistemicAgentRoute() {
+  return "/epistemic-agents/create";
+}
+
+export function createSquiggleAiEpistemicAgentRoute() {
+  return "/epistemic-agents/create";
+}
+
+export function createManifoldEpistemicAgentRoute() {
+  return "/epistemic-agents/create/manifold";
 }

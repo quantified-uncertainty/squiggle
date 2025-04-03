@@ -1,5 +1,7 @@
 import { PropsWithChildren } from "react";
 
+import { PlusIcon } from "@quri/ui";
+
 import { LinkButton } from "@/components/ui/LinkButton";
 import { newDefinitionRoute } from "@/lib/routes";
 import { auth } from "@/lib/server/auth";
@@ -17,7 +19,10 @@ export default async function DefinitionsLayout({
       actions={
         session && (
           <LinkButton href={newDefinitionRoute()} theme="primary">
-            New Definition
+            <div className="flex items-center gap-1">
+              <PlusIcon size={16} />
+              New Definition
+            </div>
           </LinkButton>
         )
       }
