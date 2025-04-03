@@ -3,7 +3,7 @@ import { Prisma } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { controlsOwnerId } from "@/owners/data/auth";
 
-import { modelWhereHasAccess } from "./authHelpers";
+import { modelWhereCanRead } from "./authHelpers";
 import {
   ModelRevisionFullDTO,
   modelRevisionFullToDTO,
@@ -104,11 +104,10 @@ export async function loadModelFull({
 }): Promise<ModelFullDTO | null> {
   const row = await prisma.model.findFirst({
     select,
-    where: {
-      slug: slug,
+    where: await modelWhereCanRead({
+      slug,
       owner: { slug: owner },
-      OR: await modelWhereHasAccess(),
-    },
+    }),
   });
 
   if (!row) {

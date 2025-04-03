@@ -4,7 +4,7 @@ import { ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { getSessionOrRedirect } from "@/users/auth";
 
-import { modelWhereHasAccess } from "./data/authHelpers";
+import { modelWhereCanRead } from "./data/authHelpers";
 
 export async function getWriteableModel({
   owner,
@@ -50,13 +50,12 @@ export async function getWriteableModel({
       select: {
         id: true,
       },
-      where: {
+      where: await modelWhereCanRead({
         slug,
         owner: {
           slug: owner,
         },
-        OR: await modelWhereHasAccess(),
-      },
+      }),
     }));
 
     if (modelExists) {

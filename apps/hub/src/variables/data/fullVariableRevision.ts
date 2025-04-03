@@ -1,7 +1,7 @@
 import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/data/authHelpers";
 import {
   ModelRevisionFullDTO,
   modelRevisionFullToDTO,
@@ -58,13 +58,12 @@ export async function loadVariableRevisionFull({
     where: {
       id: revisionId,
       modelRevision: {
-        model: {
-          OR: await modelWhereHasAccess(),
+        model: await modelWhereCanRead({
           owner: {
             slug: owner,
           },
           slug,
-        },
+        }),
       },
     },
     select,

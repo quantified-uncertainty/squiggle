@@ -2,7 +2,7 @@ import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/data/authHelpers";
 
 const variableCardSelect = {
   id: true,
@@ -70,8 +70,7 @@ export async function loadVariableCards(
     },
     cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
-      model: {
-        OR: await modelWhereHasAccess(),
+      model: await modelWhereCanRead({
         ...(params.ownerSlug
           ? {
               owner: {
@@ -79,7 +78,7 @@ export async function loadVariableCards(
               },
             }
           : undefined),
-      },
+      }),
     },
     take: limit + 1,
   });
@@ -110,11 +109,10 @@ export async function loadVariableCard({
 }) {
   const row = await prisma.variable.findFirst({
     where: {
-      model: {
-        OR: await modelWhereHasAccess(),
+      model: await modelWhereCanRead({
         owner: { slug: owner },
         slug,
-      },
+      }),
       variableName,
     },
     select: variableCardSelect,

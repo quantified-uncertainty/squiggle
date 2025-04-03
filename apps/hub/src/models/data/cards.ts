@@ -4,7 +4,7 @@ import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
 import { selectTypedOwner, toTypedOwnerDTO } from "@/owners/data/typedOwner";
 
-import { modelWhereHasAccess } from "./authHelpers";
+import { modelWhereCanRead } from "./authHelpers";
 
 // FIXME - explicit ModelCardDTO
 function toDTO(dbModel: DbModelCard) {
@@ -100,7 +100,7 @@ export async function loadModelCards(
     select,
     orderBy: { updatedAt: "desc" },
     cursor: params.cursor ? { id: params.cursor } : undefined,
-    where: {
+    where: await modelWhereCanRead({
       ...(params.ownerSlug
         ? {
             owner: {
@@ -108,8 +108,7 @@ export async function loadModelCards(
             },
           }
         : {}),
-      OR: await modelWhereHasAccess(),
-    },
+    }),
     take: limit + 1,
   });
 
@@ -137,11 +136,10 @@ export async function loadModelCard({
 }): Promise<ModelCardDTO | null> {
   const dbModel = await prisma.model.findFirst({
     select: select,
-    where: {
+    where: await modelWhereCanRead({
       slug,
       owner: { slug: owner },
-      OR: await modelWhereHasAccess(),
-    },
+    }),
   });
 
   if (!dbModel) {

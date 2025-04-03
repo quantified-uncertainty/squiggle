@@ -2,7 +2,7 @@ import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/data/authHelpers";
 import {
   ModelRevisionDTO,
   modelRevisionToDTO,
@@ -60,13 +60,12 @@ export async function loadVariableRevisions(params: {
     cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
       modelRevision: {
-        model: {
-          OR: await modelWhereHasAccess(),
+        model: await modelWhereCanRead({
           owner: {
             slug: params.owner,
           },
           slug: params.slug,
-        },
+        }),
       },
     },
     take: limit + 1,

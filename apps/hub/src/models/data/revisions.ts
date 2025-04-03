@@ -3,7 +3,7 @@ import { Prisma } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
 
-import { modelWhereHasAccess } from "./authHelpers";
+import { modelWhereCanRead } from "./authHelpers";
 
 export const selectModelRevision = {
   id: true,
@@ -107,11 +107,10 @@ export async function loadModelRevisions(params: {
 
   const dbRevisions = await prisma.modelRevision.findMany({
     where: {
-      model: {
+      model: await modelWhereCanRead({
         slug: params.slug,
         owner: { slug: params.owner },
-        OR: await modelWhereHasAccess(),
-      },
+      }),
     },
     cursor: params.cursor ? { id: params.cursor } : undefined,
     orderBy: { createdAt: "desc" },

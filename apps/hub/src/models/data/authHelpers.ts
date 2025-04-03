@@ -2,8 +2,14 @@ import { Prisma } from "@quri/hub-db";
 
 import { auth } from "@/lib/server/auth";
 
-export async function modelWhereHasAccess(): Promise<Prisma.ModelWhereInput[]> {
+export async function modelWhereCanRead(
+  where: Prisma.ModelWhereInput
+): Promise<Prisma.ModelWhereInput> {
   const session = await auth();
+
+  if (where.OR) {
+    throw new Error("modelWhereCanRead doesn't support OR");
+  }
 
   const orParts: Prisma.ModelWhereInput[] = [{ isPrivate: false }];
   if (session) {
@@ -26,5 +32,9 @@ export async function modelWhereHasAccess(): Promise<Prisma.ModelWhereInput[]> {
       },
     });
   }
-  return orParts;
+
+  return {
+    ...where,
+    OR: orParts,
+  };
 }

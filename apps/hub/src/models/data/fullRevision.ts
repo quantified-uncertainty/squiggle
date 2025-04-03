@@ -2,7 +2,7 @@ import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 
-import { modelWhereHasAccess } from "./authHelpers";
+import { modelWhereCanRead } from "./authHelpers";
 
 export const selectModelRevisionFull = {
   id: true,
@@ -92,11 +92,10 @@ export async function loadModelRevisionFull({
   const dbRevision = await prisma.modelRevision.findFirst({
     where: {
       id: revisionId,
-      model: {
+      model: await modelWhereCanRead({
         slug,
         owner: { slug: owner },
-        OR: await modelWhereHasAccess(),
-      },
+      }),
     },
     select: selectModelRevisionFull,
   });

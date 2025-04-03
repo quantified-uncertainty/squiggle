@@ -5,6 +5,7 @@ import { llmConfigSchema } from "@quri/squiggle-ai/server";
 
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
+import { getWriteableOwnerOrSelf } from "@/owners/data/auth";
 import { checkRootUser } from "@/users/auth";
 
 const schema = z.object({
