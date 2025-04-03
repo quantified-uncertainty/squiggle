@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
-    "@types/node": "^22.13.17",
+    "@types/node": "^22.14.0",
     "typescript": "^5.8.2"
   },
   "exports": {

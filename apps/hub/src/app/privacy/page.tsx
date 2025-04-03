@@ -394,9 +394,9 @@ This privacy policy was created using Termly's [Privacy Policy Generator](https:
 export default function TOS() {
   return (
     <NarrowPageLayout>
-      <ReactMarkdown className="prose max-w-4xl" remarkPlugins={[remarkGfm]}>
-        {markdown}
-      </ReactMarkdown>
+      <div className="prose max-w-4xl">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+      </div>
     </NarrowPageLayout>
   );
 }

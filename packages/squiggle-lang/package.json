@@ -45,7 +45,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-react": "^7.26.3",
-    "@babel/preset-typescript": "^7.26.0",
+    "@babel/preset-typescript": "^7.27.0",
     "@commander-js/extra-typings": "^13.1.0",
     "@jest/globals": "^29.7.0",
     "@quri/configs": "workspace:*",
@@ -53,8 +53,8 @@
     "@types/d3-time-format": "^4.0.3",
     "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.16",
-    "@types/node": "^22.13.17",
-    "@types/react": "^19.0.12",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "codecov": "^3.8.3",
@@ -66,7 +66,7 @@
     "peggy": "^4.2.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
-    "react-reconciler": "^0.31.0",
+    "react-reconciler": "^0.32.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
