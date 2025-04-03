@@ -944,7 +944,7 @@ importers:
         version: 2.1.0
       squiggle-components-0.10.0:
         specifier: npm:@quri/squiggle-components@0.10.0
-        version: '@quri/squiggle-components@0.10.0(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))'
+        version: '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))'
       squiggle-components-0.8.5:
         specifier: npm:@quri/squiggle-components@0.8.5
         version: '@quri/squiggle-components@0.8.5(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))'
@@ -1452,7 +1452,7 @@ importers:
         version: 19.1.0
       react-reconciler:
         specifier: ^0.31.0
-        version: 0.31.0(react@19.1.0)
+        version: 0.32.0(react@19.1.0)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)
@@ -4272,6 +4272,9 @@ packages:
   '@quri/prettier-plugin-squiggle@0.9.5':
     resolution: {integrity: sha512-1sgxOV2E7/t5ZZEgKqmG7OV3BOiwY0HVfh7qaXz8HQf6tRsUTTH558XpmrrTQuddObQjqZXQlnYbqDFRaHySzA==}
 
+  '@quri/serializer@1.0.0':
+    resolution: {integrity: sha512-MHaz3jcIsOC2c9iUlxRMrAppa84ZPf8Mnoio2/z5KtojoBu4sHt5360FYD7uOBgUz3fq2hp/aLATV9g5/A7q2g==}
+
   '@quri/squiggle-components@0.10.0':
     resolution: {integrity: sha512-q4at8cvVrLj9vtcbuWLp5ELXxkhzLcFGqOlCwrfUGZuxYOmCMYksOpRQijASMPE6T8lFGQc/+sSZcBYCdicuGA==}
     engines: {node: '>=20.x'}
@@ -4400,6 +4403,14 @@ packages:
     peerDependencies:
       react: ^18
       react-dom: ^18
+
+  '@quri/ui@0.2.3':
+    resolution: {integrity: sha512-Q+kPjMbNbXyQHw+5/MDXQRSSFUuWSqz1+g/4lnmRXxJGk8JqfeOAFrS8P+E2ChjSKWihart2lsq11wMwMxLUUw==}
+    engines: {node: '>=20.x'}
+    peerDependencies:
+      react: ^18 | ^19
+      react-dom: ^18 | ^19
+      react-hook-form: ^7.53.2
 
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
@@ -11044,6 +11055,12 @@ packages:
     peerDependencies:
       react: ^19.0.0
 
+  react-reconciler@0.32.0:
+    resolution: {integrity: sha512-2NPMOzgTlG0ZWdIf3qG+dcbLSoAc/uLfOwckc3ofy5sSK0pLJqnQLpUFxvGcN2rlXSjnVtGeeFLNimCQEj5gOQ==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      react: ^19.1.0
+
   react-remove-scroll-bar@2.3.6:
     resolution: {integrity: sha512-DtSYaao4mBmX+HDo5YWYdBWQwYIQQshUV/dVxFxK+KM26Wjwp1gZ6rv6OC3oujI6Bfu6Xyg3TwK533AQutsn/g==}
     engines: {node: '>=10'}
@@ -11099,6 +11116,12 @@ packages:
 
   react-textarea-autosize@8.5.3:
     resolution: {integrity: sha512-XT1024o2pqCuZSuBt9FwHlaDeNtVrtCXu0Rnz88t1jUGheCLa3PhjE1GH8Ctm2axEtvdCl5SUHYschyQ0L5QHQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
+  react-textarea-autosize@8.5.4:
+    resolution: {integrity: sha512-eSSjVtRLcLfFwFcariT77t9hcbVJHQV76b51QjQGarQIHml2+gM2lms0n3XrhnDmgK5B+/Z7TmQk5OHNzqYm/A==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -11561,11 +11584,11 @@ packages:
 
   shikiji-core@0.10.2:
     resolution: {integrity: sha512-9Of8HMlF96usXJHmCL3Gd0Fcf0EcyJUF9m8EoAKKd98mHXi0La2AZl1h6PegSFGtiYcBDK/fLuKbDa1l16r1fA==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji-core@0.9.15:
     resolution: {integrity: sha512-7hqIcUKS15OMs/61Qp2GvO1fSajBB36bDqi8vexIg5kp80V6v6SGtBrlq+nLlo7erMG2d1kvIuTIq1bwKI6fEg==}
-    deprecated: Shikiji is merged back to Shiki v1.0, please migrate over to get the latest updates
+    deprecated: Deprecated, use @shikijs/core instead
 
   shikiji@0.10.2:
     resolution: {integrity: sha512-wtZg3T0vtYV2PnqusWQs3mDaJBdCPWxFDrBM/SE5LfrX92gjUvfEMlc+vJnoKY6Z/S44OWaCRzNIsdBRWcTAiw==}
@@ -16615,7 +16638,9 @@ snapshots:
       '@quri/squiggle-lang': 0.9.5
       prettier: 3.5.3
 
-  '@quri/squiggle-components@0.10.0(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))':
+  '@quri/serializer@1.0.0': {}
+
+  '@quri/squiggle-components@0.10.0(@emotion/is-prop-valid@0.8.8)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))':
     dependencies:
       '@codemirror/autocomplete': 6.18.4
       '@codemirror/commands': 6.5.0
@@ -16633,7 +16658,7 @@ snapshots:
       '@quri/prettier-plugin-squiggle': 0.10.0(@types/react@19.1.0)
       '@quri/squiggle-lang': 0.10.0(@types/react@19.1.0)
       '@quri/squiggle-textmate-grammar': 0.10.0
-      '@quri/ui': link:packages/ui
+      '@quri/ui': 0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react-hook-form@7.55.0(react@19.1.0))(react@19.1.0)
       '@tailwindcss/typography': 0.5.16(tailwindcss@3.4.14(ts-node@10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.15))(@types/node@22.14.0)(typescript@5.8.2)))
       clsx: 2.1.1
       codemirror: 6.0.1
@@ -16652,6 +16677,7 @@ snapshots:
       unist-util-visit-parents: 6.0.1
       zod: 3.24.2
     transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
       - '@types/react'
       - bufferutil
       - immer
@@ -16946,7 +16972,7 @@ snapshots:
   '@quri/squiggle-lang@0.10.0(@types/react@19.1.0)':
     dependencies:
       '@commander-js/extra-typings': 12.1.0(commander@12.1.0)
-      '@quri/serializer': link:packages/serializer
+      '@quri/serializer': 1.0.0
       commander: 12.1.0
       d3-format: 3.1.0
       d3-time-format: 4.1.0
@@ -17118,6 +17144,24 @@ snapshots:
       react-hook-form: 7.55.0(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.3(@types/react@19.1.0)(react@19.1.0)
+      react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+    transitivePeerDependencies:
+      - '@emotion/is-prop-valid'
+      - '@types/react'
+      - supports-color
+
+  '@quri/ui@0.2.3(@emotion/is-prop-valid@0.8.8)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react-hook-form@7.55.0(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@floating-ui/react': 0.26.28(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@headlessui/react': 2.2.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      clsx: 2.1.1
+      framer-motion: 11.18.2(@emotion/is-prop-valid@0.8.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react: 19.1.0
+      react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-dom: 19.1.0(react@19.1.0)
+      react-hook-form: 7.55.0(react@19.1.0)
+      react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-textarea-autosize: 8.5.4(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
@@ -25498,6 +25542,11 @@ snapshots:
       react: 19.1.0
       scheduler: 0.25.0
 
+  react-reconciler@0.32.0(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      scheduler: 0.26.0
+
   react-remove-scroll-bar@2.3.6(@types/react@18.3.3)(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -25606,6 +25655,15 @@ snapshots:
       - '@types/react'
 
   react-textarea-autosize@8.5.3(@types/react@19.1.0)(react@19.1.0):
+    dependencies:
+      '@babel/runtime': 7.27.0
+      react: 19.1.0
+      use-composed-ref: 1.4.0(@types/react@19.1.0)(react@19.1.0)
+      use-latest: 1.3.0(@types/react@19.1.0)(react@19.1.0)
+    transitivePeerDependencies:
+      - '@types/react'
+
+  react-textarea-autosize@8.5.4(@types/react@19.1.0)(react@19.1.0):
     dependencies:
       '@babel/runtime': 7.27.0
       react: 19.1.0
