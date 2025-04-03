@@ -66,7 +66,7 @@
     "peggy": "^4.2.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
-    "react-reconciler": "^0.32.0",
+    "react-reconciler": "^0.31.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
