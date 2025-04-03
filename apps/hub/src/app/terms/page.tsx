@@ -271,7 +271,9 @@ ops@quantifieduncertainty.org
 export default function Terms() {
   return (
     <NarrowPageLayout>
-      <ReactMarkdown className="prose max-w-4xl">{markdown}</ReactMarkdown>
+      <div className="prose max-w-4xl">
+        <ReactMarkdown>{markdown}</ReactMarkdown>
+      </div>
     </NarrowPageLayout>
   );
 }

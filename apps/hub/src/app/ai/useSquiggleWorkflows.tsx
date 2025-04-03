@@ -1,5 +1,6 @@
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { type ReadableStreamDefaultReader } from "stream/web";
 
 import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 

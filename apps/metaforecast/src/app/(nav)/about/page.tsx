@@ -32,9 +32,11 @@ Metaforecast is currently maintained by [QURI](https://quantifieduncertainty.org
 export default function AboutPage() {
   return (
     <Card highlightOnHover={false} large={true}>
-      <ReactMarkdown remarkPlugins={[gfm]} className="mx-auto max-w-prose">
-        {readmeMarkdownText}
-      </ReactMarkdown>
+      <div className="mx-auto max-w-prose">
+        <ReactMarkdown remarkPlugins={[gfm]}>
+          {readmeMarkdownText}
+        </ReactMarkdown>
+      </div>
     </Card>
   );
 }

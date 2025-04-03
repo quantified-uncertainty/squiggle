@@ -14,11 +14,11 @@
     "build": "content-collections build && tsc -b && cp -r .content-collections dist/"
   },
   "dependencies": {
-    "@content-collections/cli": "^0.1.5",
-    "@content-collections/core": "^0.7.2",
+    "@content-collections/cli": "^0.1.6",
+    "@content-collections/core": "^0.8.2",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-lang": "workspace:*",
-    "@types/node": "^22.13.9",
+    "@types/node": "^22.14.0",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "zod": "^3.24.2"
@@ -28,10 +28,10 @@
     "@quri/configs": "workspace:*",
     "@quri/squiggle-textmate-grammar": "workspace:*",
     "@types/mdx": "^2.0.13",
-    "eslint": "^9.19.0",
-    "prettier": "^3.4.2",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "exports": {
     ".": "./dist/src/index.js"

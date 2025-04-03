@@ -17,10 +17,15 @@ resource "digitalocean_database_cluster" "main" {
 }
 
 locals {
-  generated_env = merge(var.metaforecast_env, {
-    # should we bring proper DO certificates to prod instead?
-    METAFORECAST_DB_URL = replace(digitalocean_database_cluster.main.uri, "/\\?sslmode=require$/", "")
-  })
+  generated_env = merge(var.metaforecast_env,
+    {
+      # should we bring proper DO certificates to prod instead?
+      METAFORECAST_DB_URL = replace(digitalocean_database_cluster.main.uri, "/\\?sslmode=require$/", "")
+    },
+    {
+      ENABLE_EXPERIMENTAL_COREPACK = "1"
+    },
+  )
 }
 
 resource "digitalocean_project_resources" "main" {

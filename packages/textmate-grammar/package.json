@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "js-yaml": "^4.1.0",
-    "prettier": "^3.4.2",
+    "prettier": "^3.5.3",
     "vscode-tmgrammar-test": "^0.1.3"
   },
   "files": [
