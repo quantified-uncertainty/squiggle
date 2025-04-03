@@ -40,10 +40,9 @@ const DisplayMarkdown: FC<{ description: string }> = ({ description }) => {
   const formatted = truncateText(250, cleanText(description));
   // overflow-hidden overflow-ellipsis h-24
   return formatted === "" ? null : (
-    <div className="overflow-clip">
+    <div className="overflow-clip font-normal">
       <ReactMarkdown
         rehypePlugins={[[rehypeExternalLinks, { target: "_blank" }]]}
-        className="font-normal"
       >
         {formatted}
       </ReactMarkdown>

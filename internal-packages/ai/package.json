@@ -21,7 +21,7 @@
     "test:edit": "tsx src/scripts/tests/edit.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.29.0",
+    "@anthropic-ai/sdk": "^0.39.0",
     "@quri/configs": "workspace:*",
     "@quri/content": "workspace:*",
     "@quri/hub-api-client": "workspace:^",
@@ -31,7 +31,7 @@
     "chalk": "^5.4.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
-    "openai": "^4.86.1",
+    "openai": "^4.91.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "zod": "^3.24.2"
@@ -39,11 +39,11 @@
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
     "@types/jest": "^29.5.13",
-    "@types/node": "^22.13.9",
-    "eslint": "^9.19.0",
+    "@types/node": "^22.14.0",
+    "eslint": "^9.23.0",
     "jest": "^29.7.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.3"
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "exports": {
     ".": {

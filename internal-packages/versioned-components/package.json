@@ -14,7 +14,7 @@
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
-    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "base64-js": "^1.5.1",
     "commander": "^13.1.0",
@@ -46,22 +46,22 @@
     "@quri/configs": "workspace:*",
     "@types/json-diff": "^1.0.3",
     "@types/lodash": "^4.17.16",
+    "@types/node": "^22.14.0",
     "@types/pako": "^2.0.3",
-    "@types/node": "^22.13.9",
-    "@types/react": "^19.0.10",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
-    "eslint": "^9.19.0",
+    "@types/react": "^19.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.23.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "tailwindcss": "^3.4.14",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "peerDependencies": {
-    "react": "^18 | ^19",
-    "react-dom": "^18 | ^19"
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
   },
   "type": "module",
   "exports": {

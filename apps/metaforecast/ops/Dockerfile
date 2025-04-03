@@ -14,10 +14,10 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
     && apt-get install -y openssl
 
 # Install pnpm and turbo
-RUN npm install -g pnpm@9.13.2
+RUN corepack enable
 
 # FIXME - how to install the exact version from package.json?
-RUN npm install -g turbo@2.4.0
+RUN npm install -g turbo@2.4.4
 
 # Pruned files
 FROM base AS builder

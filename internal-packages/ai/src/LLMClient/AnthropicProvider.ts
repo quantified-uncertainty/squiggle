@@ -79,7 +79,7 @@ export class AnthropicProvider {
       throw new Error("At least one message is required");
     }
 
-    const completion = await this.client.beta.promptCaching.messages.create({
+    const completion = await this.client.messages.create({
       max_tokens: this.modelConfig.maxTokens,
       messages: claudeMessages,
       model: this.modelConfig.model,
