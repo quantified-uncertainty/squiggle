@@ -10,6 +10,6 @@ export function getCliUserEmail() {
 
 // If a script needs to update the current user, it can do so with this function.
 // Note that this is not threadsafe, and should only be used in scripts.
-export function setCliUserEmail(email: string) {
+export function setCliUserEmail(email: string | undefined) {
   cliUserEmail = email;
 }

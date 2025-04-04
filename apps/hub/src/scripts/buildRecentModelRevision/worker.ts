@@ -14,7 +14,7 @@ export type VariableRevisionInput = {
 export type WorkerRunMessage = {
   type: "run";
   data: {
-    userEmail: string;
+    userEmail?: string;
     code: string;
     seed: string;
     squiggleVersion: SquiggleVersion;
@@ -55,6 +55,8 @@ export async function runSquiggleCode({
   };
 }
 
+// IMPORTANT: This is not threadsafe, because of `setCliUserEmail` that sets a global variable.
+// Don't try to run multiple Squiggle models in parallel in a single worker, especially if they have different users.
 process.on("message", async (message: WorkerRunMessage) => {
   if (message.type === "run") {
     try {

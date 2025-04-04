@@ -1,10 +1,7 @@
 import { spawn } from "node:child_process";
 
 import { PrismaClient } from "@quri/hub-db";
-import {
-  checkSquiggleVersion,
-  SquiggleVersion,
-} from "@quri/versioned-squiggle-components";
+import { checkSquiggleVersion } from "@quri/versioned-squiggle-components";
 
 import { createVariableRevision } from "./createVariableRevision";
 import { WorkerOutput, WorkerRunMessage } from "./worker";
@@ -25,9 +22,16 @@ async function runWorker({
   code: string;
   seed: string;
   timeoutSeconds: number;
-  userEmail: string;
-  squiggleVersion: SquiggleVersion;
+  userEmail?: string;
+  squiggleVersion: string;
 }): Promise<WorkerOutput> {
+  if (!checkSquiggleVersion(squiggleVersion)) {
+    return {
+      errors: `Squiggle version ${squiggleVersion} is not a valid Squiggle version.`,
+      variableRevisions: [],
+    };
+  }
+
   return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
     const worker = spawn("node", [__dirname + "/worker.mjs"], {
@@ -109,13 +113,8 @@ async function buildRecentModelVersion(): Promise<void> {
       return;
     }
 
-    if (!modelRevision.author?.email) {
-      throw new Error(
-        `Unexpected Error: Model revision didn't have an author. This should never happen.`
-      );
-    }
-
     if (!modelRevision.squiggleSnippet) {
+      // shouldn't happen, we accounted for this in Prisma query
       throw new Error(
         `Unexpected Error: This is not a SquiggleSnippet model revision.`
       );
@@ -123,19 +122,16 @@ async function buildRecentModelVersion(): Promise<void> {
 
     const { code, seed, version } = modelRevision.squiggleSnippet;
 
-    if (!checkSquiggleVersion(version)) {
-      throw new Error(
-        `Unexpected Error: Squiggle version ${version} is not a valid Squiggle version.`
-      );
-    }
+    // author can be empty on old revisions
+    const userEmail = modelRevision.author?.email ?? "";
 
     const startTime = performance.now();
-    let response = await runWorker({
+    const response = await runWorker({
       revisionId: modelRevision.id,
       code,
       seed,
       timeoutSeconds: TIMEOUT_SECONDS,
-      userEmail: modelRevision.author.email,
+      userEmail,
       squiggleVersion: version,
     });
     const endTime = performance.now();
