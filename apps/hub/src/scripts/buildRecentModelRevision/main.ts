@@ -28,7 +28,6 @@ async function runWorker({
   if (!checkSquiggleVersion(squiggleVersion)) {
     return {
       errors: `Squiggle version ${squiggleVersion} is not a valid Squiggle version.`,
-      variableRevisions: [],
     };
   }
 
@@ -148,7 +147,7 @@ async function buildRecentModelVersion(): Promise<void> {
         },
       });
 
-      for (const e of response.variableRevisions) {
+      for (const e of response.variableRevisions ?? []) {
         createVariableRevision({
           modelId,
           revisionId,
@@ -157,7 +156,7 @@ async function buildRecentModelVersion(): Promise<void> {
       }
     });
     console.log(
-      `Build created for model revision ID: ${modelRevision.id}, in ${endTime - startTime}ms. Created ${response.variableRevisions.length} variableRevisions.`
+      `Build created for model revision ID: ${modelRevision.id}, in ${endTime - startTime}ms. Created ${response.variableRevisions?.length ?? 0} variableRevisions.`
     );
   } catch (error) {
     console.error("Error building model revision:", error);

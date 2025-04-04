@@ -23,7 +23,7 @@ export type WorkerRunMessage = {
 
 export type WorkerOutput = {
   errors: string;
-  variableRevisions: VariableRevisionInput[];
+  variableRevisions?: VariableRevisionInput[];
 };
 
 export async function runSquiggleCode({
@@ -79,7 +79,7 @@ process.on("message", async (message: WorkerRunMessage) => {
         type: "result",
         data: {
           errors: "An unknown error occurred in the worker process.",
-        },
+        } satisfies WorkerOutput,
       });
     } finally {
       await prisma.$disconnect();
