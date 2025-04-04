@@ -7,3 +7,5 @@ export default async function CreateQuestionSetFromMetaforecastPage() {
 
   return <CreateFromMetaforecastForm page={page} />;
 }
+
+export const dynamic = "force-dynamic";
