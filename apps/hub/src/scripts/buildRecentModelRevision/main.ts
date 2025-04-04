@@ -1,6 +1,10 @@
 import { spawn } from "node:child_process";
 
 import { PrismaClient } from "@quri/hub-db";
+import {
+  checkSquiggleVersion,
+  SquiggleVersion,
+} from "@quri/versioned-squiggle-components";
 
 import { createVariableRevision } from "./createVariableRevision";
 import { WorkerOutput, WorkerRunMessage } from "./worker";
@@ -9,12 +13,21 @@ const TIMEOUT_SECONDS = 60; // 60 seconds
 
 const prisma = new PrismaClient();
 
-async function runWorker(
-  revisionId: string,
-  code: string,
-  seed: string,
-  timeoutSeconds: number
-): Promise<WorkerOutput> {
+async function runWorker({
+  revisionId,
+  code,
+  seed,
+  timeoutSeconds,
+  userEmail,
+  squiggleVersion,
+}: {
+  revisionId: string;
+  code: string;
+  seed: string;
+  timeoutSeconds: number;
+  userEmail: string;
+  squiggleVersion: SquiggleVersion;
+}): Promise<WorkerOutput> {
   return new Promise((resolve, _) => {
     console.log("Spawning worker process for Revision ID: " + revisionId);
     const worker = spawn("node", [__dirname + "/worker.mjs"], {
@@ -59,7 +72,7 @@ async function runWorker(
 
     worker.send({
       type: "run",
-      data: { code, seed },
+      data: { code, seed, userEmail, squiggleVersion },
     } satisfies WorkerRunMessage);
   });
 }
@@ -67,9 +80,6 @@ async function runWorker(
 async function oldestModelRevisionWithoutBuilds() {
   const modelRevision = await prisma.modelRevision.findFirst({
     where: {
-      currentRevisionModel: {
-        isNot: null,
-      },
       builds: {
         none: {},
       },
@@ -79,51 +89,60 @@ async function oldestModelRevisionWithoutBuilds() {
       createdAt: "asc",
     },
     include: {
-      model: {
-        include: {
-          currentRevision: {
-            include: {
-              squiggleSnippet: true,
-            },
-          },
+      author: {
+        select: {
+          email: true,
         },
       },
+      squiggleSnippet: true,
     },
   });
-  return modelRevision?.model;
+  return modelRevision;
 }
 
 async function buildRecentModelVersion(): Promise<void> {
   try {
-    const model = await oldestModelRevisionWithoutBuilds();
+    const modelRevision = await oldestModelRevisionWithoutBuilds();
 
-    if (!model) {
+    if (!modelRevision) {
       console.log("No remaining unbuilt model revisions");
       return;
     }
 
-    if (!model?.currentRevisionId || !model.currentRevision?.squiggleSnippet) {
+    if (!modelRevision.author?.email) {
       throw new Error(
-        `Unexpected Error: Model revision didn't have needed information. This should never happen.`
+        `Unexpected Error: Model revision didn't have an author. This should never happen.`
       );
     }
 
-    const { code, seed } = model.currentRevision.squiggleSnippet;
+    if (!modelRevision.squiggleSnippet) {
+      throw new Error(
+        `Unexpected Error: This is not a SquiggleSnippet model revision.`
+      );
+    }
+
+    const { code, seed, version } = modelRevision.squiggleSnippet;
+
+    if (!checkSquiggleVersion(version)) {
+      throw new Error(
+        `Unexpected Error: Squiggle version ${version} is not a valid Squiggle version.`
+      );
+    }
 
     const startTime = performance.now();
-    let response = await runWorker(
-      model.currentRevisionId,
+    let response = await runWorker({
+      revisionId: modelRevision.id,
       code,
       seed,
-      TIMEOUT_SECONDS
-    );
+      timeoutSeconds: TIMEOUT_SECONDS,
+      userEmail: modelRevision.author.email,
+      squiggleVersion: version,
+    });
     const endTime = performance.now();
 
     await prisma.$transaction(async (tx) => {
-      // For some reason, Typescript becomes unsure if `model.currentRevisionId` is null or not, even though it's checked above.
-      const revisionId = model.currentRevisionId!;
-
-      const modelId = model.id;
+      const revisionId = modelRevision.id;
+      const modelId = modelRevision.modelId;
 
       await tx.modelRevisionBuild.create({
         data: {
@@ -134,11 +153,15 @@ async function buildRecentModelVersion(): Promise<void> {
       });
 
       for (const e of response.variableRevisions) {
-        createVariableRevision(modelId, revisionId, e);
+        createVariableRevision({
+          modelId,
+          revisionId,
+          variableData: e,
+        });
       }
     });
     console.log(
-      `Build created for model revision ID: ${model.currentRevisionId}, in ${endTime - startTime}ms. Created ${response.variableRevisions.length} variableRevisions.`
+      `Build created for model revision ID: ${modelRevision.id}, in ${endTime - startTime}ms. Created ${response.variableRevisions.length} variableRevisions.`
     );
   } catch (error) {
     console.error("Error building model revision:", error);
@@ -182,7 +205,7 @@ async function runContinuously() {
     try {
       await main();
       await new Promise((resolve) => process.nextTick(resolve));
-      await delay(500); // Delay for approximately .5s
+      await delay(500); // Delay for 0.5s
     } catch (error) {
       console.error("An error occurred during continuous execution:", error);
     }

@@ -11,6 +11,7 @@ import { prisma } from "@/lib/server/prisma";
 import { indexUserId } from "@/search/helpers";
 
 import { CLI_MODE } from "../constants";
+import { getCliUserEmail } from "./cli";
 
 function buildAuthConfig(): NextAuthConfig {
   const providers: Provider[] = [];
@@ -76,9 +77,9 @@ function makeAuth(): NextAuthResult {
   if (CLI_MODE) {
     // This code doesn't guarantee that CLI scripts will always work, but in basic cases it has a decent chance.
     // See also: `docs/cli.md` file.
-    const cliUserEmail = process.env["CLI_USER_EMAIL"];
     return {
       auth: (async (): Promise<Session | null> => {
+        const cliUserEmail = getCliUserEmail();
         if (!cliUserEmail) {
           return null;
         }

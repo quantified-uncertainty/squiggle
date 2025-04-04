@@ -81,7 +81,7 @@ export function sqProjectWithHubLinker(
 ) {
   if (versionSupportsSqProjectV2.object(squiggle)) {
     return new squiggle.lang.SqProject({
-      linker: getModernLinker(squiggle) as any,
+      linker: getModernLinker(squiggle, options) as any,
     });
   } else {
     return new squiggle.lang.SqProject({

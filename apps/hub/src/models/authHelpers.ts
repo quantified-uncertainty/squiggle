@@ -3,6 +3,7 @@ import { Prisma } from "@quri/hub-db";
 import { auth } from "@/lib/server/auth";
 import { getSessionOrRedirect } from "@/users/auth";
 
+// See also: `controlsOwnerId`; TODO: merge them.
 function ownerIsUserOrInGroup(email: string): Prisma.OwnerWhereInput {
   return {
     OR: [
@@ -54,6 +55,11 @@ export async function modelWhereCanWrite(
   }
 
   return {
-    owner: ownerIsUserOrInGroup(session.user.email),
+    ...where,
+    OR: [
+      {
+        owner: ownerIsUserOrInGroup(session.user.email),
+      },
+    ],
   };
 }

@@ -46,6 +46,8 @@ export const updateSquiggleSnippetModelAction = actionClient
       owner: input.owner,
     });
 
+    console.log("existingModel", existingModel);
+
     const version = input.content.version;
     if (!(squiggleVersions as readonly string[]).includes(version)) {
       throw new ActionError(`Unknown Squiggle version ${version}`);

@@ -1,8 +1,14 @@
-// We need several kinds of guards:
-// 1) `guard.plain(version)`, to check the version string
-// 2) `guard.props({ version: ... })`, to check and narrow the props or packages object
-// 3) `guard.propsByVersion(packages, props)`, to incrementally update the props
-// The following code is a bit complicated, because it optimizes for easily adding new guards.
+/**
+ * Guards are used to check the version of the Squiggle packages, and to narrow the props or packages object.
+ *
+ * We need several kinds of guards:
+ *
+ * 1) `guard.plain(version)`, to check the version string
+ * 2) `guard.props({ version: ... })`, to check and narrow the props or packages object
+ * 3) `guard.propsByVersion(packages, props)`, to incrementally update the props
+ *
+ * The following types are complicated, because this code is optimized for easily adding new guards.
+ */
 
 import { type FC } from "react";
 
