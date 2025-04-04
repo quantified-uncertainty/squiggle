@@ -168,12 +168,10 @@ async function buildRecentModelVersion(): Promise<void> {
 async function countItemsRemaining() {
   const remaining = await prisma.modelRevision.count({
     where: {
-      currentRevisionModel: {
-        isNot: null,
-      },
       builds: {
         none: {},
       },
+      contentType: "SquiggleSnippet",
     },
   });
 
