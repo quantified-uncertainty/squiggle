@@ -6,9 +6,9 @@ image:
 
 deployments:
   build-runner:
-    command: ['node', '--conditions=react-server', 'dist/scripts/buildRecentModelRevision/main.mjs']
+    command: ["node", "dist/scripts/buildRecentModelRevision/main.mjs"]
   process-pending-evaluations:
-    command: ["node", "--conditions=react-server", "dist/scripts/process-pending-evaluations.mjs", "--loop"]
+    command: ["node", "dist/scripts/process-pending-evaluations.mjs", "--loop"]
 
 # Configured in QURI ops repo by terraform.
 envSecretName: squiggle-hub-env

@@ -18,6 +18,9 @@ spec:
         - name: server
           image: "{{ $.Values.image.name }}:{{ required "tag is required" $.Values.image.tag }}"
           imagePullPolicy: Always
+          env:
+          - name: NODE_OPTIONS
+            value: "--conditions=react-server"
           envFrom:
           - secretRef:
               name: {{ $.Values.envSecretName }}
