@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { getMembership, getMyMembership } from "@/groups/helpers";
 import { groupMembersRoute } from "@/lib/routes";
 import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
@@ -11,6 +10,7 @@ import { zSlug } from "@/lib/zodUtils";
 import { getSessionOrRedirect } from "@/users/auth";
 
 import { groupHasAdminsBesidesUser } from "../data/helpers";
+import { loadMembership, loadMyMembership } from "../data/members";
 
 export const deleteMembershipAction = actionClient
   .schema(
@@ -23,7 +23,7 @@ export const deleteMembershipAction = actionClient
     const session = await getSessionOrRedirect();
 
     // somewhat repetitive compared to `updateMembershipRoleAction`, but with slightly different error messages
-    const myMembership = await getMyMembership({
+    const myMembership = await loadMyMembership({
       groupSlug: input.group,
     });
 
@@ -38,7 +38,7 @@ export const deleteMembershipAction = actionClient
       throw new ActionError("Only admins can delete other members");
     }
 
-    const membershipToDelete = await getMembership({
+    const membershipToDelete = await loadMembership({
       groupSlug: input.group,
       userSlug: input.username,
     });

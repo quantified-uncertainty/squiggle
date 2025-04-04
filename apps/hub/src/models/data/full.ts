@@ -3,7 +3,7 @@ import { Prisma } from "@quri/hub-db";
 import { prisma } from "@/lib/server/prisma";
 import { controlsOwnerId } from "@/owners/data/auth";
 
-import { modelWhereCanRead } from "./authHelpers";
+import { modelWhereCanRead } from "../authHelpers";
 import {
   ModelRevisionFullDTO,
   modelRevisionFullToDTO,

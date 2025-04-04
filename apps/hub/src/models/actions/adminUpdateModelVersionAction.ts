@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { checkRootUser } from "@/users/auth";
+import { checkRootUser, getSelf, getSessionOrRedirect } from "@/users/auth";
 
 // Admin-only query for upgrading model versions
 export const adminUpdateModelVersionAction = actionClient
@@ -14,7 +14,8 @@ export const adminUpdateModelVersionAction = actionClient
     })
   )
   .action(async ({ parsedInput: input }) => {
-    const self = await checkRootUser();
+    await checkRootUser();
+    const self = await getSelf(await getSessionOrRedirect());
 
     const model = await prisma.$transaction(async (tx) => {
       let model = await prisma.model.findUniqueOrThrow({

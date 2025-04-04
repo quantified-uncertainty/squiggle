@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { getMyGroup } from "@/groups/data/groupCards";
-import { getSessionUserOrRedirect } from "@/users/auth";
+import { getSessionOrRedirect } from "@/users/auth";
 
 import { NewModel } from "./NewModel";
 
@@ -14,7 +14,7 @@ export default async function NewModelPage({
     [key: string]: string | string[] | undefined;
   }>;
 }) {
-  await getSessionUserOrRedirect();
+  await getSessionOrRedirect();
 
   const groupSlug = z
     .string()

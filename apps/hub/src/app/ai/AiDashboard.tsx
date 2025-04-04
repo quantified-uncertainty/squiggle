@@ -2,7 +2,7 @@
 
 import { FC, useRef } from "react";
 
-import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { AiWorkflowDTO } from "@/ai/data/loadWorkflows";
 import { usePaginator } from "@/lib/hooks/usePaginator";
 import { Paginated } from "@/lib/types";
 
@@ -11,7 +11,7 @@ import { useSquiggleWorkflows } from "./useSquiggleWorkflows";
 import { WorkflowViewer } from "./WorkflowViewer";
 
 type Props = {
-  initialWorkflows: Paginated<AiWorkflow>;
+  initialWorkflows: Paginated<AiWorkflowDTO>;
 };
 
 export const AiDashboard: FC<Props> = ({ initialWorkflows }: Props) => {

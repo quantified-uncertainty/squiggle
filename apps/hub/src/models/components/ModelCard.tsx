@@ -13,6 +13,7 @@ import {
 import { Link } from "@/components/ui/Link";
 import { modelRoute, ownerRoute } from "@/lib/routes";
 import { ModelCardDTO } from "@/models/data/cards";
+import { OwnerDTO } from "@/owners/data/owner";
 import {
   totalImportLength,
   VariableRevision,
@@ -24,9 +25,7 @@ type Props = {
   showOwner?: boolean;
 };
 
-const OwnerLink: FC<{ owner: { __typename: string; slug: string } }> = ({
-  owner,
-}) => (
+const OwnerLink: FC<{ owner: OwnerDTO }> = ({ owner }) => (
   <Link
     className="font-medium text-gray-900 hover:underline"
     href={ownerRoute(owner)}

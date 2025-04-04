@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/server/prisma";
-import { getSessionUserOrRedirect } from "@/users/auth";
+import { getSessionOrRedirect } from "@/users/auth";
 
 import { getMyGroup } from "./groupCards";
 
@@ -12,7 +12,7 @@ export async function validateReusableGroupInviteToken(input: {
   groupSlug: string;
   inviteToken: string;
 }) {
-  await getSessionUserOrRedirect();
+  await getSessionOrRedirect();
 
   const group = await prisma.group.findFirstOrThrow({
     where: {

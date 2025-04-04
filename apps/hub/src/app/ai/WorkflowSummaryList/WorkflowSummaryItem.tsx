@@ -4,13 +4,13 @@ import { FC } from "react";
 
 import { TextTooltip, UserIcon } from "@quri/ui";
 
-import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { AiWorkflowDTO } from "@/ai/data/loadWorkflows";
 
 import { WorkflowName } from "./WorkflowName";
 import { WorkflowStatusIcon } from "./WorkflowStatusIcon";
 
 export const WorkflowSummaryItem: FC<{
-  workflow: AiWorkflow;
+  workflow: AiWorkflowDTO;
   onSelect: () => void;
   isSelected: boolean;
   isLast?: boolean;

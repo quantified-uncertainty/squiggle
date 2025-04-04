@@ -4,12 +4,13 @@ import { type ReadableStreamDefaultReader } from "stream/web";
 
 import { ClientWorkflow, decodeWorkflowFromReader } from "@quri/squiggle-ai";
 
-import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { AiWorkflowDTO } from "@/ai/data/loadWorkflows";
 
 import { AiRequestBody, bodyToLineReader } from "./utils";
 
-export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
-  const [workflows, setWorkflows] = useState<AiWorkflow[]>(preloadedWorkflows);
+export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflowDTO[]) {
+  const [workflows, setWorkflows] =
+    useState<AiWorkflowDTO[]>(preloadedWorkflows);
   const [selected, setSelected] = useState<number | undefined>(undefined);
 
   const session = useSession();
@@ -48,7 +49,7 @@ export function useSquiggleWorkflows(preloadedWorkflows: AiWorkflow[]) {
     (request: AiRequestBody) => {
       // This will be replaced with the real workflow once we receive the first message from the server.
       const id = `loading-${Date.now().toString()}`;
-      const workflow: AiWorkflow = {
+      const workflow: AiWorkflowDTO = {
         workflow: {
           id,
           timestamp: new Date().getTime(),

@@ -18,7 +18,7 @@ export const FallbackModelLayout: FC<Props> = ({
 }) => {
   return (
     <EntityLayout
-      // Note that we don't pass `__typename` here.
+      // Note that we don't pass `kind` here.
       // This causes an entity node to not have an icon or a link until the owner type is known.
       nodes={<ModelEntityNodes owner={{ slug: username }} />}
       isFluid={true}

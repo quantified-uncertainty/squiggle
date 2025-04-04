@@ -17,16 +17,16 @@ import {
 } from "@/lib/routes";
 
 function hasTypename(owner: {
-  __typename?: string;
+  kind?: "User" | "Group";
   slug: string;
-}): owner is { __typename: string; slug: string } {
-  return Boolean(owner.__typename);
+}): owner is { kind: "User" | "Group"; slug: string } {
+  return Boolean(owner.kind);
 }
 
 function entityNodes(
   owner: {
     // can be undefined in FallbackLayout, when model is not loaded yet.
-    __typename?: string;
+    kind?: "User" | "Group";
     slug: string;
   },
   slug: string,
@@ -38,7 +38,7 @@ function entityNodes(
   const ownerNode: EntityNode = { slug: owner.slug };
   if (hasTypename(owner)) {
     ownerNode.href = ownerRoute(owner);
-    ownerNode.icon = ownerIcon(owner.__typename);
+    ownerNode.icon = ownerIcon(owner.kind);
   } else {
     ownerNode.icon = EmptyIcon;
   }
@@ -80,7 +80,7 @@ function entityNodes(
 type Props = {
   owner: {
     // can be undefined in FallbackLayout, when model is not loaded yet.
-    __typename?: string;
+    kind?: "User" | "Group";
     slug: string;
   };
 };

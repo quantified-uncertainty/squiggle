@@ -1,9 +1,15 @@
 import { Prisma } from "@quri/hub-db";
 
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
 
-import { modelWhereCanRead } from "./authHelpers";
+import { modelWhereCanRead } from "../authHelpers";
+import {
+  ModelRevisionBuildDTO,
+  modelRevisionBuildToDTO,
+  selectModelRevisionBuild,
+} from "./builds";
 
 export const selectModelRevision = {
   id: true,
@@ -19,10 +25,7 @@ export const selectModelRevision = {
   },
   // used for `buildStatus` and `lastBuild`
   builds: {
-    select: {
-      errors: true, // selected for `buildStatus`
-      runSeconds: true,
-    },
+    select: selectModelRevisionBuild,
     orderBy: {
       createdAt: "desc",
     },
@@ -37,7 +40,7 @@ export const selectModelRevision = {
 
 type BuildStatus = "Success" | "Failure" | "Pending" | "Skipped";
 
-type DbModelRevision = NonNullable<
+type ModelRevisionRow = NonNullable<
   Awaited<
     ReturnType<
       typeof prisma.modelRevision.findFirst<{
@@ -46,13 +49,6 @@ type DbModelRevision = NonNullable<
     >
   >
 >;
-
-type DbModelRevisionBuild = DbModelRevision["builds"][number];
-
-type ModelRevisionBuildDTO = {
-  runSeconds: number;
-  // no errors here - potential security risk, build script doesn't take `isPrivate` into account
-};
 
 export type ModelRevisionDTO = {
   id: string;
@@ -64,71 +60,60 @@ export type ModelRevisionDTO = {
   lastBuild?: ModelRevisionBuildDTO;
 };
 
-function buildToDTO(build: DbModelRevisionBuild): ModelRevisionBuildDTO {
-  return {
-    runSeconds: build.runSeconds,
-  };
-}
-
-export function modelRevisionToDTO(
-  dbRevision: DbModelRevision
-): ModelRevisionDTO {
-  const lastBuild = dbRevision.builds[0];
+export function modelRevisionToDTO(row: ModelRevisionRow): ModelRevisionDTO {
+  const lastBuild = row.builds.at(0);
   let buildStatus: BuildStatus = "Pending";
   if (lastBuild) {
     const errors = lastBuild.errors.filter((e) => e !== "");
     buildStatus = errors.length === 0 ? "Success" : "Failure";
-  } else if (dbRevision.model.currentRevisionId !== dbRevision.id) {
+  } else if (row.model.currentRevisionId !== row.id) {
     buildStatus = "Skipped";
   }
 
   return {
-    id: dbRevision.id,
-    createdAt: dbRevision.createdAt,
-    author: dbRevision.author?.asOwner
+    id: row.id,
+    createdAt: row.createdAt,
+    author: row.author?.asOwner
       ? {
-          username: dbRevision.author.asOwner?.slug,
+          username: row.author.asOwner?.slug,
         }
       : undefined,
-    comment: dbRevision.comment,
-    variableRevisions: dbRevision.variableRevisions,
+    comment: row.comment,
+    variableRevisions: row.variableRevisions,
     buildStatus,
-    lastBuild: lastBuild ? buildToDTO(lastBuild) : undefined,
+    lastBuild: lastBuild ? modelRevisionBuildToDTO(lastBuild) : undefined,
   };
 }
 
-export async function loadModelRevisions(params: {
+export async function loadModelRevisions({
+  limit = 20,
+  cursor,
+  ...params
+}: {
+  limit?: number;
+  cursor?: string;
   owner: string;
   slug: string;
-  cursor?: string;
-  limit?: number;
 }): Promise<Paginated<ModelRevisionDTO>> {
-  const limit = params.limit ?? 20;
-
-  const dbRevisions = await prisma.modelRevision.findMany({
+  const rows = await prisma.modelRevision.findMany({
+    select: selectModelRevision,
     where: {
       model: await modelWhereCanRead({
         slug: params.slug,
         owner: { slug: params.owner },
       }),
     },
-    cursor: params.cursor ? { id: params.cursor } : undefined,
     orderBy: { createdAt: "desc" },
-    select: selectModelRevision,
-    take: limit + 1,
+    ...findPaginated(cursor, limit),
   });
 
-  const nextCursor = dbRevisions[dbRevisions.length - 1]?.id;
+  const revisions = rows.map(modelRevisionToDTO);
 
+  const nextCursor = rows[rows.length - 1]?.id;
   async function loadMore(limit: number) {
     "use server";
     return loadModelRevisions({ ...params, cursor: nextCursor, limit });
   }
 
-  const revisions = dbRevisions.map(modelRevisionToDTO);
-
-  return {
-    items: revisions.slice(0, limit),
-    loadMore: revisions.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(revisions, limit, loadMore);
 }

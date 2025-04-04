@@ -3,17 +3,18 @@ import { FC } from "react";
 
 import { DropdownMenuModalActionItem, RightArrowIcon } from "@quri/ui";
 
-import { SelectOwner, SelectOwnerOption } from "@/components/SelectOwner";
+import { SelectOwner } from "@/components/SelectOwner";
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
 import { modelRoute } from "@/lib/routes";
 import { moveModelAction } from "@/models/actions/moveModelAction";
 import { ModelCardDTO } from "@/models/data/cards";
+import { OwnerDTO } from "@/owners/data/owner";
 import {
   draftUtils,
   modelToDraftLocator,
 } from "@/squiggle/components/SquiggleSnippetDraftDialog";
 
-type FormShape = { owner: SelectOwnerOption };
+type FormShape = { owner: OwnerDTO };
 
 type Props = {
   model: ModelCardDTO;
@@ -32,9 +33,7 @@ export const MoveModelAction: FC<Props> = ({ model }) => {
           title={`Change owner for ${model.owner.slug}/${model.slug}`}
           submitText="Save"
           defaultValues={{
-            // __typename from fragment is string, while SelectOwner requires 'User' | 'Group' union,
-            // so we have to explicitly recast
-            owner: model.owner as SelectOwnerOption,
+            owner: model.owner,
           }}
           action={moveModelAction}
           formDataToInput={(data) => ({

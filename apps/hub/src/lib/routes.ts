@@ -6,14 +6,14 @@ export function modelRoute({ owner, slug }: { owner: string; slug: string }) {
   return `/models/${owner}/${slug}`;
 }
 
-export function ownerRoute(owner: { __typename: string; slug: string }) {
-  switch (owner.__typename) {
+export function ownerRoute(owner: { kind: "User" | "Group"; slug: string }) {
+  switch (owner.kind) {
     case "User":
       return userRoute({ username: owner.slug });
     case "Group":
       return groupRoute({ slug: owner.slug });
     default:
-      throw new Error(`Unknown owner type ${owner.__typename}`);
+      throw new Error(`Unknown owner type ${owner.kind satisfies never}`);
   }
 }
 
@@ -256,7 +256,7 @@ export function evaluationRoute({ id }: { id: string }) {
 }
 
 export function compareEvaluationsRoute({ ids }: { ids: string[] }) {
-  return `/evals/compare?ids=${ids.join(',')}`;
+  return `/evals/compare?ids=${ids.join(",")}`;
 }
 
 export function epistemicAgentsRoute() {

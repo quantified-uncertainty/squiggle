@@ -1,45 +1,33 @@
-import { Model, Prisma } from "@quri/hub-db";
-
 import { ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { getSessionOrRedirect } from "@/users/auth";
 
-import { modelWhereCanRead } from "./data/authHelpers";
+import { modelWhereCanRead, modelWhereCanWrite } from "../authHelpers";
 
-export async function getWriteableModel({
+// Minimal shape - this DTO is only used in server actions.
+type WriteableModelDTO = {
+  id: string;
+  slug: string;
+};
+
+export async function loadWriteableModel({
   owner,
   slug,
-  include,
 }: {
   owner: string;
   slug: string;
-  include?: Prisma.ModelInclude;
-}): Promise<Model> {
-  const session = await getSessionOrRedirect();
-
-  // Note: `findUnique` would be safer, but then we won't be able to use nested queries
+}): Promise<WriteableModelDTO> {
+  // `findUnique` would be more idiomatic, but then we won't be able to use nested queries.
   const model = await prisma.model.findFirst({
-    where: {
+    where: await modelWhereCanWrite({
       slug,
       owner: {
         slug: owner,
-        OR: [
-          {
-            user: { email: session.user.email },
-          },
-          {
-            group: {
-              memberships: {
-                some: {
-                  user: { email: session.user.email },
-                },
-              },
-            },
-          },
-        ],
       },
+    }),
+    select: {
+      id: true,
+      slug: true,
     },
-    include,
   });
 
   if (!model) {

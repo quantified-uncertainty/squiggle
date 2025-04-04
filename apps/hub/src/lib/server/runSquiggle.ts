@@ -12,6 +12,7 @@ import {
 
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
 import { prisma } from "@/lib/server/prisma";
+import { modelWhereCanRead } from "@/models/authHelpers";
 
 function getKey(code: string, seed: string): string {
   return crypto
@@ -51,10 +52,10 @@ const squiggleLinker: SqLinker = {
   async loadModule(sourceId: string) {
     const { owner, slug } = parseSourceId(sourceId);
     const model = await prisma.model.findFirst({
-      where: {
+      where: await modelWhereCanRead({
         slug,
         owner: { slug: owner },
-      },
+      }),
       include: {
         currentRevision: {
           include: {

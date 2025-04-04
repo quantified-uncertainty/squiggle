@@ -1,6 +1,7 @@
 import { MembershipRole, Prisma } from "@quri/hub-db";
 
 import { auth } from "@/lib/server/auth";
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
 
@@ -12,7 +13,7 @@ export type GroupMemberDTO = {
   };
 };
 
-const select = {
+export const membershipSelect = {
   id: true,
   role: true,
   user: {
@@ -24,32 +25,38 @@ const select = {
   },
 } satisfies Prisma.UserGroupMembershipSelect;
 
-export const membershipSelect = select;
-
 type Row = NonNullable<
   Awaited<
     ReturnType<
-      typeof prisma.userGroupMembership.findFirst<{ select: typeof select }>
+      typeof prisma.userGroupMembership.findFirst<{
+        select: typeof membershipSelect;
+      }>
     >
   >
 >;
 
 export function membershipToDTO(row: Row): GroupMemberDTO {
+  if (!row.user.asOwner) {
+    // should never happen
+    throw new Error("User is missing owner information");
+  }
+
   return {
     id: row.id,
     role: row.role,
-    // guaranteed by the query
-    user: { slug: row.user.asOwner!.slug },
+    user: { slug: row.user.asOwner.slug },
   };
 }
 
-export async function loadGroupMembers(params: {
-  groupSlug: string;
-  cursor?: string;
+export async function loadGroupMembers({
+  limit = 20,
+  cursor,
+  ...params
+}: {
   limit?: number;
+  cursor?: string;
+  groupSlug: string;
 }): Promise<Paginated<GroupMemberDTO>> {
-  const limit = params.limit ?? 20;
-
   const rows = await prisma.userGroupMembership.findMany({
     where: {
       group: {
@@ -63,24 +70,20 @@ export async function loadGroupMembers(params: {
         },
       },
     },
-    select,
+    select: membershipSelect,
     orderBy: { createdAt: "asc" },
-    take: limit + 1,
+    ...findPaginated(cursor, limit),
   });
 
   const members = rows.map(membershipToDTO);
 
   const nextCursor = members[members.length - 1]?.id;
-
   async function loadMore(limit: number) {
     "use server";
     return loadGroupMembers({ ...params, cursor: nextCursor, limit });
   }
 
-  return {
-    items: members.slice(0, limit),
-    loadMore: members.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(members, limit, loadMore);
 }
 
 export async function loadMyMembership(params: {
@@ -88,6 +91,7 @@ export async function loadMyMembership(params: {
 }): Promise<GroupMemberDTO | null> {
   const session = await auth();
 
+  // extra caution because we can - using id instead of slug or email
   const userId = session?.user.id;
   if (!userId) {
     return null;
@@ -98,7 +102,7 @@ export async function loadMyMembership(params: {
       group: { asOwner: { slug: params.groupSlug } },
       user: { id: userId },
     },
-    select,
+    select: membershipSelect,
   });
   return membership ? membershipToDTO(membership) : null;
 }
@@ -112,7 +116,7 @@ export async function loadMembership(params: {
       group: { asOwner: { slug: params.groupSlug } },
       user: { asOwner: { slug: params.userSlug } },
     },
-    select,
+    select: membershipSelect,
   });
   return membership ? membershipToDTO(membership) : null;
 }

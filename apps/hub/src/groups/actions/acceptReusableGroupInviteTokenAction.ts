@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { getMyMembership } from "@/groups/helpers";
 import { groupMembersRoute } from "@/lib/routes";
 import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
@@ -11,6 +10,7 @@ import { zSlug } from "@/lib/zodUtils";
 import { getSessionOrRedirect } from "@/users/auth";
 
 import { validateReusableGroupInviteToken } from "../data/helpers";
+import { loadMyMembership } from "../data/members";
 
 export const acceptReusableGroupInviteTokenAction = actionClient
   .schema(
@@ -35,7 +35,7 @@ export const acceptReusableGroupInviteTokenAction = actionClient
       },
     });
 
-    const myMembership = await getMyMembership({
+    const myMembership = await loadMyMembership({
       groupSlug: input.groupSlug,
     });
     if (myMembership) {

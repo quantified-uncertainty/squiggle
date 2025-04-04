@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { controlsOwnerId } from "@/owners/data/auth";
 import { loadRelativeValuesDefinitionFull } from "@/relative-values/data/full";
-import { getSessionUserOrRedirect } from "@/users/auth";
+import { getSessionOrRedirect } from "@/users/auth";
 
 import { EditRelativeValuesDefinition } from "./EditRelativeValuesDefinition";
 
@@ -13,7 +13,7 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   // if we're not signed in, we can't edit
-  await getSessionUserOrRedirect();
+  await getSessionOrRedirect();
 
   const { owner, slug } = await params;
   const definition = await loadRelativeValuesDefinitionFull({ owner, slug });

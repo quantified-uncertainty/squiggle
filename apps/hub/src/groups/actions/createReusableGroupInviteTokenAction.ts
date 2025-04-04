@@ -29,9 +29,7 @@ export const createReusableGroupInviteTokenAction = actionClient
       throw new ActionError("You're not a member of this group");
     }
     if (myMembership.role !== "Admin") {
-      throw new ActionError(
-        "Only group admins can create reusable invite tokens"
-      );
+      throw new ActionError("You're not an admin of this group");
     }
 
     const group = await prisma.group.findFirstOrThrow({

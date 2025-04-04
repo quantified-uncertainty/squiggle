@@ -10,11 +10,12 @@ export const seedDatabase = actionClient.action(async () => {
     throw new Error("Seeding is only allowed in development mode");
   }
 
-  const questionSetExists = await prisma.questionSet.findFirst({
-    where: {
-      name: "Test Question Set",
-    },
-  });
+  const questionSetExists =
+    (await prisma.questionSet.count({
+      where: {
+        name: "Test Question Set",
+      },
+    })) > 0;
 
   if (!questionSetExists) {
     await prisma.questionSet.create({
@@ -52,6 +53,7 @@ export const seedDatabase = actionClient.action(async () => {
   if (!ozzieUser) {
     ozzieUser = await prisma.user.create({
       data: {
+        email: "ozzie@quantifieduncertainty.org",
         asOwner: {
           create: { slug: "ozziegooen" },
         },

@@ -6,15 +6,10 @@ import { z } from "zod";
 import { SelectFormField } from "@quri/ui";
 
 import { ownerIcon } from "@/lib/ownerIcon";
+import { OwnerDTO } from "@/owners/data/owner";
 
-export type SelectOwnerOption = {
-  __typename: "User" | "Group";
-  id: string;
-  slug: string;
-};
-
-const OwnerInfo: FC<{ owner: SelectOwnerOption }> = ({ owner }) => {
-  const Icon = ownerIcon(owner.__typename);
+const OwnerInfo: FC<{ owner: OwnerDTO }> = ({ owner }) => {
+  const Icon = ownerIcon(owner.kind);
   return (
     <div className="flex items-center gap-2">
       <Icon className="text-slate-500" size={16} />
@@ -25,10 +20,10 @@ const OwnerInfo: FC<{ owner: SelectOwnerOption }> = ({ owner }) => {
 
 export function SelectOwner<
   TValues extends FieldValues,
-  TName extends FieldPathByValue<
+  TName extends FieldPathByValue<TValues, OwnerDTO | null> = FieldPathByValue<
     TValues,
-    SelectOwnerOption | null
-  > = FieldPathByValue<TValues, SelectOwnerOption | null>,
+    OwnerDTO | null
+  >,
 >({
   name,
   label,
@@ -40,9 +35,7 @@ export function SelectOwner<
   required?: boolean;
   myOnly?: boolean;
 }) {
-  const loadOptions = async (
-    inputValue: string
-  ): Promise<SelectOwnerOption[]> => {
+  const loadOptions = async (inputValue: string): Promise<OwnerDTO[]> => {
     const result = await fetch(
       `/api/find-owners?${new URLSearchParams({
         search: inputValue,
@@ -53,7 +46,7 @@ export function SelectOwner<
     const data = z
       .array(
         z.object({
-          __typename: z.enum(["User", "Group"]),
+          kind: z.enum(["User", "Group"]),
           id: z.string(),
           slug: z.string(),
         })
@@ -64,7 +57,7 @@ export function SelectOwner<
   };
 
   return (
-    <SelectFormField<TValues, SelectOwnerOption | null>
+    <SelectFormField<TValues, OwnerDTO | null>
       name={name}
       label={label}
       required={required}
