@@ -6,6 +6,7 @@ import { prisma as metaforecastPrisma } from "@quri/metaforecast-db";
 
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
+import { getWriteableOwnerOrSelf } from "@/owners/data/auth";
 import { checkRootUser } from "@/users/auth";
 
 import { parseQuestionMetadata } from "../lib/questionMetadata";
@@ -21,6 +22,9 @@ export const createQuestionSetFromMetaforecastAction = actionClient
   .schema(schema)
   .action(async ({ parsedInput: input }) => {
     await checkRootUser();
+
+    // TODO - support group-owned question sets
+    const owner = await getWriteableOwnerOrSelf();
 
     const markets = await metaforecastPrisma.manifoldMarket.findMany({
       where: {
@@ -42,6 +46,7 @@ export const createQuestionSetFromMetaforecastAction = actionClient
       const newQuestionSet = await tx.questionSet.create({
         data: {
           name: input.name,
+          ownerId: owner.id,
         },
         select: { id: true },
       });
@@ -58,6 +63,7 @@ ${market.textDescription}
         const newQuestion = await tx.question.create({
           data: {
             description,
+            ownerId: owner.id,
             metadata: parseQuestionMetadata({
               manifold: {
                 marketId: market.id,
@@ -76,6 +82,7 @@ ${market.textDescription}
       }
 
       // Return the created questionSet with questions
+      // TODO - use DTOs instead of raw prisma models
       return await tx.questionSet.findUniqueOrThrow({
         where: { id: newQuestionSet.id },
         include: {

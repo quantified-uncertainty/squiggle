@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
           LEFT JOIN "Owner" AS "GroupOwner" ON "Group"."ownerId" = "GroupOwner".id
         WHERE
           (
-            -- check permissions, should match "modelWhereHasAccess" function
+            -- check permissions, should match "modelWhereCanRead" function
             "Model".id IS NULL OR
             "Model"."isPrivate" IS FALSE
             OR "ModelOwnerUser".email = ${session?.user.email}

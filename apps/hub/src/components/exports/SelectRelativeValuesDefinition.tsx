@@ -4,11 +4,10 @@ import { z } from "zod";
 
 import { SelectFormField } from "@quri/ui";
 
-import { FindRelativeValuesForSelectResult } from "@/relative-values/data/findRelativeValuesForSelect";
+import { OwnerDTO } from "@/owners/data/owner";
+import { RelativeValuesForSelectDTO } from "@/relative-values/data/findRelativeValuesForSelect";
 
-import { SelectOwnerOption } from "../SelectOwner";
-
-const DefinitionInfo: FC<{ option: FindRelativeValuesForSelectResult }> = ({
+const DefinitionInfo: FC<{ option: RelativeValuesForSelectDTO }> = ({
   option,
 }) => <div>{option.slug}</div>;
 
@@ -19,16 +18,16 @@ export function SelectRelativeValuesDefinition<
   label,
   ownerFieldName,
 }: {
-  name: FieldPathByValue<TValues, FindRelativeValuesForSelectResult | null>;
+  name: FieldPathByValue<TValues, RelativeValuesForSelectDTO | null>;
   label?: string;
-  ownerFieldName: FieldPathByValue<TValues, SelectOwnerOption | null>;
+  ownerFieldName: FieldPathByValue<TValues, OwnerDTO | null>;
 }) {
   const { watch, resetField } = useFormContext<TValues>();
-  const owner: SelectOwnerOption | null = watch(ownerFieldName);
+  const owner: OwnerDTO | null = watch(ownerFieldName);
 
   const loadOptions = async (
     inputValue: string
-  ): Promise<FindRelativeValuesForSelectResult[]> => {
+  ): Promise<RelativeValuesForSelectDTO[]> => {
     if (!owner) {
       return [];
     }
@@ -60,7 +59,7 @@ export function SelectRelativeValuesDefinition<
   }, [name, owner, resetField]);
 
   return (
-    <SelectFormField<TValues, FindRelativeValuesForSelectResult | null>
+    <SelectFormField<TValues, RelativeValuesForSelectDTO | null>
       key={owner?.slug ?? " "} // re-render the component when owner changes; this helps with default select options on initial open
       name={name}
       label={label}

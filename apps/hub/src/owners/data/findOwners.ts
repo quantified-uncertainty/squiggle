@@ -1,19 +1,15 @@
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 
-type OwnerForSelect = {
-  __typename: "User" | "Group";
-  id: string;
-  slug: string;
-};
+import { OwnerDTO } from "./owner";
 
 // See also: app/api/find-owners/route.ts
 export async function findOwnersForSelect(params: {
   search: string;
   // "my" means "me and my groups"
   mode: "all" | "all-users" | "all-groups" | "my" | "my-groups";
-}): Promise<OwnerForSelect[]> {
-  const result: OwnerForSelect[] = [];
+}): Promise<OwnerDTO[]> {
+  const result: OwnerDTO[] = [];
   const session = await auth();
 
   const selectUsers = params.mode === "all-users" || params.mode === "all";
@@ -37,7 +33,7 @@ export async function findOwnersForSelect(params: {
     (!params.search || session.user.username.match(params.search))
   ) {
     result.push({
-      __typename: "User" as const,
+      kind: "User",
       id: session.user.id,
       slug: session.user.username ?? "",
     });
@@ -77,7 +73,7 @@ export async function findOwnersForSelect(params: {
       }
 
       result.push({
-        __typename: "User" as const,
+        kind: "User",
         id: row.id,
         slug: row.asOwner.slug,
       });
@@ -95,11 +91,11 @@ export async function findOwnersForSelect(params: {
             },
           },
         }),
-        ...(myOnly
+        ...(myOnly && session?.user.email
           ? {
               memberships: {
                 some: {
-                  user: { email: session!.user.email },
+                  user: { email: session.user.email },
                 },
               },
             }
@@ -118,7 +114,7 @@ export async function findOwnersForSelect(params: {
 
     result.push(
       ...rows.map((row) => ({
-        __typename: "Group" as const,
+        kind: "Group" as const,
         id: row.id,
         slug: row.asOwner?.slug ?? "",
       }))

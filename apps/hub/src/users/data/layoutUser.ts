@@ -1,7 +1,7 @@
 import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/authHelpers";
 
 const getSelect = async () =>
   ({
@@ -12,7 +12,7 @@ const getSelect = async () =>
         // count models
         models: {
           take: 1,
-          where: { OR: await modelWhereHasAccess() },
+          where: await modelWhereCanRead({}),
           select: { id: true },
         },
         // count definitions
@@ -81,14 +81,12 @@ export async function loadLayoutUser(
   const hasVariables = !!(await prisma.variable.findFirst({
     select: { id: true },
     where: {
-      model: {
+      model: await modelWhereCanRead({
         // variables from this user's models
         owner: {
           slug: username,
         },
-        // that the viewer has access to
-        OR: await modelWhereHasAccess(),
-      },
+      }),
     },
     take: 1,
   }));

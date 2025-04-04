@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/server/prisma";
 
-export type FindRelativeValuesForSelectResult = {
+export type RelativeValuesForSelectDTO = {
   id: string;
   slug: string;
 };
@@ -11,7 +11,7 @@ export async function findRelativeValuesForSelect({
 }: {
   owner: string;
   slugContains: string;
-}): Promise<FindRelativeValuesForSelectResult[]> {
+}): Promise<RelativeValuesForSelectDTO[]> {
   const rows = await prisma.relativeValuesDefinition.findMany({
     where: {
       slug: {

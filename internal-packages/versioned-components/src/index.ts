@@ -34,3 +34,5 @@ export {
   parsePlaygroundUrl,
   type PlaygroundParams,
 } from "./playground.js";
+
+export { squiggleLangByVersion } from "./versionedSquiggleLang.js";

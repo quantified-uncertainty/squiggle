@@ -2,11 +2,15 @@ import { prisma } from "@/lib/server/prisma";
 
 import { type VariableRevisionInput } from "./worker";
 
-export async function createVariableRevision(
-  modelId: string,
-  revisionId: string,
-  variableData: VariableRevisionInput
-) {
+export async function createVariableRevision({
+  modelId,
+  revisionId,
+  variableData,
+}: {
+  modelId: string;
+  revisionId: string;
+  variableData: VariableRevisionInput;
+}) {
   const variable = await prisma.variable.findFirst({
     where: {
       modelId: modelId,

@@ -1,3 +1,6 @@
+import { SquiggleVersion } from "@quri/versioned-squiggle-components";
+
+import { setCliUserEmail } from "@/lib/server/cli";
 import { prisma } from "@/lib/server/prisma";
 import { runSquiggle } from "@/lib/server/runSquiggle";
 
@@ -11,8 +14,10 @@ export type VariableRevisionInput = {
 export type WorkerRunMessage = {
   type: "run";
   data: {
+    userEmail: string;
     code: string;
     seed: string;
+    squiggleVersion: SquiggleVersion;
   };
 };
 
@@ -21,11 +26,16 @@ export type WorkerOutput = {
   variableRevisions: VariableRevisionInput[];
 };
 
-export async function runSquiggleCode(
-  code: string,
-  seed: string
-): Promise<WorkerOutput> {
-  const { result } = await runSquiggle(code, seed);
+export async function runSquiggleCode({
+  code,
+  seed,
+  squiggleVersion,
+}: {
+  code: string;
+  seed: string;
+  squiggleVersion: SquiggleVersion;
+}): Promise<WorkerOutput> {
+  const { result } = await runSquiggle({ code, seed, squiggleVersion });
 
   let variableRevisions: VariableRevisionInput[] = [];
 
@@ -48,15 +58,22 @@ export async function runSquiggleCode(
 process.on("message", async (message: WorkerRunMessage) => {
   if (message.type === "run") {
     try {
-      const { code, seed } = message.data;
-      const buildOutput = await runSquiggleCode(code, seed);
-      process?.send?.({
+      const { code, seed, userEmail, squiggleVersion } = message.data;
+      // This affects the behavior of the runSquiggle function - the linker checks permissions on imports.
+      setCliUserEmail(userEmail);
+
+      const buildOutput = await runSquiggleCode({
+        code,
+        seed,
+        squiggleVersion,
+      });
+      process.send?.({
         type: "result",
         data: buildOutput,
       });
     } catch (error) {
       console.error("An error occurred in the worker process:", error);
-      process?.send?.({
+      process.send?.({
         type: "result",
         data: {
           errors: "An unknown error occurred in the worker process.",

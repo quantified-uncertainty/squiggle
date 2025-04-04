@@ -8,7 +8,7 @@ import {
 import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
 import { indexGroupId } from "@/search/helpers";
-import { getSessionOrRedirect } from "@/users/auth";
+import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
 const schema = z.object({
   slug: zSlug,
@@ -18,10 +18,7 @@ export const createGroupAction = actionClient
   .schema(schema)
   .action(async ({ parsedInput: input }): Promise<{ slug: string }> => {
     const session = await getSessionOrRedirect();
-
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { email: session.user.email },
-    });
+    const user = await getSelf(session);
 
     const group = await failValidationOnConstraint(
       () =>

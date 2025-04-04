@@ -5,7 +5,7 @@ import { z } from "zod";
 import { actionClient } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
-import { getWriteableModel } from "@/models/utils";
+import { loadWriteableModel } from "@/models/data/writeableModel";
 
 export const deleteModelAction = actionClient
   .schema(
@@ -15,7 +15,7 @@ export const deleteModelAction = actionClient
     })
   )
   .action(async ({ parsedInput: input }) => {
-    const model = await getWriteableModel({
+    const model = await loadWriteableModel({
       slug: input.slug,
       owner: input.owner,
     });

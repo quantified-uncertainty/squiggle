@@ -8,7 +8,7 @@ import {
 } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
-import { getWriteableModel } from "@/models/utils";
+import { loadWriteableModel } from "@/models/data/writeableModel";
 
 const schema = z.object({
   owner: zSlug,
@@ -29,7 +29,7 @@ export const updateModelSlugAction = actionClient
     })
   )
   .action(async ({ parsedInput: input }) => {
-    const model = await getWriteableModel({
+    const model = await loadWriteableModel({
       owner: input.owner,
       slug: input.oldSlug,
     });

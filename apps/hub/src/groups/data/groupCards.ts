@@ -1,6 +1,7 @@
 import { Prisma } from "@quri/hub-db";
 
 import { auth } from "@/lib/server/auth";
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
 
@@ -32,19 +33,18 @@ export function toDTO(dbGroup: DbGroupCard): GroupCardDTO {
   };
 }
 
-export async function loadGroupCards(
-  params: {
-    username?: string;
-    cursor?: string;
-    limit?: number;
-  } = {}
-): Promise<Paginated<GroupCardDTO>> {
-  const limit = params.limit ?? 20;
-
+export async function loadGroupCards({
+  limit = 20,
+  cursor,
+  ...params
+}: {
+  limit?: number;
+  cursor?: string;
+  username?: string;
+} = {}): Promise<Paginated<GroupCardDTO>> {
   const dbGroups = await prisma.group.findMany({
     select: select,
     orderBy: { updatedAt: "desc" },
-    cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
       memberships: {
         some: {
@@ -56,22 +56,18 @@ export async function loadGroupCards(
         },
       },
     },
-    take: limit + 1,
+    ...findPaginated(cursor, limit),
   });
 
   const groups = dbGroups.map(toDTO);
 
   const nextCursor = groups[groups.length - 1]?.id;
-
   async function loadMore(limit: number) {
     "use server";
     return loadGroupCards({ ...params, cursor: nextCursor, limit });
   }
 
-  return {
-    items: groups.slice(0, limit),
-    loadMore: groups.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(groups, limit, loadMore);
 }
 
 export async function loadGroupCard(

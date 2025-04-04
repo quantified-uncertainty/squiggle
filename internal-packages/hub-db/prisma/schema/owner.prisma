@@ -10,4 +10,10 @@ model Owner {
 
     models                    Model[]
     relativeValuesDefinitions RelativeValuesDefinition[]
+
+    questions       Question[]
+    questionSets    QuestionSet[]
+    evaluations     Evaluation[]
+    values          Value[]
+    epistemicAgents EpistemicAgent[]
 }

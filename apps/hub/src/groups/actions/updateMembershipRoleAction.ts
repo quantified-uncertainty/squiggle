@@ -11,6 +11,7 @@ import { getSessionOrRedirect } from "@/users/auth";
 
 import { groupHasAdminsBesidesUser } from "../data/helpers";
 import {
+  GroupMemberDTO,
   loadMembership,
   loadMyMembership,
   membershipSelect,
@@ -27,7 +28,7 @@ export const updateMembershipRoleAction = actionClient
       ),
     })
   )
-  .action(async ({ parsedInput: input }) => {
+  .action(async ({ parsedInput: input }): Promise<GroupMemberDTO> => {
     const session = await getSessionOrRedirect();
 
     // somewhat repetitive compared to `deleteMembershipAction`, but with slightly different error messages

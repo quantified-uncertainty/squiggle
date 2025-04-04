@@ -5,6 +5,10 @@ model Question {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    // This and other fields are nullable for the sake of smoother migrations.
+    owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
+
     // For now, this is the full question description (so it can be long).
     description String
 
@@ -21,6 +25,9 @@ model QuestionSet {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
 
     name String
 
@@ -57,6 +64,9 @@ model Evaluation {
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
+    owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
+
     state    EvaluationState @default(Pending)
     errorMsg String? // Optional error message when state is 'Failed'
 
@@ -86,6 +96,9 @@ model Value {
 
     question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
     questionId String
+
+    owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
 
     /**
      * All eval results are Squiggle models.
@@ -117,6 +130,9 @@ model EpistemicAgent {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    owner   Owner?  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    ownerId String?
 
     name String
 

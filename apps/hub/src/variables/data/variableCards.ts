@@ -1,8 +1,9 @@
 import { Prisma } from "@quri/hub-db";
 
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/authHelpers";
 
 const variableCardSelect = {
   id: true,
@@ -44,22 +45,22 @@ type Row = NonNullable<
 >;
 
 export function toDTO(dbVariable: Row) {
-  // TODO - upgrade owner, at least
+  // TODO - explicitly upgrade each field to DTO
   return dbVariable;
 }
 
 export type VariableCardDTO = ReturnType<typeof toDTO>;
 
-export async function loadVariableCards(
-  params: {
-    ownerSlug?: string;
-    cursor?: string;
-    limit?: number;
-  } = {}
-): Promise<Paginated<VariableCardDTO>> {
-  const limit = params.limit ?? 20;
-
-  const dbVariables = await prisma.variable.findMany({
+export async function loadVariableCards({
+  limit = 20,
+  cursor,
+  ...params
+}: {
+  limit?: number;
+  cursor?: string;
+  ownerSlug?: string;
+} = {}): Promise<Paginated<VariableCardDTO>> {
+  const rows = await prisma.variable.findMany({
     select: variableCardSelect,
     orderBy: {
       currentRevision: {
@@ -68,35 +69,29 @@ export async function loadVariableCards(
         },
       },
     },
-    cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
-      model: {
-        OR: await modelWhereHasAccess(),
-        ...(params.ownerSlug
+      model: await modelWhereCanRead(
+        params.ownerSlug
           ? {
               owner: {
                 slug: params.ownerSlug,
               },
             }
-          : undefined),
-      },
+          : {}
+      ),
     },
-    take: limit + 1,
+    ...findPaginated(cursor, limit),
   });
 
-  const variables = dbVariables.map(toDTO);
+  const variables = rows.map(toDTO);
 
   const nextCursor = variables[variables.length - 1]?.id;
-
   async function loadMore(limit: number) {
     "use server";
     return loadVariableCards({ ...params, cursor: nextCursor, limit });
   }
 
-  return {
-    items: variables.slice(0, limit),
-    loadMore: variables.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(variables, limit, loadMore);
 }
 
 export async function loadVariableCard({
@@ -110,11 +105,10 @@ export async function loadVariableCard({
 }) {
   const row = await prisma.variable.findFirst({
     where: {
-      model: {
-        OR: await modelWhereHasAccess(),
+      model: await modelWhereCanRead({
         owner: { slug: owner },
         slug,
-      },
+      }),
       variableName,
     },
     select: variableCardSelect,

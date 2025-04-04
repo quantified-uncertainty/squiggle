@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/server/prisma";
-import { getWriteableModel } from "@/models/utils";
+import { loadWriteableModel } from "@/models/data/writeableModel";
 
 export async function getRelativeValuesExportForWriteableModel({
   exportId,
@@ -31,7 +31,7 @@ export async function getRelativeValuesExportForWriteableModel({
     });
 
   // checking permissions
-  await getWriteableModel({
+  await loadWriteableModel({
     owner: relativeValuesExport.modelRevision.model.owner.slug,
     slug: relativeValuesExport.modelRevision.model.slug,
   });

@@ -2,7 +2,7 @@ import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
 
-import { modelWhereHasAccess } from "./authHelpers";
+import { modelWhereCanRead } from "../authHelpers";
 
 export const selectModelRevisionFull = {
   id: true,
@@ -89,21 +89,20 @@ export async function loadModelRevisionFull({
   slug: string;
   revisionId: string;
 }): Promise<ModelRevisionFullDTO | null> {
-  const dbRevision = await prisma.modelRevision.findFirst({
+  const row = await prisma.modelRevision.findFirst({
     where: {
       id: revisionId,
-      model: {
+      model: await modelWhereCanRead({
         slug,
         owner: { slug: owner },
-        OR: await modelWhereHasAccess(),
-      },
+      }),
     },
     select: selectModelRevisionFull,
   });
 
-  if (!dbRevision) {
+  if (!row) {
     return null;
   }
 
-  return modelRevisionFullToDTO(dbRevision);
+  return modelRevisionFullToDTO(row);
 }

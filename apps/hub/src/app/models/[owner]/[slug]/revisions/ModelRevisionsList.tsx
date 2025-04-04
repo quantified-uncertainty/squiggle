@@ -2,6 +2,8 @@
 import { format } from "date-fns";
 import { FC } from "react";
 
+import { Tooltip } from "@quri/ui";
+
 import { LoadMore } from "@/components/LoadMore";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { UsernameLink } from "@/components/UsernameLink";
@@ -16,6 +18,11 @@ const ModelRevisionItem: FC<{
   model: ModelCardDTO;
   revision: ModelRevisionDTO;
 }> = ({ model, revision }) => {
+  const buildErrors =
+    revision.lastBuild?.errors?.length && revision.lastBuild.errors[0]
+      ? revision.lastBuild.errors
+      : [];
+
   return (
     <div key={revision.id}>
       <div>
@@ -39,13 +46,40 @@ const ModelRevisionItem: FC<{
         <div className="text-xs text-slate-700">{revision.comment}</div>
       ) : null}
 
-      <div className="text-xs text-slate-700">{`Build Status: ${revision.buildStatus}`}</div>
+      <div className="text-xs text-slate-700">
+        Build Status:{" "}
+        {buildErrors.length > 0 ? (
+          <Tooltip
+            placement="bottom"
+            render={() => (
+              <div className="h-full max-w-96 overflow-y-auto rounded-sm border bg-white shadow-lg">
+                <div className="p-4 text-xs">
+                  <header className="mb-2 font-medium">Build Errors:</header>
+                  <ul>
+                    {buildErrors.map((error) => (
+                      <li key={error}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+          >
+            <span className="cursor-pointer text-red-700 underline decoration-dashed">
+              {revision.buildStatus}
+            </span>
+          </Tooltip>
+        ) : (
+          revision.buildStatus
+        )}
+      </div>
       {revision.lastBuild && (
-        <div className="text-xs text-slate-700">{`Build Time: ${revision.lastBuild.runSeconds.toFixed(2)}s`}</div>
+        <div className="text-xs text-slate-700">
+          Build Time: {revision.lastBuild.runSeconds.toFixed(2)}s
+        </div>
       )}
       {revision.variableRevisions.length > 0 ? (
         <div className="text-xs text-emerald-700">
-          {`${revision.variableRevisions.length} variables`}
+          {revision.variableRevisions.length} variables
         </div>
       ) : null}
     </div>

@@ -1,14 +1,14 @@
 import { FC } from "react";
 
-import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { AiWorkflowDTO } from "@/ai/data/loadWorkflows";
 import { LoadMore } from "@/components/LoadMore";
 
 import { WorkflowListAdminControls } from "./WorkflowListAdminControls";
 import { WorkflowSummaryItem } from "./WorkflowSummaryItem";
 
 export const WorkflowSummaryList: FC<{
-  workflows: AiWorkflow[];
-  selectedWorkflow: AiWorkflow | undefined;
+  workflows: AiWorkflowDTO[];
+  selectedWorkflow: AiWorkflowDTO | undefined;
   selectWorkflow: (id: string) => void;
   loadNext?: (count: number) => void;
 }> = ({ workflows, selectedWorkflow, selectWorkflow, loadNext }) => {

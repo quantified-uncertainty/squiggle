@@ -1,40 +1,28 @@
 import { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
-import { User } from "@quri/hub-db";
-
 import { CLI_MODE } from "@/lib/constants";
 import { auth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 
 export async function getSessionOrRedirect() {
   const session = await auth();
-  if (!isSignedIn(session)) {
-    if (CLI_MODE) {
-      throw new Error("Unauthorized");
-    }
-    redirect("/api/auth/signin"); // TODO - callbackUrl
+  if (isSignedIn(session)) {
+    return session;
   }
 
-  return session;
-}
-
-export async function getSessionUserOrRedirect() {
-  return (await getSessionOrRedirect()).user;
-}
-
-// Checks if the user is a root user. If so, returns the user.
-export async function checkRootUser() {
-  const sessionUser = await getSessionUserOrRedirect();
-  if (!isAdminUser(sessionUser)) {
+  if (CLI_MODE) {
     throw new Error("Unauthorized");
   }
+  redirect("/api/auth/signin"); // TODO - callbackUrl
+}
 
-  // TODO - is this necessary? we usually don't need to load the user from the database.
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { email: sessionUser.email },
-  });
-  return user as User & { email: NonNullable<User["email"]> };
+// Checks if the user is a root user.
+export async function checkRootUser(): Promise<void> {
+  const session = await getSessionOrRedirect();
+  if (!isAdminUser(session.user)) {
+    throw new Error("Unauthorized");
+  }
 }
 
 export type SignedInSession = Session & {

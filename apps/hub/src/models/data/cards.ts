@@ -1,38 +1,19 @@
 import { Prisma } from "@quri/hub-db";
 
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
-import { selectTypedOwner, toTypedOwnerDTO } from "@/owners/data/typedOwner";
+import { OwnerDTO, selectOwner, toOwnerDTO } from "@/owners/data/owner";
 
-import { modelWhereHasAccess } from "./authHelpers";
-
-// FIXME - explicit ModelCardDTO
-function toDTO(dbModel: DbModelCard) {
-  function check(model: DbModelCard): asserts model is Omit<
-    DbModelCard,
-    "currentRevision"
-  > & {
-    currentRevision: NonNullable<DbModelCard["currentRevision"]>;
-  } {
-    if (!model.currentRevision) {
-      throw new Error("Model has no current revision");
-    }
-  }
-  check(dbModel);
-
-  return {
-    // FIXME - process each field separately
-    ...dbModel,
-    owner: toTypedOwnerDTO(dbModel.owner),
-  };
-}
+import { modelWhereCanRead } from "../authHelpers";
+import { ModelRevisionBuildDTO, selectModelRevisionBuild } from "./builds";
 
 const select = {
   id: true,
   slug: true,
   updatedAt: true,
   owner: {
-    select: selectTypedOwner,
+    select: selectOwner,
   },
   isPrivate: true,
   variables: {
@@ -68,10 +49,7 @@ const select = {
         },
       },
       builds: {
-        select: {
-          // be careful with selecting errors here - potential security risk, build script doesn't take `isPrivate` into account
-          runSeconds: true,
-        },
+        select: selectModelRevisionBuild,
         orderBy: {
           createdAt: "desc",
         },
@@ -81,51 +59,95 @@ const select = {
   },
 } satisfies Prisma.ModelSelect;
 
-type DbModelCard = NonNullable<
+function toDTO(dbModel: Row): ModelCardDTO {
+  function check(model: Row): asserts model is Row & {
+    currentRevision: NonNullable<Row["currentRevision"]>;
+  } {
+    if (!model.currentRevision) {
+      throw new Error("Model has no current revision");
+    }
+  }
+  check(dbModel);
+
+  return {
+    id: dbModel.id,
+    slug: dbModel.slug,
+    updatedAt: dbModel.updatedAt,
+    owner: toOwnerDTO(dbModel.owner),
+    isPrivate: dbModel.isPrivate,
+    variables: dbModel.variables,
+    currentRevision: dbModel.currentRevision,
+  };
+}
+
+type Row = NonNullable<
   Awaited<ReturnType<typeof prisma.model.findFirst<{ select: typeof select }>>>
 >;
 
-export type ModelCardDTO = ReturnType<typeof toDTO>;
+export type ModelCardDTO = {
+  id: string;
+  slug: string;
+  updatedAt: Date;
+  owner: OwnerDTO;
+  isPrivate: boolean;
+  variables: {
+    variableName: string;
+    currentRevision: {
+      variableType: string;
+      title: string | null;
+    } | null;
+  }[];
+  currentRevision: {
+    id: string;
+    contentType: string;
+    squiggleSnippet: {
+      id: string;
+      code: string;
+      version: string;
+    } | null;
+    relativeValuesExports: {
+      variableName: string;
+      definition: {
+        slug: string;
+      };
+    }[];
+    builds: ModelRevisionBuildDTO[];
+  };
+};
 
-export async function loadModelCards(
-  params: {
-    ownerSlug?: string;
-    cursor?: string;
-    limit?: number;
-  } = {}
-): Promise<Paginated<ModelCardDTO>> {
-  const limit = params.limit ?? 20;
-
-  const dbModels = await prisma.model.findMany({
+export async function loadModelCards({
+  limit = 20,
+  cursor,
+  ...params
+}: {
+  limit?: number;
+  cursor?: string;
+  ownerSlug?: string;
+} = {}): Promise<Paginated<ModelCardDTO>> {
+  const rows = await prisma.model.findMany({
     select,
-    orderBy: { updatedAt: "desc" },
-    cursor: params.cursor ? { id: params.cursor } : undefined,
-    where: {
-      ...(params.ownerSlug
+    where: await modelWhereCanRead(
+      params.ownerSlug
         ? {
             owner: {
               slug: params.ownerSlug,
             },
           }
-        : {}),
-      OR: await modelWhereHasAccess(),
-    },
-    take: limit + 1,
+        : {}
+    ),
+    orderBy: { updatedAt: "desc" },
+    ...findPaginated(cursor, limit),
   });
 
-  const models = dbModels.map(toDTO);
+  const models = rows.map(toDTO);
 
   const nextCursor = models[models.length - 1]?.id;
-
   async function loadMore(limit: number) {
     "use server";
     return loadModelCards({ ...params, cursor: nextCursor, limit });
   }
 
-  return {
-    items: models.slice(0, limit),
-    loadMore: models.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(models, limit, loadMore);
 }
 
 export async function loadModelCard({
@@ -135,18 +157,17 @@ export async function loadModelCard({
   owner: string;
   slug: string;
 }): Promise<ModelCardDTO | null> {
-  const dbModel = await prisma.model.findFirst({
-    select: select,
-    where: {
+  const row = await prisma.model.findFirst({
+    select,
+    where: await modelWhereCanRead({
       slug,
       owner: { slug: owner },
-      OR: await modelWhereHasAccess(),
-    },
+    }),
   });
 
-  if (!dbModel) {
+  if (!row) {
     return null;
   }
 
-  return toDTO(dbModel);
+  return toDTO(row);
 }

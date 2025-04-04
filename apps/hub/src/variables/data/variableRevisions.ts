@@ -1,8 +1,9 @@
 import { Prisma } from "@quri/hub-db";
 
+import { findPaginated, makePaginated } from "@/lib/server/dataHelpers";
 import { prisma } from "@/lib/server/prisma";
 import { Paginated } from "@/lib/types";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/authHelpers";
 import {
   ModelRevisionDTO,
   modelRevisionToDTO,
@@ -41,15 +42,17 @@ function toDTO(row: Row): VariableRevisionDTO {
   };
 }
 
-export async function loadVariableRevisions(params: {
+export async function loadVariableRevisions({
+  limit = 20,
+  cursor,
+  ...params
+}: {
   owner: string;
   slug: string;
   variableName: string;
   cursor?: string;
   limit?: number;
 }): Promise<Paginated<VariableRevisionDTO>> {
-  const limit = params.limit ?? 20;
-
   const rows = await prisma.variableRevision.findMany({
     select,
     orderBy: {
@@ -57,32 +60,26 @@ export async function loadVariableRevisions(params: {
         createdAt: "desc",
       },
     },
-    cursor: params.cursor ? { id: params.cursor } : undefined,
     where: {
       modelRevision: {
-        model: {
-          OR: await modelWhereHasAccess(),
+        model: await modelWhereCanRead({
           owner: {
             slug: params.owner,
           },
           slug: params.slug,
-        },
+        }),
       },
     },
-    take: limit + 1,
+    ...findPaginated(cursor, limit),
   });
 
   const variables = rows.map(toDTO);
 
   const nextCursor = variables[variables.length - 1]?.id;
-
   async function loadMore(limit: number) {
     "use server";
     return loadVariableRevisions({ ...params, cursor: nextCursor, limit });
   }
 
-  return {
-    items: variables.slice(0, limit),
-    loadMore: variables.length > limit ? loadMore : undefined,
-  };
+  return makePaginated(variables, limit, loadMore);
 }

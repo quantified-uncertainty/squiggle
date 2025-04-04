@@ -11,7 +11,7 @@ import { prisma } from "@/lib/server/prisma";
 import { zSlug } from "@/lib/zodUtils";
 import { getSelf, getSessionOrRedirect } from "@/users/auth";
 
-import { getWriteableModel } from "../utils";
+import { loadWriteableModel } from "../data/writeableModel";
 
 export const updateSquiggleSnippetModelAction = actionClient
   .schema(
@@ -41,10 +41,12 @@ export const updateSquiggleSnippetModelAction = actionClient
   .action(async ({ parsedInput: input }) => {
     const session = await getSessionOrRedirect();
 
-    const existingModel = await getWriteableModel({
+    const existingModel = await loadWriteableModel({
       slug: input.slug,
       owner: input.owner,
     });
+
+    console.log("existingModel", existingModel);
 
     const version = input.content.version;
     if (!(squiggleVersions as readonly string[]).includes(version)) {

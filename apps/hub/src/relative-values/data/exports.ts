@@ -1,7 +1,7 @@
 import { Prisma } from "@quri/hub-db";
 
 import { prisma } from "@/lib/server/prisma";
-import { modelWhereHasAccess } from "@/models/data/authHelpers";
+import { modelWhereCanRead } from "@/models/authHelpers";
 
 import { RelativeValuesDefinitionFullDTO } from "./full";
 
@@ -55,7 +55,7 @@ export async function loadRelativeValuesExportCardsFromDefinition(
   definition: RelativeValuesDefinitionFullDTO
 ): Promise<RelativeValuesExportCardDTO[]> {
   const models = await prisma.model.findMany({
-    where: {
+    where: await modelWhereCanRead({
       currentRevision: {
         relativeValuesExports: {
           some: {
@@ -63,8 +63,7 @@ export async function loadRelativeValuesExportCardsFromDefinition(
           },
         },
       },
-      OR: await modelWhereHasAccess(),
-    },
+    }),
   });
 
   const rows = await prisma.relativeValuesExport.findMany({

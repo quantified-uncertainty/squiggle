@@ -20,7 +20,7 @@ import {
   TextFormField,
 } from "@quri/ui";
 
-import { AiWorkflow } from "@/ai/data/loadWorkflows";
+import { AiWorkflowDTO } from "@/ai/data/loadWorkflows";
 
 import { AiRequestBody } from "./utils";
 import { WorkflowSummaryList } from "./WorkflowSummaryList";
@@ -32,8 +32,8 @@ type Handle = {
 type Props = {
   submitWorkflow: (requestBody: AiRequestBody) => void;
   selectWorkflow: (id: string) => void;
-  selectedWorkflow: AiWorkflow | undefined;
-  workflows: AiWorkflow[];
+  selectedWorkflow: AiWorkflowDTO | undefined;
+  workflows: AiWorkflowDTO[];
   loadNext?: (count: number) => void;
 };
 

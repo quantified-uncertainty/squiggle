@@ -3,15 +3,15 @@ import crypto from "crypto";
 import { Prisma } from "@quri/hub-db";
 import { parseSourceId } from "@quri/hub-linker";
 import {
-  SqLinker,
-  SqModule,
-  SqModuleOutput,
-  SqProject,
-  SqValue,
-} from "@quri/squiggle-lang";
+  defaultSquiggleVersion,
+  squiggleLangByVersion,
+  SquiggleVersion,
+  versionSupportsSqProjectV2,
+} from "@quri/versioned-squiggle-components";
 
 import { SAMPLE_COUNT_DEFAULT, XY_POINT_LENGTH_DEFAULT } from "@/lib/constants";
 import { prisma } from "@/lib/server/prisma";
+import { modelWhereCanRead } from "@/models/authHelpers";
 
 function getKey(code: string, seed: string): string {
   return crypto
@@ -20,7 +20,10 @@ function getKey(code: string, seed: string): string {
     .digest("base64");
 }
 
-export const squiggleValueToJSON = (value: SqValue): any => {
+export const squiggleValueToJSON = (
+  // This is `SqValue`, but it's versioned, so I can't import the correct type easily here.
+  value: { asJS: () => any }
+): any => {
   return value.asJS();
 };
 
@@ -41,57 +44,74 @@ type SquiggleOutput = {
     }
 );
 
-// Note that this linker is different from the one in @quri/hub-linker: it loads models directly from the database.
-// TODO : explore the possibility of implementing an alternative API client that supports `HubApiClient` interface but requests models from the database.
-// If we had such a client, we could parameterize the linker with it.
-const squiggleLinker: SqLinker = {
-  resolve(name) {
-    return name;
-  },
-  async loadModule(sourceId: string) {
-    const { owner, slug } = parseSourceId(sourceId);
-    const model = await prisma.model.findFirst({
-      where: {
-        slug,
-        owner: { slug: owner },
-      },
-      include: {
-        currentRevision: {
-          include: {
-            squiggleSnippet: true,
-          },
-        },
-      },
-    });
-
-    if (!model) {
-      throw new Error("Not found");
-    }
-
-    const content = model?.currentRevision?.squiggleSnippet;
-    if (content) {
-      return new SqModule({ name: sourceId, code: content.code });
-    } else {
-      throw new Error("Not found");
-    }
-  },
-};
-
-export async function runSquiggle(
-  code: string,
-  seed: string
-): Promise<SqModuleOutput> {
+// This function outputs a _versioned_ `SqModuleOutput`.
+// For this reason, its return type is not explicitly typed.
+export async function runSquiggle({
+  code,
+  seed,
+  squiggleVersion,
+}: {
+  code: string;
+  seed: string;
+  squiggleVersion?: SquiggleVersion;
+}) {
   const MAIN = "main";
 
   const env = {
     sampleCount: SAMPLE_COUNT_DEFAULT, // int
     xyPointLength: XY_POINT_LENGTH_DEFAULT, // int
-    seed: seed,
+    seed,
+  };
+  const version = squiggleVersion ?? defaultSquiggleVersion;
+
+  if (!versionSupportsSqProjectV2.plain(version)) {
+    throw new Error("Unsupported Squiggle version");
+  }
+
+  const squiggle = await squiggleLangByVersion(version);
+
+  // Note that this linker is different from the one in @quri/hub-linker: it loads models directly from the database.
+  // TODO : explore the possibility of implementing an alternative API client that supports `HubApiClient` interface but requests models from the database.
+  // If we had such a client, we could parameterize the linker with it.
+  const linker: ReturnType<typeof squiggle.makeSelfContainedLinker> = {
+    resolve(name) {
+      return name;
+    },
+    async loadModule(sourceId: string) {
+      const { owner, slug } = parseSourceId(sourceId);
+      const model = await prisma.model.findFirst({
+        where: await modelWhereCanRead({
+          slug,
+          owner: { slug: owner },
+        }),
+        include: {
+          currentRevision: {
+            include: {
+              squiggleSnippet: true,
+            },
+          },
+        },
+      });
+
+      if (!model) {
+        throw new Error("Not found");
+      }
+
+      const content = model?.currentRevision?.squiggleSnippet;
+      if (content) {
+        return new squiggle.SqModule({
+          name: sourceId,
+          code: content.code,
+        }) as any;
+      } else {
+        throw new Error("Not found");
+      }
+    },
   };
 
-  const project = new SqProject({
+  const project = new squiggle.SqProject({
     environment: env,
-    linker: squiggleLinker,
+    linker: linker as any,
   });
 
   project.setSimpleHead(MAIN, code);
@@ -118,7 +138,7 @@ export async function runSquiggleWithCache(
     } as unknown as SquiggleOutput;
   }
 
-  const { result: outputResult } = await runSquiggle(code, seed);
+  const { result: outputResult } = await runSquiggle({ code, seed });
 
   const result: SquiggleOutput = outputResult.ok
     ? {
