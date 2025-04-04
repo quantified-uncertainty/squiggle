@@ -1,0 +1,16 @@
+---
+description: 
+globs: *.tsx
+alwaysApply: false
+---
+Define React components in this style:
+
+```typescript
+const ComponentName: FC<...> = ({ ... }) => {
+    return (
+        ...
+    );
+}
+```
+
+Inline props in `FC<...>` if there are less than 5 props.
