@@ -113,7 +113,7 @@
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.0",
     "@graphql-typed-document-node/core": "^3.2.0",
-    "@prisma/nextjs-monorepo-workaround-plugin": "^6.5.0",
+    "@prisma/nextjs-monorepo-workaround-plugin": "^6.7.0",
     "@quri/configs": "workspace:*",
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.14.0",
