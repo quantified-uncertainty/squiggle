@@ -10,7 +10,7 @@
     "post-publish": "node ./dist/scripts/post-publish.js"
   },
   "devDependencies": {
-    "@babel/plugin-syntax-typescript": "^7.25.7",
+    "@babel/plugin-syntax-typescript": "^7.27.1",
     "@changesets/get-github-info": "^0.6.0",
     "@changesets/types": "^6.1.0",
     "@quri/configs": "workspace:*",
