@@ -9,7 +9,7 @@
   "dependencies": {
     "@quri/hub-api-client": "workspace:^",
     "@quri/versioned-squiggle-components": "workspace:^",
-    "zod": "^3.24.2"
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@quri/configs": "workspace:*",
