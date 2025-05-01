@@ -18,7 +18,7 @@
     "@content-collections/core": "^0.8.2",
     "@fumadocs/content-collections": "^1.1.5",
     "@quri/squiggle-lang": "workspace:*",
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.15.3",
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "zod": "^3.24.2"
