@@ -27,7 +27,7 @@
     "@vercel/analytics": "^1.5.0",
     "base64-js": "^1.5.1",
     "clsx": "^2.1.1",
-    "fumadocs-core": "14.0.2",
+    "fumadocs-core": "15.2.12",
     "fumadocs-ui": "14.0.2",
     "katex": "^0.16.21",
     "next": "^15.2.4",
