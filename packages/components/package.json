@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-attributes": "^7.26.0",
-    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.0",
     "@jest/globals": "^29.7.0",
     "@juggle/resize-observer": "^3.4.0",
