@@ -17,7 +17,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-env": "^7.27.1",
     "@babel/preset-typescript": "^7.27.0",
     "@jest/globals": "^29.7.0",
     "@quri/configs": "workspace:*",
