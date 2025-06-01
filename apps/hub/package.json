@@ -67,7 +67,7 @@
     "@types/lodash": "^4.17.16",
     "@types/node": "^22.14.0",
     "@types/pako": "^2.0.3",
-    "@types/react": "^19.1.0",
+    "@types/react": "^19.1.6",
     "@typescript/analyze-trace": "^0.10.1",
     "dotenv-cli": "^8.0.0",
     "esbuild": "^0.25.2",
