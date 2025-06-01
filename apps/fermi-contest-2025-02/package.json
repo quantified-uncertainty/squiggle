@@ -20,7 +20,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.52.0",
     "@inquirer/prompts": "^7.4.0",
     "dotenv": "^16.4.7",
     "next": "^15.2.4",
