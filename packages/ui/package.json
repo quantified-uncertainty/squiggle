@@ -59,7 +59,7 @@
     "@storybook/addon-links": "^8.6.12",
     "@storybook/blocks": "^8.6.12",
     "@storybook/react": "^8.6.12",
-    "@storybook/react-vite": "^8.6.12",
+    "@storybook/react-vite": "^9.0.3",
     "@tailwindcss/forms": "^0.5.10",
     "@types/node": "^22.14.0",
     "@types/react": "^19.1.0",
