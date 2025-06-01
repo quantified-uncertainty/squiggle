@@ -35,7 +35,7 @@
     "@vercel/analytics": "^1.5.0",
     "base64-js": "^1.5.1",
     "clsx": "^2.1.1",
-    "commander": "^13.1.0",
+    "commander": "^14.0.0",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
     "immutable": "^5.1.1",
