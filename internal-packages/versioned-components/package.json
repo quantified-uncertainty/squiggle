@@ -39,7 +39,7 @@
     "squiggle-lang-0.9.3": "npm:@quri/squiggle-lang@0.9.3",
     "squiggle-lang-0.9.4": "npm:@quri/squiggle-lang@0.9.4",
     "squiggle-lang-0.9.5": "npm:@quri/squiggle-lang@0.9.5",
-    "zod": "^3.24.2"
+    "zod": "^3.25.46"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
