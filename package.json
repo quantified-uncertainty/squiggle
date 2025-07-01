@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "turbo": "^2.4.4",
     "turbo-ignore": "^2.4.4"
