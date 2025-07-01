@@ -75,7 +75,7 @@
     "prop-types": "^15.8.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-hook-form": "^7.53.2",
+    "react-hook-form": "^7.59.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "^8.6.12",
     "tailwindcss": "^3.4.14",
