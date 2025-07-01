@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
-    "@prisma/nextjs-monorepo-workaround-plugin": "^6.5.0",
+    "@prisma/nextjs-monorepo-workaround-plugin": "^6.11.0",
     "@quri/configs": "workspace:*",
     "@types/d3": "^7.4.3",
     "@types/invariant": "^2.2.37",
