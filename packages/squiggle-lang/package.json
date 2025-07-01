@@ -63,7 +63,7 @@
     "eslint": "^9.23.0",
     "fast-check": "^4.0.1",
     "jest": "^29.7.0",
-    "peggy": "^4.2.0",
+    "peggy": "^5.0.4",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
     "react-reconciler": "^0.31.0",
