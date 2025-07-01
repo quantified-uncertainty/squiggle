@@ -46,7 +46,7 @@
     "@babel/plugin-syntax-import-attributes": "^7.26.0",
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.27.0",
-    "@jest/globals": "^29.7.0",
+    "@jest/globals": "^30.0.3",
     "@juggle/resize-observer": "^3.4.0",
     "@lezer/generator": "^1.7.3",
     "@lezer/highlight": "^1.2.1",
