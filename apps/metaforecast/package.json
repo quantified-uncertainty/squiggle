@@ -116,7 +116,7 @@
     "@prisma/nextjs-monorepo-workaround-plugin": "^6.5.0",
     "@quri/configs": "workspace:*",
     "@types/lodash": "^4.17.16",
-    "@types/node": "^22.14.0",
+    "@types/node": "^24.0.8",
     "@types/pg": "^8.11.10",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.23.0",
