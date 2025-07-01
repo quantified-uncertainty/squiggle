@@ -45,7 +45,7 @@
     "@commander-js/extra-typings": "^13.1.0",
     "@quri/configs": "workspace:*",
     "@types/json-diff": "^1.0.3",
-    "@types/lodash": "^4.17.16",
+    "@types/lodash": "^4.17.19",
     "@types/node": "^22.14.0",
     "@types/pako": "^2.0.3",
     "@types/react": "^19.1.0",
