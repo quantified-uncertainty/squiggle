@@ -63,7 +63,7 @@
     "commander": "^13.1.0",
     "date-fns": "^4.1.0",
     "dom-to-image": "^2.6.0",
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.0.0",
     "fetch": "^1.1.0",
     "fs": "^0.0.1-security",
     "google-spreadsheet": "^3.3.0",
