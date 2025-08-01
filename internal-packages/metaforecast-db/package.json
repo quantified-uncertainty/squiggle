@@ -15,7 +15,7 @@
   "devDependencies": {
     "@pothos/plugin-prisma": "^4.5.0",
     "@quri/configs": "workspace:*",
-    "@types/node": "^22.14.0",
+    "@types/node": "^24.1.0",
     "typescript": "^5.8.2"
   },
   "exports": {
