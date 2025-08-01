@@ -70,7 +70,7 @@
     "@types/react": "^19.1.0",
     "@typescript/analyze-trace": "^0.10.1",
     "dotenv-cli": "^8.0.0",
-    "esbuild": "^0.25.2",
+    "esbuild": "^0.25.8",
     "eslint": "^9.23.0",
     "eslint-config-next": "^15.2.4",
     "jest": "^29.7.0",
