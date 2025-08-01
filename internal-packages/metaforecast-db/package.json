@@ -16,7 +16,7 @@
     "@pothos/plugin-prisma": "^4.5.0",
     "@quri/configs": "workspace:*",
     "@types/node": "^22.14.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.2"
   },
   "exports": {
     ".": {
