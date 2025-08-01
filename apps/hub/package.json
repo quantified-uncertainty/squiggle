@@ -55,7 +55,7 @@
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
-    "zod": "^3.24.2"
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
