@@ -115,7 +115,7 @@
     "@graphql-typed-document-node/core": "^3.2.0",
     "@prisma/nextjs-monorepo-workaround-plugin": "^6.5.0",
     "@quri/configs": "workspace:*",
-    "@types/lodash": "^4.17.16",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^22.14.0",
     "@types/pg": "^8.11.10",
     "autoprefixer": "^10.4.21",
