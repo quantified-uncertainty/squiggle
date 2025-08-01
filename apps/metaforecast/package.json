@@ -38,7 +38,7 @@
     "@inquirer/prompts": "^7.4.0",
     "@pothos/core": "^4.5.1",
     "@pothos/plugin-prisma": "^4.5.0",
-    "@pothos/plugin-relay": "^4.4.1",
+    "@pothos/plugin-relay": "^4.6.2",
     "@quri/metaforecast-db": "workspace:*",
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.10",
