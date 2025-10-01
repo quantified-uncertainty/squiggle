@@ -23,7 +23,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@inquirer/prompts": "^7.4.0",
     "dotenv": "^16.4.7",
-    "next": "^15.2.4",
+    "next": "^15.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
