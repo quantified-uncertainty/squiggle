@@ -111,7 +111,7 @@
     "@graphql-codegen/schema-ast": "^4.1.0",
     "@graphql-codegen/typed-document-node": "^5.1.1",
     "@graphql-codegen/typescript": "^4.1.6",
-    "@graphql-codegen/typescript-operations": "^4.6.0",
+    "@graphql-codegen/typescript-operations": "^5.0.1",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@prisma/nextjs-monorepo-workaround-plugin": "^6.5.0",
     "@quri/configs": "workspace:*",
