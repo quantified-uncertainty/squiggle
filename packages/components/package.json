@@ -85,7 +85,7 @@
     "rollup-plugin-node-builtins": "^2.1.2",
     "storybook": "8.6.12",
     "tailwindcss": "^3.4.3",
-    "typescript": "5.8.2",
+    "typescript": "5.9.3",
     "vite": "^6.2.4"
   },
   "peerDependencies": {
