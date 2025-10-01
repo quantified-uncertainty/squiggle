@@ -101,7 +101,7 @@
     "tunnel": "^0.0.6",
     "urql": "^4.2.2",
     "victory": "^37.3.1",
-    "zod": "^3.24.2"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
