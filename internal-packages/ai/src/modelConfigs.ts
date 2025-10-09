@@ -69,6 +69,17 @@ export const MODEL_CONFIGS = [
   {
     id: "Claude-Sonnet",
     provider: "anthropic",
+    model: "claude-sonnet-4-5-20250929",
+    inputRate: 3,
+    outputRate: 15,
+    contextWindow: 200000,
+    maxTokens: 8192,
+    name: "Claude Sonnet 4.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Claude-3-7-Sonnet",
+    provider: "anthropic",
     model: "claude-3-7-sonnet-latest",
     inputRate: 3,
     outputRate: 15,
