@@ -67,7 +67,18 @@ export const MODEL_CONFIGS = [
     allowsSystemPrompt: true,
   },
   {
-    id: "Claude-Sonnet",
+    id: "Claude-4-5-Sonnet",
+    provider: "anthropic",
+    model: "claude-sonnet-4-5-20250929",
+    inputRate: 3,
+    outputRate: 15,
+    contextWindow: 200000,
+    maxTokens: 8192,
+    name: "Claude Sonnet 4.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Claude-3-7-Sonnet",
     provider: "anthropic",
     model: "claude-3-7-sonnet-latest",
     inputRate: 3,
@@ -78,7 +89,7 @@ export const MODEL_CONFIGS = [
     allowsSystemPrompt: true,
   },
   {
-    id: "Claude-Haiku",
+    id: "Claude-3-5-Haiku",
     provider: "anthropic",
     model: "claude-3-5-haiku-latest",
     inputRate: 1.0,
@@ -92,3 +103,5 @@ export const MODEL_CONFIGS = [
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];
+
+export const DEFAULT_LLM_ID: LlmId = "Claude-4-5-Sonnet";

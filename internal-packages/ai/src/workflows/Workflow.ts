@@ -7,7 +7,7 @@ import { LlmMetrics, Message } from "../LLMClient/types.js";
 import { LLMStepInstance } from "../LLMStepInstance.js";
 import { Inputs, IOShape, PreparedStep } from "../LLMStepTemplate.js";
 import { TimestampedLogEntry } from "../Logger.js";
-import { LlmId, MODEL_CONFIGS } from "../modelConfigs.js";
+import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "../modelConfigs.js";
 import {
   AiDeserializationVisitor,
   AiSerializationVisitor,
@@ -39,7 +39,7 @@ export const llmConfigSchema = z.object({
 export type LlmConfig = z.infer<typeof llmConfigSchema>;
 
 export const llmConfigDefault: LlmConfig = {
-  llmId: "Claude-Sonnet",
+  llmId: DEFAULT_LLM_ID,
   priceLimit: 0.3,
   durationLimitMinutes: 1,
   messagesInHistoryToKeep: 4,

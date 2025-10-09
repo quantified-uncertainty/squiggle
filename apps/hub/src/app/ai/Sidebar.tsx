@@ -10,7 +10,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
   NumberFormField,
@@ -64,7 +64,7 @@ Outputs:
 - Cumulative failure probability
 - Charts: monthly costs, benefits, net value over time`,
       squiggleCode: "",
-      model: "Claude-Sonnet",
+      model: DEFAULT_LLM_ID,
       numericSteps: 1,
       styleGuideSteps: 1,
       anthropicApiKey: "",

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
-import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import { NumberFormField, SelectFormField, TextFormField } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
@@ -40,7 +40,7 @@ type Props = {
 export const CreateEpistemicAgentModal: FC<Props> = ({ close }) => {
   const router = useRouter();
 
-  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === "Claude-Sonnet")!;
+  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === DEFAULT_LLM_ID)!;
   const defaultValues: FormShape = {
     name: "",
     config: {

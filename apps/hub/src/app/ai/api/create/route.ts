@@ -1,4 +1,4 @@
-import { LlmConfig } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmConfig } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
   fixSquiggleWorkflowTemplate,
@@ -39,7 +39,7 @@ function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
 function aiRequestToWorkflow(request: AiRequestBody) {
   // Create a SquiggleWorkflow instance
   const llmConfig: LlmConfig = {
-    llmId: request.model ?? "Claude-Sonnet",
+    llmId: request.model ?? DEFAULT_LLM_ID,
     priceLimit: 0.8,
     durationLimitMinutes: 6,
     messagesInHistoryToKeep: 4,
