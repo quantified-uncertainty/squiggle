@@ -69,7 +69,7 @@ export const MODEL_CONFIGS = [
   {
     id: "Claude-Sonnet",
     provider: "anthropic",
-    model: "claude-sonnet-4.5",
+    model: "claude-sonnet-4-5",
     inputRate: 3,
     outputRate: 15,
     contextWindow: 200000,
