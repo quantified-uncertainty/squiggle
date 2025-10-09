@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
 
-import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   Button,
   NumberFormField,
@@ -44,7 +44,7 @@ const modelConfigToOption = (
 export default function CreateEpistemicAgentPage() {
   const router = useRouter();
 
-  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === "Claude-Sonnet")!;
+  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === DEFAULT_LLM_ID)!;
   const defaultValues: FormShape = {
     name: "",
     config: {
