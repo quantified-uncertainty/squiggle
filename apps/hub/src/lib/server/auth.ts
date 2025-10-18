@@ -38,6 +38,24 @@ function buildAuthConfig(): NextAuthConfig {
     );
   }
 
+  // Dev-only: print login link to console
+  if (process.env.NODE_ENV === "development" && process.env["DEV_AUTH_ENABLED"] === "true") {
+    providers.push(
+      Resend({
+        apiKey: "dummy-key-not-used",
+        from: "dev@localhost",
+        name: "Dev Email (Check Console)",
+        async sendVerificationRequest({ identifier: email, url }) {
+          console.log("\n===========================================");
+          console.log("🔐 DEV LOGIN LINK");
+          console.log(`Email: ${email}`);
+          console.log(`\nClick here to sign in:\n${url}\n`);
+          console.log("===========================================\n");
+        },
+      })
+    );
+  }
+
   const config: NextAuthConfig = {
     adapter: PrismaAdapter(
       prisma as any // @auth/prisma-adapter doesn't support our PrismaClient from @quri/hub-db
