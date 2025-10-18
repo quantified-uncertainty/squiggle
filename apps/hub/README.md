@@ -11,8 +11,8 @@ The typical config looks like this:
 ```bash
 DATABASE_URL=postgres://postgres@localhost:5432/[your-db-name] # You need a Postgres database; on macOS the easiest option is https://postgresapp.com/
 NEXTAUTH_URL=http://localhost:3001
-SENDGRID_KEY=... # You'll need a working API key to sign in
-EMAIL_FROM=dev@squigglehub.org # Doesn't matter too much
+NEXTAUTH_SECRET=OwXOS457opeQzuhsKLItdhFDMrta2dcRlehqoQBGyKg= # Any random string works for local dev
+DEV_AUTH_ENABLED=true # Enables simple email auth - login links print to console (no email service needed)
 ROOT_EMAILS=[your-email] # Email of the root user on Squiggle Hub, to get extra permissions
 ```
 
