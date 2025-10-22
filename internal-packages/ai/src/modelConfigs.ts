@@ -99,6 +99,17 @@ export const MODEL_CONFIGS = [
     name: "Claude Haiku 3.5",
     allowsSystemPrompt: true,
   },
+  {
+    id: "Claude-4-5-Haiku",
+    provider: "anthropic",
+    model: "claude-haiku-4-5",
+    inputRate: 1.0,
+    outputRate: 3.0,
+    contextWindow: 200000,
+    maxTokens: 8192,
+    name: "Claude Haiku 4.5",
+    allowsSystemPrompt: true,
+  },  
 ] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
