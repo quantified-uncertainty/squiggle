@@ -109,7 +109,7 @@ export const MODEL_CONFIGS = [
     maxTokens: 8192,
     name: "Claude Haiku 4.5",
     allowsSystemPrompt: true,
-  },  
+  },
 ] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];

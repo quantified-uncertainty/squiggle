@@ -39,7 +39,10 @@ function buildAuthConfig(): NextAuthConfig {
   }
 
   // Dev-only: print login link to console
-  if (process.env.NODE_ENV === "development" && process.env["DEV_AUTH_ENABLED"] === "true") {
+  if (
+    process.env.NODE_ENV === "development" &&
+    process.env["DEV_AUTH_ENABLED"] === "true"
+  ) {
     providers.push(
       Resend({
         apiKey: "dummy-key-not-used",
