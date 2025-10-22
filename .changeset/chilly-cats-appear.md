@@ -2,4 +2,4 @@
 "@quri/squiggle-ai": patch
 ---
 
-Add Claude Haiku 4.5 model to Squiggle Hub AI
+Add Anthropic Claude Haiku 4.5 model to Squiggle Hub AI
