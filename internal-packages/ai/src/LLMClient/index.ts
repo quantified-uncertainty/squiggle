@@ -66,7 +66,7 @@ export class LLMClient {
           ? {
               baseURL: "https://openrouter.ai/api/v1",
               defaultHeaders: {
-                "HTTP-Referer": "https://squiggle-hub.com",
+                "HTTP-Referer": "https://squigglehub.org",
                 "X-Title": "Squiggle Hub",
               },
             }
