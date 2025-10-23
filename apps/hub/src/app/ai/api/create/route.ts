@@ -50,6 +50,7 @@ function aiRequestToWorkflow(request: AiRequestBody) {
   const openaiApiKey = process.env["OPENAI_API_KEY"];
   const anthropicApiKey =
     request.anthropicApiKey || process.env["ANTHROPIC_API_KEY"];
+  const openRouterApiKey = process.env["OPENROUTER_API_KEY"];
 
   const workflow =
     request.kind === "create"
@@ -61,6 +62,7 @@ function aiRequestToWorkflow(request: AiRequestBody) {
           // abortSignal: req.signal,
           openaiApiKey,
           anthropicApiKey,
+          openRouterApiKey,
         })
       : fixSquiggleWorkflowTemplate.instantiate({
           llmConfig,
@@ -70,6 +72,7 @@ function aiRequestToWorkflow(request: AiRequestBody) {
           // abortSignal: req.signal,
           openaiApiKey,
           anthropicApiKey,
+          openRouterApiKey,
         });
 
   return workflow;

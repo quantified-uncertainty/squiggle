@@ -30,14 +30,15 @@ export function calculatePriceMultipleCalls(
   return totalCost;
 }
 
-// Wrapper around OpenAI and Anthropic clients; injects Squiggle context into the conversation.
+// Wrapper around various LLM provider clients; injects Squiggle context into the conversation.
 export class LLMClient {
   private provider: AnthropicProvider | OpenAIProvider;
 
   constructor(
     public llmId: LlmId,
     openaiApiKey?: string,
-    anthropicApiKey?: string
+    anthropicApiKey?: string,
+    openrouterApiKey?: string
   ) {
     const selectedModelConfig = MODEL_CONFIGS.find(
       (model) => model.id === this.llmId
@@ -47,11 +48,30 @@ export class LLMClient {
       throw new Error(`No model config found for LLM: ${this.llmId}`);
     }
 
-    if (selectedModelConfig.provider === "openai") {
-      if (!openaiApiKey) {
-        throw new Error("No OpenAI API key provided");
+    if (
+      selectedModelConfig.provider === "openai" ||
+      selectedModelConfig.provider === "openrouter"
+    ) {
+      const apiKey =
+        selectedModelConfig.provider === "openai"
+          ? openaiApiKey
+          : openrouterApiKey;
+      if (!apiKey) {
+        throw new Error(`No ${selectedModelConfig.provider} API key provided`);
       }
-      this.provider = new OpenAIProvider(openaiApiKey, selectedModelConfig);
+      this.provider = new OpenAIProvider(
+        apiKey,
+        selectedModelConfig,
+        selectedModelConfig.provider === "openrouter"
+          ? {
+              baseURL: "https://openrouter.ai/api/v1",
+              defaultHeaders: {
+                "HTTP-Referer": "https://squigglehub.org",
+                "X-Title": "Squiggle Hub",
+              },
+            }
+          : {}
+      );
     } else if (selectedModelConfig.provider === "anthropic") {
       if (!anthropicApiKey) {
         throw new Error("No Anthropic API key provided");

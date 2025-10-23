@@ -19,7 +19,7 @@ Squiggle Hub is a platform for the creation and sharing of code written in [Squi
 Squiggle is a probabilistic estimation-oriented programming language that operates on the JavaScript platform. We think it's well-suited for intuition-based modeling and risk estimation. Additional details can be found on the [Squiggle official website](https://www.squiggle-language.com/).
 
 ## Our Connection to Guesstimate
-Out team previously co-founded [Guesstimate](https://getguesstimate.com/), a different estimation tool. Squiggle Hub stands as a spiritual successor to Guesstimate. With the power of a full programming language at its disposal, it offers superior flexibility and power, albeit at the cost of a steeper learning curve.
+Our team previously co-founded [Guesstimate](https://getguesstimate.com/), a different estimation tool. Squiggle Hub stands as a spiritual successor to Guesstimate. With the power of a full programming language at its disposal, it offers superior flexibility and power, albeit at the cost of a steeper learning curve.
 
 ## QURI & Squiggle Hub
 Squiggle Hub is made by the [Quantified Uncertainty Research Institute](https://quantifieduncertainty.org/) (QURI). QURI is a registered 501(c)(3) nonprofit devoted to the design and research of uncertainty quantification tools. We hope to use Squiggle Hub to aid effective nonprofits and funding bodies in making impactful decisions.
