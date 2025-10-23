@@ -7,6 +7,7 @@ const config = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   testTimeout: 60000, // github actions can be slow
+  maxWorkers: 1, // equivalent to --runInBand
 };
 
 export default config;
