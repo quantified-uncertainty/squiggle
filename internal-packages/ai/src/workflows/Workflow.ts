@@ -129,7 +129,8 @@ export class Workflow<Shape extends IOShape = IOShape> {
     this.llmClient = new LLMClient(
       this.llmConfig.llmId,
       params.openaiApiKey,
-      params.anthropicApiKey
+      params.anthropicApiKey,
+      params.openRouterApiKey
     );
 
     this.transitionRule = params.template.getTransitionRule(this);

@@ -210,12 +210,13 @@ Outputs:
         </div>
         <SelectStringFormField<FormShape, LlmId>
           label="Model"
-          tooltip="Choose the LLM to use. Sonnet is much better than Haiku, but is around 3x more expensive. We use the latest versions of Sonnet 3.5 and Haiku 3.5."
+          tooltip="Choose the LLM to use. Sonnet is much better than Haiku, but is around 3x more expensive. We use the latest versions of Sonnet 4.5 and Haiku 4.5."
           layout="row"
           name="model"
           size="small"
           options={MODEL_CONFIGS.filter(
-            (model) => model.provider === "anthropic"
+            (model) =>
+              model.provider === "anthropic" || model.provider === "openrouter"
           ).map((model) => model.id)}
           required
         />

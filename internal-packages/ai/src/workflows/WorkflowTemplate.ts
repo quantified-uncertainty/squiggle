@@ -11,6 +11,7 @@ export type WorkflowInstanceParams<Shape extends IOShape> = {
   llmConfig?: LlmConfig;
   openaiApiKey?: string;
   anthropicApiKey?: string;
+  openRouterApiKey?: string;
   error?: string;
 };
 

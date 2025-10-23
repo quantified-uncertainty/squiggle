@@ -44,6 +44,7 @@ function getSquiggleAiRunner(
         prompt: new PromptArtifact(questionToPrompt(question)),
       },
       anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+      openRouterApiKey: process.env["OPENROUTER_API_KEY"],
     });
 
     await workflow.runToResult();

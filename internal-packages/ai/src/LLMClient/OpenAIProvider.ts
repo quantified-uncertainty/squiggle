@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import OpenAI, { ClientOptions } from "openai";
 
 import { MODEL_CONFIGS } from "../modelConfigs.js";
 import { squiggleSystemPrompt } from "../prompts.js";
@@ -31,11 +31,13 @@ export class OpenAIProvider {
     apiKey: string,
     private modelConfig: Extract<
       (typeof MODEL_CONFIGS)[number],
-      { provider: "openai" }
-    >
+      { provider: "openai" | "openrouter" }
+    >,
+    options: Omit<ClientOptions, "apiKey"> = {}
   ) {
     this.client = new OpenAI({
-      apiKey: apiKey,
+      apiKey,
+      ...options,
     });
   }
 

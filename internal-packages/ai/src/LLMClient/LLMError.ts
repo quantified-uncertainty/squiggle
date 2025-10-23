@@ -1,4 +1,4 @@
-// Common error class for OpenAI and Anthropic errors.
+// Common error class for LLM provider errors.
 export class LLMError extends Error {
   constructor(
     message: string,

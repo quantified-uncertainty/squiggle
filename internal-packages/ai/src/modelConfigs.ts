@@ -1,6 +1,6 @@
 // Model selection and pricing
 export type ModelConfig = {
-  provider: "anthropic" | "openai";
+  provider: "anthropic" | "openai" | "openrouter";
   model: string;
   inputRate: number;
   outputRate: number;
@@ -108,6 +108,17 @@ export const MODEL_CONFIGS = [
     contextWindow: 200000,
     maxTokens: 8192,
     name: "Claude Haiku 4.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Grok-Code-Fast-1",
+    provider: "openrouter",
+    model: "x-ai/grok-code-fast-1",
+    inputRate: 0.2,
+    outputRate: 1.5,
+    contextWindow: 256000,
+    maxTokens: 10000,
+    name: "xAI: Grok Code Fast 1",
     allowsSystemPrompt: true,
   },
 ] as const satisfies ModelConfig[];
