@@ -1,7 +1,10 @@
 import { format } from "./helpers.js";
 
+// The tests in this file are timing out in CI.
+jest.setTimeout(60000);
+
 describe("lambda", () => {
-  test.skip("lambda", async () => {
+  test("lambda", async () => {
     expect(await format("f={|x|x*x}")).toBe("f = {|x| x * x}\n");
   });
 

@@ -1,8 +1,11 @@
 import { format } from "./helpers.js";
 
+// The tests in this file are timing out in CI.
+jest.setTimeout(60000);
+
 describe("unit type signature", () => {
     describe("let", () => {
-        test.skip("simple", async () => {
+        test("simple", async () => {
             expect(await format("x::meters = 1")).toBe("x :: meters = 1\n");
         });
 
