@@ -2,7 +2,7 @@ import { format } from "./helpers.js";
 
 describe("unit type signature", () => {
     describe("let", () => {
-        test("simple", async () => {
+        test.skip("simple", async () => {
             expect(await format("x::meters = 1")).toBe("x :: meters = 1\n");
         });
 

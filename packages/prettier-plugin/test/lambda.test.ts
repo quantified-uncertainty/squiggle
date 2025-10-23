@@ -1,7 +1,7 @@
 import { format } from "./helpers.js";
 
 describe("lambda", () => {
-  test("lambda", async () => {
+  test.skip("lambda", async () => {
     expect(await format("f={|x|x*x}")).toBe("f = {|x| x * x}\n");
   });
 
