@@ -48,7 +48,7 @@
     "@babel/preset-typescript": "^7.27.0",
     "@jest/globals": "^29.7.0",
     "@juggle/resize-observer": "^3.4.0",
-    "@lezer/generator": "^1.7.3",
+    "@lezer/generator": "^1.8.0",
     "@lezer/highlight": "^1.2.1",
     "@lezer/lr": "^1.4.2",
     "@quri/configs": "workspace:*",
