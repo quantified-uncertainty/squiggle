@@ -67,7 +67,7 @@
     "fetch": "^1.1.0",
     "fs": "^0.0.1-security",
     "google-spreadsheet": "^3.3.0",
-    "graphql": "^16.9.0",
+    "graphql": "^16.11.0",
     "graphql-yoga": "^5.13.2",
     "html-to-image": "^1.11.13",
     "https": "^1.0.0",
