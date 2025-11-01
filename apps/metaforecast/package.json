@@ -37,7 +37,7 @@
     "@graphql-yoga/plugin-response-cache": "^3.15.3",
     "@inquirer/prompts": "^7.4.0",
     "@pothos/core": "^4.5.1",
-    "@pothos/plugin-prisma": "^4.5.0",
+    "@pothos/plugin-prisma": "^4.10.0",
     "@pothos/plugin-relay": "^4.4.1",
     "@quri/metaforecast-db": "workspace:*",
     "@quri/ui": "workspace:*",
