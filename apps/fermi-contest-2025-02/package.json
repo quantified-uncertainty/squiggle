@@ -12,7 +12,7 @@
     "@quri/configs": "workspace:*",
     "@tailwindcss/typography": "^0.5.10",
     "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1",
+    "@types/react-dom": "^19.1.7",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.1",
@@ -25,7 +25,7 @@
     "dotenv": "^16.4.7",
     "next": "^15.2.4",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
     "zod": "^3.24.2"
   }
