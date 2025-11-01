@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.26.9",
-    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.0",
     "@commander-js/extra-typings": "^13.1.0",
     "@jest/globals": "^29.7.0",
