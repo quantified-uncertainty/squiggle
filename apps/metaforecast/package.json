@@ -80,7 +80,7 @@
     "open": "^10.1.0",
     "pg": "^8.14.1",
     "postcss": "^8.5.3",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "re-resizable": "^6.11.2",
     "react": "19.1.0",
     "react-component-export-image": "^1.0.6",
