@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import fs from "fs";
+import { randomBytes } from "crypto";
 import * as csv from "fast-csv";
 import enquirer from "enquirer";
 
@@ -18,6 +19,7 @@ const prompts = [
 ];
 
 type EvalResult = {
+  runId: string;
   prompt: string;
   modelName: LlmId;
   dateRan: string;
@@ -40,7 +42,7 @@ type EvalParameters = {
 function getLlmConfig(llmId: LlmId) {
   return {
     llmId,
-    priceLimit: 0.3,
+    priceLimit: 2,
     durationLimitMinutes: 2,
     messagesInHistoryToKeep: 4,
     numericSteps: 3,
@@ -86,11 +88,13 @@ function toEvalResult(
     logSummary,
   }: WorkflowResult,
   prompt: string,
-  llmId: LlmId
+  llmId: LlmId,
+  runId: string
 ): EvalResult {
   const linesOfCode = code.split("\n").length;
 
   return {
+    runId,
     prompt,
     modelName: llmId,
     dateRan: new Date().toISOString(),
@@ -107,9 +111,11 @@ function toEvalResult(
 function toErrorResult(
   prompt: string,
   llmId: LlmId,
-  error: unknown
+  error: unknown,
+  runId: string
 ): EvalResult {
   return {
+    runId,
     prompt,
     modelName: llmId,
     dateRan: new Date().toISOString(),
@@ -118,33 +124,38 @@ function toErrorResult(
   };
 }
 
+function generateRunId(): string {
+  return randomBytes(3).toString("hex").slice(0, 5);
+}
+
 async function runSingleEval(
   prompt: string,
   llmId: LlmId,
   runNumber: number,
   totalRuns: number
 ): Promise<EvalResult> {
+  const runId = generateRunId();
   console.log(
-    `Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`
+    `(${runId}) Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`
   );
 
   try {
     const workflow = await createWorkflow(prompt, llmId);
     const workflowResult = await workflow.runToResult();
-    const result = toEvalResult(workflowResult, prompt, llmId);
+    const result = toEvalResult(workflowResult, prompt, llmId, runId);
 
     console.log(
-      `Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`
+      `(${runId}) Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`
     );
 
     return result;
   } catch (error) {
     console.error(
-      `Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`,
+      `(${runId}) Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`,
       error
     );
 
-    const result = toErrorResult(prompt, llmId, error);
+    const result = toErrorResult(prompt, llmId, error, runId);
 
     return result;
   }
@@ -172,6 +183,7 @@ function saveResults(results: EvalResult[]): Promise<void> {
 
     results.forEach((result) => {
       csvStream.write({
+        runId: result.runId,
         prompt: result.prompt,
         modelName: result.modelName,
         dateRan: result.dateRan,
