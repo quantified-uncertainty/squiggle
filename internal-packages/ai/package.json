@@ -17,6 +17,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "prepareSquiggleFiles": "tsx src/scripts/prepareSquiggleFiles.ts",
     "fineTuningSetup": "tsx src/scripts/fine-tuning/setup.ts",
+    "simpleEvals": "tsx src/scripts/simple-evals/simple-evals.ts",
     "test:create": "tsx src/scripts/tests/create.ts",
     "test:edit": "tsx src/scripts/tests/edit.ts"
   },
