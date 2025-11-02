@@ -27,7 +27,7 @@ type EvalResult = {
   llmRunCount?: number;
   linesOfCode?: number;
   finalCode?: string;
-  logSummary?: any; // logSummary is complex
+  logSummary?: string;
   error?: string;
 };
 
