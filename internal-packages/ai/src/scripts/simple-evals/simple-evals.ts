@@ -239,9 +239,11 @@ async function getEvalParameters(): Promise<EvalParameters> {
     answers.selectedPrompts.push(answers.customPrompt);
   }
 
-  const { customPrompt, ...evalParams } = answers;
-
-  return evalParams;
+  return {
+    llmIds: answers.llmIds,
+    selectedPrompts: answers.selectedPrompts,
+    runsPerCombination: answers.runsPerCombination,
+  };
 }
 
 async function main() {
