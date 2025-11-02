@@ -189,7 +189,9 @@ function saveResults(results: EvalResult[]): Promise<void> {
 }
 
 async function getEvalParameters(): Promise<EvalParameters> {
-  const allModelIds = MODEL_CONFIGS.map((c) => c.id);
+  const allModelIds = MODEL_CONFIGS.filter((c) => c.provider !== "openai").map(
+    (c) => c.id
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { prompt } = enquirer as any;
