@@ -39,62 +39,83 @@ type EvalResult = {
   error?: string;
 };
 
+function getLlmConfig(llmId: LlmId) {
+  return { llmId, priceLimit: 0.3, durationLimitMinutes: 2, messagesInHistoryToKeep: 4, numericSteps: 3, styleGuideSteps: 2 };
+}
+
+async function instantiateAndRunWorkflow(prompt: string, llmId: LlmId) {
+  const llmConfig = getLlmConfig(llmId);
+  return createSquiggleWorkflowTemplate
+    .instantiate({
+      inputs: { prompt: new PromptArtifact(prompt) },
+      openaiApiKey: process.env['OPENAI_API_KEY'],
+      anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
+      openRouterApiKey: process.env['OPENROUTER_API_KEY'],
+      llmConfig,
+    })
+    .runToResult();
+}
+
+type WorkflowResult = { totalPrice: number; runTimeMs: number; llmRunCount: number; code: unknown; isValid: boolean; logSummary: any };
+
+function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary }: WorkflowResult, prompt: string, llmId: LlmId): EvalResult {
+  const finalCode = typeof code === 'string' ? code : '';
+  const linesOfCode = finalCode.split('\n').length;
+
+  return {
+    prompt,
+    modelName: llmId,
+    dateRan: new Date().toISOString(),
+    succeeded: isValid,
+    cost: totalPrice,
+    timeOfCompletionMs: runTimeMs,
+    llmRunCount,
+    linesOfCode,
+    finalCode,
+    logSummary,
+  };
+}
+
+async function runSingleEval(prompt: string, llmId: LlmId, runNumber: number, totalRuns: number): Promise<EvalResult> {
+  console.log(`Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`);
+
+  try {
+    const workflowResult: WorkflowResult = await instantiateAndRunWorkflow(prompt, llmId);
+    const result = toEvalResult(workflowResult, prompt, llmId);
+    console.log(`Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`);
+    return result;
+  } catch (error) {
+    console.error(`Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`, error);
+    const result: EvalResult = {
+      prompt,
+      modelName: llmId,
+      dateRan: new Date().toISOString(),
+      succeeded: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
+    return result;
+  }
+}
+
+function saveResults(results: EvalResult[]) {
+  const outputFilename = `eval-results-${new Date().toISOString().replace(/:/g, '-')}.json`;
+  fs.writeFileSync(outputFilename, JSON.stringify(results, null, 2));
+  console.log(`Results saved to ${outputFilename}`);
+}
+
 async function main() {
   const allResults: EvalResult[] = [];
 
   for (const prompt of prompts) {
     for (const llmId of llmIds) {
       for (let i = 0; i < RUNS_PER_COMBINATION; i++) {
-        console.log(`Running prompt: "${prompt}" with LLM: ${llmId}, run ${i + 1}/${RUNS_PER_COMBINATION}`);
-
-        const llmConfig = { llmId, priceLimit: 0.3, durationLimitMinutes: 2, messagesInHistoryToKeep: 4, numericSteps: 3, styleGuideSteps: 2 };
-
-        try {
-          const { totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary } = await createSquiggleWorkflowTemplate
-            .instantiate({
-              inputs: { prompt: new PromptArtifact(prompt) },
-              openaiApiKey: process.env['OPENAI_API_KEY'],
-              anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
-              openRouterApiKey: process.env['OPENROUTER_API_KEY'],
-              llmConfig,
-            })
-            .runToResult();
-
-          const finalCode = typeof code === 'string' ? code : '';
-          const linesOfCode = finalCode.split('\n').length;
-
-          const result: EvalResult = {
-            prompt,
-            modelName: llmId,
-            dateRan: new Date().toISOString(),
-            succeeded: isValid,
-            cost: totalPrice,
-            timeOfCompletionMs: runTimeMs,
-            llmRunCount,
-            linesOfCode,
-            finalCode,
-            logSummary,
-          };
-          allResults.push(result);
-          console.log(`Finished run. Success: ${isValid}, Cost: ${totalPrice}`);
-        } catch (error) {
-          console.error(`Error running prompt: "${prompt}" with LLM: ${llmId}, run ${i + 1}`, error);
-          const result: EvalResult = {
-            prompt,
-            modelName: llmId,
-            dateRan: new Date().toISOString(),
-            succeeded: false,
-            error: error instanceof Error ? error.message : String(error),
-          };
-          allResults.push(result);
-        }
+        const result = await runSingleEval(prompt, llmId, i + 1, RUNS_PER_COMBINATION);
+        allResults.push(result);
       }
     }
   }
 
-  const outputFilename = `eval-results-${new Date().toISOString().replace(/:/g, '-')}.json`;
-  fs.writeFileSync(outputFilename, JSON.stringify(allResults, null, 2));
-  console.log(`Results saved to ${outputFilename}`);
+  saveResults(allResults);
 }
 
 main().catch((error) => {
