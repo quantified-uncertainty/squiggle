@@ -17,14 +17,14 @@ const prompts = [
 ];
 
 const llmIds: LlmId[] = [
-  // 'Claude-4-5-Sonnet',
-  // "Claude-4-5-Haiku",
+  'Claude-4-5-Sonnet',
+  "Claude-4-5-Haiku",
   "Claude-3-5-Haiku",
-  // "Claude-3-7-Sonnet",
-  // "Grok-Code-Fast-1",
+  "Claude-3-7-Sonnet",
+  "Grok-Code-Fast-1",
 ];
 
-const RUNS_PER_COMBINATION = 3;
+const RUNS_PER_COMBINATION = 1;
 
 type EvalResult = {
   prompt: string;
