@@ -61,11 +61,18 @@ async function createWorkflow(prompt: string, llmId: LlmId) {
   return createSquiggleWorkflowTemplate.instantiate(params);
 }
 
-type WorkflowResult = { totalPrice: number; runTimeMs: number; llmRunCount: number; code: unknown; isValid: boolean; logSummary: any };
+type WorkflowResult = {
+  code: string;
+  isValid: boolean;
+  error?: string;
+  totalPrice: number;
+  runTimeMs: number;
+  llmRunCount: number;
+  logSummary: string;
+};
 
 function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary }: WorkflowResult, prompt: string, llmId: LlmId): EvalResult {
-  const finalCode = typeof code === 'string' ? code : '';
-  const linesOfCode = finalCode.split('\n').length;
+  const linesOfCode = code.split('\n').length;
 
   return {
     prompt,
@@ -76,7 +83,7 @@ function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSu
     timeOfCompletionMs: runTimeMs,
     llmRunCount,
     linesOfCode,
-    finalCode,
+    finalCode: code,
     logSummary,
   };
 }
