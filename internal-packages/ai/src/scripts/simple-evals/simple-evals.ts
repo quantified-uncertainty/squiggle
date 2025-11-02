@@ -43,7 +43,9 @@ function getLlmConfig(llmId: LlmId) {
   return {
     llmId,
     priceLimit: 2,
-    durationLimitMinutes: 2,
+    durationLimitMinutes: llmId.toLowerCase().includes("gemini-2-5-pro")
+      ? 4
+      : 2,
     messagesInHistoryToKeep: 4,
     numericSteps: 3,
     styleGuideSteps: 2,
