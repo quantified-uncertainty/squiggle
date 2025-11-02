@@ -1,34 +1,21 @@
 import { config } from "dotenv";
 import fs from "fs";
 import * as csv from "fast-csv";
+import enquirer from "enquirer";
 
 import { PromptArtifact } from "../../Artifact.js";
 import { createSquiggleWorkflowTemplate } from "../../workflows/createSquiggleWorkflowTemplate.js";
-import { LlmId } from "../../modelConfigs.js";
+import { LlmId, MODEL_CONFIGS } from "../../modelConfigs.js";
 
 config();
 
 const prompts = [
   "Simple financial projections for a new bubble tea shop in Berkeley CA",
-  // "Estimate total money saved by autonomous vehicles",
-  // "Piano tuners in Chicago",
-  // "Total length of blood vessels in human body",
-  // "Annual revenue of all McDonald’s locations worldwide",
+  "Estimate total money saved by autonomous vehicles",
+  "Piano tuners in Chicago",
+  "Total length of blood vessels in human body",
+  "Annual revenue of all McDonald’s locations worldwide",
 ];
-
-const llmIds: LlmId[] = [
-  "Claude-4-5-Sonnet",
-  "Claude-3-7-Sonnet",
-  "Claude-3-5-Haiku",
-  "Claude-4-5-Haiku",
-  "Grok-Code-Fast-1",
-  "GLM-4-6",
-  "Gemini-2-5-Pro",
-  "MiniMax-M2",
-  "Grok-4-Fast",
-];
-
-const RUNS_PER_COMBINATION = 1;
 
 type EvalResult = {
   prompt: string;
@@ -42,6 +29,12 @@ type EvalResult = {
   finalCode?: string;
   logSummary?: any; // logSummary is complex
   error?: string;
+};
+
+type EvalParameters = {
+  llmIds: LlmId[];
+  selectedPrompts: string[];
+  runsPerCombination: number;
 };
 
 function getLlmConfig(llmId: LlmId) {
@@ -195,17 +188,57 @@ function saveResults(results: EvalResult[]): Promise<void> {
   });
 }
 
+async function getEvalParameters(): Promise<EvalParameters> {
+  const allModelIds = MODEL_CONFIGS.map((c) => c.id);
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { prompt } = enquirer as any;
+  const answers: EvalParameters = await prompt([
+    {
+      type: "multiselect",
+      name: "llmIds",
+      message: "Select models to run",
+      choices: allModelIds,
+      initial: ["Claude-4-5-Sonnet"],
+    },
+    {
+      type: "multiselect",
+      name: "selectedPrompts",
+      message: "Select prompts to run",
+      choices: prompts,
+      initial: [prompts[0]],
+    },
+    {
+      type: "numeral",
+      name: "runsPerCombination",
+      message: "How many runs per combination?",
+      initial: 1,
+    },
+  ]);
+
+  return answers;
+}
+
 async function main() {
+  const { llmIds, selectedPrompts, runsPerCombination } =
+    await getEvalParameters();
+
+  if (!llmIds.length || !selectedPrompts.length || runsPerCombination <= 0) {
+    console.log(
+      "No models or prompts selected, or invalid number of runs. Exiting."
+    );
+    return;
+  }
   const allResults: EvalResult[] = [];
 
-  for (const prompt of prompts) {
+  for (const prompt of selectedPrompts) {
     for (const llmId of llmIds) {
-      for (let i = 0; i < RUNS_PER_COMBINATION; i++) {
+      for (let i = 0; i < runsPerCombination; i++) {
         const result = await runSingleEval(
           prompt,
           llmId,
           i + 1,
-          RUNS_PER_COMBINATION
+          runsPerCombination
         );
         allResults.push(result);
       }

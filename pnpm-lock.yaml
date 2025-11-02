@@ -684,6 +684,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      enquirer:
+        specifier: ^2.4.1
+        version: 2.4.1
       fast-csv:
         specifier: ^5.0.5
         version: 5.0.5
