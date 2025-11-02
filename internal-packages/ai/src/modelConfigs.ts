@@ -165,6 +165,17 @@ export const MODEL_CONFIGS = [
     name: "xAI: Grok 4 Fast",
     allowsSystemPrompt: true,
   },
+  {
+    id: "Qwen3-Coder",
+    provider: "openrouter",
+    model: "qwen/qwen3-coder",
+    inputRate: 0.22,
+    outputRate: 0.95,
+    contextWindow: 262144,
+    maxTokens: 262144,
+    name: "Qwen: Qwen3 Coder 480B A35B",
+    allowsSystemPrompt: true,
+  },
 ] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
