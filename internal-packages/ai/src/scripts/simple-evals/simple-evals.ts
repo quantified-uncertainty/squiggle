@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import fs from 'fs';
+import * as csv from 'fast-csv';
 
 import { PromptArtifact } from '../../Artifact.js';
 import { createSquiggleWorkflowTemplate } from '../../workflows/createSquiggleWorkflowTemplate.js';
@@ -17,13 +18,13 @@ const prompts = [
 
 const llmIds: LlmId[] = [
   // 'Claude-4-5-Sonnet',
-  "Claude-4-5-Haiku",
+  // "Claude-4-5-Haiku",
   "Claude-3-5-Haiku",
   // "Claude-3-7-Sonnet",
   // "Grok-Code-Fast-1",
 ];
 
-const RUNS_PER_COMBINATION = 1;
+const RUNS_PER_COMBINATION = 3;
 
 type EvalResult = {
   prompt: string;
@@ -118,10 +119,33 @@ async function runSingleEval(prompt: string, llmId: LlmId, runNumber: number, to
   }
 }
 
-function saveResults(results: EvalResult[]) {
-  const outputFilename = `eval-results-${new Date().toISOString().replace(/:/g, '-')}.json`;
-  fs.writeFileSync(outputFilename, JSON.stringify(results, null, 2));
-  console.log(`Results saved to ${outputFilename}`);
+function saveResults(results: EvalResult[]): Promise<void> {
+  const baseName = `eval-results-${new Date().toISOString().replace(/:/g, '-')}`;
+
+  const jsonFilename = `${baseName}.json`;
+  fs.writeFileSync(jsonFilename, JSON.stringify(results, null, 2));
+  console.log(`Results saved to ${jsonFilename}`);
+
+  return new Promise((resolve, reject) => {
+    const csvFilename = `${baseName}.csv`;
+    const csvStream = csv.format({ headers: true });
+    const writableStream = fs.createWriteStream(csvFilename);
+
+    writableStream.on('finish', () => {
+      console.log(`Results saved to ${csvFilename}`);
+      resolve();
+    });
+    writableStream.on('error', reject);
+
+    csvStream.pipe(writableStream);
+
+    results.forEach(result => {
+      const { finalCode, logSummary, ...csvResult } = result;
+      csvStream.write(csvResult);
+    });
+
+    csvStream.end();
+  });
 }
 
 async function main() {
@@ -136,7 +160,7 @@ async function main() {
     }
   }
 
-  saveResults(allResults);
+  await saveResults(allResults);
 }
 
 main().catch((error) => {
