@@ -43,17 +43,22 @@ function getLlmConfig(llmId: LlmId) {
   return { llmId, priceLimit: 0.3, durationLimitMinutes: 2, messagesInHistoryToKeep: 4, numericSteps: 3, styleGuideSteps: 2 };
 }
 
-async function instantiateAndRunWorkflow(prompt: string, llmId: LlmId) {
+function getParams(prompt: string, llmId: LlmId) {
   const llmConfig = getLlmConfig(llmId);
-  return createSquiggleWorkflowTemplate
-    .instantiate({
-      inputs: { prompt: new PromptArtifact(prompt) },
-      openaiApiKey: process.env['OPENAI_API_KEY'],
-      anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
-      openRouterApiKey: process.env['OPENROUTER_API_KEY'],
-      llmConfig,
-    })
-    .runToResult();
+  const prompArtifact = new PromptArtifact(prompt);
+
+  return {
+    inputs: { prompt: prompArtifact },
+    openaiApiKey: process.env['OPENAI_API_KEY'],
+    anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
+    openRouterApiKey: process.env['OPENROUTER_API_KEY'],
+    llmConfig,
+  };
+}
+
+async function createWorkflow(prompt: string, llmId: LlmId) {
+  const params = getParams(prompt, llmId);
+  return createSquiggleWorkflowTemplate.instantiate(params);
 }
 
 type WorkflowResult = { totalPrice: number; runTimeMs: number; llmRunCount: number; code: unknown; isValid: boolean; logSummary: any };
@@ -76,23 +81,32 @@ function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSu
   };
 }
 
+function toErrorResult(prompt: string, llmId: LlmId, error: unknown): EvalResult {
+  return {
+    prompt,
+    modelName: llmId,
+    dateRan: new Date().toISOString(),
+    succeeded: false,
+    error: error instanceof Error ? error.message : String(error),
+  };
+}
+
 async function runSingleEval(prompt: string, llmId: LlmId, runNumber: number, totalRuns: number): Promise<EvalResult> {
   console.log(`Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`);
 
   try {
-    const workflowResult: WorkflowResult = await instantiateAndRunWorkflow(prompt, llmId);
+    const workflow = await createWorkflow(prompt, llmId);
+    const workflowResult = await workflow.runToResult();
     const result = toEvalResult(workflowResult, prompt, llmId);
+
     console.log(`Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`);
+    
     return result;
   } catch (error) {
     console.error(`Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`, error);
-    const result: EvalResult = {
-      prompt,
-      modelName: llmId,
-      dateRan: new Date().toISOString(),
-      succeeded: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
+    
+    const result = toErrorResult(prompt, llmId, error);
+    
     return result;
   }
 }
