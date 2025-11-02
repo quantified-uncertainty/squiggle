@@ -4,7 +4,7 @@ import * as csv from "fast-csv";
 
 import { PromptArtifact } from "../../Artifact.js";
 import { createSquiggleWorkflowTemplate } from "../../workflows/createSquiggleWorkflowTemplate.js";
-import { LlmId, MODEL_CONFIGS } from "../../modelConfigs.js";
+import { LlmId } from "../../modelConfigs.js";
 
 config();
 
@@ -178,8 +178,17 @@ function saveResults(results: EvalResult[]): Promise<void> {
     csvStream.pipe(writableStream);
 
     results.forEach((result) => {
-      const { finalCode, logSummary, ...csvResult } = result;
-      csvStream.write(csvResult);
+      csvStream.write({
+        prompt: result.prompt,
+        modelName: result.modelName,
+        dateRan: result.dateRan,
+        succeeded: result.succeeded,
+        cost: result.cost,
+        timeOfCompletionMs: result.timeOfCompletionMs,
+        llmRunCount: result.llmRunCount,
+        linesOfCode: result.linesOfCode,
+        error: result.error,
+      });
     });
 
     csvStream.end();
