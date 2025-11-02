@@ -207,7 +207,7 @@ async function getEvalParameters(): Promise<EvalParameters> {
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { prompt } = enquirer as any;
-  const answers: EvalParameters = await prompt([
+  const answers: EvalParameters & { customPrompt?: string } = await prompt([
     {
       type: "multiselect",
       name: "llmIds",
@@ -223,6 +223,11 @@ async function getEvalParameters(): Promise<EvalParameters> {
       initial: [prompts[0]],
     },
     {
+      type: "input",
+      name: "customPrompt",
+      message: "Additionally, enter a custom prompt (or leave blank to skip)",
+    },
+    {
       type: "numeral",
       name: "runsPerCombination",
       message: "How many runs per combination?",
@@ -230,7 +235,13 @@ async function getEvalParameters(): Promise<EvalParameters> {
     },
   ]);
 
-  return answers;
+  if (answers.customPrompt) {
+    answers.selectedPrompts.push(answers.customPrompt);
+  }
+
+  const { customPrompt, ...evalParams } = answers;
+
+  return evalParams;
 }
 
 async function main() {
