@@ -1,15 +1,15 @@
-import { config } from 'dotenv';
-import fs from 'fs';
-import * as csv from 'fast-csv';
+import { config } from "dotenv";
+import fs from "fs";
+import * as csv from "fast-csv";
 
-import { PromptArtifact } from '../../Artifact.js';
-import { createSquiggleWorkflowTemplate } from '../../workflows/createSquiggleWorkflowTemplate.js';
-import { LlmId, MODEL_CONFIGS } from '../../modelConfigs.js';
+import { PromptArtifact } from "../../Artifact.js";
+import { createSquiggleWorkflowTemplate } from "../../workflows/createSquiggleWorkflowTemplate.js";
+import { LlmId, MODEL_CONFIGS } from "../../modelConfigs.js";
 
 config();
 
 const prompts = [
-  'Simple financial projections for a new bubble tea shop in Berkeley CA',
+  "Simple financial projections for a new bubble tea shop in Berkeley CA",
   // "Estimate total money saved by autonomous vehicles",
   // "Piano tuners in Chicago",
   // "Total length of blood vessels in human body",
@@ -17,15 +17,15 @@ const prompts = [
 ];
 
 const llmIds: LlmId[] = [
-  'Claude-4-5-Sonnet',
-  'Claude-3-7-Sonnet',
-  'Claude-3-5-Haiku',
-  'Claude-4-5-Haiku',
-  'Grok-Code-Fast-1',
-  'GLM-4-6',
-  'Gemini-2-5-Pro',
-  'MiniMax-M2',
-  'Grok-4-Fast',
+  "Claude-4-5-Sonnet",
+  "Claude-3-7-Sonnet",
+  "Claude-3-5-Haiku",
+  "Claude-4-5-Haiku",
+  "Grok-Code-Fast-1",
+  "GLM-4-6",
+  "Gemini-2-5-Pro",
+  "MiniMax-M2",
+  "Grok-4-Fast",
 ];
 
 const RUNS_PER_COMBINATION = 1;
@@ -45,7 +45,14 @@ type EvalResult = {
 };
 
 function getLlmConfig(llmId: LlmId) {
-  return { llmId, priceLimit: 0.3, durationLimitMinutes: 2, messagesInHistoryToKeep: 4, numericSteps: 3, styleGuideSteps: 2 };
+  return {
+    llmId,
+    priceLimit: 0.3,
+    durationLimitMinutes: 2,
+    messagesInHistoryToKeep: 4,
+    numericSteps: 3,
+    styleGuideSteps: 2,
+  };
 }
 
 function getParams(prompt: string, llmId: LlmId) {
@@ -54,9 +61,9 @@ function getParams(prompt: string, llmId: LlmId) {
 
   return {
     inputs: { prompt: prompArtifact },
-    openaiApiKey: process.env['OPENAI_API_KEY'],
-    anthropicApiKey: process.env['ANTHROPIC_API_KEY'],
-    openRouterApiKey: process.env['OPENROUTER_API_KEY'],
+    openaiApiKey: process.env["OPENAI_API_KEY"],
+    anthropicApiKey: process.env["ANTHROPIC_API_KEY"],
+    openRouterApiKey: process.env["OPENROUTER_API_KEY"],
     llmConfig,
   };
 }
@@ -76,8 +83,19 @@ type WorkflowResult = {
   logSummary: string;
 };
 
-function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSummary }: WorkflowResult, prompt: string, llmId: LlmId): EvalResult {
-  const linesOfCode = code.split('\n').length;
+function toEvalResult(
+  {
+    totalPrice,
+    runTimeMs,
+    llmRunCount,
+    code,
+    isValid,
+    logSummary,
+  }: WorkflowResult,
+  prompt: string,
+  llmId: LlmId
+): EvalResult {
+  const linesOfCode = code.split("\n").length;
 
   return {
     prompt,
@@ -93,7 +111,11 @@ function toEvalResult({ totalPrice, runTimeMs, llmRunCount, code, isValid, logSu
   };
 }
 
-function toErrorResult(prompt: string, llmId: LlmId, error: unknown): EvalResult {
+function toErrorResult(
+  prompt: string,
+  llmId: LlmId,
+  error: unknown
+): EvalResult {
   return {
     prompt,
     modelName: llmId,
@@ -103,28 +125,40 @@ function toErrorResult(prompt: string, llmId: LlmId, error: unknown): EvalResult
   };
 }
 
-async function runSingleEval(prompt: string, llmId: LlmId, runNumber: number, totalRuns: number): Promise<EvalResult> {
-  console.log(`Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`);
+async function runSingleEval(
+  prompt: string,
+  llmId: LlmId,
+  runNumber: number,
+  totalRuns: number
+): Promise<EvalResult> {
+  console.log(
+    `Running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}/${totalRuns}`
+  );
 
   try {
     const workflow = await createWorkflow(prompt, llmId);
     const workflowResult = await workflow.runToResult();
     const result = toEvalResult(workflowResult, prompt, llmId);
 
-    console.log(`Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`);
-    
+    console.log(
+      `Finished run. Success: ${result.succeeded}, Cost: ${result.cost}`
+    );
+
     return result;
   } catch (error) {
-    console.error(`Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`, error);
-    
+    console.error(
+      `Error running prompt: "${prompt}" with LLM: ${llmId}, run ${runNumber}`,
+      error
+    );
+
     const result = toErrorResult(prompt, llmId, error);
-    
+
     return result;
   }
 }
 
 function saveResults(results: EvalResult[]): Promise<void> {
-  const baseName = `eval-results-${new Date().toISOString().replace(/:/g, '-')}`;
+  const baseName = `eval-results-${new Date().toISOString().replace(/:/g, "-")}`;
 
   const jsonFilename = `${baseName}.json`;
   fs.writeFileSync(jsonFilename, JSON.stringify(results, null, 2));
@@ -135,15 +169,15 @@ function saveResults(results: EvalResult[]): Promise<void> {
     const csvStream = csv.format({ headers: true });
     const writableStream = fs.createWriteStream(csvFilename);
 
-    writableStream.on('finish', () => {
+    writableStream.on("finish", () => {
       console.log(`Results saved to ${csvFilename}`);
       resolve();
     });
-    writableStream.on('error', reject);
+    writableStream.on("error", reject);
 
     csvStream.pipe(writableStream);
 
-    results.forEach(result => {
+    results.forEach((result) => {
       const { finalCode, logSummary, ...csvResult } = result;
       csvStream.write(csvResult);
     });
@@ -158,7 +192,12 @@ async function main() {
   for (const prompt of prompts) {
     for (const llmId of llmIds) {
       for (let i = 0; i < RUNS_PER_COMBINATION; i++) {
-        const result = await runSingleEval(prompt, llmId, i + 1, RUNS_PER_COMBINATION);
+        const result = await runSingleEval(
+          prompt,
+          llmId,
+          i + 1,
+          RUNS_PER_COMBINATION
+        );
         allResults.push(result);
       }
     }
@@ -168,6 +207,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error('An error occurred:', error);
+  console.error("An error occurred:", error);
   process.exit(1);
 });
