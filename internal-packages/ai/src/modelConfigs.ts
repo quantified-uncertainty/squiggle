@@ -106,7 +106,7 @@ export const MODEL_CONFIGS = [
     inputRate: 1.0,
     outputRate: 5.0,
     contextWindow: 200000,
-    maxTokens: 64000,
+    maxTokens: 8192,
     name: "Claude Haiku 4.5",
     allowsSystemPrompt: true,
   },
