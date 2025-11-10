@@ -182,3 +182,16 @@ export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];
 
 export const DEFAULT_LLM_ID: LlmId = "Claude-4-5-Sonnet";
+
+// Models that should be visible in the UI
+const UI_VISIBLE_MODEL_IDS: LlmId[] = [
+  "Claude-4-5-Sonnet",
+  "Claude-3-7-Sonnet",
+  "Claude-3-5-Haiku",
+  "Claude-4-5-Haiku",
+  "Grok-Code-Fast-1",
+];
+
+export const UI_VISIBLE_MODELS = MODEL_CONFIGS.filter((model) =>
+  UI_VISIBLE_MODEL_IDS.includes(model.id)
+);

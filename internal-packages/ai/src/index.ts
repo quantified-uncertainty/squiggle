@@ -18,6 +18,7 @@ export {
   type LlmName,
   MODEL_CONFIGS,
   DEFAULT_LLM_ID,
+  UI_VISIBLE_MODELS,
 } from "./modelConfigs.js";
 
 export { decodeWorkflowFromReader } from "./workflows/streaming.js";

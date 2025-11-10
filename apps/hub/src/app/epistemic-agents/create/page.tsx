@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FC } from "react";
 import { FormProvider } from "react-hook-form";
 
-import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, UI_VISIBLE_MODELS } from "@quri/squiggle-ai";
 import {
   Button,
   NumberFormField,
@@ -35,7 +35,7 @@ type FormShape = {
 };
 
 const modelConfigToOption = (
-  modelConfig: (typeof MODEL_CONFIGS)[number]
+  modelConfig: (typeof UI_VISIBLE_MODELS)[number]
 ): LlmOption => ({
   value: modelConfig.id,
   label: `${modelConfig.name} (${modelConfig.provider})`,
@@ -44,7 +44,7 @@ const modelConfigToOption = (
 export default function CreateEpistemicAgentPage() {
   const router = useRouter();
 
-  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === DEFAULT_LLM_ID)!;
+  const sonnetLlm = UI_VISIBLE_MODELS.find((m) => m.id === DEFAULT_LLM_ID)!;
   const defaultValues: FormShape = {
     name: "",
     config: {
@@ -109,7 +109,7 @@ export default function CreateEpistemicAgentPage() {
                   label="Model"
                   description="Select the LLM to use for evaluations"
                   name="config.llm"
-                  options={MODEL_CONFIGS.map((model) => ({
+                  options={UI_VISIBLE_MODELS.map((model) => ({
                     value: model.id,
                     label: `${model.name} (${model.provider})`,
                   }))}
