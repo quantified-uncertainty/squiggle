@@ -677,8 +677,8 @@ importers:
   internal-packages/ai:
     dependencies:
       '@anthropic-ai/sdk':
-        specifier: ^0.68.0
-        version: 0.68.0(zod@3.24.2)
+        specifier: ^0.39.0
+        version: 0.39.0(encoding@0.1.12)
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -1751,15 +1751,6 @@ packages:
 
   '@anthropic-ai/sdk@0.39.0':
     resolution: {integrity: sha512-eMyDIPRZbt1CCLErRCi3exlAvNkBtRe+kW5vvJyef93PmNr/clstYgHhtvmkxN82nlKgzyGPCyGxrm0JQ1ZIdg==}
-
-  '@anthropic-ai/sdk@0.68.0':
-    resolution: {integrity: sha512-SMYAmbbiprG8k1EjEPMTwaTqssDT7Ae+jxcR5kWXiqTlbwMR2AthXtscEVWOHkRfyAV5+y3PFYTJRNa3OJWIEw==}
-    hasBin: true
-    peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
 
   '@apidevtools/swagger-methods@3.0.2':
     resolution: {integrity: sha512-QAkD5kK2b1WfjDS/UQn/qQkbwF31uqRjPTrsCs5ZG9BQGAkjwvqGFjjPqAuzac/IYzpPtRzjCP1WrTuAIjMrXg==}
@@ -9238,10 +9229,6 @@ packages:
     resolution: {integrity: sha512-uTde38yBm5lzJSRPWRaasxZo72pb+JGE4iUksNdNfAkFaLhV4N9akeBxPPUpZy5onINt9Zo0oTLrAoEXyZESiQ==}
     engines: {node: '>=16'}
 
-  json-schema-to-ts@3.1.1:
-    resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
-    engines: {node: '>=16'}
-
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
 
@@ -12300,9 +12287,6 @@ packages:
   ts-algebra@1.2.2:
     resolution: {integrity: sha512-kloPhf1hq3JbCPOTYoOWDKxebWjNb2o/LKnNfkWhxVVisFFmMJPPdJeGoGmM+iRLyoXAR61e08Pb+vUXINg8aA==}
 
-  ts-algebra@2.0.0:
-    resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
-
   ts-api-utils@2.1.0:
     resolution: {integrity: sha512-CUgTZL1irw8u29bzrOD/nH85jqyc74D6SshFgujOIA7osm2Rz7dYH77agkx7H4FBNxDq7Cjf+IjaX/8zwFW+ZQ==}
     engines: {node: '>=18.12'}
@@ -13484,12 +13468,6 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.12)
     transitivePeerDependencies:
       - encoding
-
-  '@anthropic-ai/sdk@0.68.0(zod@3.24.2)':
-    dependencies:
-      json-schema-to-ts: 3.1.1
-    optionalDependencies:
-      zod: 3.24.2
 
   '@apidevtools/swagger-methods@3.0.2': {}
 
@@ -23286,11 +23264,6 @@ snapshots:
       '@types/json-schema': 7.0.15
       ts-algebra: 1.2.2
 
-  json-schema-to-ts@3.1.1:
-    dependencies:
-      '@babel/runtime': 7.28.4
-      ts-algebra: 2.0.0
-
   json-schema-traverse@0.4.1: {}
 
   json-schema-traverse@1.0.0: {}
@@ -27326,8 +27299,6 @@ snapshots:
   trough@2.1.0: {}
 
   ts-algebra@1.2.2: {}
-
-  ts-algebra@2.0.0: {}
 
   ts-api-utils@2.1.0(typescript@5.8.2):
     dependencies:
