@@ -4,9 +4,11 @@ import { randomBytes } from "crypto";
 import * as csv from "fast-csv";
 import enquirer from "enquirer";
 
-import { PromptArtifact } from "../../Artifact.js";
-import { createSquiggleWorkflowTemplate } from "../../workflows/createSquiggleWorkflowTemplate.js";
-import { LlmId, MODEL_CONFIGS } from "../../modelConfigs.js";
+import {
+  PromptArtifact,
+  createSquiggleWorkflowTemplate,
+} from "@quri/squiggle-ai/server";
+import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 
 config();
 
