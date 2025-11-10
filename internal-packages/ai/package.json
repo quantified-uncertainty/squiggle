@@ -21,7 +21,7 @@
     "test:edit": "tsx src/scripts/tests/edit.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.68.0",
+    "@anthropic-ai/sdk": "^0.39.0",
     "@quri/configs": "workspace:*",
     "@quri/content": "workspace:*",
     "@quri/hub-api-client": "workspace:^",
