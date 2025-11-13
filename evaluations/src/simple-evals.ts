@@ -260,6 +260,21 @@ async function getEvalParameters(): Promise<EvalParameters> {
 }
 
 async function main() {
+  // Validate required environment variables
+  if (!process.env["ANTHROPIC_API_KEY"]) {
+    console.error(
+      "Error: ANTHROPIC_API_KEY environment variable is required. Please add it to your .env file."
+    );
+    process.exit(1);
+  }
+
+  if (!process.env["OPENROUTER_API_KEY"]) {
+    console.error(
+      "Error: OPENROUTER_API_KEY environment variable is required. Please add it to your .env file."
+    );
+    process.exit(1);
+  }
+
   const { llmIds, selectedPrompts, runsPerCombination, concurrencyLimit } =
     await getEvalParameters();
 
