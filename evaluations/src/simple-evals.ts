@@ -40,6 +40,7 @@ type EvalParameters = {
   llmIds: LlmId[];
   selectedPrompts: string[];
   runsPerCombination: number;
+  concurrencyLimit: number;
 };
 
 function getLlmConfig(llmId: LlmId) {
@@ -238,6 +239,12 @@ async function getEvalParameters(): Promise<EvalParameters> {
       message: "How many runs per combination?",
       initial: 1,
     },
+    {
+      type: "numeral",
+      name: "concurrencyLimit",
+      message: "Concurrency limit (how many evaluations to run in parallel)?",
+      initial: 5,
+    },
   ]);
 
   if (answers.customPrompt) {
@@ -248,11 +255,12 @@ async function getEvalParameters(): Promise<EvalParameters> {
     llmIds: answers.llmIds,
     selectedPrompts: answers.selectedPrompts,
     runsPerCombination: answers.runsPerCombination,
+    concurrencyLimit: answers.concurrencyLimit,
   };
 }
 
 async function main() {
-  const { llmIds, selectedPrompts, runsPerCombination } =
+  const { llmIds, selectedPrompts, runsPerCombination, concurrencyLimit } =
     await getEvalParameters();
 
   if (!llmIds.length || !selectedPrompts.length || runsPerCombination <= 0) {
@@ -278,11 +286,11 @@ async function main() {
   }
 
   console.log(
-    `Running ${tasks.length} evaluations with concurrency limit of 5...`
+    `Running ${tasks.length} evaluations with concurrency limit of ${concurrencyLimit}...`
   );
 
   // Run tasks in parallel with concurrency limit
-  const limit = pLimit(5);
+  const limit = pLimit(concurrencyLimit);
   const allResults = await Promise.all(
     tasks.map(({ prompt, llmId, runNumber }) =>
       limit(() => runSingleEval(prompt, llmId, runNumber, runsPerCombination))
