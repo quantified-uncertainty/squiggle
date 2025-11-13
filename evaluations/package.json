@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "simpleEvals": "tsx src/simple-evals.ts"
+    "simpleEvals": "tsx src/simple-evals.ts",
+    "evaluateQuality": "tsx src/evaluate-quality.ts"
   },
   "dependencies": {
     "@quri/squiggle-ai": "workspace:*",

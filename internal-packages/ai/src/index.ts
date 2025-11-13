@@ -22,3 +22,6 @@ export {
 } from "./modelConfigs.js";
 
 export { decodeWorkflowFromReader } from "./workflows/streaming.js";
+
+export { LLMClient } from "./LLMClient/index.js";
+export type { Message, LlmMetrics, StandardizedChatCompletion } from "./LLMClient/types.js";
