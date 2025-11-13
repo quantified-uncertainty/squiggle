@@ -34,6 +34,11 @@ type QualityScores = {
   [K in QualityDimension]: QualityScore;
 };
 
+type QualityEvaluationResult = {
+  qualityScores: QualityScores;
+  finalQualityScore: number;
+};
+
 // Extended EvalResult with quality scores
 type EvalResult = {
   runId: string;
@@ -99,6 +104,53 @@ async function getEvaluationParameters(): Promise<EvaluationParameters> {
   ]);
 
   return answers;
+}
+
+function validateEnvironmentVariables(): void {
+  if (!process.env["ANTHROPIC_API_KEY"]) {
+    throw new Error(
+      "ANTHROPIC_API_KEY environment variable is required. Please add it to your .env file."
+    );
+  }
+}
+
+function loadEvalResults(filePath: string): EvalResult[] {
+  const fileData = fs.readFileSync(filePath, "utf-8");
+  return JSON.parse(fileData);
+}
+
+async function runQualityEvaluationsInParallel(
+  results: EvalResult[],
+  qualityEvalRuns: number,
+  concurrencyLimit: number
+): Promise<EvalResultWithQuality[]> {
+  const limit = pLimit(concurrencyLimit);
+
+  const evaluationTasks = results.map((result, i) =>
+    limit(async () => {
+      console.log(
+        `(${result.runId}) [${i + 1}/${results.length}] Evaluating: "${result.prompt.slice(0, 50)}..."`
+      );
+
+      const { qualityScores, finalQualityScore } = await evaluateQuality(
+        result,
+        qualityEvalRuns,
+        result.runId
+      );
+
+      console.log(
+        `(${result.runId})   Final quality score: ${finalQualityScore.toFixed(2)}/10`
+      );
+
+      return {
+        ...result,
+        qualityScores,
+        finalQualityScore,
+      };
+    })
+  );
+
+  return Promise.all(evaluationTasks);
 }
 
 async function evaluateSingleDimension(
@@ -201,7 +253,7 @@ async function evaluateQuality(
   result: EvalResult,
   runs: number,
   runId: string
-): Promise<{ qualityScores: QualityScores; finalQualityScore: number }> {
+): Promise<QualityEvaluationResult> {
   const llmClient = new LLMClient(
     "Claude-4-5-Sonnet",
     undefined,
@@ -304,11 +356,7 @@ function saveQualityResults(results: EvalResultWithQuality[]): Promise<void> {
 
 async function main() {
   // Validate required environment variables
-  if (!process.env["ANTHROPIC_API_KEY"]) {
-    throw new Error(
-      "ANTHROPIC_API_KEY environment variable is required. Please add it to your .env file."
-    );
-  }
+  validateEnvironmentVariables();
 
   const { inputFile, qualityEvalRuns, concurrencyLimit } =
     await getEvaluationParameters();
@@ -319,40 +367,17 @@ async function main() {
   }
 
   // Load the eval results
-  const resultsData = fs.readFileSync(inputFile, "utf-8");
-  const results: EvalResult[] = JSON.parse(resultsData);
+  const results = loadEvalResults(inputFile);
 
   console.log(
     `\nLoaded ${results.length} results from ${inputFile}. Starting quality evaluation with concurrency limit of ${concurrencyLimit}...\n`
   );
 
   // Run quality evaluations in parallel with concurrency limit
-  const limit = pLimit(concurrencyLimit);
-
-  const qualityResults = await Promise.all(
-    results.map((result, i) =>
-      limit(async () => {
-        console.log(
-          `(${result.runId}) [${i + 1}/${results.length}] Evaluating: "${result.prompt.slice(0, 50)}..."`
-        );
-
-        const { qualityScores, finalQualityScore } = await evaluateQuality(
-          result,
-          qualityEvalRuns,
-          result.runId
-        );
-
-        console.log(
-          `(${result.runId})   Final quality score: ${finalQualityScore.toFixed(2)}/10`
-        );
-
-        return {
-          ...result,
-          qualityScores,
-          finalQualityScore,
-        };
-      })
-    )
+  const qualityResults = await runQualityEvaluationsInParallel(
+    results,
+    qualityEvalRuns,
+    concurrencyLimit
   );
 
   await saveQualityResults(qualityResults);

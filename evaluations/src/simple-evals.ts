@@ -43,6 +43,60 @@ type EvalParameters = {
   concurrencyLimit: number;
 };
 
+type EvalTask = {
+  prompt: string;
+  llmId: LlmId;
+  runNumber: number;
+};
+
+function buildEvalTasks(
+  prompts: string[],
+  llmIds: LlmId[],
+  runsPerCombination: number
+): EvalTask[] {
+  const tasks: EvalTask[] = [];
+
+  for (const prompt of prompts) {
+    for (const llmId of llmIds) {
+      for (let i = 0; i < runsPerCombination; i++) {
+        tasks.push({ prompt, llmId, runNumber: i + 1 });
+      }
+    }
+  }
+
+  return tasks;
+}
+
+async function runEvalTasksInParallel(
+  tasks: EvalTask[],
+  concurrencyLimit: number,
+  runsPerCombination: number
+): Promise<EvalResult[]> {
+  const limit = pLimit(concurrencyLimit);
+
+  const evaluationTasks = tasks.map(({ prompt, llmId, runNumber }) =>
+    limit(() => runSingleEval(prompt, llmId, runNumber, runsPerCombination))
+  );
+
+  return Promise.all(evaluationTasks);
+}
+
+function validateEnvironmentVariables(): void {
+  const requiredKeys = [
+    { key: "ANTHROPIC_API_KEY", name: "ANTHROPIC_API_KEY" },
+    { key: "OPENROUTER_API_KEY", name: "OPENROUTER_API_KEY" },
+  ];
+
+  for (const { key, name } of requiredKeys) {
+    if (!process.env[key]) {
+      console.error(
+        `Error: ${name} environment variable is required. Please add it to your .env file.`
+      );
+      process.exit(1);
+    }
+  }
+}
+
 function getLlmConfig(llmId: LlmId) {
   return {
     llmId,
@@ -261,19 +315,7 @@ async function getEvalParameters(): Promise<EvalParameters> {
 
 async function main() {
   // Validate required environment variables
-  if (!process.env["ANTHROPIC_API_KEY"]) {
-    console.error(
-      "Error: ANTHROPIC_API_KEY environment variable is required. Please add it to your .env file."
-    );
-    process.exit(1);
-  }
-
-  if (!process.env["OPENROUTER_API_KEY"]) {
-    console.error(
-      "Error: OPENROUTER_API_KEY environment variable is required. Please add it to your .env file."
-    );
-    process.exit(1);
-  }
+  validateEnvironmentVariables();
 
   const { llmIds, selectedPrompts, runsPerCombination, concurrencyLimit } =
     await getEvalParameters();
@@ -286,30 +328,17 @@ async function main() {
   }
 
   // Build array of all task combinations
-  const tasks: Array<{
-    prompt: string;
-    llmId: LlmId;
-    runNumber: number;
-  }> = [];
-
-  for (const prompt of selectedPrompts) {
-    for (const llmId of llmIds) {
-      for (let i = 0; i < runsPerCombination; i++) {
-        tasks.push({ prompt, llmId, runNumber: i + 1 });
-      }
-    }
-  }
+  const tasks = buildEvalTasks(selectedPrompts, llmIds, runsPerCombination);
 
   console.log(
     `Running ${tasks.length} evaluations with concurrency limit of ${concurrencyLimit}...`
   );
 
   // Run tasks in parallel with concurrency limit
-  const limit = pLimit(concurrencyLimit);
-  const allResults = await Promise.all(
-    tasks.map(({ prompt, llmId, runNumber }) =>
-      limit(() => runSingleEval(prompt, llmId, runNumber, runsPerCombination))
-    )
+  const allResults = await runEvalTasksInParallel(
+    tasks,
+    concurrencyLimit,
+    runsPerCombination
   );
 
   await saveResults(allResults);
