@@ -3,6 +3,7 @@ import fs from "fs";
 import { randomBytes } from "crypto";
 import * as csv from "fast-csv";
 import enquirer from "enquirer";
+import pLimit from "p-limit";
 
 import {
   PromptArtifact,
@@ -260,21 +261,33 @@ async function main() {
     );
     return;
   }
-  const allResults: EvalResult[] = [];
+
+  // Build array of all task combinations
+  const tasks: Array<{
+    prompt: string;
+    llmId: LlmId;
+    runNumber: number;
+  }> = [];
 
   for (const prompt of selectedPrompts) {
     for (const llmId of llmIds) {
       for (let i = 0; i < runsPerCombination; i++) {
-        const result = await runSingleEval(
-          prompt,
-          llmId,
-          i + 1,
-          runsPerCombination
-        );
-        allResults.push(result);
+        tasks.push({ prompt, llmId, runNumber: i + 1 });
       }
     }
   }
+
+  console.log(
+    `Running ${tasks.length} evaluations with concurrency limit of 5...`
+  );
+
+  // Run tasks in parallel with concurrency limit
+  const limit = pLimit(5);
+  const allResults = await Promise.all(
+    tasks.map(({ prompt, llmId, runNumber }) =>
+      limit(() => runSingleEval(prompt, llmId, runNumber, runsPerCombination))
+    )
+  );
 
   await saveResults(allResults);
 }

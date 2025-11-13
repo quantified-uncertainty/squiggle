@@ -90,9 +90,11 @@ export class LLMClient {
   async run(
     conversationHistory: Message[]
   ): Promise<StandardizedChatCompletion> {
+    let timeoutId: NodeJS.Timeout | undefined;
+
     try {
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(
           () =>
             reject(
               new LLMError(
@@ -101,8 +103,8 @@ export class LLMClient {
               )
             ),
           TIMEOUT_MS
-        )
-      );
+        );
+      });
 
       const completionPromise = this.provider.run(conversationHistory);
 
@@ -115,6 +117,11 @@ export class LLMClient {
     } catch (error) {
       console.error("Error in API call:", error);
       throw error;
+    } finally {
+      // Always clear the timeout to prevent hanging event loop
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 }
