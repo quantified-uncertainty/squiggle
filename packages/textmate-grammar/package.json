@@ -8,7 +8,7 @@
     "format": "prettier --write ."
   },
   "devDependencies": {
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "prettier": "^3.5.3",
     "vscode-tmgrammar-test": "^0.1.3"
   },
