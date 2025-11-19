@@ -98,12 +98,14 @@ function validateEnvironmentVariables(): void {
 }
 
 function getLlmConfig(llmId: LlmId) {
+  const isGemini2_5or3 =
+    llmId.toLowerCase().includes("gemini-2-5") ||
+    llmId.toLowerCase().includes("gemini-3");
+
   return {
     llmId,
     priceLimit: 2,
-    durationLimitMinutes: llmId.toLowerCase().includes("gemini-2-5-pro")
-      ? 4
-      : 2,
+    durationLimitMinutes: isGemini2_5or3 ? 8 : 2,
     messagesInHistoryToKeep: 4,
     numericSteps: 3,
     styleGuideSteps: 2,
