@@ -67,6 +67,28 @@ export const MODEL_CONFIGS = [
     allowsSystemPrompt: true,
   },
   {
+    id: "GPT-5-1-Codex",
+    provider: "openrouter",
+    model: "openai/gpt-5.1-codex",
+    inputRate: 1.25,
+    outputRate: 10,
+    contextWindow: 400000,
+    maxTokens: 128000,
+    name: "OpenAI: GPT-5.1-Codex",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "GPT-5-1-Codex-Mini",
+    provider: "openrouter",
+    model: "openai/gpt-5.1-codex-mini",
+    inputRate: 0.25,
+    outputRate: 2,
+    contextWindow: 400000,
+    maxTokens: 100000,
+    name: "OpenAI: GPT-5.1-Codex-Mini",
+    allowsSystemPrompt: true,
+  },
+  {
     id: "Claude-4-5-Sonnet",
     provider: "anthropic",
     model: "claude-sonnet-4-5-20250929",
@@ -104,7 +126,7 @@ export const MODEL_CONFIGS = [
     provider: "anthropic",
     model: "claude-haiku-4-5",
     inputRate: 1.0,
-    outputRate: 3.0,
+    outputRate: 5.0,
     contextWindow: 200000,
     maxTokens: 8192,
     name: "Claude Haiku 4.5",
@@ -121,9 +143,88 @@ export const MODEL_CONFIGS = [
     name: "xAI: Grok Code Fast 1",
     allowsSystemPrompt: true,
   },
+  {
+    id: "GLM-4-6",
+    provider: "openrouter",
+    model: "z-ai/glm-4.6",
+    inputRate: 0.4,
+    outputRate: 1.75,
+    contextWindow: 202752,
+    maxTokens: 10000,
+    name: "Z.AI: GLM 4.6",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Gemini-2-5-Pro",
+    provider: "openrouter",
+    model: "google/gemini-2.5-pro",
+    inputRate: 1.25,
+    outputRate: 10,
+    contextWindow: 1048576,
+    maxTokens: 65536,
+    name: "Google: Gemini 2.5 Pro",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Gemini-3-Pro-Preview",
+    provider: "openrouter",
+    model: "google/gemini-3-pro-preview",
+    inputRate: 2,
+    outputRate: 12,
+    contextWindow: 1048576,
+    maxTokens: 65536,
+    name: "Google: Gemini 3 Pro Preview",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "MiniMax-M2",
+    provider: "openrouter",
+    model: "minimax/minimax-m2",
+    inputRate: 0.15,
+    outputRate: 0.45,
+    contextWindow: 196608,
+    maxTokens: 196608,
+    name: "MiniMax: MiniMax M2",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Grok-4-Fast",
+    provider: "openrouter",
+    model: "x-ai/grok-4-fast",
+    inputRate: 0.2,
+    outputRate: 0.5,
+    contextWindow: 2000000,
+    maxTokens: 30000,
+    name: "xAI: Grok 4 Fast",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Qwen3-Coder",
+    provider: "openrouter",
+    model: "qwen/qwen3-coder",
+    inputRate: 0.22,
+    outputRate: 0.95,
+    contextWindow: 262144,
+    maxTokens: 262144,
+    name: "Qwen: Qwen3 Coder 480B A35B",
+    allowsSystemPrompt: true,
+  },
 ] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];
 
 export const DEFAULT_LLM_ID: LlmId = "Claude-4-5-Sonnet";
+
+// Models that should be visible in the UI
+const UI_VISIBLE_MODEL_IDS: LlmId[] = [
+  "Claude-4-5-Sonnet",
+  "Claude-3-7-Sonnet",
+  "Claude-3-5-Haiku",
+  "Claude-4-5-Haiku",
+  "Grok-Code-Fast-1",
+];
+
+export const UI_VISIBLE_MODELS = MODEL_CONFIGS.filter((model) =>
+  UI_VISIBLE_MODEL_IDS.includes(model.id)
+);

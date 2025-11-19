@@ -58,6 +58,7 @@ When using `createSquiggle` and `editSquiggle` scripts, you should define the fo
 ```
 ANTHROPIC_API_KEY= // needed for using Claude models
 OPENAI_API_KEY= // needed for using OpenAI models
+OPENROUTER_API_KEY= // needed for using OpenRouter models
 ```
 
 ## Internals

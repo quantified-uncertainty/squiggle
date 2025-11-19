@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { FC } from "react";
 
-import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, UI_VISIBLE_MODELS } from "@quri/squiggle-ai";
 import { NumberFormField, SelectFormField, TextFormField } from "@quri/ui";
 
 import { SafeActionFormModal } from "@/components/ui/SafeActionFormModal";
@@ -27,7 +27,7 @@ type FormShape = {
 };
 
 const modelConfigToOption = (
-  modelConfig: (typeof MODEL_CONFIGS)[number]
+  modelConfig: (typeof UI_VISIBLE_MODELS)[number]
 ): LlmOption => ({
   value: modelConfig.id,
   label: `${modelConfig.name} (${modelConfig.provider})`,
@@ -40,7 +40,7 @@ type Props = {
 export const CreateEpistemicAgentModal: FC<Props> = ({ close }) => {
   const router = useRouter();
 
-  const sonnetLlm = MODEL_CONFIGS.find((m) => m.id === DEFAULT_LLM_ID)!;
+  const sonnetLlm = UI_VISIBLE_MODELS.find((m) => m.id === DEFAULT_LLM_ID)!;
   const defaultValues: FormShape = {
     name: "",
     config: {
@@ -99,7 +99,7 @@ export const CreateEpistemicAgentModal: FC<Props> = ({ close }) => {
               label="Model"
               description="Select the LLM to use for evaluations"
               name="config.llm"
-              options={MODEL_CONFIGS.map((model) => ({
+              options={UI_VISIBLE_MODELS.map((model) => ({
                 value: model.id,
                 label: `${model.name} (${model.provider})`,
               }))}

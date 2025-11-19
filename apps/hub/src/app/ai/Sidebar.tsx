@@ -10,7 +10,7 @@ import {
 } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { DEFAULT_LLM_ID, LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
+import { DEFAULT_LLM_ID, LlmId, UI_VISIBLE_MODELS } from "@quri/squiggle-ai";
 import {
   Button,
   NumberFormField,
@@ -214,10 +214,7 @@ Outputs:
           layout="row"
           name="model"
           size="small"
-          options={MODEL_CONFIGS.filter(
-            (model) =>
-              model.provider === "anthropic" || model.provider === "openrouter"
-          ).map((model) => model.id)}
+          options={UI_VISIBLE_MODELS.map((model) => model.id)}
           required
         />
         <Button wide onClick={handleSubmit} disabled={isSubmitDisabled}>
