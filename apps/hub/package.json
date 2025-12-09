@@ -41,7 +41,7 @@
     "immutable": "^5.1.1",
     "invariant": "^2.2.4",
     "lodash": "^4.17.21",
-    "next": "^15.2.4",
+    "next": "15.2.6",
     "next-auth": "5.0.0-beta.25",
     "next-safe-action": "^7.10.4",
     "pako": "^2.1.0",
