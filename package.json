@@ -19,7 +19,7 @@
     "overrides": {
       "@headlessui/react": "^2.2.0",
       "react-reconciler": "^0.31.0",
-      "next": "^15.2.4"
+      "next": "15.2.6"
     },
     "patchedDependencies": {
       "react-select@5.10.1": "patches/react-select@5.10.1.patch"
