@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { FC, PropsWithChildren } from "react";
 
 import { auth } from "@/lib/server/auth";
+import { chooseUsernameRoute } from "@/lib/routes";
 import { prisma } from "@/lib/server/prisma";
 import { isAdminUser, isSignedIn } from "@/users/auth";
 
@@ -12,6 +14,12 @@ type Props = PropsWithChildren<{
 
 export const WithAuth: FC<Props> = async ({ children, rootOnly = false }) => {
   const session = await auth();
+
+  // User is authenticated but hasn't chosen a username yet
+  if (session?.user?.email && !session?.user?.username) {
+    redirect(chooseUsernameRoute());
+  }
+
   if (!isSignedIn(session)) {
     return <RedirectToLogin />;
   }
