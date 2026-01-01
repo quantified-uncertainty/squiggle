@@ -16,7 +16,7 @@ jobs:
     outputs:
       should_run_hub: ${{ steps.check-hub.outputs.changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: Preview
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/install
 
       - name: Migrate Hub
