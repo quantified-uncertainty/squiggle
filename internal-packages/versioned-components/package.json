@@ -20,7 +20,7 @@
     "commander": "^13.1.0",
     "glob": "^11.1.0",
     "json-diff": "^1.0.6",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "paco": "^0.4.0",
     "pako": "^2.1.0",
     "squiggle-components-0.10.0": "npm:@quri/squiggle-components@0.10.0",

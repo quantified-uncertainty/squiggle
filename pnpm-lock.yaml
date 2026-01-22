@@ -146,8 +146,8 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       next:
         specifier: 15.2.6
         version: 15.2.6(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -390,8 +390,8 @@ importers:
         specifier: ^26.0.0
         version: 26.0.0
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       next:
         specifier: 15.2.6
         version: 15.2.6(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -887,8 +887,8 @@ importers:
         specifier: ^7.26.7
         version: 7.27.0
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       mdast-util-to-string:
         specifier: ^4.0.0
         version: 4.0.0
@@ -963,8 +963,8 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       paco:
         specifier: ^0.4.0
         version: 0.4.0
@@ -1138,8 +1138,8 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -1401,8 +1401,8 @@ importers:
         specifier: ^1.9.6
         version: 1.9.6
       lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
+        specifier: ^4.17.23
+        version: 4.17.23
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -1882,8 +1882,8 @@ packages:
     resolution: {integrity: sha512-RJlIHRueQgwWitWgF8OdFYGZX328Ax5BCemNGlqHfplnRT9ESi8JkFlvaVYbS+UubVY6dpv87Fs2u5M29iNFVQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/code-frame@7.27.1':
-    resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
+  '@babel/code-frame@7.28.6':
+    resolution: {integrity: sha512-JYgintcMjRiCvS8mMECzaEn+m3PfoQiyqukOMCCVQtoJGYJw8j/8LBJEiqkHLkfwCcs74E3pbAUFNg7d9VNJ+Q==}
     engines: {node: '>=6.9.0'}
 
   '@babel/compat-data@7.26.8':
@@ -2530,6 +2530,10 @@ packages:
 
   '@babel/runtime@7.28.4':
     resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.28.6':
+    resolution: {integrity: sha512-05WQkdpL9COIMz4LjTxGpPNCdlpyimKppYNoJ5Di5EUObifl8t4tuLuUBBZEpoLYOmfvIWrsp9fCl0HoPRVTdA==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.27.0':
@@ -9467,8 +9471,8 @@ packages:
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
@@ -10126,6 +10130,7 @@ packages:
   next@15.2.6:
     resolution: {integrity: sha512-DIKFctUpZoCq5ok2ztVU+PqhWsbiqM9xNP7rHL2cAp29NQcmDp7Y6JnBBhHRbFt4bCsCZigj6uh+/Gwh2158Wg==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/security-update-2025-12-11 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -13039,10 +13044,12 @@ packages:
   whatwg-encoding@2.0.0:
     resolution: {integrity: sha512-p41ogyeMUrw3jWclHWTQg1k05DSVXPLcVxRTYsXUk+ZooOCZLcoYgPZ/HL/D/N+uQPOtcp1me1WhBEaX02mhWg==}
     engines: {node: '>=12'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-fetch@3.6.20:
     resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
@@ -13641,7 +13648,7 @@ snapshots:
       js-tokens: 4.0.0
       picocolors: 1.1.1
 
-  '@babel/code-frame@7.27.1':
+  '@babel/code-frame@7.28.6':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
       js-tokens: 4.0.0
@@ -14449,6 +14456,8 @@ snapshots:
       regenerator-runtime: 0.14.1
 
   '@babel/runtime@7.28.4': {}
+
+  '@babel/runtime@7.28.6': {}
 
   '@babel/template@7.27.0':
     dependencies:
@@ -15425,7 +15434,7 @@ snapshots:
       common-tags: 1.8.2
       graphql: 16.10.0
       import-from: 4.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.4.1
 
   '@graphql-codegen/plugin-helpers@3.1.2(graphql@16.10.0)':
@@ -15435,7 +15444,7 @@ snapshots:
       common-tags: 1.8.2
       graphql: 16.10.0
       import-from: 4.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.4.1
 
   '@graphql-codegen/plugin-helpers@5.1.0(graphql@16.10.0)':
@@ -15445,7 +15454,7 @@ snapshots:
       common-tags: 1.8.2
       graphql: 16.10.0
       import-from: 4.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       tslib: 2.6.3
 
   '@graphql-codegen/schema-ast@4.1.0(graphql@16.10.0)':
@@ -15749,7 +15758,7 @@ snapshots:
       https-proxy-agent: 7.0.6
       jose: 5.10.0
       js-yaml: 4.1.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       scuid: 1.1.0
       tslib: 2.8.1
       yaml-ast-parser: 0.0.43
@@ -16817,7 +16826,7 @@ snapshots:
       clsx: 2.1.1
       codemirror: 6.0.1
       d3: 7.9.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -16864,7 +16873,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
+      lodash: 4.17.23
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -16903,7 +16912,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -16943,7 +16952,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -16981,7 +16990,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -17023,7 +17032,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -17063,7 +17072,7 @@ snapshots:
       clsx: 2.1.1
       codemirror: 6.0.1
       d3: 7.9.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -17104,7 +17113,7 @@ snapshots:
       clsx: 2.1.1
       codemirror: 6.0.1
       d3: 7.9.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mermaid: 10.9.0
       prettier: 3.5.3
       react: 19.1.0
@@ -17133,7 +17142,7 @@ snapshots:
       immutable: 4.3.7
       ink: 5.1.0(@types/react@19.1.0)(react@18.3.1)
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 10.1.0
       react: 18.3.1
       web-worker: 1.5.0
@@ -17149,7 +17158,7 @@ snapshots:
       commander: 11.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 9.1.0
 
   '@quri/squiggle-lang@0.8.6':
@@ -17158,7 +17167,7 @@ snapshots:
       commander: 11.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 9.1.0
 
   '@quri/squiggle-lang@0.9.0':
@@ -17167,7 +17176,7 @@ snapshots:
       commander: 11.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 9.1.0
 
   '@quri/squiggle-lang@0.9.2':
@@ -17176,7 +17185,7 @@ snapshots:
       commander: 11.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 10.1.0
 
   '@quri/squiggle-lang@0.9.3':
@@ -17185,7 +17194,7 @@ snapshots:
       commander: 11.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 10.1.0
 
   '@quri/squiggle-lang@0.9.4':
@@ -17194,7 +17203,7 @@ snapshots:
       commander: 12.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 10.1.0
       web-worker: 1.5.0
 
@@ -17204,7 +17213,7 @@ snapshots:
       commander: 12.1.0
       immutable: 4.3.7
       jstat: 1.9.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       open: 10.1.0
       web-worker: 1.5.0
 
@@ -18340,8 +18349,8 @@ snapshots:
 
   '@testing-library/dom@10.4.0':
     dependencies:
-      '@babel/code-frame': 7.27.1
-      '@babel/runtime': 7.28.4
+      '@babel/code-frame': 7.28.6
+      '@babel/runtime': 7.28.6
       '@types/aria-query': 5.0.4
       aria-query: 5.3.0
       chalk: 4.1.2
@@ -18356,7 +18365,7 @@ snapshots:
       chalk: 3.0.0
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       redent: 3.0.0
 
   '@testing-library/react@16.3.0(@testing-library/dom@10.4.0)(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
@@ -19117,7 +19126,7 @@ snapshots:
       '@types/node': 14.18.63
       abort-controller: 3.0.0
       abortcontroller-polyfill: 1.7.8
-      lodash: 4.17.21
+      lodash: 4.17.23
       node-fetch: 2.7.0(encoding@0.1.12)
     transitivePeerDependencies:
       - encoding
@@ -19231,7 +19240,7 @@ snapshots:
       js-yaml: 4.1.0
       json-schema-to-ts: 2.12.0
       json-schema-traverse: 1.0.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       make-dir: 3.1.0
       node-abort-controller: 3.1.1
       oas: 20.11.0(encoding@0.1.12)
@@ -20284,7 +20293,7 @@ snapshots:
   cytoscape@3.28.1:
     dependencies:
       heap: 0.2.7
-      lodash: 4.17.21
+      lodash: 4.17.23
 
   d3-array@2.12.1:
     dependencies:
@@ -21877,7 +21886,7 @@ snapshots:
     dependencies:
       axios: 0.21.4
       google-auth-library: 6.1.6(encoding@0.1.12)
-      lodash: 4.17.21
+      lodash: 4.17.23
     transitivePeerDependencies:
       - debug
       - encoding
@@ -22432,7 +22441,7 @@ snapshots:
       cli-width: 3.0.0
       external-editor: 3.1.0
       figures: 3.2.0
-      lodash: 4.17.21
+      lodash: 4.17.23
       mute-stream: 0.0.8
       ora: 5.4.1
       run-async: 2.4.1
@@ -23209,13 +23218,13 @@ snapshots:
 
   json-schema-compare@0.2.2:
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
 
   json-schema-merge-allof@0.8.1:
     dependencies:
       compute-lcm: 1.1.2
       json-schema-compare: 0.2.2
-      lodash: 4.17.21
+      lodash: 4.17.23
 
   json-schema-to-ts@2.12.0:
     dependencies:
@@ -23516,7 +23525,7 @@ snapshots:
 
   lodash.uniq@4.5.0: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   log-symbols@4.1.0:
     dependencies:
@@ -27776,61 +27785,61 @@ snapshots:
 
   victory-area@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
       victory-vendor: 37.3.6
 
   victory-axis@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-bar@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
       victory-vendor: 37.3.6
 
   victory-box-plot@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
       victory-vendor: 37.3.6
 
   victory-brush-container@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
 
   victory-brush-line@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
 
   victory-candlestick@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-canvas@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-bar: 37.3.6(react@19.1.0)
       victory-core: 37.3.6(react@19.1.0)
 
   victory-chart@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-axis: 37.3.6(react@19.1.0)
@@ -27840,14 +27849,14 @@ snapshots:
 
   victory-core@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-vendor: 37.3.6
 
   victory-create-container@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-brush-container: 37.3.6(react@19.1.0)
       victory-core: 37.3.6(react@19.1.0)
@@ -27858,19 +27867,19 @@ snapshots:
 
   victory-cursor-container@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-errorbar@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-group@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
@@ -27878,7 +27887,7 @@ snapshots:
 
   victory-histogram@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-bar: 37.3.6(react@19.1.0)
@@ -27887,53 +27896,53 @@ snapshots:
 
   victory-legend@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-line@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
       victory-vendor: 37.3.6
 
   victory-pie@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
       victory-vendor: 37.3.6
 
   victory-polar-axis@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-scatter@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-selection-container@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-shared-events@37.3.6(react@19.1.0):
     dependencies:
       json-stringify-safe: 5.0.1
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
 
   victory-stack@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
@@ -27941,7 +27950,7 @@ snapshots:
 
   victory-tooltip@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
@@ -27965,7 +27974,7 @@ snapshots:
   victory-voronoi-container@37.3.6(react@19.1.0):
     dependencies:
       delaunay-find: 0.0.6
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       react-fast-compare: 3.2.2
       victory-core: 37.3.6(react@19.1.0)
@@ -27974,13 +27983,13 @@ snapshots:
   victory-voronoi@37.3.6(react@19.1.0):
     dependencies:
       d3-voronoi: 1.1.4
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
   victory-zoom-container@37.3.6(react@19.1.0):
     dependencies:
-      lodash: 4.17.21
+      lodash: 4.17.23
       react: 19.1.0
       victory-core: 37.3.6(react@19.1.0)
 
