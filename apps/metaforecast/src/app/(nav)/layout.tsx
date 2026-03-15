@@ -41,8 +41,8 @@ const Layout: FC<PropsWithChildren> = ({ children }) => {
         <div className="bg-yellow-50 border-b border-yellow-200">
           <div className="container mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
             <p className="text-center text-sm text-yellow-800">
-              <strong>Notice:</strong> Metaforecast is currently experiencing
-              issues and may not work as expected. We are working on fixing it.
+              We aren&apos;t currently maintaining Metaforecast. We hope to
+              do so again in the future.
             </p>
           </div>
         </div>
