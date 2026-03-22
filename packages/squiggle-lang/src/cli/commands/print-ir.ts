@@ -30,10 +30,12 @@ export function addPrintIrCommand(program: Command) {
         if (ir.ok) {
           console.log(irToString(ir.value, { colored: true }));
         } else {
-          console.log(red(ir.value.toString()));
+          process.exitCode = 1;
+          console.error(red(ir.value.toString()));
         }
       } else {
-        console.log(red(typedAstR.value.toString()));
+        process.exitCode = 1;
+        console.error(red(typedAstR.value.toString()));
       }
     });
 }
