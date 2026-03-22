@@ -19,7 +19,13 @@ export function loadSrc({
   if (filename !== undefined && inline !== undefined) {
     program.error("Only one of filename and eval string should be set.");
   } else if (filename !== undefined) {
-    src = fs.readFileSync(filename, "utf-8");
+    try {
+      src = fs.readFileSync(filename, "utf-8");
+    } catch (e) {
+      program.error(
+        `Failed to read file "${filename}": ${e instanceof Error ? e.message : String(e)}`
+      );
+    }
   } else if (inline !== undefined) {
     src = inline;
   } else {
