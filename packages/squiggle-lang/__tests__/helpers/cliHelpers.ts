@@ -26,6 +26,10 @@ export async function runCLI(args: string[]) {
     },
   });
 
+  // Capture process.exitCode set by our error handlers
+  const originalExitCode = process.exitCode;
+  process.exitCode = undefined;
+
   let exitCode = 0;
   try {
     await program.parseAsync(args, { from: "user" });
@@ -36,6 +40,13 @@ export async function runCLI(args: string[]) {
       throw e;
     }
   }
+
+  // Use process.exitCode if it was set (by our error handlers),
+  // otherwise use the Commander exit code
+  if (process.exitCode !== undefined) {
+    exitCode = process.exitCode;
+  }
+  process.exitCode = originalExitCode;
 
   jest.restoreAllMocks();
   return { stdout, stderr, exitCode };
