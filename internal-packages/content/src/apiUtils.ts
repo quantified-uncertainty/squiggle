@@ -8,8 +8,10 @@ import { type ApiModuleDoc } from "./collections/apiDocs.js";
 import { docTitleFromMeta } from "./collections/utils.js";
 
 // We need to escape the curly braces in the markdown for .jsx files.
+// Escape backslashes first so existing backslashes in the input can't
+// combine with the ones we add for the braces.
 function escapedStr(str: string) {
-  return str.replace(/{/g, "\\{").replace(/}/g, "\\}");
+  return str.replace(/\\/g, "\\\\").replace(/{/g, "\\{").replace(/}/g, "\\}");
 }
 
 function toMarkdown(documentation: FnDocumentation) {
