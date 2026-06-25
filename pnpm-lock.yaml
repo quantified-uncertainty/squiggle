@@ -28,6 +28,8 @@ overrides:
   deep-extend@0.4.2: 0.5.1
   defu@6.1.4: 6.1.5
   diff@4.0.2: 4.0.4
+  diff@5.2.0: 5.2.2
+  dompurify@3.0.6: 3.4.11
   elliptic@6.5.4: 6.6.1
   estree-util-value-to-estree@3.3.2: 3.3.3
   fast-uri@3.0.6: 3.1.2
@@ -48,6 +50,7 @@ overrides:
   lodash@4.17.21: 4.18.0
   markdown-it@14.1.0: 14.2.0
   mdast-util-to-hast@13.2.0: 13.2.1
+  mermaid@10.9.0: 10.9.6
   minimatch@10.1.1: 10.2.3
   minimatch@3.1.2: 10.2.3
   minimatch@5.1.6: 10.2.3
@@ -72,7 +75,9 @@ overrides:
   tmp@0.0.33: 0.2.7
   tmp@0.2.3: 0.2.7
   underscore@1.12.1: 1.13.8
+  underscore@1.13.6: 1.13.8
   underscore@1.13.7: 1.13.8
+  undici@6.21.1: 6.27.0
   uuid@8.3.2: 11.1.1
   uuid@9.0.1: 11.1.1
   vite@6.2.4: 6.4.3
@@ -7378,8 +7383,8 @@ packages:
     resolution: {integrity: sha512-MOqHvMWF9/9MX6nza0KgvFH4HpMU0EF5uUDXqX/BtxtU8NfB0QzRtJ8Oe/6SuS4kbhyzVJwjd97EA4PKrzJ8bw==}
     engines: {node: '>=0.12'}
 
-  dagre-d3-es@7.0.10:
-    resolution: {integrity: sha512-qTCQmEhcynucuaZgY5/+ti3X/rnszKZhEQH/ZdWdtP1tA/y3VoHJzcVrO9pjjJCNpigfscAtoUB5ONcd2wNn0A==}
+  dagre-d3-es@7.0.13:
+    resolution: {integrity: sha512-efEhnxpSuwpYOKRm/L5KbqoZmNNukHa/Flty4Wp62JRvgH2ojwVgPgdYyr4twpieZnyRDdIH7PY2mopX26+j2Q==}
 
   damerau-levenshtein@1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -7589,8 +7594,8 @@ packages:
     resolution: {integrity: sha512-X07nttJQkwkfKfvTPG/KSnE2OMdcUCao6+eXF3wmnIQRn2aPAHH3VxDbDOdegkd6JbPsXqShpvEOHfAT+nCNwQ==}
     engines: {node: '>=0.3.1'}
 
-  diff@5.2.0:
-    resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
+  diff@5.2.2:
+    resolution: {integrity: sha512-vtcDfH3TOjP8UekytvnHH1o1P4FcUdt4eQ1Y+Abap1tk/OB2MWQvcwS2ClCd1zuIhc3JKOx6p3kod8Vfys3E+A==}
     engines: {node: '>=0.3.1'}
 
   diffie-hellman@5.0.3:
@@ -7637,9 +7642,6 @@ packages:
   domhandler@5.0.3:
     resolution: {integrity: sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w==}
     engines: {node: '>= 4'}
-
-  dompurify@3.0.6:
-    resolution: {integrity: sha512-ilkD8YEnnGh1zJ240uJsW7AzE+2qpbOUYjacomn3AvJ6J4JhKGSZ2nh4wUIXPZrEPppaCLx5jFe8T89Rk8tQ7w==}
 
   dompurify@3.4.11:
     resolution: {integrity: sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw==}
@@ -9863,8 +9865,8 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
-  mermaid@10.9.0:
-    resolution: {integrity: sha512-swZju0hFox/B/qoLKK0rOxxgh8Cf7rJSfAUc1u8fezVihYMvrJAS45GzAxTVf4Q+xn9uMgitBcmWk7nWGXOs/g==}
+  mermaid@10.9.6:
+    resolution: {integrity: sha512-XRjjRaI4aPCAMpVaOhxIwLYdx3U4Cb6mN0M268ggFAfFRqsvyFW8zxWbEZazN/mPkqsVWThb0oa1UawWK+XMNg==}
 
   meros@1.3.0:
     resolution: {integrity: sha512-2BNGOimxEz5hmjUG2FwoxCt5HN7BXdaWyFqEwxPTrJzVdABtrL4TiHTcsWSFAxPQ/tOnEaQEJh3qWq71QRMY+w==}
@@ -12175,9 +12177,6 @@ packages:
   stylis@4.2.0:
     resolution: {integrity: sha512-Orov6g6BB1sDfYgzWfTHDOxamtX1bE/zo104Dh9e6fqJ3PooipYyfJ0pUmrZO2wAvO8YbEyeFrkV91XTsGMSrw==}
 
-  stylis@4.3.0:
-    resolution: {integrity: sha512-E87pIogpwUsUwXw7dNyU4QDjdgVMy52m+XEOPEKUn161cCzWjjhPSQhByfd1CcNvrOLnXQ6OnnZDwnJrz/Z4YQ==}
-
   stylis@4.3.6:
     resolution: {integrity: sha512-yQ3rwFWRfwNUY7H5vpU0wfdkNSnvnJinhF9830Swlaxl03zsOjCfmX0ugac+3LtK0lYSgwL/KXc8oYL3mG4YFQ==}
 
@@ -12544,9 +12543,6 @@ packages:
   undefsafe@2.0.5:
     resolution: {integrity: sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==}
 
-  underscore@1.13.6:
-    resolution: {integrity: sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==}
-
   underscore@1.13.8:
     resolution: {integrity: sha512-DXtD3ZtEQzc7M8m4cXotyHR+FAS18C64asBYY5vqZexfYryNNnDc02W4hKg3rdQuqOYas1jkseX0+nZXjTXnvQ==}
 
@@ -12559,8 +12555,8 @@ packages:
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
-  undici@6.21.1:
-    resolution: {integrity: sha512-q/1rj5D0/zayJB2FraXdaWxbhWiNKDvu8naDT2dl1yTlvJp4BLtOcp2a5BvgGNQpYYJzau7tf1WgKv3b+7mqpQ==}
+  undici@6.27.0:
+    resolution: {integrity: sha512-YmfV3YnEDzXRC5lZ2jWtWWHKGUm1zIt8AhesR1tens+HTNv+YZlN/dp6G727LOvMJ8xjP9Be7Y2Sdr96LDm+pg==}
     engines: {node: '>=18.17'}
 
   unicode-canonical-property-names-ecmascript@2.0.1:
@@ -14997,7 +14993,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 3.0.2
       tslib: 2.8.1
-      undici: 6.21.1
+      undici: 6.27.0
     transitivePeerDependencies:
       - supports-color
 
@@ -17076,7 +17072,7 @@ snapshots:
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -17116,7 +17112,7 @@ snapshots:
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -17154,7 +17150,7 @@ snapshots:
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -17196,7 +17192,7 @@ snapshots:
       d3: 7.9.0
       framer-motion: 10.18.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -17236,7 +17232,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -17277,7 +17273,7 @@ snapshots:
       codemirror: 6.0.1
       d3: 7.9.0
       lodash: 4.18.0
-      mermaid: 10.9.0
+      mermaid: 10.9.6
       prettier: 3.5.3
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
@@ -20049,7 +20045,7 @@ snapshots:
       parse5: 7.2.1
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 6.21.1
+      undici: 6.27.0
       whatwg-mimetype: 4.0.0
 
   chokidar@3.6.0:
@@ -20646,7 +20642,7 @@ snapshots:
       es5-ext: 0.10.64
       type: 2.7.3
 
-  dagre-d3-es@7.0.10:
+  dagre-d3-es@7.0.13:
     dependencies:
       d3: 7.9.0
       lodash-es: 4.17.21
@@ -20827,7 +20823,7 @@ snapshots:
 
   diff@4.0.4: {}
 
-  diff@5.2.0: {}
+  diff@5.2.2: {}
 
   diffie-hellman@5.0.3:
     dependencies:
@@ -20876,12 +20872,9 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
 
-  dompurify@3.0.6: {}
-
   dompurify@3.4.11:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
-    optional: true
 
   domutils@3.2.2:
     dependencies:
@@ -23448,7 +23441,7 @@ snapshots:
     dependencies:
       esprima: 1.2.5
       static-eval: 2.1.1
-      underscore: 1.13.6
+      underscore: 1.13.8
 
   jsonpointer@5.0.1: {}
 
@@ -24126,25 +24119,25 @@ snapshots:
 
   merge2@1.4.1: {}
 
-  mermaid@10.9.0:
+  mermaid@10.9.6:
     dependencies:
       '@braintree/sanitize-url': 6.0.4
-      '@types/d3-scale': 4.0.6
+      '@types/d3-scale': 4.0.8
       '@types/d3-scale-chromatic': 3.0.1
       cytoscape: 3.28.1
       cytoscape-cose-bilkent: 4.1.0(cytoscape@3.28.1)
       d3: 7.9.0
       d3-sankey: 0.12.3
-      dagre-d3-es: 7.0.10
+      dagre-d3-es: 7.0.13
       dayjs: 1.11.10
-      dompurify: 3.0.6
+      dompurify: 3.4.11
       elkjs: 0.9.1
       katex: 0.16.21
       khroma: 2.1.0
       lodash-es: 4.17.21
       mdast-util-from-markdown: 1.3.1
       non-layered-tidy-tree-layout: 2.0.2
-      stylis: 4.3.0
+      stylis: 4.3.6
       ts-dedent: 2.2.0
       uuid: 11.1.1
       web-worker: 1.5.0
@@ -24623,7 +24616,7 @@ snapshots:
 
   micromark@3.2.0:
     dependencies:
-      '@types/debug': 4.1.10
+      '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@5.5.0)
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.1.0
@@ -27094,8 +27087,6 @@ snapshots:
 
   stylis@4.2.0: {}
 
-  stylis@4.3.0: {}
-
   stylis@4.3.6: {}
 
   sucrase@3.34.0:
@@ -27537,8 +27528,6 @@ snapshots:
 
   undefsafe@2.0.5: {}
 
-  underscore@1.13.6: {}
-
   underscore@1.13.8: {}
 
   undici-types@5.26.5: {}
@@ -27547,7 +27536,7 @@ snapshots:
 
   undici-types@6.21.0: {}
 
-  undici@6.21.1: {}
+  undici@6.27.0: {}
 
   unicode-canonical-property-names-ecmascript@2.0.1: {}
 
@@ -27805,7 +27794,7 @@ snapshots:
   uvu@0.5.6:
     dependencies:
       dequal: 2.0.3
-      diff: 5.2.0
+      diff: 5.2.2
       kleur: 4.1.5
       sade: 1.8.1
 
