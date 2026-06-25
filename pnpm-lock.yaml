@@ -38,6 +38,7 @@ overrides:
   form-data@4.0.2: 4.0.6
   image-size@1.0.0: 1.2.1
   image-size@1.1.1: 1.2.1
+  immutable@3.7.6: 3.8.3
   immutable@4.3.7: 5.1.5
   immutable@5.1.1: 5.1.5
   js-cookie@2.2.1: 3.0.7
@@ -70,6 +71,7 @@ overrides:
   semver@2.3.2: 5.7.2
   serialize-javascript@6.0.2: 7.0.5
   sha.js@2.4.11: 2.4.12
+  shell-quote@1.8.2: 1.8.4
   storybook@8.6.12: 8.6.17
   tar-fs@2.1.2: 2.1.4
   tmp@0.0.33: 0.2.7
@@ -8736,9 +8738,9 @@ packages:
     engines: {node: '>=16.x'}
     hasBin: true
 
-  immutable@3.7.6:
-    resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
-    engines: {node: '>=0.8.0'}
+  immutable@3.8.3:
+    resolution: {integrity: sha512-AUY/VyX0E5XlibOmWt10uabJzam1zlYjwiEgQSDc5+UIkFNaF9WM0JxXKaNMGf+F/ffUF+7kRKXM9A7C0xXqMg==}
+    engines: {node: '>=0.10.0'}
 
   immutable@5.1.5:
     resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
@@ -11808,8 +11810,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-quote@1.8.2:
-    resolution: {integrity: sha512-AzqKpGKjrj7EM6rKVQEPpB288oCfnrEIuyoT9cyF4nmGa7V8Zk6f7RRqYisX8X9m+Q7bd632aZW4ky7EhbQztA==}
+  shell-quote@1.8.4:
+    resolution: {integrity: sha512-VsC6n6vz1ihYYyZZwX7YZSF5l5x36ca17OC+a69h94YqB7X6XLwf+5MOgynYir2SLFUbl8gIYvBo8K8RoNQ6bQ==}
     engines: {node: '>= 0.4'}
 
   shiki@0.14.7:
@@ -13538,7 +13540,7 @@ snapshots:
       fbjs: 3.0.5(encoding@0.1.12)
       glob: 7.2.3
       graphql: 16.10.0
-      immutable: 3.7.6
+      immutable: 3.8.3
       invariant: 2.2.4
       nullthrows: 1.1.1
       relay-runtime: 12.0.0(encoding@0.1.12)
@@ -13558,7 +13560,7 @@ snapshots:
       fb-watchman: 2.0.2
       fbjs: 3.0.5(encoding@0.1.12)
       graphql: 16.10.0
-      immutable: 3.7.6
+      immutable: 3.8.3
       invariant: 2.2.4
       nullthrows: 1.1.1
       relay-runtime: 12.0.0(encoding@0.1.12)
@@ -13576,7 +13578,7 @@ snapshots:
       chalk: 4.1.2
       fb-watchman: 2.0.2
       graphql: 16.10.0
-      immutable: 3.7.6
+      immutable: 3.8.3
       invariant: 2.2.4
       nullthrows: 1.1.1
       relay-runtime: 12.0.0(encoding@0.1.12)
@@ -15471,7 +15473,7 @@ snapshots:
       listr2: 4.0.5(enquirer@2.4.1)
       log-symbols: 4.1.0
       micromatch: 4.0.8
-      shell-quote: 1.8.2
+      shell-quote: 1.8.4
       string-env-interpolation: 1.0.1
       ts-log: 2.2.7
       tslib: 2.8.1
@@ -22494,7 +22496,7 @@ snapshots:
     dependencies:
       queue: 6.0.2
 
-  immutable@3.7.6: {}
+  immutable@3.8.3: {}
 
   immutable@5.1.5: {}
 
@@ -26674,7 +26676,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.8.2: {}
+  shell-quote@1.8.4: {}
 
   shiki@0.14.7:
     dependencies:
