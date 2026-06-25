@@ -47,3 +47,7 @@ node_modules
 /.vscode
 
 /.git
+
+# Ignore turbo prune output
+out
+**/out
