@@ -3,6 +3,9 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
+# Version-update PRs are disabled (open-pull-requests-limit: 0); dependency
+# upgrades are managed centrally via pnpm overrides. Dependabot security
+# alerts are unaffected and stay on.
 version: 2
 updates:
   - package-ecosystem: "npm" # See documentation for possible values
@@ -11,7 +14,7 @@ updates:
       interval: "monthly"
     commit-message:
       prefix: "⬆️"
-    open-pull-requests-limit: 100
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
   - package-ecosystem: "github-actions"
@@ -20,5 +23,6 @@ updates:
       interval: "monthly"
     commit-message:
       prefix: "⬆️"
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
