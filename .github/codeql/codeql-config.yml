@@ -1,0 +1,5 @@
+name: "CodeQL config"
+
+# Metaforecast is being wound down; don't scan it.
+paths-ignore:
+  - apps/metaforecast

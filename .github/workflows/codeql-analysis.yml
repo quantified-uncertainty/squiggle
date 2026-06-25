@@ -34,6 +34,7 @@ jobs:
           languages: ${{ matrix.language }}
           # JS/TS is analyzed directly from source — no build needed.
           build-mode: none
+          config-file: ./.github/codeql/codeql-config.yml
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
