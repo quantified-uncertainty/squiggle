@@ -27,6 +27,10 @@ export const getWebviewContent = ({
     vscode.Uri.joinPath(context.extensionUri, "dist/media/components.css")
   );
 
+  const webviewStyleUri = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, "dist/webview/index.css")
+  );
+
   const scriptUris = [script].map((script) =>
     webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, script))
   );
@@ -40,6 +44,12 @@ export const getWebviewContent = ({
         <meta http-equiv="Content-Security-Policy" content="script-src 'nonce-${nonce}' 'unsafe-eval';">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="${styleUri}" rel="stylesheet" />
+        <link href="${webviewStyleUri}" rel="stylesheet" />
+        <style>
+          html, body, #root { height: 100%; }
+          #root { display: flex; flex-direction: column; }
+          * { box-sizing: border-box; }
+        </style>
         <title>${title}</title>
     </head>
     <body style="background-color: white; color: black; padding: 8px 12px">

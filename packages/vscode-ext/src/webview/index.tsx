@@ -1,3 +1,5 @@
+import "reactflow/dist/style.css";
+
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
 
