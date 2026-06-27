@@ -1,5 +1,9 @@
 # vscode-squiggle
 
+## 0.10.1
+
+- Fix the blank preview pane (issue #3836, caused by an `import.meta` error in the bundle), fix the dependency-graph view rendering (page height and graph stylesheet), and upgrade the extension's dependencies. ([#4120](https://github.com/quantified-uncertainty/squiggle/pull/4120))
+
 ## 0.10.0
 
 Use 0.10.0 Squiggle. No extension-specific changes.

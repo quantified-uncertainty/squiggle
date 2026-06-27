@@ -1,5 +1,12 @@
 # @quri/squiggle-lang
 
+## 0.10.1
+
+- - Fix log KDE for an edge case of 2 samples ([#3508](https://github.com/quantified-uncertainty/squiggle/pull/3508))
+  - Fix `PointSet.fromDist` crash
+
+- Improve domain errors in runLambda (fixes "Unknown Exception" in function charts in components) ([#3507](https://github.com/quantified-uncertainty/squiggle/pull/3507))
+
 ## 0.10.0
 
 - Partial compile-time type checking and inference ([#3333](https://github.com/quantified-uncertainty/squiggle/pull/3333))

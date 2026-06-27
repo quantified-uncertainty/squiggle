@@ -1,5 +1,11 @@
 # @quri/squiggle-components
 
+## 0.10.1
+
+- Scroll past end in SquigglePlayground, and in SquiggleEditor when the height is fixed ([#3475](https://github.com/quantified-uncertainty/squiggle/pull/3475))
+
+- Prefer `@doc` over `/** */` docstring ([#3509](https://github.com/quantified-uncertainty/squiggle/pull/3509))
+
 ## 0.10.0
 
 - Most viewer items begin in collapsed state ([#3425](https://github.com/quantified-uncertainty/squiggle/pull/3425))

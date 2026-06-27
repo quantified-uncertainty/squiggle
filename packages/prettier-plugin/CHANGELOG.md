@@ -1,5 +1,9 @@
 # @quri/prettier-plugin-squiggle
 
+## 0.10.1
+
+- Fix comment printing after decorators ([#3505](https://github.com/quantified-uncertainty/squiggle/pull/3505))
+
 ## 0.10.0
 
 Compatible with Squiggle 0.10.0. No extension-specific changes.
