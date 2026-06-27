@@ -16,9 +16,6 @@
   "ignore": [
     "@quri/ops",
     "squiggle-website",
-    "@quri/hub",
-    "@quri/content",
-    "@quri/squiggle-ai",
     "@quri/evaluations"
   ],
   "changelog": "../internal-packages/ops/dist/changelog.cjs"
