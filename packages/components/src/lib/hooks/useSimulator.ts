@@ -161,18 +161,29 @@ export function useSimulator(args: SimulatorArgs): UseSimulatorResult {
     ? project.getOutput(renderedHeadName)
     : undefined;
 
+  const isStale = project.hasHead(renderedHeadName)
+    ? project.getHead(mainHeadName) !== project.getHead(renderedHeadName)
+    : false;
+
+  // Referentially stable, so that the viewer doesn't re-render on every
+  // keystroke; important for typing performance with autorun disabled.
+  const simulation = useMemo(
+    () =>
+      output
+        ? {
+            project,
+            executionId,
+            output,
+            isStale,
+          }
+        : undefined,
+    [project, executionId, output, isStale]
+  );
+
   return {
     sourceId,
     project,
-    simulation: output
-      ? {
-          project,
-          executionId,
-          output,
-          isStale:
-            project.getHead(mainHeadName) !== project.getHead(renderedHeadName),
-        }
-      : undefined,
+    simulation,
     autorunMode,
     setAutorunMode,
     runSimulation,

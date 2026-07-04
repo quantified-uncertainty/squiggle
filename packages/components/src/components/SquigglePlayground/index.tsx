@@ -168,6 +168,21 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
     leftPanelRef.current?.getEditor()
   );
 
+  // `runSimulation` identity changes on every code change; keep the latest one
+  // in a ref so that `randomizeSeedAndRun` stays stable and doesn't break
+  // `ViewerWithMenuBar` memoization.
+  const runSimulationRef = useRef(runSimulation);
+  runSimulationRef.current = runSimulation;
+  const randomizeSeedRef = useRef(randomizeSeed);
+  randomizeSeedRef.current = randomizeSeed;
+
+  const randomizeSeedAndRun = useCallback(() => {
+    randomizeSeedRef.current();
+    if (!autorunMode) {
+      runSimulationRef.current();
+    }
+  }, [autorunMode]);
+
   const renderRight = () => {
     if (simulation) {
       return (
@@ -182,12 +197,7 @@ export const SquigglePlayground: React.FC<SquigglePlaygroundProps> = (
             ref={rightPanelRef}
             useGlobalShortcuts={true}
             xPadding={2}
-            randomizeSeed={() => {
-              randomizeSeed();
-              if (!autorunMode) {
-                runSimulation();
-              }
-            }}
+            randomizeSeed={randomizeSeedAndRun}
           />
         </ProjectContext.Provider>
       );
