@@ -10,6 +10,10 @@ describe("Numbers", () => {
   testEvalToBe("Number.abs(0)", "0");
   testEvalToBe("abs(5.5)", "5.5");
   testEvalToBe("Number.exp(10)", "22026.465794806718");
+  testEvalToBe("Number.log(1)", "0");
+  testEvalToBe("Number.log(8, 2)", "3");
+  testEvalToBe("Number.log(1000, 10)", "2.9999999999999996");
+  testEvalToBe("log(8, 2)", "3");
   testEvalToBe("Number.log10(10)", "1");
   testEvalToBe("Number.log2(10)", "3.321928094887362");
   testEvalToBe("Number.sum([])", "0");
