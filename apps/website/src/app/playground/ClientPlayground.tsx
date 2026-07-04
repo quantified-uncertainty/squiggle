@@ -19,7 +19,7 @@ import {
 import { useAvailableHeight } from "../../utils/useAvailableHeight";
 import { ShareButton } from "./ShareButton";
 
-function updateUrl(params: Partial<PlaygroundParams>) {
+function applyUrlUpdate(params: Partial<PlaygroundParams>) {
   const url = new URL(window.location.href);
   const newUrl = getPlaygroundUrl({ ...parsePlaygroundUrl(url), ...params });
 
@@ -29,6 +29,25 @@ function updateUrl(params: Partial<PlaygroundParams>) {
 
   // Intentionally not triggering Next.js navigation / re-render.
   window.history.replaceState(undefined, "", newUrl.toString());
+}
+
+// Firefox and Safari rate-limit History API calls and crash the page on fast
+// typing (https://github.com/quantified-uncertainty/squiggle/issues/3510), so
+// we debounce URL updates while accumulating the pending params.
+let pendingParams: Partial<PlaygroundParams> = {};
+let updateTimeout: ReturnType<typeof setTimeout> | undefined;
+
+function updateUrl(params: Partial<PlaygroundParams>) {
+  pendingParams = { ...pendingParams, ...params };
+  if (updateTimeout !== undefined) {
+    clearTimeout(updateTimeout);
+  }
+  updateTimeout = setTimeout(() => {
+    updateTimeout = undefined;
+    const paramsToApply = pendingParams;
+    pendingParams = {};
+    applyUrlUpdate(paramsToApply);
+  }, 300);
 }
 
 export const ClientPlayground: FC = () => {
