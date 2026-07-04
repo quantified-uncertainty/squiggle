@@ -24,6 +24,7 @@ export const DeleteModelAction: FC<Props> = ({ model }) => {
           close={close}
           title={`Delete ${model.owner.slug}/${model.slug}`}
           submitText="Delete Model"
+          submitTheme="alert"
           action={deleteModelAction}
           formDataToInput={() => ({
             owner: model.owner.slug,

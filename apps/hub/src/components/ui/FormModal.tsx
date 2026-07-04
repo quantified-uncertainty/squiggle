@@ -6,12 +6,14 @@ import {
   UseFormReturn,
 } from "react-hook-form";
 
-import { Button, Modal } from "@quri/ui";
+import { Button, ButtonTheme, Modal } from "@quri/ui";
 
 type Props<TFieldValues extends FieldValues> = PropsWithChildren<{
   onSubmit: (event?: BaseSyntheticEvent) => void;
   close: () => void;
   submitText: string;
+  // "alert" is useful for destructive actions.
+  submitTheme?: ButtonTheme;
   title: string;
   inFlight?: boolean;
   form: UseFormReturn<TFieldValues, unknown, any>;
@@ -23,6 +25,7 @@ export function FormModal<TFieldValues extends FieldValues>({
   onSubmit,
   close,
   submitText,
+  submitTheme = "primary",
   title,
   inFlight,
   form,
@@ -44,7 +47,7 @@ export function FormModal<TFieldValues extends FieldValues>({
           <Modal.Footer>
             <Button
               type="submit"
-              theme="primary"
+              theme={submitTheme}
               disabled={!form.formState.isValid || inFlight}
             >
               {submitText}
