@@ -64,6 +64,19 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({
         rehypePlugins={[rehypeInlineCodeProperty]}
         remarkPlugins={[remarkGfm]}
         components={{
+          // Open links in a new tab, so that the user doesn't lose the state of the current page.
+          // In-page anchor links are excluded.
+          a: ({ href, children, ...rest }) => (
+            <a
+              {...rest}
+              href={href}
+              {...(href?.startsWith("#")
+                ? {}
+                : { target: "_blank", rel: "noreferrer" })}
+            >
+              {children}
+            </a>
+          ),
           pre: ({ children }) => <React.Fragment>{children}</React.Fragment>,
           code({ node, className, children, ...rest }) {
             const isInline =
