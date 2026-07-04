@@ -106,11 +106,20 @@ export const library = [
     examples: [makeFnExample(`exp(3.5)`)],
     fn: Math.exp,
   }),
-  maker.n2n({
+  maker.make({
     name: "log",
     displaySection: "Functions (Number)",
-    examples: [makeFnExample(`log(3.5)`)],
-    fn: Math.log,
+    description:
+      "Natural logarithm. With a second argument, returns the logarithm in that base.",
+    examples: [makeFnExample(`log(3.5)`), makeFnExample(`log(8, 2)`)],
+    definitions: [
+      makeDefinition([frNumber], frNumber, ([x]) => Math.log(x)),
+      makeDefinition(
+        [frNumber, namedInput("base", frNumber)],
+        frNumber,
+        ([x, base]) => Math.log(x) / Math.log(base)
+      ),
+    ],
   }),
   maker.n2n({
     name: "log10",
