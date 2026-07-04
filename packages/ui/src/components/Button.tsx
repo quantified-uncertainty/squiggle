@@ -1,7 +1,7 @@
 import { clsx } from "clsx";
 import { FC, PropsWithChildren } from "react";
 
-type ButtonTheme = "default" | "primary" | "alert";
+export type ButtonTheme = "default" | "primary" | "alert";
 
 export type ButtonProps = PropsWithChildren<{
   onClick?: () => void;

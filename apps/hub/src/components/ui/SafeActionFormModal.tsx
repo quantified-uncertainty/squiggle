@@ -2,6 +2,8 @@ import { HookSafeActionFn } from "next-safe-action/hooks";
 import { PropsWithChildren, ReactNode } from "react";
 import { FieldPath, FieldValues } from "react-hook-form";
 
+import { ButtonTheme } from "@quri/ui";
+
 import { FormModal } from "@/components/ui/FormModal";
 import { useSafeActionForm } from "@/lib/hooks/useSafeActionForm";
 
@@ -18,6 +20,7 @@ export function SafeActionFormModal<
   title,
   initialFocus,
   submitText,
+  submitTheme,
   children,
   close,
   closeOnSuccess = true,
@@ -29,6 +32,8 @@ export function SafeActionFormModal<
     title: string;
     initialFocus?: FieldPath<TFormShape>;
     submitText: string;
+    // "alert" is useful for destructive actions.
+    submitTheme?: ButtonTheme;
     // Intentionally explicit. In case of forms activated by dropdowns we could obtain this with `useCloseDropdown`, but it's not always the case.
     // The common pattern is to use this component in `DropdownMenuModalActionItem` and pass the close function from `render({ close })`.
     close: () => void;
@@ -56,6 +61,7 @@ export function SafeActionFormModal<
       close={close}
       title={title}
       submitText={submitText}
+      submitTheme={submitTheme}
       form={form}
       initialFocus={initialFocus}
       onSubmit={onSubmit}
