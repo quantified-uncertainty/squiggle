@@ -17,7 +17,7 @@ export const Footer: FC = () => {
         <FaDiscord size="1em" className="mr-2" />
         Discord
       </a>
-      <a href="https://quri.substack.com/t/squiggle" className={linkClasses}>
+      <a href="https://quantifieduncertainty.org/" className={linkClasses}>
         <FaRss size="1em" className="mr-2" />
         Newsletter
       </a>
