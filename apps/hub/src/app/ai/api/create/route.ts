@@ -14,7 +14,9 @@ import { getSelf, isSignedIn } from "@/users/auth";
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
-export const maxDuration = 300;
+// Vercel kills the function (and the workflow with it) at this limit; keep it
+// above durationLimitMinutes. 800s is the Pro plan maximum.
+export const maxDuration = 800;
 
 function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
   // Save workflow to the database on each update.
@@ -41,7 +43,9 @@ function aiRequestToWorkflow(request: AiRequestBody) {
   const llmConfig: LlmConfig = {
     llmId: request.model ?? DEFAULT_LLM_ID,
     priceLimit: 0.8,
-    durationLimitMinutes: 6,
+    // Must stay under maxDuration below, so the workflow ends gracefully
+    // before Vercel kills the function.
+    durationLimitMinutes: 12,
     messagesInHistoryToKeep: 4,
     numericSteps: request.numericSteps,
     styleGuideSteps: request.styleGuideSteps,
