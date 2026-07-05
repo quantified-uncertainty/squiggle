@@ -4,7 +4,7 @@ import { LLMError } from "./LLMError.js";
 import { OpenAIProvider } from "./OpenAIProvider.js";
 import { LlmMetrics, Message, StandardizedChatCompletion } from "./types.js";
 
-const TIMEOUT_MINUTES = 3;
+const TIMEOUT_MINUTES = 4;
 const TIMEOUT_MS = TIMEOUT_MINUTES * 60 * 1000;
 
 export function calculatePriceMultipleCalls(

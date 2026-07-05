@@ -3,10 +3,12 @@ import "server-only";
 import { makeAiCodec } from "@quri/squiggle-ai/server";
 
 export function getAiCodec() {
-  const openaiApiKey = process.env["OPENROUTER_API_KEY"];
+  const openaiApiKey = process.env["OPENAI_API_KEY"];
   const anthropicApiKey = process.env["ANTHROPIC_API_KEY"];
+  const openRouterApiKey = process.env["OPENROUTER_API_KEY"];
   return makeAiCodec({
     openaiApiKey,
     anthropicApiKey,
+    openRouterApiKey,
   });
 }

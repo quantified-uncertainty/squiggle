@@ -34,6 +34,7 @@ export function makeAiCodec(params: {
   // we don't want to serialize these secrets, so we parameterize the codec with them
   openaiApiKey?: string;
   anthropicApiKey?: string;
+  openRouterApiKey?: string;
 }) {
   return makeCodec<AiShape>({
     workflow: {
@@ -44,6 +45,7 @@ export function makeAiCodec(params: {
           visitor,
           openaiApiKey: params.openaiApiKey,
           anthropicApiKey: params.anthropicApiKey,
+          openRouterApiKey: params.openRouterApiKey,
           getWorkflowTemplateByName,
         }),
     },

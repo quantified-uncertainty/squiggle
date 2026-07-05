@@ -61,7 +61,12 @@ export class OpenAIProvider {
         role: msg.role as "system" | "user" | "assistant",
         content: msg.content,
       })),
-    });
+      // OpenRouter-specific: cap thinking effort, otherwise reasoning models
+      // can spend many minutes per call. Ignored by non-reasoning models.
+      ...(this.modelConfig.provider === "openrouter"
+        ? { reasoning: { effort: "low" } }
+        : {}),
+    } as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming);
 
     return convertOpenAIToStandardFormat(
       completion as OpenAI.Chat.Completions.ChatCompletion
