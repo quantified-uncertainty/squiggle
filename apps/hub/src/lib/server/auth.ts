@@ -45,6 +45,9 @@ function buildAuthConfig(): NextAuthConfig {
   ) {
     providers.push(
       Resend({
+        // Without a distinct id, this provider clashes with the real Resend
+        // provider above (both get id "resend") and can never be selected.
+        id: "dev-email",
         apiKey: "dummy-key-not-used",
         from: "dev@localhost",
         name: "Dev Email (Check Console)",
