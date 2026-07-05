@@ -1,7 +1,7 @@
 "use client";
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
-import { FC, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import {
   components,
   DropdownIndicatorProps,
@@ -60,6 +60,14 @@ export const GlobalSearch: FC = () => {
   // https://github.com/JedWatson/react-select/discussions/4669#discussioncomment-1994888
   const ref = useRef<SelectInstance<SearchOption> | null>(null);
 
+  // react-select renders `aria-activedescendant=""` on the server but not on
+  // the client, which triggers a hydration mismatch warning on every page.
+  // Render it on the client only, with a same-sized placeholder for SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useGlobalShortcut(
     {
       metaKey: true,
@@ -69,6 +77,12 @@ export const GlobalSearch: FC = () => {
       ref.current?.focus();
     }
   );
+
+  if (!mounted) {
+    return (
+      <div className="h-8 min-w-[16em] max-w-[12em] rounded-md border border-slate-900 bg-slate-900 shadow-sm" />
+    );
+  }
 
   return (
     <AsyncSelect<SearchOption>
