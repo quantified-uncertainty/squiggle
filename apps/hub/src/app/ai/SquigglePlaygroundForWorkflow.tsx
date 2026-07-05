@@ -11,12 +11,14 @@ import {
 interface SquigglePlaygroundComponentProps {
   height: number;
   defaultCode: string;
+  onCodeChange?: (code: string) => void;
 }
 
 // TODO - this is copy-pasted, use another component
 export function SquigglePlaygroundForWorkflow({
   height,
   defaultCode,
+  onCodeChange,
 }: SquigglePlaygroundComponentProps) {
   const [squiggle, setSquiggle] = useState<
     undefined | Awaited<ReturnType<typeof versionedSquigglePackages>>
@@ -45,6 +47,7 @@ export function SquigglePlaygroundForWorkflow({
     <squiggle.components.SquigglePlayground
       height={height}
       defaultCode={defaultCode}
+      onCodeChange={onCodeChange}
       linker={llmLinker}
       renderExtraControls={() => (
         <div className="flex h-full items-center justify-end gap-2">
