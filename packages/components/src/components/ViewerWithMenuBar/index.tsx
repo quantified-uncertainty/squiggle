@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  memo,
   startTransition,
   useCallback,
   useImperativeHandle,
@@ -42,8 +43,10 @@ export type ViewerWithMenuBarHandle = {
   focusByPath: (path: SqValuePath) => void;
 };
 /* Wrapper for SquiggleViewer that shows the rendering stats and isSimulating state. */
-export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
-  function ViewerWithMenuBar(
+// Memoized: parents re-render on every keystroke, and re-rendering the viewer
+// tree is expensive for simulations with high sample counts (#4057).
+export const ViewerWithMenuBar = memo(
+  forwardRef<ViewerWithMenuBarHandle, Props>(function ViewerWithMenuBar(
     {
       simulation,
       playgroundSettings,
@@ -135,5 +138,5 @@ export const ViewerWithMenuBar = forwardRef<ViewerWithMenuBarHandle, Props>(
         xPadding={xPadding}
       />
     );
-  }
+  })
 );
