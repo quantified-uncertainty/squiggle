@@ -4,8 +4,7 @@ import { LLMError } from "./LLMError.js";
 import { OpenAIProvider } from "./OpenAIProvider.js";
 import { LlmMetrics, Message, StandardizedChatCompletion } from "./types.js";
 
-// Some OpenRouter models (reasoning-heavy ones) routinely take >3 minutes per call.
-const TIMEOUT_MINUTES = 10;
+const TIMEOUT_MINUTES = 4;
 const TIMEOUT_MS = TIMEOUT_MINUTES * 60 * 1000;
 
 export function calculatePriceMultipleCalls(

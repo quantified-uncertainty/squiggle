@@ -14,9 +14,6 @@ import { getSelf, isSignedIn } from "@/users/auth";
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
-// Vercel kills the function (and the workflow with it) at this limit.
-// 300s is the project's cap until Fluid Compute is enabled; raise this and
-// durationLimitMinutes once it is.
 export const maxDuration = 300;
 
 function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
@@ -44,9 +41,9 @@ function aiRequestToWorkflow(request: AiRequestBody) {
   const llmConfig: LlmConfig = {
     llmId: request.model ?? DEFAULT_LLM_ID,
     priceLimit: 0.8,
-    // Must stay under maxDuration below, so the workflow ends gracefully
-    // before Vercel kills the function.
-    durationLimitMinutes: 12,
+    // Must stay under maxDuration, so the workflow ends gracefully before
+    // Vercel kills the function.
+    durationLimitMinutes: 4.5,
     messagesInHistoryToKeep: 4,
     numericSteps: request.numericSteps,
     styleGuideSteps: request.styleGuideSteps,
