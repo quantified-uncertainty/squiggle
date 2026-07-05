@@ -155,6 +155,28 @@ export const MODEL_CONFIGS = [
     allowsSystemPrompt: true,
   },
   {
+    id: "Claude-Sonnet-5",
+    provider: "anthropic",
+    model: "claude-sonnet-5",
+    inputRate: 3,
+    outputRate: 15,
+    contextWindow: 1000000,
+    maxTokens: 8192,
+    name: "Claude Sonnet 5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Claude-Opus-4-8",
+    provider: "anthropic",
+    model: "claude-opus-4-8",
+    inputRate: 5,
+    outputRate: 25,
+    contextWindow: 1000000,
+    maxTokens: 8192,
+    name: "Claude Opus 4.8",
+    allowsSystemPrompt: true,
+  },
+  {
     id: "Gemini-3-1-Pro-Preview",
     provider: "openrouter",
     model: "google/gemini-3.1-pro-preview",
@@ -242,51 +264,17 @@ export const MODEL_CONFIGS = [
     name: "Google: Gemini 2.5 Pro",
     allowsSystemPrompt: true,
   },
-  {
-    id: "MiniMax-M2",
-    provider: "openrouter",
-    model: "minimax/minimax-m2",
-    inputRate: 0.255,
-    outputRate: 1.02,
-    contextWindow: 204800,
-    maxTokens: 8192,
-    name: "MiniMax: MiniMax M2",
-    allowsSystemPrompt: true,
-  },
-  {
-    id: "Grok-4-20",
-    provider: "openrouter",
-    model: "x-ai/grok-4.20",
-    inputRate: 1.25,
-    outputRate: 2.5,
-    contextWindow: 2000000,
-    maxTokens: 8192,
-    name: "xAI: Grok 4.20",
-    allowsSystemPrompt: true,
-  },
-  {
-    id: "Qwen3-Coder",
-    provider: "openrouter",
-    model: "qwen/qwen3-coder",
-    inputRate: 0.22,
-    outputRate: 1.8,
-    contextWindow: 1048576,
-    maxTokens: 8192,
-    name: "Qwen: Qwen3 Coder 480B A35B",
-    allowsSystemPrompt: true,
-  },
 ] as const satisfies ModelConfig[];
 
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];
 
-export const DEFAULT_LLM_ID: LlmId = "Claude-4-5-Sonnet";
+export const DEFAULT_LLM_ID: LlmId = "Claude-Sonnet-5";
 
 // Models that should be visible in the UI
 const UI_VISIBLE_MODEL_IDS: LlmId[] = [
-  "Claude-4-5-Sonnet",
-  "Claude-3-7-Sonnet",
-  "Claude-3-5-Haiku",
+  "Claude-Sonnet-5",
+  "Claude-Opus-4-8",
   "Claude-4-5-Haiku",
   "Gemini-3-1-Pro-Preview",
   "DeepSeek-V4-Pro",
