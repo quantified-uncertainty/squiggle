@@ -453,12 +453,14 @@ export class Workflow<Shape extends IOShape = IOShape> {
     visitor,
     openaiApiKey,
     anthropicApiKey,
+    openRouterApiKey,
     getWorkflowTemplateByName,
   }: {
     node: SerializedWorkflow;
     visitor: AiDeserializationVisitor;
     openaiApiKey?: string;
     anthropicApiKey?: string;
+    openRouterApiKey?: string;
     // can't be imported from workflow registry because of circular dependency
     getWorkflowTemplateByName: (name: string) => WorkflowTemplate<any>;
   }): Workflow<IOShape> {
@@ -476,6 +478,7 @@ export class Workflow<Shape extends IOShape = IOShape> {
       steps: [],
       openaiApiKey,
       anthropicApiKey,
+      openRouterApiKey,
     });
 
     // restore steps and create back references from steps to workflow
