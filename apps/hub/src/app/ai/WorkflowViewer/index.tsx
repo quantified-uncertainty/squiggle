@@ -1,6 +1,6 @@
 "use client";
 import { format } from "date-fns";
-import { Children, FC } from "react";
+import { Children, FC, useRef } from "react";
 
 import { ClientWorkflow } from "@quri/squiggle-ai";
 import { ErrorIcon, StyledTab, TextTooltip } from "@quri/ui";
@@ -47,6 +47,10 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
   const { ref, height } = useAvailableHeight();
   const usedHeight = height ? height : 200;
 
+  // Tracks the latest code from the playground editor, so that "Save Model"
+  // saves the user's manual edits, not just the original AI-generated code.
+  const codeRef = useRef(workflow.result.code);
+
   return (
     <StyledTab.Group>
       <div className="mt-2 flex flex-col gap-2">
@@ -76,7 +80,10 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
           )}
           renderRight={() => (
             <div className="flex items-center gap-2">
-              <PublishWorkflowButton workflow={workflow} />
+              <PublishWorkflowButton
+                workflow={workflow}
+                getCode={() => codeRef.current}
+              />
               <StyledTab.List>
                 <StyledTab name="Playground" />
                 <StyledTab name="Steps" />
@@ -91,6 +98,9 @@ const FinishedWorkflowViewer: FC<WorkflowViewerProps<"finished">> = ({
               <SquigglePlaygroundForWorkflow
                 height={usedHeight}
                 defaultCode={workflow.result.code}
+                onCodeChange={(code) => {
+                  codeRef.current = code;
+                }}
               />
             </StyledTab.Panel>
             <StyledTab.Panel>
