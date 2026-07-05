@@ -14,9 +14,10 @@ import { getSelf, isSignedIn } from "@/users/auth";
 import { AiRequestBody, aiRequestBodySchema } from "../../utils";
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route-segment-config#maxduration
-// Vercel kills the function (and the workflow with it) at this limit; keep it
-// above durationLimitMinutes. 800s is the Pro plan maximum.
-export const maxDuration = 800;
+// Vercel kills the function (and the workflow with it) at this limit.
+// 300s is the project's cap until Fluid Compute is enabled; raise this and
+// durationLimitMinutes once it is.
+export const maxDuration = 300;
 
 function saveWorkflowToDbOnUpdates(workflow: Workflow<any>) {
   // Save workflow to the database on each update.
