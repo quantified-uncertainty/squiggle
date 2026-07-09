@@ -13,10 +13,12 @@ export function marketsToQuestions(
   markets: ManifoldMarket[]
 ): FetchedQuestion[] {
   const questions: FetchedQuestion[] = [];
+  let skippedCount = 0;
 
   for (const market of markets) {
     // Skip markets without probability (multiple choice questions)
     if (market.probability === undefined || market.probability === null) {
+      skippedCount++;
       continue;
     }
 
@@ -50,6 +52,12 @@ export function marketsToQuestions(
     };
 
     questions.push(question);
+  }
+
+  if (skippedCount > 0) {
+    console.log(
+      `Skipped ${skippedCount} out of ${markets.length} markets without probability`
+    );
   }
 
   return questions;
