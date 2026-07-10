@@ -1,6 +1,7 @@
 import { BaseDist } from "../../src/dists/BaseDist.js";
 import { DistError } from "../../src/dists/DistError.js";
 import { SampleSetDist } from "../../src/dists/SampleSetDist/index.js";
+import * as SymbolicDist from "../../src/dists/SymbolicDist/index.js";
 import { Env } from "../../src/index.js";
 import { getDefaultRng } from "../../src/rng/index.js";
 import * as Result from "../../src/utility/result.js";
@@ -81,6 +82,30 @@ describe("sparkline", () => {
   runTest("triangular", triangularDist, Ok(`▁▁▂▃▄▅▆▇████▇▆▅▄▃▂▁▁`));
 
   runTest("exponential", exponentialDist, Ok(`█▅▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁`));
+});
+
+describe("truncate", () => {
+  // Regression test for https://github.com/quantified-uncertainty/squiggle/issues/2518
+  // A discrete-only distribution (like a point mass) has an empty continuous
+  // part. ContinuousShape.truncate used to append boundary sentinel points even
+  // to that empty part, turning it into a zero-integral non-empty shape, so
+  // MixedShape.normalize computed 0 / 0 = NaN and corrupted the distribution.
+  test("point mass survives truncation to a range that contains it", () => {
+    const pointMass = unpackResult(SymbolicDist.PointMass.make(0.5));
+    const truncated = unpackResult(pointMass.truncate(1e-6, 1 - 1e-6, { env }));
+
+    const mean = truncated.mean();
+    expect(Number.isNaN(mean)).toBe(false);
+    expect(mean).toBeCloseTo(0.5, 6);
+  });
+
+  test("continuous distribution truncation is unchanged", () => {
+    const truncated = unpackResult(normalDist5.truncate(3, 8, { env }));
+
+    const mean = truncated.mean();
+    expect(Number.isFinite(mean)).toBe(true);
+    expect(mean).toBeCloseTo(5, 0);
+  });
 });
 
 describe("isEqual", () => {

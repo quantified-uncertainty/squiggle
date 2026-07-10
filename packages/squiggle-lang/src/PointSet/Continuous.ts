@@ -141,6 +141,14 @@ export class ContinuousShape implements PointSet<ContinuousShape> {
   }
 
   truncate(leftCutoff: number | undefined, rightCutoff: number | undefined) {
+    // An empty continuous shape has no curve to close off, so appending the
+    // boundary sentinel points below would turn it into a non-empty,
+    // zero-integral shape. That breaks MixedShape.normalize for discrete-only
+    // distributions (0 / 0 = NaN). Leave the empty shape unchanged.
+    if (this.isEmpty()) {
+      return this;
+    }
+
     const lc = leftCutoff ?? -Infinity;
     const rc = rightCutoff ?? Infinity;
     const truncatedZippedPairs = XYShape.Zipped.filterByX(
