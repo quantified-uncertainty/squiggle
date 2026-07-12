@@ -1,3 +1,7 @@
+## ⚠️ Project shut down
+
+Metaforecast was discontinued on July 9, 2026. The website and the public GraphQL API are no longer available. A full archive of the database was preserved; contact [QURI](https://quantifieduncertainty.org/) if you need access to the data.
+
 ## What this is
 
 [Metaforecast](https://metaforecast.org) is a search engine for probabilities from various prediction markes and forecasting platforms. Try searching "Trump", "China" or "Semiconductors".
