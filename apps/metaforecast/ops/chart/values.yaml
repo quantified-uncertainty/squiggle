@@ -7,13 +7,5 @@ image:
 # Env variables documented in `env.example`.
 envSecret: metaforecast-env
 
-jobs:
-  scheduler:
-    command: ["pnpm", "run", "cli", "all"]
-    schedule: "0 3 * * *" # every day at 3am
-  frontpage:
-    command: ["pnpm", "run", "cli", "frontpage"]
-    schedule: "0 6 * * *" # every day at 6am
-  manifold-fetch-new:
-    command: ["pnpm", "run", "cli", "manifold", "fetch-new"]
-    schedule: "*/5 * * * *" # every 5 minutes
+# Metaforecast was shut down on July 9, 2026 — all scraper cronjobs removed.
+jobs: {}
