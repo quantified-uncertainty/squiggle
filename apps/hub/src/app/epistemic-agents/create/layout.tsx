@@ -6,10 +6,7 @@ import { NarrowPageLayout } from "@/components/layout/NarrowPageLayout";
 import { H2 } from "@/components/ui/Headers";
 import { StyledLink } from "@/components/ui/StyledLink";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
-import {
-  createEpistemicAgentRoute,
-  epistemicAgentsRoute,
-} from "@/lib/routes";
+import { createEpistemicAgentRoute, epistemicAgentsRoute } from "@/lib/routes";
 
 export default function EpistemicAgentCreateLayout({
   children,
