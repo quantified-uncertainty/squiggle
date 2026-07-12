@@ -36,6 +36,15 @@ const shouldBeLogHeuristicFn = ({ p10, p90 }: { p10: number; p90: number }) => {
 };
 
 const checkIfShouldBeLog = (samples: number[]): boolean => {
+  // Log KDE splits samples at zero and runs KDE on each side in log space.
+  // For sign-crossing distributions (e.g. the difference of two lognormals)
+  // this produces spurious density spikes near zero, because samples close to
+  // zero become isolated far-out points in log space and each turns into a
+  // huge narrow spike after converting back. See #4103.
+  // `samples` is sorted, so checking the ends is enough.
+  if (samples[0] < 0 && samples[samples.length - 1] > 0) {
+    return false;
+  }
   const dist = SampleSetDist.make(samples);
   if (dist.ok) {
     const range = dist.value.range(0.8, true);
