@@ -35,7 +35,7 @@
     "d3-format": "^3.1.0",
     "d3-time-format": "^4.1.0",
     "immutable": "^5.1.1",
-    "ink": "^5.2.0",
+    "ink": "^6.8.0",
     "jstat": "^1.9.6",
     "lodash": "^4.17.21",
     "open": "^10.1.0",
@@ -64,13 +64,11 @@
     "peggy": "^4.2.0",
     "prettier": "^3.5.3",
     "react": "^19.1.0",
-    "react-reconciler": "^0.31.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "peerDependencies": {
-    "react": "^18 || ^19",
-    "react-reconciler": "^0.31.0"
+    "react": "^18 || ^19"
   },
   "files": [
     "dist",
