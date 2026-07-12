@@ -26,7 +26,6 @@
     "@quri/hub-api-client": "workspace:^",
     "@quri/hub-db": "workspace:*",
     "@quri/hub-linker": "workspace:^",
-    "@quri/metaforecast-db": "workspace:^",
     "@quri/squiggle-ai": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",

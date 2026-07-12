@@ -33,18 +33,11 @@ Right now the "New Spec List" button in the UI (/evals/speclists page) only allo
 We want to convert the button to be a dropdown with the following options:
 
 - "Manually"
-- "From Metaforecast"
 - "From GitHub Issues"
 
 #### Manually
 
 This should be the same as the current behavior: send the user to `/evals/speclists/create` page.
-
-#### From Metaforecast
-
-This should be a page that shows a list of available Metaforecast questions, and allows the user to select one or more of them.
-
-To obtain the questions, we can access Metaforecast database directly, via the `@quri/metaforecast-db` package.
 
 #### From GitHub Issues
 

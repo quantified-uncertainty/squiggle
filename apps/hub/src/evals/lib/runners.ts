@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { prisma as metaforecastPrisma } from "@quri/metaforecast-db";
 import { LlmId, MODEL_CONFIGS } from "@quri/squiggle-ai";
 import {
   createSquiggleWorkflowTemplate,
@@ -62,44 +61,6 @@ function getSquiggleAiRunner(
   };
 }
 
-function getManifoldRunner(): EvalRunner {
-  return async (question) => {
-    const manifoldId = question.metadata.manifold?.marketId;
-    if (!manifoldId) {
-      throw new Error("Manifold market ID not found");
-    }
-
-    const market = await metaforecastPrisma.manifoldMarket.findUniqueOrThrow({
-      where: {
-        id: manifoldId,
-      },
-    });
-
-    if (market.outcomeType !== "BINARY") {
-      throw new Error("Manifold market is not a binary market");
-    }
-
-    if (market.isResolved) {
-      return {
-        questionId: question.id,
-        code:
-          market.resolution === "YES"
-            ? "1"
-            : market.resolution === "NO"
-              ? "0"
-              : '"unknown"',
-        workflowId: null,
-      };
-    }
-
-    return {
-      questionId: question.id,
-      code: `${market.probability}`,
-      workflowId: null,
-    };
-  };
-}
-
 export async function getEpistemicAgentRunner({
   id,
 }: {
@@ -114,7 +75,8 @@ export async function getEpistemicAgentRunner({
       return getSquiggleAiRunner(llmConfig);
     }
     case "Manifold":
-      return getManifoldRunner();
+      // Metaforecast (the data source for Manifold agents) was shut down in July 2026.
+      throw new Error("Manifold agents are no longer supported");
     default:
       throw new Error("Unsupported agent type");
   }

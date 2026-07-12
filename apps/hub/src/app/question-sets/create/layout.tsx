@@ -8,7 +8,6 @@ import { StyledLink } from "@/components/ui/StyledLink";
 import { StyledTabLink } from "@/components/ui/StyledTabLink";
 import {
   createQuestionSetFromGitHubIssuesRoute,
-  createQuestionSetFromMetaforecastRoute,
   createQuestionSetRoute,
   questionSetsRoute,
 } from "@/lib/routes";
@@ -28,10 +27,6 @@ export default function QuestionSetCreateLayout({
       <div className="mb-4 flex items-center gap-2">
         <StyledTabLink.List>
           <StyledTabLink name="Manual" href={createQuestionSetRoute()} />
-          <StyledTabLink
-            name="From Metaforecast"
-            href={createQuestionSetFromMetaforecastRoute()}
-          />
           <StyledTabLink
             name="From GitHub Issues (TODO)"
             href={createQuestionSetFromGitHubIssuesRoute()}

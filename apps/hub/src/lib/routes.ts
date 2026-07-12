@@ -239,10 +239,6 @@ export function createQuestionSetRoute() {
   return "/question-sets/create";
 }
 
-export function createQuestionSetFromMetaforecastRoute() {
-  return "/question-sets/create/metaforecast";
-}
-
 export function createQuestionSetFromGitHubIssuesRoute() {
   return "/question-sets/create/github";
 }
@@ -273,8 +269,4 @@ export function createEpistemicAgentRoute() {
 
 export function createSquiggleAiEpistemicAgentRoute() {
   return "/epistemic-agents/create";
-}
-
-export function createManifoldEpistemicAgentRoute() {
-  return "/epistemic-agents/create/manifold";
 }
