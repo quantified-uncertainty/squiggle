@@ -50,15 +50,16 @@ function applySearchReplaceBlocks(
   blocks: Array<{ search: string; replace: string }>
 ): { success: boolean; value: string } {
   let updatedText = originalText;
+  // LLMs sometimes emit blocks where search === replace (e.g. an unchanged
+  // context block alongside real edits). Those are harmless no-ops — skip
+  // them instead of failing the whole edit. We only fail if *no* block
+  // changes anything, so the model gets feedback and retries.
+  let appliedBlocks = 0;
 
   try {
     for (const block of blocks) {
-      // Check if search and replace are identical
       if (block.search === block.replace) {
-        return {
-          success: false,
-          value: `Error: Search and replace texts are identical: \n\`\`\`\n${block.search}\n\`\`\``,
-        };
+        continue;
       }
 
       if (block.search === "") {
@@ -81,6 +82,15 @@ function applySearchReplaceBlocks(
           block.replace +
           updatedText.slice(match.index + match[0].length);
       }
+      appliedBlocks++;
+    }
+
+    if (appliedBlocks === 0) {
+      return {
+        success: false,
+        value:
+          "Error: All search/replace blocks were no-ops (SEARCH and REPLACE texts are identical), so the code was not changed. Put the modified text in the REPLACE section.",
+      };
     }
 
     return { success: true, value: updatedText };

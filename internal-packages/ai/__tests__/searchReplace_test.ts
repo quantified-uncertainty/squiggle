@@ -18,6 +18,44 @@ Goodbye, world!
       expect(result.value).toBe("Goodbye, world!");
     });
 
+    test("should skip no-op blocks when other blocks make changes", () => {
+      const originalText = "first line\nsecond line";
+      const promptResponse = `
+<<<<<<< SEARCH
+first line
+=======
+first line
+>>>>>>> REPLACE
+
+<<<<<<< SEARCH
+second line
+=======
+changed line
+>>>>>>> REPLACE
+      `;
+
+      const result = processSearchReplaceResponse(originalText, promptResponse);
+
+      expect(result.success).toBe(true);
+      expect(result.value).toBe("first line\nchanged line");
+    });
+
+    test("should fail when all blocks are no-ops", () => {
+      const originalText = "Hello, world!";
+      const promptResponse = `
+<<<<<<< SEARCH
+Hello, world!
+=======
+Hello, world!
+>>>>>>> REPLACE
+      `;
+
+      const result = processSearchReplaceResponse(originalText, promptResponse);
+
+      expect(result.success).toBe(false);
+      expect(result.value).toContain("no-ops");
+    });
+
     test("should handle empty prompt response", () => {
       const originalText = "Hello, world!";
       const promptResponse = "";
