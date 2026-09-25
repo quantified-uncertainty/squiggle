@@ -6,6 +6,12 @@ import path from "path";
 import { FC } from "react";
 
 import { defaultEnv, Env } from "../../dists/env.js";
+import {
+  SqCompileError,
+  SqError,
+  SqImportError,
+  SqRuntimeError,
+} from "../../public/SqError.js";
 import { SqLinker } from "../../public/SqLinker.js";
 import { SqProject } from "../../public/SqProject/index.js";
 import {
@@ -36,11 +42,24 @@ type RunArgs = {
 
 const EVAL_SOURCE_ID = "[eval]";
 
+function errorHeader(error: SqError): string {
+  const inner =
+    error instanceof SqImportError ? error.wrappedError() : error;
+  if (inner instanceof SqCompileError) {
+    return "Compile Error";
+  } else if (inner instanceof SqRuntimeError) {
+    return "Runtime Error";
+  }
+  return "Error";
+}
+
 function getLinker(): SqLinker {
   return {
     resolve(name, fromId) {
       if (!name.startsWith("./") && !name.startsWith("../")) {
-        throw new Error("Only relative paths in imports are allowed");
+        throw new Error(
+          `Only relative paths in imports are allowed, got "${name}"`
+        );
       }
       const dir =
         fromId === EVAL_SOURCE_ID ? process.cwd() : path.dirname(fromId);
@@ -48,13 +67,19 @@ function getLinker(): SqLinker {
     },
     async loadModule(sourceId, hash) {
       if (hash) {
-        throw new Error("Hashes are not supported");
+        throw new Error("Hashes are not supported in CLI imports");
       }
-      const code = await fs.readFile(sourceId, "utf-8");
-      return new SqModule({
-        name: sourceId,
-        code,
-      });
+      try {
+        const code = await fs.readFile(sourceId, "utf-8");
+        return new SqModule({
+          name: sourceId,
+          code,
+        });
+      } catch (e) {
+        throw new Error(
+          `Failed to read import "${sourceId}": ${e instanceof Error ? e.message : String(e)}`
+        );
+      }
     },
   };
 }
@@ -206,10 +231,11 @@ async function run(args: RunArgs) {
 
   const printer = new CliPrinter();
   if (!output.result.ok) {
-    printer.printSection(
-      red("Error:"),
-      output.result.value.toStringWithDetails()
-    );
+    process.exitCode = 1;
+    const errors = output.result.value;
+    for (const error of errors.errors) {
+      printer.printError(errorHeader(error), error.toStringWithDetails());
+    }
   } else {
     const outputResult = output.result.value;
     switch (args.output) {
