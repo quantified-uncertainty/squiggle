@@ -3,6 +3,8 @@ import { z } from "zod";
 // https://docs.polymarket.com/#gamma-markets-api
 const gammaEndpoint = "https://gamma-api.polymarket.com";
 
+const FETCH_TIMEOUT_MS = 30_000;
+
 export async function* fetchAllOpenMarkets() {
   let offset = 0;
   const limit = 500;
@@ -12,14 +14,33 @@ export async function* fetchAllOpenMarkets() {
   while (true) {
     const url = `${gammaEndpoint}/markets?offset=${offset}&limit=${limit}&closed=false`;
     console.log(`Fetching markets: ${url}`);
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    const listItems = z.array(z.unknown()).parse(data);
+
+    let listItems: unknown[];
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
+
+      if (!response.ok) {
+        console.error(
+          `HTTP error fetching ${url}: ${response.status} ${response.statusText}`
+        );
+        break;
+      }
+
+      const data = await response.json();
+      listItems = z.array(z.unknown()).parse(data);
+    } catch (error) {
+      console.error(
+        `Failed to fetch page at offset ${offset}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      break;
+    }
+
     for (let i = 0; i < listItems.length; i++) {
       const parsedMarket = marketSchema.safeParse(listItems[i]);
       if (parsedMarket.success) {
