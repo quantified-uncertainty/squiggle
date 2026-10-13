@@ -17,7 +17,7 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
     && apt-get install -y --no-install-recommends openssl
 
 # Prepare the package manager used by the workspace before installing dependencies.
-RUN npm install -g npm@11.21.0 corepack@0.36.0 turbo@2.4.4 \
+RUN npm install -g npm@11.21.0 corepack@0.36.0 turbo@2.9.14 \
     && corepack enable \
     && corepack prepare pnpm@10.34.7 --activate
 
