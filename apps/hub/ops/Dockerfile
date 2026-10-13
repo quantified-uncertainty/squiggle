@@ -13,13 +13,26 @@ RUN --mount=type=cache,id=apt-lists,target=/var/lib/apt/lists,sharing=locked \
     --mount=type=cache,id=apt-cache,target=/var/cache/apt,sharing=locked \
     rm -f /etc/apt/apt.conf.d/docker-clean \
     && apt-get update \
-    && apt-get install -y openssl
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends openssl
 
-# Install pnpm and turbo
-RUN corepack enable
+# Prepare the package manager used by the workspace before installing dependencies.
+RUN npm install -g npm@11.21.0 corepack@0.36.0 turbo@2.9.14 \
+    && corepack enable \
+    && corepack prepare pnpm@10.34.7 --activate
 
-# FIXME - how to install the exact version from package.json?
-RUN npm install -g turbo@2.4.4
+# Workspace overrides do not cover npm's bundled dependencies.
+# Install their compatible security patches with their own nested dependencies.
+RUN npm install --prefix /tmp/npm-security-patches --install-strategy=nested \
+        --ignore-scripts --no-audit --no-fund \
+        brace-expansion@5.0.12 ip-address@10.7.4 \
+        postcss-selector-parser@7.1.6 undici@6.28.1 \
+    && npm_vendor_dir="$(npm root -g)/npm/node_modules" \
+    && for package in brace-expansion ip-address postcss-selector-parser undici; do \
+        rm -rf "${npm_vendor_dir}/${package}"; \
+        cp -a "/tmp/npm-security-patches/node_modules/${package}" "${npm_vendor_dir}/${package}"; \
+    done \
+    && rm -rf /tmp/npm-security-patches
 
 # ================================ Builder ================================
 # Pruned files

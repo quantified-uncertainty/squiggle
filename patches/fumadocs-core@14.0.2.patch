@@ -1,0 +1,19 @@
+--- a/dist/mdx-plugins/index.js
++++ b/dist/mdx-plugins/index.js
+@@ -300,6 +300,7 @@
+ import path from "node:path";
+ import { visit } from "unist-util-visit";
+ import sizeOf from "image-size";
++import { readFile } from "node:fs/promises";
+ var VALID_BLUR_EXT = [".jpeg", ".png", ".webp", ".avif", ".jpg"];
+ var EXTERNAL_URL_REGEX = /^https?:\/\//;
+ function remarkImage({
+@@ -438,7 +439,7 @@
+       await res.arrayBuffer().then((buffer) => new Uint8Array(buffer))
+     );
+   }
+-  return sizeOf(resolveSrc(src, dir));
++  return sizeOf(await readFile(resolveSrc(src, dir)));
+ }
+ 
+ // src/mdx-plugins/remark-structure.ts
