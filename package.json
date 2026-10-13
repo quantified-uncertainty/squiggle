@@ -49,6 +49,7 @@
       "dompurify@3.0.6": "3.4.17",
       "dompurify@>=3 <4": "3.4.17",
       "elliptic@6.5.4": "6.6.1",
+      "esbuild@>=0.25.0 <0.26.0": "0.28.2",
       "estree-util-value-to-estree@3.3.2": "3.3.3",
       "fast-uri@3.0.6": "3.1.8",
       "fast-uri@>=3 <4": "3.1.8",
