@@ -1,5 +1,13 @@
 packages:
-  - 'packages/*'
-  - 'internal-packages/*'
-  - 'apps/*'
-  - 'evaluations'
+  - "packages/*"
+  - "internal-packages/*"
+  - "apps/*"
+  - "evaluations"
+
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@swc/core": true
+  esbuild: true
+  prisma: true
+  sharp: true
