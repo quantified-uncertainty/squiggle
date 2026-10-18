@@ -1,5 +1,12 @@
 const esbuild = require("esbuild");
 
+const external = ["server-only", "@opentelemetry/api"];
+
+// Bundled scripts need these packages to resolve from the Hub at runtime.
+for (const dependency of external) {
+  require.resolve(dependency);
+}
+
 for (const name of [
   "buildRecentModelRevision/worker",
   "buildRecentModelRevision/main",
@@ -40,6 +47,6 @@ await (async () => {
 `,
     },
     outfile: `./dist/scripts/${name}.mjs`,
-    external: ["server-only", "@opentelemetry/api"],
+    external,
   });
 }

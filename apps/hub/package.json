@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.8.0",
+    "@opentelemetry/api": "^1.9.0",
     "@quri/hub-api-client": "workspace:^",
     "@quri/hub-db": "workspace:*",
     "@quri/hub-linker": "workspace:^",
