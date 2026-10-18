@@ -206,6 +206,9 @@ importers:
       '@auth/prisma-adapter':
         specifier: ^2.8.0
         version: 2.8.0(@prisma/client@6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2))
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.0
       '@quri/hub-api-client':
         specifier: workspace:^
         version: link:../../internal-packages/hub-api-client

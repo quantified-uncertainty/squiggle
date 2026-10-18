@@ -28,3 +28,8 @@ jobs:
 
       - name: Turbo run
         run: npx turbo run build test lint --env-mode=loose
+
+      - name: Bundle and smoke-test Hub workers
+        run: |
+          npx turbo run bundle --filter=@quri/hub --env-mode=loose
+          pnpm --filter @quri/hub exec node --conditions=react-server dist/scripts/process-pending-evaluations.mjs --help
