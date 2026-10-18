@@ -41,7 +41,8 @@ export const RunSquiggle: FC<{
         });
 
         if (runResult.result.ok) {
-          setResult(runResult.result.value.result);
+          const { result, bindings } = runResult.result.value;
+          setResult(result.tag === "Void" ? bindings.asValue() : result);
         } else {
           setError(runResult.result.value.toString());
         }
