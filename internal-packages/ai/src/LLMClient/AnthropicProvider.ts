@@ -83,6 +83,9 @@ export class AnthropicProvider {
       max_tokens: this.modelConfig.maxTokens,
       messages: claudeMessages,
       model: this.modelConfig.model,
+      ...("reasoningEffort" in this.modelConfig
+        ? { output_config: { effort: this.modelConfig.reasoningEffort } }
+        : {}),
       system: [
         {
           text: squiggleSystemPrompt,

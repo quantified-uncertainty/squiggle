@@ -6,6 +6,7 @@ export type ModelConfig = {
   outputRate: number;
   contextWindow: number;
   maxTokens?: number;
+  reasoningEffort?: "low" | "medium" | "high";
   name: string;
   id: string;
   allowsSystemPrompt: boolean;
@@ -13,6 +14,119 @@ export type ModelConfig = {
 
 // After some discussion, we decided to store this as an array of objects instead of a record. This is because it can be a pain to iterate and filter over records, and there aren't any significant performance benefits to using a record for this data.
 export const MODEL_CONFIGS = [
+  {
+    id: "Claude-Sonnet-5-5",
+    provider: "anthropic",
+    model: "claude-sonnet-5-5",
+    inputRate: 2,
+    outputRate: 10,
+    contextWindow: 1000000,
+    maxTokens: 8192,
+    reasoningEffort: "low",
+    name: "Claude Sonnet 5.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Claude-Opus-5-5",
+    provider: "anthropic",
+    model: "claude-opus-5-5",
+    inputRate: 4,
+    outputRate: 20,
+    contextWindow: 1000000,
+    maxTokens: 8192,
+    reasoningEffort: "low",
+    name: "Claude Opus 5.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Claude-Haiku-5-5",
+    provider: "anthropic",
+    model: "claude-haiku-5-5",
+    inputRate: 0.1,
+    outputRate: 0.5,
+    contextWindow: 1000000,
+    maxTokens: 8192,
+    reasoningEffort: "low",
+    name: "Claude Haiku 5.5",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "GPT-6-1-Sol",
+    provider: "openrouter",
+    model: "openai/gpt-6.1-sol",
+    inputRate: 2,
+    outputRate: 10,
+    contextWindow: 1050000,
+    maxTokens: 8192,
+    name: "OpenAI: GPT-6.1 Sol",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "GPT-6-Luna",
+    provider: "openrouter",
+    model: "openai/gpt-6-luna",
+    inputRate: 0.1,
+    outputRate: 0.5,
+    contextWindow: 1050000,
+    maxTokens: 8192,
+    name: "OpenAI: GPT-6 Luna",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Gemini-4-Argon",
+    provider: "openrouter",
+    model: "google/gemini-4-argon",
+    inputRate: 2,
+    outputRate: 10,
+    contextWindow: 1048576,
+    maxTokens: 8192,
+    name: "Google: Gemini 4 Argon",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "DeepSeek-V4-1-Flash-1017",
+    provider: "openrouter",
+    model: "deepseek/deepseek-v4.1-flash-1017",
+    inputRate: 0.15,
+    outputRate: 0.6,
+    contextWindow: 1048576,
+    maxTokens: 8192,
+    name: "DeepSeek: DeepSeek V4.1 Flash 1017",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "GLM-5-3",
+    provider: "openrouter",
+    model: "z-ai/glm-5.3",
+    inputRate: 0.079,
+    outputRate: 1.8,
+    contextWindow: 1048576,
+    maxTokens: 8192,
+    name: "Z.AI: GLM 5.3",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "Kimi-K3",
+    provider: "openrouter",
+    model: "moonshotai/kimi-k3",
+    inputRate: 0.304,
+    outputRate: 11.936,
+    contextWindow: 1048576,
+    maxTokens: 8192,
+    name: "MoonshotAI: Kimi K3",
+    allowsSystemPrompt: true,
+  },
+  {
+    id: "MiMo-V2-6-Pro",
+    provider: "openrouter",
+    model: "xiaomi/mimo-v2.6-pro",
+    inputRate: 0.435,
+    outputRate: 0.87,
+    contextWindow: 1050000,
+    maxTokens: 8192,
+    name: "Xiaomi: MiMo-V2.6-Pro",
+    allowsSystemPrompt: true,
+  },
   {
     id: "o1-preview",
     provider: "openai",
@@ -269,19 +383,20 @@ export const MODEL_CONFIGS = [
 export type LlmId = (typeof MODEL_CONFIGS)[number]["id"];
 export type LlmName = (typeof MODEL_CONFIGS)[number]["name"];
 
-export const DEFAULT_LLM_ID: LlmId = "Claude-Sonnet-5";
+export const DEFAULT_LLM_ID: LlmId = "Claude-Sonnet-5-5";
 
 // Models that should be visible in the UI
 const UI_VISIBLE_MODEL_IDS: LlmId[] = [
-  "Claude-Sonnet-5",
-  "Claude-Opus-4-8",
-  "Claude-4-5-Haiku",
-  "Gemini-3-1-Pro-Preview",
-  "DeepSeek-V4-Pro",
-  "GLM-5-2",
-  "Kimi-K2-7-Code",
-  "MiniMax-M3",
-  "MiMo-V2-5-Pro",
+  "Claude-Sonnet-5-5",
+  "Claude-Opus-5-5",
+  "Claude-Haiku-5-5",
+  "GPT-6-1-Sol",
+  "GPT-6-Luna",
+  "Gemini-4-Argon",
+  "DeepSeek-V4-1-Flash-1017",
+  "GLM-5-3",
+  "Kimi-K3",
+  "MiMo-V2-6-Pro",
 ];
 
 export const UI_VISIBLE_MODELS = MODEL_CONFIGS.filter((model) =>
