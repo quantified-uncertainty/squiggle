@@ -1,0 +1,130 @@
+// Everyday health interventions, in units of "10 minutes walking in nature".
+// Ported from the original relative-values app (model by GPT-4, 2023).
+// Uses the `values` form of the relative values convention.
+// (Negative ranges use `normal({p5, p95})`; modern Squiggle only allows `to` for positive bounds.)
+
+brown_sugar_10g = SampleSet.fromDist(-(0.5 to 3))
+turmeric_1tsp = SampleSet.fromDist(0.1 to 2)
+redwine_1oz = SampleSet.fromDist(normal({ p5: -0.5, p95: 2 }))
+orthomega_fishoil_1cap = SampleSet.fromDist(0.1 to 3)
+laughing_5min = SampleSet.fromDist(0.5 to 3)
+stretching_10min = SampleSet.fromDist(0.2 to 3.5)
+
+item(id, name, clusterId) = { id: id, name: name, clusterId: clusterId }
+
+@name("Health interventions")
+healthInterventions = {
+  title: "Health Interventions",
+  recommendedUnit: "walking_in_nature_10min",
+  clusters: [
+    {
+      id: "activities",
+      name: "Physical and Mental Health Activities",
+      color: "#00B7C2",
+    },
+    { id: "meds", name: "Meds and Supplements", color: "#6E5BA5" },
+    { id: "goodFood", name: "Good Food", color: "#73AF48" },
+    { id: "selfCare", name: "Self-Care Practices", color: "#F4B940" },
+    { id: "unhealthy", name: "Unhealthy Food or Drink", color: "#E6542B" },
+    { id: "sweeteners", name: "Sweeteners", color: "#DB828C" },
+    { id: "wine", name: "Wine", color: "#A53241" },
+    { id: "negative", name: "Negative Health Condition", color: "#2F2D2E" },
+    { id: "badHabits", name: "Bad Habits", color: "#8B572A" },
+  ],
+  items: [
+    item("walking_in_nature_10min", "Walking in Nature (10 min)", "activities"),
+    item("stretching_10min", "Stretching (10 min)", "activities"),
+    item("biking_10min", "Biking (10 min)", "activities"),
+    item("meditation_10min", "Meditation (10 min)", "activities"),
+    item("taking_stairs_5floors", "Taking Stairs (5 floors)", "activities"),
+    item("strength_training_10min", "Strength Training (10 min)", "activities"),
+    item("flu_vaccine_1", "Flu Vaccine (1 time)", "meds"),
+    item("orthomega_fishoil_1cap", "Orthomega Fish Oil (1 cap)", "meds"),
+    item(
+      "zinc_lozenges_6cap_assuming_sick",
+      "Enhanced Zinc Lozenges (6 cap, assuming sick)",
+      "meds"
+    ),
+    item("eating_yogurt_1serving", "Eating Yogurt (1 serving)", "goodFood"),
+    item("whole_grain_bread_1slice", "Whole Grain Bread (1 slice)", "goodFood"),
+    item("drinking_water_8oz", "Drinking Water (8 oz)", "goodFood"),
+    item("green_tea_1cup", "Drinking Green Tea (1 cup)", "goodFood"),
+    item("turmeric_1tsp", "Taking Turmeric (1 tsp)", "goodFood"),
+    item("blueberries_1cup", "Eating Blueberries (1 cup)", "goodFood"),
+    item(
+      "extra_primary_sleep_10min",
+      "Getting extra primary sleep (10 min)",
+      "selfCare"
+    ),
+    item("laughing_5min", "Laughing (5 min)", "selfCare"),
+    item("social_interaction_30min", "Social Interaction (30 min)", "selfCare"),
+    item("washing_hands_30sec", "Washing hands (30 sec)", "selfCare"),
+    item("wearing_face_mask_1day", "Wearing Face Mask (1 day)", "selfCare"),
+    item("brushing_teeth_2min", "Brushing Teeth (2 min)", "selfCare"),
+    item("flossing_1time", "Flossing (1 time)", "selfCare"),
+    item("sunscreen_application_1", "Sunscreen application (1 time)", "selfCare"),
+    item("blackcoffee_1cup", "Drinking black coffee (1 cup)", "unhealthy"),
+    item("diet_coke_250ml", "Drinking diet coke (250 mL)", "unhealthy"),
+    item(
+      "deep_fried_food_1serving",
+      "Eating deep fried food (1 serving)",
+      "unhealthy"
+    ),
+    item(
+      "processed_meat_1serving",
+      "Eating processed meat (1 serving)",
+      "unhealthy"
+    ),
+    item("brown_sugar_10g", "Taking brown sugar (10 g)", "sweeteners"),
+    item("white_sugar_10g", "Taking white sugar (10 g)", "sweeteners"),
+    item("stevia_1pack", "Taking stevia (1 pack)", "sweeteners"),
+    item("redwine_1oz", "Drinking red wine (1 oz)", "wine"),
+    item("redwine_10oz", "Drinking red wine (10 oz)", "wine"),
+    item("vomiting_2min", "Vomiting (2 min)", "negative"),
+    item("diarrhea_1episode", "Diarrhea (1 episode)", "negative"),
+    item("mediocre_headache_10min", "Having mediocre headache (10 min)", "negative"),
+    item("sitting_1hour", "Sitting (1 hour)", "badHabits"),
+    item("screen_time_1hour", "Screen time (1 hour)", "badHabits"),
+    item("smoking_cigarette_1", "Smoking cigarette (1 stick)", "badHabits"),
+  ],
+  values: {
+    walking_in_nature_10min: 1,
+    stretching_10min: stretching_10min,
+    biking_10min: stretching_10min * (3 to 10),
+    meditation_10min: SampleSet.fromDist(0.5 to 10),
+    taking_stairs_5floors: stretching_10min * (1 to 5),
+    strength_training_10min: stretching_10min * (2 to 6),
+    flu_vaccine_1: 5 to 25,
+    orthomega_fishoil_1cap: orthomega_fishoil_1cap,
+    zinc_lozenges_6cap_assuming_sick: orthomega_fishoil_1cap * (5 to 20),
+    eating_yogurt_1serving: 0.2 to 2.5,
+    whole_grain_bread_1slice: 0.1 to 2,
+    drinking_water_8oz: 0.1 to 2,
+    green_tea_1cup: turmeric_1tsp * (0.2 to 3),
+    turmeric_1tsp: turmeric_1tsp,
+    blueberries_1cup: SampleSet.fromDist(0.5 to 5),
+    extra_primary_sleep_10min: 0.2 to 3,
+    laughing_5min: laughing_5min,
+    social_interaction_30min: laughing_5min * (1 to 5),
+    washing_hands_30sec: 0.1 to 5,
+    wearing_face_mask_1day: 0.2 to 1,
+    brushing_teeth_2min: 1 to 4,
+    flossing_1time: 0.5 to 3,
+    sunscreen_application_1: 0.5 to 10,
+    blackcoffee_1cup: normal({ p5: -10, p95: 2 }),
+    diet_coke_250ml: normal({ p5: -2, p95: 0.2 }),
+    deep_fried_food_1serving: -(0.5 to 6),
+    processed_meat_1serving: -(0.5 to 3),
+    brown_sugar_10g: brown_sugar_10g,
+    white_sugar_10g: brown_sugar_10g * (0.7 to 1),
+    stevia_1pack: brown_sugar_10g * (0.001 to 0.2),
+    redwine_1oz: redwine_1oz,
+    redwine_10oz: redwine_1oz * 10,
+    vomiting_2min: -(5 to 100),
+    diarrhea_1episode: -(3 to 50),
+    mediocre_headache_10min: -(1 to 10),
+    sitting_1hour: -(0.1 to 0.5),
+    screen_time_1hour: -(0.1 to 1),
+    smoking_cigarette_1: SampleSet.fromDist(-(1 to 10)),
+  },
+}

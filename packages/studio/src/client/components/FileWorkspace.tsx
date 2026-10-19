@@ -69,7 +69,11 @@ const SquiggleFileWorkspace: FC<Props> = ({
     v.isAvailable({ filePath: file.path, runOutput })
   );
   const activeView =
-    availableViews.find((v) => v.id === viewId) ?? availableViews[0];
+    availableViews.find((v) => v.id === viewId) ??
+    // In embed mode (`render`), fall back to the Output view, which reports
+    // errors, rather than to the editor.
+    (embed ? availableViews.find((v) => v.id === "output") : undefined) ??
+    availableViews[0];
 
   const context: StudioViewContext = {
     filePath: file.path,

@@ -1,4 +1,5 @@
 import { OutputView } from "./OutputView.js";
+import { hasRelativeValues, RelativeValuesView } from "./RelativeValuesView.js";
 import { SplitView } from "./SplitView.js";
 import type { StudioView } from "./types.js";
 
@@ -23,7 +24,18 @@ export const outputView: StudioView = {
   render: (context) => <OutputView context={context} />,
 };
 
-const views: StudioView[] = [splitView, outputView];
+// Shown for files with a top-level relative values spec (see
+// @quri/squiggle-relative-values). The dashboard has its own List / Grid / Plot
+// tabs.
+export const relativeValuesView: StudioView = {
+  id: "relative-values",
+  label: "Relative values",
+  isAvailable: ({ filePath, runOutput }) =>
+    hasRelativeValues(filePath, runOutput),
+  render: (context) => <RelativeValuesView context={context} />,
+};
+
+const views: StudioView[] = [splitView, outputView, relativeValuesView];
 
 // Adds a per-file view tab. Call before the app renders (e.g. in main.tsx).
 // Registering a view with an existing id replaces it.

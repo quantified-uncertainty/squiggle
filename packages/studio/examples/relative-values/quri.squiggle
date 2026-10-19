@@ -1,0 +1,113 @@
+// QURI projects, compared by value.
+// Ported from the original relative-values app (Ozzie Gooen's model, 2022).
+// Uses the `fn` form of the relative values convention.
+
+ss(t) = SampleSet.fromDist(t)
+quri_papers_1 = 1 * ss(20 to 20000)
+blog_post_to_software = ss(0.1 to 100) * quri_papers_1
+quri_papers_4 = quri_papers_1 * ss(0.2 to 20)
+quri_papers_5 = ss(quri_papers_1 * (0.2 to 3))
+quri_papers_10 = ss(quri_papers_1 * (2 to 15))
+quri_papers_12 = quri_papers_10 * (4 to 7)
+quri_guesstimate = (50 to 10000) * blog_post_to_software
+
+dists = {
+  quri_papers_1: quri_papers_1,
+  quri_papers_2: (1 to 2) * quri_papers_1,
+  quri_papers_3: (0.5 to 10) * quri_papers_1,
+  quri_papers_4: quri_papers_4,
+  quri_papers_5: quri_papers_5,
+  quri_papers_6: quri_papers_5 * (0.7 to 2.5),
+  quri_papers_7: quri_papers_5 * (10 to 20),
+  quri_papers_8: quri_papers_5 * (3 to 9),
+  quri_papers_9: quri_papers_5 * (2 to 9),
+  quri_papers_10: quri_papers_10,
+  quri_papers_11: quri_papers_10 * (3 to 6),
+  quri_papers_12: quri_papers_12,
+  quri_papers_13: quri_papers_12,
+  quri_papers_14: quri_papers_12 * (2 to 4),
+  quri_papers_15: quri_papers_12 * (2 to 5),
+  quri_metaforecast: 1 * blog_post_to_software,
+  quri_metaforecast_twitter: (0.01 to 0.1) * blog_post_to_software,
+  quri_squiggle: (3 to 100) * quri_guesstimate,
+  quri_foretold: (0.5 to 100) * blog_post_to_software,
+  quri_homepage: (0.05 to 5) * blog_post_to_software,
+  quri_utility_extractor: (0.005 to 0.2) * blog_post_to_software,
+  quri_ai_safety_papers: (0.01 to 0.5) * blog_post_to_software,
+  quri_ken: (0.1 to 0.5) * blog_post_to_software,
+  quri_guesstimate: quri_guesstimate,
+}
+
+paper(id, name) = { id: id, name: name, clusterId: "papers" }
+software(id, name) = { id: id, name: name, clusterId: "software" }
+
+@name("QURI projects")
+quriProjects = {
+  title: "QURI projects",
+  items: [
+    paper("quri_papers_1", "External Evaluation of the EA Wiki"),
+    paper("quri_papers_2", "Flimsy Pet Theories, Enormous Initiatives"),
+    paper(
+      "quri_papers_3",
+      "Simple comparison polling to create utility functions"
+    ),
+    paper(
+      "quri_papers_4",
+      "Prioritization Research for Advancing Wisdom and Intelligence"
+    ),
+    paper("quri_papers_5", "Shallow evaluations of longtermist organizations"),
+    paper(
+      "quri_papers_6",
+      "2018-2019 Long Term Future Fund Grantees: How did they do?"
+    ),
+    paper(
+      "quri_papers_7",
+      "Introducing Metaforecasting: A Forecast Aggregator and Search Tool"
+    ),
+    paper("quri_papers_8", "Big List of Cause Candidates"),
+    paper("quri_papers_9", "Multivariate estimation & the Squiggly language"),
+    paper(
+      "quri_papers_10",
+      "Amplifying generalist research via forecasting – Part 2"
+    ),
+    paper(
+      "quri_papers_11",
+      "Introducing foretold.io: A New Open-Source Prediction Registry"
+    ),
+    paper(
+      "quri_papers_12",
+      "Conversation on forecasting with Vaniver and Ozzie Gooen"
+    ),
+    paper("quri_papers_13", "Prediction-Augmented Evaluation Systems"),
+    paper("quri_papers_14", "Five steps for quantifying speculative interventions"),
+    paper(
+      "quri_papers_15",
+      "Valuing research works by eliciting comparisons from EA researchers"
+    ),
+    software("quri_metaforecast", "Metaforecast"),
+    software("quri_metaforecast_twitter", "Metaforecast Twitter Bot"),
+    software("quri_squiggle", "Squiggle"),
+    software("quri_foretold", "Foretold.io"),
+    software("quri_homepage", "QuantifiedUncertainty.org"),
+    software("quri_utility_extractor", "Utility Function Extractor"),
+    software("quri_ai_safety_papers", "AI Safety Papers"),
+    software("quri_ken", "Ken"),
+    software("quri_guesstimate", "Guesstimate"),
+  ],
+  clusters: [
+    {
+      id: "papers",
+      name: "Papers",
+      color: "#DB828C",
+      recommendedUnit: "quri_papers_1",
+    },
+    {
+      id: "software",
+      name: "Software",
+      color: "#5D8CD3",
+      recommendedUnit: "quri_guesstimate",
+    },
+  ],
+  recommendedUnit: "quri_papers_1",
+  fn: {|a, b| [dists[a], dists[b]]},
+}

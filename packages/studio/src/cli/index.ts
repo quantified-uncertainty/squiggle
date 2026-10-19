@@ -62,7 +62,18 @@ program
   )
   .argument("<file>", ".squiggle file to render")
   .option("-o, --out <file>", "output PNG path (default: <file>.png)")
-  .option("--variable <name>", "render only this variable")
+  .option(
+    "--variable <name>",
+    "render only this variable (with --view relative-values: the spec to show)"
+  )
+  .option(
+    "--view <id>",
+    'view to render: "output" (default) or "relative-values"'
+  )
+  .option(
+    "--tab <tab>",
+    'relative values tab: "list" (default), "grid" or "plot"'
+  )
   .option("--width <px>", "viewport width", parsePort, 1000)
   .option("--chrome <path>", "path to a Chrome/Chromium executable")
   .action(async (file, options) => {
@@ -70,6 +81,8 @@ program
       file: path.resolve(file),
       out: options.out ? path.resolve(options.out) : undefined,
       variable: options.variable,
+      view: options.view,
+      tab: options.tab,
       width: options.width,
       chromePath: options.chrome,
     });

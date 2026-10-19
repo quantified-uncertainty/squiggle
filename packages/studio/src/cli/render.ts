@@ -75,6 +75,8 @@ export async function renderToPng(params: {
   file: string; // absolute path to a .squiggle file
   out?: string; // absolute path of the PNG; defaults to <file>.png
   variable?: string; // render a single variable
+  view?: string; // view id, e.g. "relative-values"; defaults to "output"
+  tab?: string; // relative values dashboard tab: "list", "grid" or "plot"
   width?: number;
   chromePath?: string;
 }): Promise<string> {
@@ -104,10 +106,11 @@ export async function renderToPng(params: {
     });
     const query = new URLSearchParams({
       file: path.basename(params.file),
-      view: "output",
+      view: params.view ?? "output",
       embed: "1",
     });
     if (params.variable) query.set("variable", params.variable);
+    if (params.tab) query.set("tab", params.tab);
     await page.goto(`${server.url}/?${query}`, {
       waitUntil: "load", // not networkidle: the SSE stream stays open
       timeout: 60_000,

@@ -1,7 +1,13 @@
 "use client";
 import { FC, Fragment } from "react";
 
-import { NumberShower, SquiggleChart } from "@quri/squiggle-components";
+import {
+  NumberShower,
+  useSimulator,
+  ViewerWithMenuBar,
+} from "@quri/squiggle-components";
+import { SqLinker } from "@quri/squiggle-lang";
+import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
 import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
@@ -94,6 +100,35 @@ ratio
 `;
 };
 
+// Like `SquiggleChart`, but supports a linker and a source id, so that models
+// with imports work.
+const PairChart: FC<{ code: string; linker?: SqLinker; sourceId?: string }> = ({
+  code,
+  linker,
+  sourceId,
+}) => {
+  const { simulation } = useSimulator({
+    code,
+    sourceId,
+    setup: linker
+      ? { type: "projectFromLinker", linker }
+      : { type: "standalone" },
+  });
+
+  if (!simulation) {
+    return <RefreshIcon className="animate-spin" />;
+  }
+
+  return (
+    <ViewerWithMenuBar
+      simulation={simulation}
+      playgroundSettings={{}}
+      showMenu
+      randomizeSeed={undefined}
+    />
+  );
+};
+
 type Props = {
   model: ModelEvaluator;
   numeratorItem: Item;
@@ -105,7 +140,7 @@ export const ItemSideBar: FC<Props> = ({
   numeratorItem,
   denominatorItem,
 }) => {
-  const { getPlaygroundUrl } = useRelativeValuesOptions();
+  const { getPlaygroundUrl, linker, sourceId } = useRelativeValuesOptions();
   const result = model.compare(numeratorItem.id, denominatorItem.id);
   if (!result.ok) {
     return <div>Result not found</div>;
@@ -121,7 +156,6 @@ export const ItemSideBar: FC<Props> = ({
           })
         : undefined;
 
-    // It would be better to not load SquiggleChart, but rather, a lower-level compontent. That can be refactored later.
     return (
       <div>
         <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1">
@@ -151,7 +185,9 @@ export const ItemSideBar: FC<Props> = ({
           </span>
         </div>
 
-        {squiggleCode !== undefined && <SquiggleChart code={squiggleCode} />}
+        {squiggleCode !== undefined && (
+          <PairChart code={squiggleCode} linker={linker} sourceId={sourceId} />
+        )}
 
         <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
           <TableRow label="median" number={item.median} />

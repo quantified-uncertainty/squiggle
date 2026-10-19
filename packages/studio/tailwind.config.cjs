@@ -7,6 +7,10 @@ module.exports = {
     path.join(__dirname, "src/client/**/*.{ts,tsx,html}"),
     path.join(__dirname, "node_modules/@quri/ui/dist/**/*.js"),
     path.join(__dirname, "node_modules/@quri/squiggle-components/dist/**/*.js"),
+    path.join(
+      __dirname,
+      "node_modules/@quri/squiggle-relative-values/dist/**/*.js"
+    ),
   ],
   plugins: [
     require("@tailwindcss/forms")({ strategy: "class" }),

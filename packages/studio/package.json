@@ -45,6 +45,7 @@
     "@quri/configs": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-relative-values": "workspace:*",
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.10",
     "@types/node": "^22.14.0",

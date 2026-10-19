@@ -9,6 +9,7 @@ import {
   useMemo,
 } from "react";
 
+import { SqLinker } from "@quri/squiggle-lang";
 import { generateProvider } from "@quri/ui";
 
 import { Clusters, RelativeValuesDefinition } from "../../types.js";
@@ -39,6 +40,13 @@ type ViewContextShape = {
 export type RelativeValuesOptions = {
   // If set, the list view sidebar shows an "Open in Playground" link.
   getPlaygroundUrl?: (code: string) => string;
+  // Resolves imports in the per-pair Squiggle charts of the list view sidebar
+  // (which re-run the model code). Without it, models with imports can't show
+  // these charts.
+  linker?: SqLinker;
+  // Source id of the model, passed to the linker as the importing module's id
+  // so that relative imports (`import "./other.squiggle"`) resolve.
+  sourceId?: string;
 };
 
 type DataContextShape = {
@@ -185,11 +193,17 @@ export const RelativeValuesProvider: FC<RelativeValuesProviderProps> = ({
   evaluator,
   definition,
   getPlaygroundUrl,
+  linker,
+  sourceId,
   children,
 }) => {
   const data = useMemo(
-    () => ({ evaluator, definition, options: { getPlaygroundUrl } }),
-    [evaluator, definition, getPlaygroundUrl]
+    () => ({
+      evaluator,
+      definition,
+      options: { getPlaygroundUrl, linker, sourceId },
+    }),
+    [evaluator, definition, getPlaygroundUrl, linker, sourceId]
   );
 
   // Reset filters when the set of clusters changes.

@@ -83,7 +83,7 @@ export const RelativeValuesDashboard: FC<RelativeValuesDashboardProps> = ({
   onTabChange,
   showTabs = true,
   header,
-  getPlaygroundUrl,
+  ...options
 }) => {
   const [uncontrolledTab, setUncontrolledTab] =
     useState<RelativeValuesTab>(initialTab);
@@ -105,7 +105,7 @@ export const RelativeValuesDashboard: FC<RelativeValuesDashboardProps> = ({
     <RelativeValuesProvider
       definition={definition}
       evaluator={evaluator}
-      getPlaygroundUrl={getPlaygroundUrl}
+      {...options}
     >
       <div className="flex flex-col gap-4">
         {(showTabs || headerContent) && (
