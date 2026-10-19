@@ -48,12 +48,24 @@ export function saveFolderState(root: string, state: FolderState): void {
   writeStorage(folderKey(root), state);
 }
 
-const viewKey = "squiggle-studio:view";
+// The view (Output, Relative values, Playground) last chosen per file.
+const viewsKey = (root: string) => `squiggle-studio:views:${root}`;
+const viewsSchema = z.record(z.string(), z.string());
 
-export function loadViewId(): string | undefined {
-  return readStorage(viewKey, z.string());
+export function loadViewIds(root: string): Record<string, string> {
+  return readStorage(viewsKey(root), viewsSchema) ?? {};
 }
 
-export function saveViewId(id: string): void {
-  writeStorage(viewKey, id);
+export function saveViewIds(root: string, views: Record<string, string>) {
+  writeStorage(viewsKey(root), views);
+}
+
+const followKey = "squiggle-studio:follow-changes";
+
+export function loadFollowChanges(): boolean {
+  return readStorage(followKey, z.boolean()) ?? false;
+}
+
+export function saveFollowChanges(follow: boolean): void {
+  writeStorage(followKey, follow);
 }

@@ -42,4 +42,7 @@ export type StudioView = {
   // Hidden views don't get a tab. Called on every render; keep it cheap.
   isAvailable: (args: StudioViewAvailabilityArgs) => boolean;
   render: (context: StudioViewContext) => ReactNode;
+  // Views with their own code editor (e.g. the playground) are shown without
+  // Studio's code pane.
+  hasOwnEditor?: boolean;
 };

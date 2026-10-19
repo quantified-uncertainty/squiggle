@@ -1,15 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { type StudioEvent, studioEventSchema } from "../../shared/api.js";
 
 // Subscribes to the server's file-change stream (Server-Sent Events).
 // EventSource reconnects automatically if the server restarts.
-export function useStudioEvents(onEvent: (event: StudioEvent) => void): void {
+// Returns whether the stream is currently connected.
+export function useStudioEvents(
+  onEvent: (event: StudioEvent) => void
+): boolean {
   const handlerRef = useRef(onEvent);
   handlerRef.current = onEvent;
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     const source = new EventSource("/api/events");
+    source.onopen = () => setConnected(true);
+    source.onerror = () => setConnected(false);
     source.onmessage = (message: MessageEvent<string>) => {
       let json: unknown;
       try {
@@ -22,4 +28,6 @@ export function useStudioEvents(onEvent: (event: StudioEvent) => void): void {
     };
     return () => source.close();
   }, []);
+
+  return connected;
 }

@@ -10,9 +10,12 @@ export type {
   StudioViewContext,
 } from "./types.js";
 
+// The full Squiggle playground (its own editor, settings and viewer). The id is
+// "split" for compatibility with saved state and `?view=split`.
 export const splitView: StudioView = {
   id: "split",
-  label: "Split",
+  label: "Playground",
+  hasOwnEditor: true,
   isAvailable: () => true,
   render: (context) => <SplitView context={context} />,
 };
@@ -35,7 +38,7 @@ export const relativeValuesView: StudioView = {
   render: (context) => <RelativeValuesView context={context} />,
 };
 
-const views: StudioView[] = [splitView, outputView, relativeValuesView];
+const views: StudioView[] = [outputView, relativeValuesView, splitView];
 
 // Adds a per-file view tab. Call before the app renders (e.g. in main.tsx).
 // Registering a view with an existing id replaces it.
@@ -49,4 +52,4 @@ export function getStudioViews(): readonly StudioView[] {
   return views;
 }
 
-export const DEFAULT_VIEW_ID = splitView.id;
+export const DEFAULT_VIEW_ID = outputView.id;

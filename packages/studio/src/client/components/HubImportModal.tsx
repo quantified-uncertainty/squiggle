@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from "react";
 
 import { Button, Modal, StyledInput, useToast } from "@quri/ui";
 
+import { API_ERROR_CODES } from "../../shared/api.js";
 import { api, ApiError } from "../lib/api.js";
 
 type Props = {
@@ -49,7 +50,7 @@ export const HubImportModal: FC<Props> = ({ onImported, close }) => {
     } catch (e) {
       if (
         e instanceof ApiError &&
-        e.status === 409 &&
+        e.code === API_ERROR_CODES.fileExists &&
         window.confirm(`${target} already exists. Overwrite it?`)
       ) {
         setBusy(false);

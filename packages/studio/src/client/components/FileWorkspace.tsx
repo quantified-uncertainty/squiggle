@@ -1,4 +1,5 @@
-import { FC, useMemo, useState } from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { useSimulator } from "@quri/squiggle-components";
 import { RefreshIcon } from "@quri/ui";
@@ -10,20 +11,28 @@ import type {
   StudioView,
   StudioViewContext,
 } from "../views/types.js";
+import { CodePane, CodeToggle, useCodePaneState } from "./CodePane.js";
 import { ViewTabs } from "./ViewTabs.js";
 
 type Props = {
   file: OpenFile;
   views: readonly StudioView[];
-  viewId: string;
+  viewId: string | undefined; // undefined: pick a default for this file
   onSelectView: (id: string) => void;
   setBuffer: (path: string, code: string) => void;
   openFile: (path: string) => void;
   recordDependency: (file: string, dep: string) => void;
   embed: boolean;
   variable?: string;
-  toolbarRight?: React.ReactNode;
+  toolbarRight?: ReactNode;
+  // Slot in the tab bar for the view switcher and save state.
+  toolbarTarget: HTMLElement | null;
 };
+
+const Toolbar: FC<{ target: HTMLElement | null; children: ReactNode }> = ({
+  target,
+  children,
+}) => (target ? createPortal(children, target) : null);
 
 // Runs the file (for the Output view and any registered views) and renders the
 // view bar plus the active view. Remounted (via `key`) when the file's imports
@@ -39,7 +48,9 @@ const SquiggleFileWorkspace: FC<Props> = ({
   embed,
   variable,
   toolbarRight,
+  toolbarTarget,
 }) => {
+  const [codePane, setCodePane] = useCodePaneState();
   const [linker] = useState(() =>
     makeStudioLinker((dep) => recordDependency(file.path, dep))
   );
@@ -73,6 +84,11 @@ const SquiggleFileWorkspace: FC<Props> = ({
     // In embed mode (`render`), fall back to the Output view, which reports
     // errors, rather than to the editor.
     (embed ? availableViews.find((v) => v.id === "output") : undefined) ??
+    // Without a saved choice, files with a relative values spec open on their
+    // dashboard.
+    (viewId === undefined
+      ? availableViews.find((v) => v.id === "relative-values")
+      : undefined) ??
     availableViews[0];
 
   const context: StudioViewContext = {
@@ -91,33 +107,55 @@ const SquiggleFileWorkspace: FC<Props> = ({
     return <div>{activeView?.render(context)}</div>;
   }
 
+  // Views that bring their own editor (the playground) don't get the pane.
+  const canShowCode = activeView !== undefined && !activeView.hasOwnEditor;
+  const showCode = canShowCode && codePane.open;
+
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 px-3 py-1.5">
-        <span className="truncate text-xs text-slate-500" title={file.path}>
-          {file.path}
-        </span>
-        <div className="ml-auto flex items-center gap-3">
-          {toolbarRight}
-          <ViewTabs
-            views={availableViews}
-            activeId={activeView?.id ?? ""}
-            onSelect={onSelectView}
+    <div className="h-full min-h-0">
+      <Toolbar target={toolbarTarget}>
+        {toolbarRight}
+        {canShowCode && (
+          <CodeToggle
+            open={codePane.open}
+            onToggle={() => setCodePane({ open: !codePane.open })}
           />
-        </div>
-      </div>
-      <div className="min-h-0 flex-1">{activeView?.render(context)}</div>
+        )}
+        <ViewTabs
+          views={availableViews}
+          activeId={activeView?.id ?? ""}
+          onSelect={onSelectView}
+        />
+      </Toolbar>
+      {showCode ? (
+        <CodePane
+          editorKey={context.editorKey}
+          code={file.buffer}
+          setCode={context.setCode}
+          sourceId={file.path}
+          project={project}
+          simulation={simulation}
+          fraction={codePane.fraction}
+          onResize={(fraction) => setCodePane({ fraction })}
+        >
+          {activeView?.render(context)}
+        </CodePane>
+      ) : (
+        activeView?.render(context)
+      )}
     </div>
   );
 };
 
 // Plain text editor for .json / .md files.
-const TextFileWorkspace: FC<Props> = ({ file, setBuffer, toolbarRight }) => (
+const TextFileWorkspace: FC<Props> = ({
+  file,
+  setBuffer,
+  toolbarRight,
+  toolbarTarget,
+}) => (
   <div className="flex h-full min-h-0 flex-col">
-    <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 px-3 py-1.5">
-      <span className="truncate text-xs text-slate-500">{file.path}</span>
-      <div className="ml-auto flex items-center gap-3">{toolbarRight}</div>
-    </div>
+    <Toolbar target={toolbarTarget}>{toolbarRight}</Toolbar>
     <textarea
       key={file.editorEpoch}
       className="min-h-0 flex-1 resize-none border-0 p-4 font-mono text-sm text-slate-800 focus:ring-0"

@@ -5,12 +5,17 @@ import { ChevronDownIcon, ChevronRightIcon } from "@quri/ui";
 
 import type { TreeNode } from "../../shared/api.js";
 import { FileIcon, FolderIcon, SquiggleIcon } from "./icons.js";
+import { InlineNameInput, withExtension } from "./InlineNameInput.js";
 
 type Props = {
   nodes: TreeNode[];
   activePath: string | null;
   dirtyPaths: Set<string>;
+  // Last external change per path; recently changed files are highlighted.
+  externalChanges: Record<string, number>;
   onOpen: (path: string) => void;
+  // Double-clicking a file renames it.
+  onRename: (from: string, to: string) => Promise<void>;
 };
 
 const indent = (depth: number) => ({ paddingLeft: 8 + depth * 14 });
@@ -20,8 +25,11 @@ const Node: FC<Omit<Props, "nodes"> & { node: TreeNode; depth: number }> = ({
   depth,
   activePath,
   dirtyPaths,
+  externalChanges,
   onOpen,
+  onRename,
 }) => {
+  const [renaming, setRenaming] = useState(false);
   const [expanded, setExpanded] = useState(
     () => depth < 1 || (activePath?.startsWith(node.path + "/") ?? false)
   );
@@ -52,7 +60,9 @@ const Node: FC<Omit<Props, "nodes"> & { node: TreeNode; depth: number }> = ({
                 depth={depth + 1}
                 activePath={activePath}
                 dirtyPaths={dirtyPaths}
+                externalChanges={externalChanges}
                 onOpen={onOpen}
+                onRename={onRename}
               />
             ))}
           </ul>
@@ -63,19 +73,40 @@ const Node: FC<Omit<Props, "nodes"> & { node: TreeNode; depth: number }> = ({
 
   const isActive = node.path === activePath;
   const isSquiggle = node.name.endsWith(".squiggle");
+  const changedAt = externalChanges[node.path];
+  if (renaming) {
+    return (
+      <li>
+        <InlineNameInput
+          initialValue={node.path}
+          style={indent(depth + 1)}
+          onCancel={() => setRenaming(false)}
+          onSubmit={async (value) => {
+            const to = withExtension(value);
+            if (to !== node.path) await onRename(node.path, to);
+            setRenaming(false);
+          }}
+        />
+      </li>
+    );
+  }
   return (
     <li>
       <button
+        // A new key restarts the highlight animation on every change.
+        key={changedAt ?? "unchanged"}
         type="button"
         title={node.path}
         className={clsx(
           "flex w-full items-center gap-1.5 rounded py-0.5 pr-2 text-left text-sm",
+          changedAt !== undefined && "studio-changed",
           isActive
             ? "bg-slate-200 font-medium text-slate-900"
             : "text-slate-700 hover:bg-slate-200/60"
         )}
         style={indent(depth + 1)}
         onClick={() => onOpen(node.path)}
+        onDoubleClick={() => setRenaming(true)}
       >
         {isSquiggle ? (
           <SquiggleIcon size={14} className="shrink-0 text-orange-500" />

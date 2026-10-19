@@ -26,3 +26,17 @@ html.studio-embed #root,
 html.studio-embed #root > div {
   height: auto;
 }
+
+/* Highlights a file in the tree when it changes on disk. */
+@keyframes studio-changed {
+  from {
+    background-color: rgb(253 230 138); /* amber-200 */
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.studio-changed {
+  animation: studio-changed 4s ease-out;
+}
