@@ -247,13 +247,13 @@ export type RelativeValuesDashboardProps<TabId extends string = never> = {
   definition: RelativeValuesDefinition;
   evaluator: ModelEvaluator;
   // Tabs to show, in order: built-in tab ids and custom tabs. Defaults to
-  // `["list", "grid", "plot"]`.
+  // `["list", "grid", "plot"]`. Custom tab ids are inferred from here only.
   tabs?: RelativeValuesTabConfig<TabId>[];
   // Controlled mode; if set, `initialTab` is ignored.
-  tab?: RelativeValuesTab | TabId;
+  tab?: RelativeValuesTab | NoInfer<TabId>;
   // Uncontrolled mode; defaults to the first tab.
-  initialTab?: RelativeValuesTab | TabId;
-  onTabChange?: (tab: RelativeValuesTab | TabId) => void;
+  initialTab?: RelativeValuesTab | NoInfer<TabId>;
+  onTabChange?: (tab: RelativeValuesTab | NoInfer<TabId>) => void;
   // Defaults to true. Hide if you render tab buttons yourself.
   showTabs?: boolean;
   // Rendered on the left side of the header row. Defaults to the definition title.

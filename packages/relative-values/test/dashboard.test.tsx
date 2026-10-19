@@ -92,6 +92,31 @@ describe("dashboard rendering", () => {
     expect(html).toContain("<p>3 items, live: false</p>");
   });
 
+  test("tab ids are typed", async () => {
+    const { bundle } = await setup();
+    const tabs: string[] = [];
+    const element = (
+      <RelativeValuesBundleDashboard
+        bundle={bundle}
+        tabs={["grid", { id: "ranking", label: "Ranking", render: () => null }]}
+        initialTab="ranking"
+        onTabChange={(tab) => {
+          const typed: "list" | "grid" | "plot" | "ranking" = tab;
+          tabs.push(typed);
+        }}
+      />
+    );
+    expect(renderToStaticMarkup(element)).toContain(">Ranking<");
+    const invalid = (
+      <RelativeValuesBundleDashboard
+        bundle={bundle}
+        // @ts-expect-error: unknown tab id
+        initialTab="nope"
+      />
+    );
+    expect(invalid).toBeTruthy();
+  });
+
   test("invalid bundle", () => {
     const html = renderToStaticMarkup(
       <RelativeValuesBundleDashboard bundle={{ version: 1 }} />
