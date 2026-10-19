@@ -35,7 +35,7 @@ export const RelativeValuesUnitPicker: FC<{ className?: string }> = ({
         )}
       >
         <Button>
-          {labels["list.valueInTermsOf"]}: {unit?.name ?? "—"}
+          {labels["unitPicker.label"]}: {unit?.name ?? "—"}
         </Button>
       </Dropdown>
     </div>

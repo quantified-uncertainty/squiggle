@@ -230,7 +230,8 @@ const DashboardFrame: FC<
   ) : (
     header
   );
-  const showTabs = controls.tabs && !core.isLocked("view");
+  const showTabs =
+    controls.tabs && !core.isLocked("view") && core.status !== "error";
   const fixedHeight = height !== undefined;
 
   const tabBar = showTabs

@@ -66,6 +66,7 @@ export const RelativeCell: FC<{
           "bg-[var(--squiggle-rv-selected-bg,#f1f5f9)] ring-2 ring-inset ring-[color:var(--squiggle-rv-accent,#64748b)]"
       )}
       data-rv-selected={selected ? "" : undefined}
+      data-rv-median={result?.ok ? result.value.median : undefined}
     >
       {result === undefined ? (
         <CellBox>

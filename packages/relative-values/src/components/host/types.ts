@@ -183,6 +183,7 @@ export type RelativeValuesLabels = {
   "list.name": string;
   "list.description": string;
   "list.valueInTermsOf": string; // "Estimated value, in terms of"
+  "unitPicker.label": string; // "In units of" (RelativeValuesUnitPicker)
   "grid.rowSettings": string;
   "grid.columnSettings": string;
   "grid.clusterDiagram": string;

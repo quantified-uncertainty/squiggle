@@ -13,6 +13,7 @@ export const defaultRelativeValuesLabels: RelativeValuesLabels = {
   "list.name": "Name",
   "list.description": "Description",
   "list.valueInTermsOf": "Estimated value, in terms of",
+  "unitPicker.label": "In units of",
   "grid.rowSettings": "Row Settings",
   "grid.columnSettings": "Column Settings",
   "grid.clusterDiagram": "Cluster Diagram",
