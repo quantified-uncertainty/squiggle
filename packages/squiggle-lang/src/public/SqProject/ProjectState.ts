@@ -169,14 +169,15 @@ export class ProjectState implements ProjectStateData {
       }
       const mod = entry.value;
 
+      // Modules with unresolvable imports fail without waiting for their other imports, so they're nobody's parents.
+      const imports = mod.getImports(this.linker);
       if (
-        mod
-          .getImports(this.linker)
-          .some(
-            (imp) =>
-              imp.name === modulePointer.name &&
-              (!mod.pins[imp.name] || mod.pins[imp.name] === modulePointer.hash)
-          )
+        imports.ok &&
+        imports.value.some(
+          (imp) =>
+            imp.name === modulePointer.name &&
+            (!mod.pins[imp.name] || mod.pins[imp.name] === modulePointer.hash)
+        )
       ) {
         parents.push(hash);
       }
@@ -210,7 +211,12 @@ export class ProjectState implements ProjectStateData {
 
       visited = visited.add(module.value.hash());
 
-      for (const imp of module.value.getImports(this.linker)) {
+      const imports = module.value.getImports(this.linker);
+      if (!imports.ok) {
+        return { type: "failed" };
+      }
+
+      for (const imp of imports.value) {
         const importedModule = this.getModuleDataByPointer(
           importToPointer(imp)
         );
@@ -275,8 +281,11 @@ export class ProjectState implements ProjectStateData {
         if (!module || module.type !== "loaded") {
           return;
         }
-        for (const importBinding of module.value.getImports(this.linker) ??
-          []) {
+        const imports = module.value.getImports(this.linker);
+        if (!imports.ok) {
+          return;
+        }
+        for (const importBinding of imports.value) {
           let importedModuleHash: string | undefined =
             module.value.pins[importBinding.name];
 

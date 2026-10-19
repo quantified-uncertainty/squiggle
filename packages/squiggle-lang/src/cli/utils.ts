@@ -92,6 +92,14 @@ export function myParseInt(value: string) {
   return parsedValue;
 }
 
+export function myParsePositiveInt(value: string) {
+  const parsedValue = myParseInt(value);
+  if (parsedValue <= 0) {
+    throw new InvalidArgumentError("Must be a positive integer.");
+  }
+  return parsedValue;
+}
+
 export function debugLog(...args: string[]) {
   const date = new Date();
   console.debug(yellow(formatDate(date, "yyyy-MM-dd HH:mm:ss.SSS")), ...args);

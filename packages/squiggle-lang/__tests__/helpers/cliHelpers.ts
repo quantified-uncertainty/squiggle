@@ -16,15 +16,18 @@ export async function runCLI(args: string[]) {
     .mockImplementation((...args) => (stderr += args.join(" ") + "\n"));
 
   const program = makeProgram();
-  program.exitOverride();
-  program.configureOutput({
-    writeOut: (str) => {
-      stdout += str;
-    },
-    writeErr: (str) => {
-      stderr += str;
-    },
-  });
+  // Subcommands don't inherit these settings when they're set after the subcommands are created.
+  for (const command of [program, ...program.commands]) {
+    command.exitOverride();
+    command.configureOutput({
+      writeOut: (str) => {
+        stdout += str;
+      },
+      writeErr: (str) => {
+        stderr += str;
+      },
+    });
+  }
 
   // Capture process.exitCode set by our error handlers
   const originalExitCode = process.exitCode;

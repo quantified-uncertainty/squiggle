@@ -13,10 +13,16 @@ import { sqValueToJson } from "../../public/SqValue/toJson.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold } from "../colors.js";
-import { ErrorJson, errorToJson, printErrors } from "../errorReport.js";
+import {
+  ErrorJson,
+  exceptionToErrorJson,
+  errorToJson,
+  printErrors,
+} from "../errorReport.js";
 import { EVAL_SOURCE_ID, makeFileLinker } from "../linker.js";
 import { StateGraph } from "../StateGraph.js";
-import { loadSrc, myParseInt } from "../utils.js";
+import { loadSrc, myParseInt, myParsePositiveInt } from "../utils.js";
+import { makeFileWatcher, makeRerunScheduler } from "../watch.js";
 
 type OutputMode =
   | "NONE"
@@ -24,7 +30,9 @@ type OutputMode =
   | "RESULT_AND_BINDINGS"
   | "JSON";
 
-type RunArgs = {
+const WATCH_DEBOUNCE_MS = 100;
+
+export type RunArgs = {
   src: string;
   filename?: string;
   output: OutputMode;
@@ -132,20 +140,49 @@ export function outputToJson(
   };
 }
 
+function exceptionToJson(e: unknown): RunJsonOutput {
+  return {
+    ok: false,
+    result: null,
+    bindings: {},
+    errors: [exceptionToErrorJson(e)],
+    timeMs: 0,
+  };
+}
+
+function printJson(json: RunJsonOutput) {
+  if (!json.ok) {
+    process.exitCode = 1;
+  }
+  console.log(JSON.stringify(json, null, 2));
+}
+
+// `--json` promises a single JSON object on stdout, so unexpected exceptions are reported in it too.
+async function runJson(args: RunArgs & { environment: Env }) {
+  let json: RunJsonOutput;
+  let files: string[] = [];
+  try {
+    const { output, sources } = await evaluate(args);
+    json = outputToJson(output, sources, args.samples);
+    files = [...sources.keys()];
+  } catch (e) {
+    json = exceptionToJson(e);
+  }
+  printJson(json);
+  return files;
+}
+
 // Runs the code once and prints the output. Returns the files that were loaded, for `--watch`.
 async function run(args: RunArgs): Promise<string[]> {
   const environment = makeEnvironment(args);
+  if (args.output === "JSON") {
+    return runJson({ ...args, environment });
+  }
+
   const { output, sources } = await evaluate({ ...args, environment });
 
   if (!output.result.ok) {
     process.exitCode = 1;
-  }
-
-  if (args.output === "JSON") {
-    console.log(
-      JSON.stringify(outputToJson(output, sources, args.samples), null, 2)
-    );
-    return [...sources.keys()];
   }
 
   const printer = new CliPrinter();
@@ -179,18 +216,13 @@ async function run(args: RunArgs): Promise<string[]> {
   return [...sources.keys()];
 }
 
-// Re-runs the code whenever the root file or any of its (transitive) imports change.
-async function watch(args: RunArgs, filename: string) {
-  let watchers: fs.FSWatcher[] = [];
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  let running = false;
+// Re-runs the code whenever the root file or any of its (transitive) imports
+// change. Keeps watching while the code runs: changes made during a run
+// trigger another run once it finishes. Returns a handle to stop watching.
+export async function watch(args: RunArgs, filename: string) {
+  const watcher = makeFileWatcher(() => scheduler.trigger());
 
-  const rerun = async () => {
-    if (running) return;
-    running = true;
-    watchers.forEach((w) => w.close());
-    watchers = [];
-
+  const scheduler = makeRerunScheduler(async () => {
     let files = [filename];
     try {
       const src = fs.readFileSync(filename, "utf-8");
@@ -198,25 +230,29 @@ async function watch(args: RunArgs, filename: string) {
       process.exitCode = undefined;
       files = await run({ ...args, src });
     } catch (e) {
-      console.error(e instanceof Error ? e.message : String(e));
+      if (args.output === "JSON") {
+        printJson(exceptionToJson(e));
+      } else {
+        console.error(e instanceof Error ? e.message : String(e));
+      }
     }
+    // Imports might have changed.
+    watcher.setFiles([filename, ...files]);
     if (args.output !== "JSON") {
-      console.error(`\nWatching ${files.length} file(s) for changes...`);
+      console.error(`\nWatching ${watcher.size()} file(s) for changes...`);
     }
+  }, WATCH_DEBOUNCE_MS);
 
-    for (const file of new Set([filename, ...files])) {
-      if (file === EVAL_SOURCE_ID || !fs.existsSync(file)) continue;
-      watchers.push(
-        fs.watch(file, () => {
-          clearTimeout(timer);
-          timer = setTimeout(() => void rerun(), 100);
-        })
-      );
-    }
-    running = false;
+  // Watch the root file during the first run, too.
+  watcher.setFiles([filename]);
+  await scheduler.run();
+
+  return {
+    close() {
+      scheduler.cancel();
+      watcher.close();
+    },
   };
-
-  await rerun();
 }
 
 export function addRunCommand(program: Command) {
@@ -245,7 +281,7 @@ export function addRunCommand(program: Command) {
         "number of samples per distribution (default: 1000)"
       )
         .env("SAMPLE_COUNT")
-        .argParser(myParseInt)
+        .argParser(myParsePositiveInt)
     )
     .option(
       "-w, --watch",

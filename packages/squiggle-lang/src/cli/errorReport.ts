@@ -15,7 +15,8 @@ export type LocationJson = {
 };
 
 export type ErrorJson = {
-  kind: "compile" | "runtime" | "other";
+  // "internal" is for unexpected exceptions in the CLI or in squiggle-lang itself.
+  kind: "compile" | "runtime" | "other" | "internal";
   message: string;
   location?: LocationJson;
   stack?: { name: string; location?: LocationJson }[];
@@ -33,17 +34,21 @@ function locationToJson(location: LocationRange): LocationJson {
   };
 }
 
-// For import errors, returns the original error and the chain of imports that led to it.
+// For import errors, returns the original error, the chain of imports that led
+// to it, and the location of the innermost import statement.
 function unwrapError(error: SqError): {
   inner: Exclude<SqError, { tag: "import" }>;
   importChain?: string[];
+  importLocation?: LocationRange;
 } {
   if (error.tag !== "import") {
     return { inner: error };
   }
+  const frames = error.getFrameArray(); // innermost import first
   return {
     inner: error.wrappedError() as Exclude<SqError, { tag: "import" }>,
-    importChain: error.getFrameArray().map((frame) => frame.name()),
+    importChain: frames.map((frame) => frame.name()),
+    importLocation: frames[0]?.location(),
   };
 }
 
@@ -52,10 +57,13 @@ export function errorToJson(
   // Source code by source id, used to look up the offending line for hints.
   sources: ReadonlyMap<string, string>
 ): ErrorJson {
-  const { inner, importChain } = unwrapError(error);
+  const { inner, importChain, importLocation } = unwrapError(error);
   const json: ErrorJson = { kind: inner.tag, message: inner.toString() };
 
-  const location = inner.tag === "other" ? undefined : inner.location();
+  // Errors without a location of their own, e.g. failures to resolve or load
+  // an import, point to the import statement.
+  const ownLocation = inner.tag === "other" ? undefined : inner.location();
+  const location = ownLocation ?? importLocation;
   if (location) {
     json.location = locationToJson(location);
   }
@@ -74,14 +82,23 @@ export function errorToJson(
     json.importChain = importChain;
   }
 
-  const line = location
-    ? sources.get(location.source)?.split("\n")[location.start.line - 1]
+  // Line-based hints are about the error's own code, not the import statement.
+  const line = ownLocation
+    ? sources.get(ownLocation.source)?.split("\n")[ownLocation.start.line - 1]
     : undefined;
   const hints = getErrorHints({ message: json.message, line });
   if (hints.length) {
     json.hints = hints;
   }
   return json;
+}
+
+// For exceptions that escaped Squiggle's own error reporting.
+export function exceptionToErrorJson(e: unknown): ErrorJson {
+  return {
+    kind: "internal",
+    message: e instanceof Error ? e.message : String(e),
+  };
 }
 
 export function warningsForSources(
@@ -100,6 +117,8 @@ function errorHeader(kind: ErrorJson["kind"]): string {
       return "Runtime Error";
     case "other":
       return "Error";
+    case "internal":
+      return "Internal Error";
   }
 }
 
