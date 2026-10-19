@@ -27,14 +27,33 @@ export {
   type RelativeValuesCache,
 } from "./values/cache.js";
 export {
+  type ComputeOptions,
+  type ComputeProgress,
   type CreateModelEvaluatorOptions,
   extractOkValues,
   getParamPercentiles,
+  type ItemPair,
   ModelEvaluator,
   type ModelEvaluatorOptions,
 } from "./values/ModelEvaluator.js";
+
+// Precomputed bundles
+export {
+  type BundleNumber,
+  createRelativeValuesBundle,
+  type CreateRelativeValuesBundleParams,
+  parseRelativeValuesBundle,
+  RELATIVE_VALUES_BUNDLE_VERSION,
+  type RelativeValuesBundle,
+  type RelativeValuesBundleMeta,
+  relativeValuesBundleMetaSchema,
+  type RelativeValuesBundlePair,
+  relativeValuesBundleSchema,
+  relativeValuesCacheFromBundle,
+  stringifyRelativeValuesBundle,
+} from "./values/bundle.js";
 export { hasInvalid } from "./values/value.js";
-export { cartesianProduct } from "./lib/utils.js";
+export { cartesianProduct, yieldToEventLoop } from "./lib/utils.js";
 
 // Squiggle convention
 export {
