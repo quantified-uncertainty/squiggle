@@ -38,9 +38,25 @@
 
 @layer base {
   .squiggle-rv {
-    /* Override with `--squiggle-rv-font-family` on a parent element. */
+    /*
+     * Theming: set these CSS variables on a parent element (or with the
+     * `themeClassName` prop, which also reaches dropdown and tooltip
+     * portals). Custom properties aren't reset by `all: initial`, so they
+     * inherit. Each has today's look as its fallback:
+     *
+     * --squiggle-rv-font-family, --squiggle-rv-font-size, --squiggle-rv-text,
+     * --squiggle-rv-muted, --squiggle-rv-bg, --squiggle-rv-border,
+     * --squiggle-rv-header-bg, --squiggle-rv-panel-bg, --squiggle-rv-accent,
+     * --squiggle-rv-selected-bg, --squiggle-rv-radius,
+     * --squiggle-rv-cell-padding, --squiggle-rv-grid-cell-width,
+     * --squiggle-rv-sidebar-width.
+     *
+     * Font sizes and line heights are multiples of --squiggle-rv-font-size
+     * (`postcss-scope.cjs` rewrites the rem values of this stylesheet), so
+     * it scales all text. Use an absolute value (px or rem).
+     */
     font-family: var(--squiggle-rv-font-family, theme(fontFamily.sans));
-    font-size: 1rem;
+    font-size: var(--squiggle-rv-font-size, 1rem);
     font-weight: 400;
     font-style: normal;
     line-height: 1.5;
@@ -51,6 +67,18 @@
     text-transform: none;
     text-shadow: none;
     white-space: normal;
-    color: #000;
+    color: var(--squiggle-rv-text, #000);
+    background-color: var(--squiggle-rv-bg, transparent);
   }
+}
+
+/*
+ * Compact density (`display.density: "compact"`). Private defaults: the
+ * components use `var(--squiggle-rv-grid-cell-width, var(--squiggle-rv-compact-grid-cell-width, 140px))`,
+ * so the public variables win wherever the host sets them (on an ancestor
+ * or with `themeClassName`).
+ */
+:where(.squiggle-rv.squiggle-rv-compact) {
+  --squiggle-rv-compact-grid-cell-width: 112px;
+  --squiggle-rv-compact-sidebar-width: 380px;
 }

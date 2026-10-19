@@ -1,4 +1,4 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, jest, test } from "@jest/globals";
 
 import {
   ComputeProgress,
@@ -100,5 +100,29 @@ describe("computeAll", () => {
     expect(cache.size).toBe(2);
     expect(evaluator.isCached([["b", "a"]])).toBe(true);
     expect(evaluator.isCached([["a", "b"]])).toBe(false);
+  });
+});
+
+describe("sharing an evaluator", () => {
+  test("two interleaved loops compute each pair once", async () => {
+    const { evaluator, cache } = await makeEvaluator();
+    const set = jest.spyOn(cache, "set");
+    const all = ids.flatMap((a) => ids.map((b): [string, string] => [a, b]));
+    await Promise.all([
+      evaluator.computePairs(all, { sliceMs: 0 }),
+      evaluator.computePairs([...all].reverse(), { sliceMs: 0 }),
+    ]);
+    expect(set).toHaveBeenCalledTimes(all.length);
+    expect(cache.size).toBe(all.length);
+  });
+
+  test("peek never computes", async () => {
+    const { evaluator, cache } = await makeEvaluator();
+    const spy = jest.spyOn(evaluator, "compareWithoutCache");
+    expect(evaluator.peek("b", "a")).toBeUndefined();
+    expect(spy).not.toHaveBeenCalled();
+    expect(cache.size).toBe(0);
+    const computed = evaluator.compare("b", "a");
+    expect(evaluator.peek("b", "a")).toBe(computed);
   });
 });

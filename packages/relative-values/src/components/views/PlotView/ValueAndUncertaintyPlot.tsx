@@ -11,17 +11,20 @@ import {
 } from "@quri/squiggle-components";
 import { MouseTooltip } from "@quri/ui";
 
-import { Item } from "../../../types.js";
-import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
-
-import { useFilteredItems } from "../hooks/index.js";
-import { averageMedian, averageUncertainty } from "../hooks/useSortedItems.js";
+import type { Clusters, Item } from "../../../types.js";
+import { extractOkValues } from "../../../values/ModelEvaluator.js";
+import type { RelativeValueResult } from "../../../values/types.js";
+import { hasInvalid } from "../../../values/value.js";
 import {
-  useDefinition,
-  useDefinitionClusters,
-  useRelativeValuesContext,
-  useRelativeValuesOptions,
-} from "../RelativeValuesProvider.js";
+  formatNumberString,
+  kindPrecision,
+  type ResolvedFormat,
+} from "../../host/format.js";
+import type {
+  RelativeValuesLabels,
+  RelativeValuesNumberKind,
+} from "../../host/types.js";
+import { cssVariable } from "./canvasColors.js";
 import { distance } from "./ForcePlot.js";
 import { ItemTooltip } from "./ItemTooltip.js";
 
@@ -31,59 +34,121 @@ type Datum = {
   uncertainty: number;
 };
 
-function usePlotData(model: ModelEvaluator) {
-  const { items, recommendedUnit } = useDefinition();
-
-  const {
-    axisConfig: { rows },
-  } = useRelativeValuesContext();
-
-  const filteredItems = useFilteredItems({ items, config: rows });
-
-  const comparedTo = useMemo(() => {
-    return recommendedUnit
-      ? [items.find((item) => item.id === recommendedUnit) ?? items[0]]
-      : items;
-  }, [recommendedUnit, items]);
-
-  const data = useMemo(() => {
-    const data: Datum[] = [];
-
-    for (const item of filteredItems) {
-      data.push({
-        item,
-        median: averageMedian({ item, comparedTo, model: model }),
-        uncertainty: averageUncertainty({ item, comparedTo, model: model }),
-      });
-    }
-    return data;
-  }, [filteredItems, model, comparedTo]);
-  return { data, comparedToAverage: comparedTo.length > 1 };
+function average(
+  item: Item,
+  reference: readonly Item[],
+  compare: (id1: string, id2: string) => RelativeValueResult | undefined
+) {
+  const values = extractOkValues(
+    reference.flatMap((other) => {
+      const result = compare(item.id, other.id);
+      return result ? [result] : [];
+    })
+  ).filter((value) => !hasInvalid(value));
+  if (values.length === 0) {
+    return undefined;
+  }
+  return {
+    median: d3.mean(values, (value) => value.median) ?? NaN,
+    uncertainty: d3.mean(values, (value) => value.uncertainty) ?? NaN,
+  };
 }
 
-export const ValueAndUncertaintyPlot: FC<{
-  model: ModelEvaluator;
-}> = ({ model }) => {
-  const clusters = useDefinitionClusters();
-  const { onItemClick } = useRelativeValuesOptions();
+type ChartScale = ReturnType<typeof d3Extended.scaleLinear>;
 
+// Tick labels through `format.formatNumber` (place "plot"), when it returns
+// a string; drawAxes asks the scale for its tick format.
+function withTickFormat(
+  scale: ChartScale,
+  format: ResolvedFormat,
+  kind: RelativeValuesNumberKind
+): ChartScale {
+  const formatNumber = format.formatNumber;
+  if (!formatNumber) {
+    return scale;
+  }
+  const builtin = scale.tickFormat.bind(scale);
+  const precision = kindPrecision(format, kind, "plot");
+  scale.tickFormat = (count?: number, specifier?: string) => {
+    const fallback = builtin(count, specifier);
+    return (value: d3.NumberValue) =>
+      formatNumber(Number(value), { kind, place: "plot", precision }) ??
+      fallback(value);
+  };
+  return scale;
+}
+
+/** Items by value (x) and uncertainty (y), against a reference. */
+export const ValueAndUncertaintyPlot: FC<{
+  items: readonly Item[];
+  // One item (the unit), or several (averaged).
+  reference: readonly Item[];
+  clusters: Clusters;
+  compare: (id1: string, id2: string) => RelativeValueResult | undefined;
+  height: number;
+  xScale: "log" | "linear";
+  yScale: "linear" | "log";
+  labels: RelativeValuesLabels;
+  format: ResolvedFormat;
+  selectedItem: string | null;
+  onItemClick: (item: Item) => void;
+}> = ({
+  items,
+  reference,
+  clusters,
+  compare,
+  height,
+  xScale: xScaleType,
+  yScale: yScaleType,
+  labels,
+  format,
+  selectedItem,
+  onItemClick,
+}) => {
   const { cursor, initCursor } = useCanvasCursor();
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
 
-  const height = 450;
-  const { data, comparedToAverage } = usePlotData(model);
+  const comparedToAverage = reference.length > 1;
+  const data = useMemo(() => {
+    const data: Datum[] = [];
+    for (const item of items) {
+      const value = average(item, reference, compare);
+      // A log scale can't show zero (e.g. the unit against itself has no
+      // uncertainty) or, for values, a zero median.
+      if (
+        value &&
+        (yScaleType !== "log" || value.uncertainty > 0) &&
+        (xScaleType !== "log" || Math.abs(value.median) > 0)
+      ) {
+        data.push({ item, ...value });
+      }
+    }
+    return data;
+  }, [items, reference, compare, xScaleType, yScaleType]);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
       context.clearRect(0, 0, width, height);
 
-      const xScale = d3Extended
-        .scaleLog()
-        .domain(d3.extent(data, (d) => Math.abs(d.median)) as [number, number]);
-
-      const yScale = d3Extended
-        .scaleLinear()
-        .domain(d3.extent(data, (d) => d.uncertainty) as [number, number]);
+      const makeScale = (type: "log" | "linear") =>
+        type === "log" ? d3Extended.scaleLog() : d3Extended.scaleLinear();
+      const xValue = (d: Datum) =>
+        xScaleType === "log" ? Math.abs(d.median) : d.median;
+      const yValue = (d: Datum) => d.uncertainty;
+      const xScale = withTickFormat(
+        makeScale(xScaleType).domain(
+          d3.extent(data, xValue) as [number, number]
+        ),
+        format,
+        "median"
+      );
+      const yScale = withTickFormat(
+        makeScale(yScaleType).domain(
+          d3.extent(data, yValue) as [number, number]
+        ),
+        format,
+        "uncertainty"
+      );
 
       const { padding, frame } = drawAxes({
         context,
@@ -94,12 +159,22 @@ export const ValueAndUncertaintyPlot: FC<{
         yScale,
       });
 
+      const muted = cssVariable(
+        context.canvas,
+        "--squiggle-rv-muted",
+        "rgb(114, 125, 147)" // copy-paste from drawUtils
+      );
+      const accent = cssVariable(
+        context.canvas,
+        "--squiggle-rv-accent",
+        "#334155"
+      );
       context.textAlign = "right";
       context.textBaseline = "bottom";
       context.font = "bold 12px sans-serif";
-      context.fillStyle = "rgb(114, 125, 147)"; // copy-paste from drawUtils
+      context.fillStyle = muted;
       context.fillText(
-        comparedToAverage ? "Mean relative value" : "Relative value",
+        comparedToAverage ? labels["plot.xAxisAverage"] : labels["plot.xAxis"],
         width - padding.right,
         height
       );
@@ -109,9 +184,7 @@ export const ValueAndUncertaintyPlot: FC<{
       context.textBaseline = "top";
       context.rotate(-Math.PI / 2);
       context.fillText(
-        comparedToAverage
-          ? "Mean uncertainty (decibels)"
-          : "Uncertainty (decibels)",
+        comparedToAverage ? labels["plot.yAxisAverage"] : labels["plot.yAxis"],
         -padding.top,
         0
       );
@@ -127,8 +200,8 @@ export const ValueAndUncertaintyPlot: FC<{
         const d = data[i];
 
         context.beginPath();
-        const x = xScale(Math.abs(d.median)),
-          y = yScale(d.uncertainty);
+        const x = xScale(xValue(d)),
+          y = yScale(yValue(d));
         context.moveTo(x + r, y);
         context.arc(x, y, r, 0, 2 * Math.PI);
 
@@ -149,6 +222,13 @@ export const ValueAndUncertaintyPlot: FC<{
             clusters[d.item.clusterId]?.color) ||
           "black";
         context.fill();
+        if (d.item.id === selectedItem) {
+          context.beginPath();
+          context.arc(x, y, r + 3, 0, 2 * Math.PI);
+          context.strokeStyle = accent;
+          context.lineWidth = 2;
+          context.stroke();
+        }
       }
 
       context.canvas.style.cursor =
@@ -156,7 +236,18 @@ export const ValueAndUncertaintyPlot: FC<{
       setHoveredId(newHoveredId);
       context.restore();
     },
-    [data, clusters, cursor, comparedToAverage]
+    [
+      data,
+      clusters,
+      cursor,
+      comparedToAverage,
+      height,
+      xScaleType,
+      yScaleType,
+      labels,
+      format,
+      selectedItem,
+    ]
   );
 
   const { ref } = useCanvas({
@@ -166,7 +257,7 @@ export const ValueAndUncertaintyPlot: FC<{
   });
 
   const renderTooltip = useCallback(() => {
-    if (hoveredId === undefined) {
+    if (hoveredId === undefined || !data[hoveredId]) {
       return;
     }
     return <ItemTooltip item={data[hoveredId].item} />;
@@ -177,8 +268,10 @@ export const ValueAndUncertaintyPlot: FC<{
       <canvas
         ref={ref}
         className="w-full"
+        style={{ height }}
+        data-rv-plot="valueUncertainty"
         onClick={() => {
-          if (hoveredId !== undefined && onItemClick) {
+          if (hoveredId !== undefined && data[hoveredId]) {
             onItemClick(data[hoveredId].item);
           }
         }}

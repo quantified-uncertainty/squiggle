@@ -1,297 +1,134 @@
 "use client";
 import { Set } from "immutable";
+import { FC, useCallback, useMemo } from "react";
+
 import {
-  createContext,
-  FC,
-  PropsWithChildren,
-  ReactNode,
-  Reducer,
-  useContext,
-  useMemo,
-} from "react";
-
-import { SqLinker } from "@quri/squiggle-lang";
-import { generateProvider } from "@quri/ui";
-
-import { Clusters, Item, RelativeValuesDefinition } from "../../types.js";
-import { ModelEvaluator } from "../../values/ModelEvaluator.js";
+  fromLegacyAction,
+  type LegacyRelativeValuesAction,
+} from "../../state/reducer.js";
+import type {
+  Axis,
+  GridMode,
+  RelativeValuesSort,
+  RelativeValuesState,
+} from "../../state/types.js";
+import type { Clusters, RelativeValuesDefinition } from "../../types.js";
+import type { ModelEvaluator } from "../../values/ModelEvaluator.js";
+import { RelativeValuesCoreProvider, useCore } from "../host/core.js";
+import { usePresentation } from "../host/presentation.js";
+import type {
+  RelativeValuesOptions,
+  RelativeValuesProviderProps,
+} from "../host/types.js";
 import { Filter } from "./types.js";
 
-export type Axis = "rows" | "columns";
+export type { Axis, GridMode, SortMode } from "../../state/types.js";
+export type {
+  RelativeValuesOptions,
+  RelativeValuesProviderProps,
+} from "../host/types.js";
 
-export type GridMode = "full" | "half";
-
-export type SortMode = "default" | "median" | "uncertainty" | "similarity";
-
-export type SortConfig = {
-  mode: SortMode;
-  desc: boolean;
-};
+export type SortConfig = RelativeValuesSort;
 
 export type AxisConfig = {
   filter: Filter;
   sort: SortConfig;
 };
 
-type ViewContextShape = {
-  gridMode: GridMode;
-  axisConfig: { [k in Axis]: AxisConfig };
-};
+/**
+ * Data, state and computation for the views (`ListView`, `GridView`,
+ * `PlotView`), primitives and `useRelativeValues()` below it. Renders no DOM:
+ * wrap the pieces in `RelativeValuesRoot` if you use `styles.css`.
+ *
+ * Sources: `definition` + `evaluator` (views compute pairs while rendering,
+ * unless `precompute`), `bundle` or `spec` (computed without blocking, with
+ * progress).
+ */
+export const RelativeValuesProvider: FC<RelativeValuesProviderProps> = (
+  props
+) => <RelativeValuesCoreProvider {...props} />;
 
-export type RelativeValuesOptions = {
-  // If set, the list view sidebar shows an "Open in Playground" link.
-  getPlaygroundUrl?: (code: string) => string;
-  // Deprecated and unused: the list view sidebar's per-pair charts now call
-  // the evaluator's comparison function instead of re-running the model code,
-  // so they need no linker. Kept so that existing callers still compile.
-  linker?: SqLinker;
-  // Deprecated and unused, like `linker`.
-  sourceId?: string;
-  // Called when an item name is clicked in the list view, the grid headers or
-  // the list sidebar, or when an item's dot is clicked in the plots. Without
-  // it, clicking a name in the list view makes it the unit of comparison.
-  onItemClick?: (item: Item) => void;
-  // Custom rendering of item names, e.g. a link to the item's page in your app.
-  // Defaults to `item.name`.
-  renderItemName?: (item: Item) => ReactNode;
-};
-
-type DataContextShape = {
-  evaluator: ModelEvaluator;
-  definition: RelativeValuesDefinition;
-  options: RelativeValuesOptions;
-};
-
-const DataContext = createContext<DataContextShape | null>(null);
-
-const defaultAxisConfig: AxisConfig = {
-  filter: {
-    selectedClusters: Set(),
-  },
-  sort: {
-    mode: "default",
-    desc: false,
-  },
-};
-
-const defaultValue: ViewContextShape = {
-  gridMode: "full",
-  axisConfig: {
-    rows: defaultAxisConfig,
-    columns: defaultAxisConfig,
-  },
-};
-
-type Action =
-  | {
-      type: "toggleCluster";
-      payload: {
-        axis: "rows" | "columns";
-        id: string;
-      };
-    }
-  | {
-      type: "toggleClusterCombination";
-      payload: {
-        row: string;
-        column: string;
-      };
-    }
-  | {
-      type: "setSort";
-      payload: {
-        axis: "rows" | "columns";
-        sort: SortConfig;
-      };
-    }
-  | {
-      type: "setGridMode";
-      payload: GridMode;
-    };
-
-const toggle = (set: Set<string>, id: string) =>
-  set.has(id) ? set.delete(id) : set.add(id);
-
-const reducer: Reducer<ViewContextShape, Action> = (state, action) => {
-  switch (action.type) {
-    case "toggleCluster": {
-      const axisConfig = state.axisConfig[action.payload.axis];
-      return {
-        ...state,
-        axisConfig: {
-          ...state.axisConfig,
-          [action.payload.axis]: {
-            ...axisConfig,
-            filter: {
-              ...axisConfig.filter,
-              selectedClusters: toggle(
-                axisConfig.filter.selectedClusters,
-                action.payload.id
-              ),
-            },
-          },
-        },
-      };
-    }
-    case "toggleClusterCombination": {
-      const axisConfig = state.axisConfig;
-      return {
-        ...state,
-        axisConfig: {
-          ...state.axisConfig,
-          rows: {
-            ...axisConfig.rows,
-            filter: {
-              ...axisConfig.rows.filter,
-              selectedClusters: Set([action.payload.row]),
-            },
-          },
-          columns: {
-            ...axisConfig.columns,
-            filter: {
-              ...axisConfig.columns.filter,
-              selectedClusters: Set([action.payload.column]),
-            },
-          },
-        },
-      };
-    }
-    case "setSort": {
-      const axisConfig = state.axisConfig[action.payload.axis];
-      return {
-        ...state,
-        axisConfig: {
-          ...state.axisConfig,
-          [action.payload.axis]: {
-            ...axisConfig,
-            sort: action.payload.sort,
-          },
-        },
-      };
-    }
-    case "setGridMode":
-      return {
-        ...state,
-        gridMode: action.payload,
-      };
-    default:
-      return state;
-  }
-};
-
-const {
-  Provider,
-  useContext: useRelativeValuesViewContext,
-  useDispatch: useRelativeValuesDispatch,
-} = generateProvider({
-  name: "View",
-  reducer,
-  defaultValue,
-});
-
-export type RelativeValuesProviderProps = PropsWithChildren<
-  {
-    definition: RelativeValuesDefinition;
-    evaluator: ModelEvaluator;
-  } & RelativeValuesOptions
->;
-
-export const RelativeValuesProvider: FC<RelativeValuesProviderProps> = ({
-  evaluator,
-  definition,
-  getPlaygroundUrl,
-  linker,
-  sourceId,
-  onItemClick,
-  renderItemName,
-  children,
-}) => {
-  const data = useMemo(
-    () => ({
-      evaluator,
-      definition,
-      options: {
-        getPlaygroundUrl,
-        linker,
-        sourceId,
-        onItemClick,
-        renderItemName,
-      },
-    }),
-    [
-      evaluator,
-      definition,
-      getPlaygroundUrl,
-      linker,
-      sourceId,
-      onItemClick,
-      renderItemName,
-    ]
-  );
-
-  // Reset filters when the set of clusters changes.
-  const clustersKey = definition.clusters
-    .map((cluster) => cluster.id)
-    .join("\n");
-
-  return (
-    <DataContext.Provider value={data}>
-      <Provider
-        key={clustersKey}
-        generateInitialValue={() => {
-          const clusterIds = Set<string>(
-            definition.clusters.map((cluster) => cluster.id)
-          );
-          const axisConfig: AxisConfig = {
-            filter: { selectedClusters: clusterIds },
-            sort: { mode: "default", desc: false },
-          };
-
-          return {
-            gridMode: "full",
-            axisConfig: {
-              rows: axisConfig,
-              columns: axisConfig,
-            },
-          };
-        }}
-      >
-        {children}
-      </Provider>
-    </DataContext.Provider>
-  );
-};
-
-function useRelativeValuesData(): DataContextShape {
-  const data = useContext(DataContext);
-  if (!data) {
+function useSnapshot() {
+  const core = useCore();
+  if (!core.snapshot) {
     throw new Error(
-      "Relative values components must be used inside RelativeValuesProvider"
+      core.status === "error"
+        ? (core.error ?? "Relative values error")
+        : "The relative values evaluator isn't ready yet"
     );
   }
-  return data;
+  return core.snapshot;
 }
 
-export const useRelativeValuesContext = () => {
-  const { evaluator, definition } = useRelativeValuesData();
-  const view = useRelativeValuesViewContext();
-  return { evaluator, definition, ...view };
+function legacyAxisConfig(
+  state: RelativeValuesState<string>,
+  axis: Axis,
+  allClusters: readonly string[]
+): AxisConfig {
+  const selected =
+    axis === "rows" || state.columns === "rows"
+      ? state.clusters
+      : state.columns.clusters;
+  const sort =
+    axis === "rows" || state.columns === "rows"
+      ? state.sort
+      : state.columns.sort;
+  return {
+    filter: { selectedClusters: Set(selected ?? allClusters) },
+    sort,
+  };
+}
+
+/**
+ * The state in the shape it had before host control: `{ evaluator,
+ * definition, gridMode, axisConfig }`. Prefer `useRelativeValues()`.
+ */
+export const useRelativeValuesContext = (): {
+  evaluator: ModelEvaluator;
+  definition: RelativeValuesDefinition;
+  gridMode: GridMode;
+  axisConfig: { [k in Axis]: AxisConfig };
+} => {
+  const { evaluator, definition } = useSnapshot();
+  const { state } = useCore();
+  const axisConfig = useMemo(() => {
+    const allClusters = definition.clusters.map((cluster) => cluster.id);
+    return {
+      rows: legacyAxisConfig(state, "rows", allClusters),
+      columns: legacyAxisConfig(state, "columns", allClusters),
+    };
+  }, [state, definition]);
+  return { evaluator, definition, gridMode: state.gridMode, axisConfig };
 };
 
-export const useDefinition = () => {
-  return useRelativeValuesData().definition;
+/**
+ * Dispatches the actions of the earlier reducer (`toggleCluster`,
+ * `toggleClusterCombination`, `setSort`, `setGridMode`). Prefer
+ * `useRelativeValues().actions`.
+ */
+export const useRelativeValuesDispatch = () => {
+  const { dispatch } = useCore();
+  return useCallback(
+    (action: LegacyRelativeValuesAction) =>
+      dispatch(fromLegacyAction(action), "user"),
+    [dispatch]
+  );
 };
 
-export const useRelativeValuesOptions = () => {
-  return useRelativeValuesData().options;
+export const useDefinition = (): RelativeValuesDefinition => {
+  return useSnapshot().definition;
 };
 
-export const useEvaluator = () => {
-  return useRelativeValuesData().evaluator;
+export const useRelativeValuesOptions = (): RelativeValuesOptions => {
+  return usePresentation().options;
+};
+
+export const useEvaluator = (): ModelEvaluator => {
+  return useSnapshot().evaluator;
 };
 
 export const useDefinitionClusters = (): Clusters => {
-  const { definition } = useRelativeValuesData();
+  const { definition } = useSnapshot();
   return useMemo(
     () =>
       Object.fromEntries(
@@ -300,5 +137,3 @@ export const useDefinitionClusters = (): Clusters => {
     [definition]
   );
 };
-
-export { useRelativeValuesDispatch };

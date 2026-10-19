@@ -53,6 +53,10 @@ export {
   stringifyRelativeValuesBundle,
 } from "./values/bundle.js";
 export {
+  type LoadedRelativeValuesBundle,
+  loadRelativeValuesBundle,
+} from "./values/loadBundle.js";
+export {
   RELATIVE_VALUES_CSV_ERROR,
   RELATIVE_VALUES_CSV_METRICS,
   relativeValuesBundleToCsv,
@@ -80,3 +84,6 @@ export {
   type RelativeValuesExport,
   relativeValuesSpecFromCode,
 } from "./spec/findExports.js";
+
+// Host-control state (see README, "Customizing in your app")
+export * from "./state/index.js";

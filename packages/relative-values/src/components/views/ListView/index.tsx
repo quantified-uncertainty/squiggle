@@ -1,227 +1,269 @@
 "use client";
 import clsx from "clsx";
-import escapeRegExp from "lodash/escapeRegExp.js";
 import {
+  CSSProperties,
   FC,
+  Fragment,
   KeyboardEvent,
   RefObject,
   useEffect,
-  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 
-import { DropdownButton } from "../../ui/DropdownButton.js";
-import { CompassIcon } from "../../ui/icons/CompassIcon.js";
-import { Item } from "../../../types.js";
+import { makeSortContext, sortOptions } from "../../../state/select.js";
+import { sortItems } from "../../../state/sort.js";
+import { UNCLUSTERED } from "../../../state/types.js";
+import { clusterMap, tableKeyOf } from "../../../state/universe.js";
+import type { Cluster, Item } from "../../../types.js";
 import {
   extractOkValues,
   getParamPercentiles,
-  ModelEvaluator,
 } from "../../../values/ModelEvaluator.js";
-
+import type { RelativeValueResult } from "../../../values/types.js";
 import { ClusterIcon } from "../../common/ClusterIcon.js";
+import { useCore } from "../../host/core.js";
+import { usePresentation } from "../../host/presentation.js";
+import type { ConsumerRequirement } from "../../host/requirements.js";
+import { ViewToolbar } from "../../host/slots.js";
+import type { RelativeValuesReadyController } from "../../host/types.js";
+import { useIsomorphicLayoutEffect } from "../../host/useStateController.js";
+import { RelativeValuesPairDetails } from "../../primitives/RelativeValuesPairDetails.js";
+import { RelativeValuesSearchBox } from "../../primitives/RelativeValuesSearchBox.js";
+import { DropdownButton } from "../../ui/DropdownButton.js";
+import { CompassIcon } from "../../ui/icons/CompassIcon.js";
+import { useRelativeValuesConsumer } from "../../useRelativeValues.js";
 import { CellBox } from "../CellBox.js";
-import { AxisMenu } from "../GridView/AxisMenu.js";
-import { useFilteredItems, useSortedItems } from "../hooks/index.js";
-import { RelativeCell } from "../RelativeCell/index.js";
-import {
-  useDefinition,
-  useDefinitionClusters,
-  useRelativeValuesContext,
-  useRelativeValuesOptions,
-} from "../RelativeValuesProvider.js";
+import { AxisMenu, useAxisMenuSections } from "../GridView/AxisMenu.js";
 import { ItemName } from "../ItemName.js";
+import { RelativeCell } from "../RelativeCell/index.js";
+import { SearchChip, ViewEmpty, ViewStatus } from "../ViewStatus.js";
 import { ColumnHeader } from "./ColumnHeader.js";
-import { ItemSideBar } from "./sidebar.js";
 
-// Below this width the pair sidebar is an overlay drawer over the table's
-// right side, instead of a column next to it.
+type Lookup = (id1: string, id2: string) => RelativeValueResult | undefined;
+
+// Below this width the pair sidebar (`sidebarPosition: "side"`) is an overlay
+// drawer over the table's right side, instead of a column next to it.
 export const LIST_SIDEBAR_DRAWER_BELOW_PX = 900;
 
-// [numerator id, denominator id] of the pair shown in the sidebar. Ids, not
-// items, so that the sidebar follows live reloads of the definition.
-type SidebarPair = readonly [string, string];
-
 type TableProps = {
-  model: ModelEvaluator;
+  rv: RelativeValuesReadyController;
   items: Item[];
+  unit: Item;
+  // The table's cluster; undefined for a flat list or unclustered items.
+  cluster: Cluster | undefined;
+  // Picks the unit of this table; undefined if the unit can't be changed.
+  setUnit: ((item: Item) => void) | undefined;
   showDescriptions: boolean;
-  // The table's default unit; follows the definition (a cluster's or the
-  // spec's `recommendedUnit`, else the first item).
-  recommendedUnit: Item;
-  sidebarPair: SidebarPair | undefined;
-  setSidebarPair: (pair: SidebarPair | undefined) => void;
 };
 
-export const ListViewTable: FC<TableProps> = ({
-  model,
+const ListViewTable: FC<TableProps> = ({
+  rv,
   items,
+  unit,
+  cluster,
+  setUnit,
   showDescriptions,
-  recommendedUnit,
-  sidebarPair,
-  setSidebarPair,
 }) => {
-  const { axisConfig } = useRelativeValuesContext();
-  const { items: allItems } = useDefinition();
-  const clusters = useDefinitionClusters();
-  const { onItemClick, renderItemName } = useRelativeValuesOptions();
+  const core = useCore();
+  const { display, labels, options } = usePresentation();
+  const clusters = useMemo(() => clusterMap(rv.definition), [rv.definition]);
+  const { onItemClick, renderItemName, onPairClick } = options;
   // With custom item names or click handlers, only the compass icon changes
   // the unit of comparison.
-  const namesSetUnit = !onItemClick && !renderItemName;
+  const namesSetUnit = !onItemClick && !renderItemName && !!setUnit;
+  const compact = display.density === "compact";
+  const lookup: Lookup = rv.compare;
 
-  // The unit the user picked, as an id. It's resolved against the current
-  // definition on every render: while the user hasn't picked one (or the
-  // picked item was removed), the unit follows `recommendedUnit`.
-  const [pickedUnitId, setPickedUnitId] = useState<string | undefined>();
-  const pickedUnit =
-    pickedUnitId === undefined
-      ? undefined
-      : allItems.find((item) => item.id === pickedUnitId);
-  const denominatorItem = pickedUnit ?? recommendedUnit;
-  useEffect(() => {
-    if (pickedUnitId !== undefined && !pickedUnit) {
-      setPickedUnitId(undefined);
-    }
-  }, [pickedUnitId, pickedUnit]);
-  const setDenominatorItem = (item: Item) => setPickedUnitId(item.id);
-
-  // Colors come from the uncertainty of the n pairs the table shows (each item
-  // in terms of the unit), not of all n² pairs.
-  const uncertaintyPercentiles = getParamPercentiles(
-    extractOkValues(
-      items.map((item) => model.compare(item.id, denominatorItem.id))
-    ),
-    (r) => r.uncertainty,
-    [20, 80]
+  // Uncertainty percentiles (for the colors) of the n pairs the table shows,
+  // each item in units of the table's unit, not of all n² pairs (QA #15).
+  const itemsKey = items.map((item) => item.id).join("\0");
+  const uncertaintyPercentiles = useMemo(
+    () =>
+      getParamPercentiles(
+        extractOkValues(
+          items.flatMap((item) => {
+            const result = lookup(item.id, unit.id);
+            return result ? [result] : [];
+          })
+        ),
+        (r) => r.uncertainty,
+        [20, 80]
+      ),
+    // `itemsKey` identifies `items`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemsKey, unit.id, lookup]
   );
 
-  const sortedItems = useSortedItems({
-    items: items,
-    config: axisConfig.rows,
-    model: model,
-    otherDimensionItems: [denominatorItem],
-  });
+  const { selectedPair, selectedItem } = rv.state;
+  const pairLocked = core.isLocked("selectedPair");
 
   const headerRow = (name: string) => (
     <CellBox header>
-      <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+      <div className="p-1 pt-2 text-sm font-semibold text-[color:var(--squiggle-rv-text,#475569)]">
         {name}
       </div>
     </CellBox>
   );
 
   return (
-    <div className="mb-10" data-rv-unit={denominatorItem.id}>
+    <div
+      className="mb-10"
+      data-rv-part="list-table"
+      data-rv-table={cluster?.id ?? UNCLUSTERED}
+    >
       <div
-        className="grid w-full border-b border-r border-gray-200"
+        className="grid w-full border-b border-r border-[color:var(--squiggle-rv-border,#e5e7eb)]"
         style={{
           gridTemplateColumns: showDescriptions ? "2fr 2fr 1fr" : "3fr 1fr",
         }}
       >
-        {headerRow("Name")}
-        {showDescriptions && headerRow("Description")}
+        {headerRow(labels["list.name"])}
+        {showDescriptions && headerRow(labels["list.description"])}
         <ColumnHeader
-          selectedItem={denominatorItem}
-          setSelectedItem={setDenominatorItem}
+          selectedItem={unit}
+          cluster={clusters.get(unit.clusterId ?? "")}
+          items={rv.universe}
+          onSelect={setUnit}
         />
-        {sortedItems.map((item) => (
-          // `rv-list-row` is Squiggle Studio's test id for list rows.
-          <div
-            key={item.id}
-            className="contents"
-            data-testid="rv-list-row"
-            data-item={item.id}
-          >
-            <CellBox>
-              <div
+        {items.map((item) => {
+          const itemCluster = item.clusterId
+            ? clusters.get(item.clusterId)
+            : undefined;
+          const result = lookup(item.id, unit.id);
+          const selected =
+            selectedPair !== null &&
+            selectedPair[0] === item.id &&
+            selectedPair[1] === unit.id;
+          return (
+            // `rv-list-row` [data-item] is Squiggle Studio's test id for list
+            // rows.
+            <div
+              key={item.id}
+              className="contents"
+              data-rv-part="list-row"
+              data-rv-item={item.id}
+              data-rv-selected={selectedItem === item.id ? "" : undefined}
+              data-testid="rv-list-row"
+              data-item={item.id}
+            >
+              <CellBox
                 className={clsx(
-                  "flex justify-end p-2 text-sm font-bold text-slate-700",
-                  namesSetUnit && "cursor-pointer"
+                  selectedItem === item.id &&
+                    "bg-[var(--squiggle-rv-selected-bg,#f1f5f9)]"
                 )}
-                onClick={
-                  namesSetUnit ? () => setDenominatorItem(item) : undefined
-                }
               >
                 <div
                   className={clsx(
-                    "min-w-0 flex-grow text-sm",
-                    namesSetUnit && "hover:text-slate-900 hover:underline"
+                    "flex justify-end text-sm font-bold text-[color:var(--squiggle-rv-text,#334155)]",
+                    compact ? "px-2 py-1" : "p-2",
+                    namesSetUnit && "cursor-pointer"
                   )}
+                  onClick={namesSetUnit ? () => setUnit?.(item) : undefined}
                 >
-                  <ItemName item={item} />
-                </div>
-                <div
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setDenominatorItem(item);
-                  }}
-                  className="cursor-pointer pl-2"
-                  data-rv-compass={item.id}
-                >
-                  <CompassIcon
+                  <div
                     className={clsx(
-                      "hover:fill-slate-800",
-                      item.id === denominatorItem.id
-                        ? "fill-slate-500"
-                        : "fill-slate-200"
+                      "min-w-0 flex-grow text-sm",
+                      namesSetUnit && "hover:text-slate-900 hover:underline"
                     )}
-                    size={23}
-                    viewBox={"0 0 25 25"}
-                  />
-                </div>
-              </div>
-
-              <div className="flex px-2 pb-3">
-                {item.clusterId && clusters[item.clusterId] ? (
-                  <div className="flex items-center gap-1">
-                    <div className="flex-none opacity-50">
-                      <ClusterIcon
-                        cluster={clusters[item.clusterId]}
-                        selected={true}
+                  >
+                    <ItemName item={item} />
+                  </div>
+                  {setUnit && (
+                    <div
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setUnit(item);
+                      }}
+                      data-rv-compass={item.id}
+                      className="cursor-pointer pl-2"
+                    >
+                      <CompassIcon
+                        className={clsx(
+                          "hover:fill-slate-800",
+                          item.id === unit.id
+                            ? "fill-slate-500"
+                            : "fill-slate-200"
+                        )}
+                        size={compact ? 18 : 23}
+                        viewBox={"0 0 25 25"}
                       />
                     </div>
-                    <div className="text-xs font-medium text-slate-500">
-                      {clusters[item.clusterId].name ||
-                        clusters[item.clusterId].id}
-                    </div>
+                  )}
+                </div>
+
+                {(display.list.clusterTags || display.list.itemIds) && (
+                  <div className={clsx("flex px-2", compact ? "pb-1" : "pb-3")}>
+                    {display.list.clusterTags && itemCluster ? (
+                      <div className="flex items-center gap-1">
+                        <div className="flex-none opacity-50">
+                          <ClusterIcon cluster={itemCluster} selected={true} />
+                        </div>
+                        <div className="text-xs font-medium text-[color:var(--squiggle-rv-muted,#64748b)]">
+                          {itemCluster.name || itemCluster.id}
+                        </div>
+                      </div>
+                    ) : (
+                      ""
+                    )}
+                    {display.list.itemIds && (
+                      <div className="min-w-0 truncate px-3 font-mono text-xs text-[color:var(--squiggle-rv-muted,#64748b)]">
+                        {item.id}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  ""
                 )}
-                <div className="min-w-0 truncate px-3 font-mono text-xs text-slate-500">
-                  {item.id}
-                </div>
-              </div>
-            </CellBox>
-            {showDescriptions && (
-              <CellBox>
-                <div className="p-3 text-sm text-slate-500">
-                  {item.description}
-                </div>
               </CellBox>
-            )}
-            <div
-              className="cursor-pointer"
-              data-rv-cell=""
-              onClick={() => {
-                if (sidebarPair && sidebarPair[0] === item.id) {
-                  setSidebarPair(undefined);
-                } else {
-                  setSidebarPair([item.id, denominatorItem.id]);
-                }
-              }}
-            >
-              <RelativeCell
-                id1={item.id}
-                id2={denominatorItem.id}
-                model={model}
-                uncertaintyPercentiles={uncertaintyPercentiles}
-                showRange={true}
-              />
+              {showDescriptions && (
+                <CellBox>
+                  <div
+                    className={clsx(
+                      "text-sm text-[color:var(--squiggle-rv-muted,#64748b)]",
+                      compact ? "p-1.5" : "p-3"
+                    )}
+                  >
+                    {item.description}
+                  </div>
+                </CellBox>
+              )}
+              <div
+                className="cursor-pointer"
+                data-rv-cell=""
+                onClick={() => {
+                  onPairClick?.({
+                    numerator: item,
+                    denominator: unit,
+                    result,
+                    place: "list",
+                  });
+                  if (pairLocked) {
+                    return;
+                  }
+                  const open =
+                    selectedPair !== null && selectedPair[0] === item.id;
+                  core.dispatch(
+                    {
+                      type: "selectPair",
+                      pair: open ? null : [item.id, unit.id],
+                    },
+                    "user"
+                  );
+                }}
+              >
+                <RelativeCell
+                  numerator={item}
+                  denominator={unit}
+                  result={result}
+                  display={display.list.cell}
+                  uncertaintyPercentiles={uncertaintyPercentiles}
+                  place="list"
+                  selected={selected}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -231,7 +273,7 @@ export const ListViewTable: FC<TableProps> = ({
 // Undefined until measured (e.g. during server-side rendering).
 function useWidth(ref: RefObject<HTMLElement | null>): number | undefined {
   const [width, setWidth] = useState<number | undefined>();
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
     setWidth(element.getBoundingClientRect().width);
@@ -253,7 +295,7 @@ function useScrollViewportHeight(
   enabled: boolean
 ): number | undefined {
   const [height, setHeight] = useState<number | undefined>();
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!enabled) return;
     const element = ref.current;
     if (!element) return;
@@ -282,200 +324,244 @@ function useScrollViewportHeight(
   return height;
 }
 
-const SidebarCloseButton: FC<{
-  onClose: () => void;
-  buttonRef?: RefObject<HTMLButtonElement | null>;
-}> = ({ onClose, buttonRef }) => (
-  <button
-    ref={buttonRef}
-    type="button"
-    aria-label="Close pair details"
-    title="Close (Esc)"
-    className="absolute right-1 top-1 z-10 rounded px-1.5 text-lg leading-none text-slate-500 hover:bg-slate-200 hover:text-slate-800"
-    onClick={onClose}
-  >
-    ×
-  </button>
-);
+// The sidebar's width: the compact default doesn't override a host's value.
+const SIDEBAR_WIDTH =
+  "var(--squiggle-rv-sidebar-width, var(--squiggle-rv-compact-sidebar-width, 500px))";
 
-export const ListView: FC = () => {
-  const { evaluator: model } = useRelativeValuesContext();
-  const definition = useDefinition();
-  const clusters = useDefinitionClusters();
+const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
+  const core = useCore();
+  const { controls, display, labels, components } = usePresentation();
+  const { definition, state, items } = rv;
+  const clusters = useMemo(() => clusterMap(definition), [definition]);
 
-  const showDescriptions = definition.items.some((item) => !!item.description);
+  const showDescriptions =
+    display.list.descriptions === "auto"
+      ? definition.items.some((item) => !!item.description)
+      : display.list.descriptions;
 
-  const [sidebarPair, setSidebarPair] = useState<SidebarPair | undefined>(
-    undefined
-  );
+  const unitLocked = core.isLocked("unit") || core.isLocked("clusterUnits");
+  const canPickUnit = controls.list.unitPicker && !unitLocked;
+  const menuSections = useAxisMenuSections("rows");
+  const showSettings = controls.list.settings && menuSections.length > 0;
+  const showSearch = controls.list.search && !core.isLocked("search");
+  // A Toolbar slot is rendered even when no built-in control is left in it.
+  const showToolbar =
+    controls.list.toolbar &&
+    (showSettings || showSearch || !!components.Toolbar);
+  // Without a search box, an active search shows as a chip.
+  const searchBoxShown = showToolbar && showSearch;
 
-  const [search, setSearch] = useState("");
-
-  const { axisConfig } = useRelativeValuesContext();
-
-  const itemMatchesString = (item: Item, str: string): boolean => {
-    const regexp = new RegExp(escapeRegExp(str), "i");
-    return !!(
-      item.name.match(regexp) ||
-      item.id.match(regexp) ||
-      (item.description && item.description.match(regexp)) ||
-      (item.clusterId || "").match(regexp)
-    );
-  };
-
-  let filteredItems = useFilteredItems({
-    items: definition.items,
-    config: axisConfig.rows,
-  });
-
-  if (search !== "") {
-    filteredItems = filteredItems.filter((item) =>
-      itemMatchesString(item, search)
-    );
-  }
-
-  const findItem = (id: string | null | undefined) =>
-    id ? definition.items.find((item) => item.id === id) : undefined;
-
-  // The sidebar's items, from the current definition (current names); it
-  // closes when either of them is removed.
-  const sidebarNumerator = findItem(sidebarPair?.[0]);
-  const sidebarDenominator = findItem(sidebarPair?.[1]);
-  const sidebarItemsExist = !!sidebarNumerator && !!sidebarDenominator;
-  useEffect(() => {
-    if (sidebarPair !== undefined && !sidebarItemsExist) {
-      setSidebarPair(undefined);
+  // Value sorts are measured against each table's unit (as the table shows
+  // it); other sorts keep the pipeline's order.
+  const tables = useMemo(() => {
+    if (!display.list.groupByCluster) {
+      return rv.unit
+        ? [{ key: UNCLUSTERED, cluster: undefined, items, unit: rv.unit }]
+        : [];
     }
-  }, [sidebarPair, sidebarItemsExist]);
+    const context = makeSortContext({
+      definition,
+      sorts: core.sorts,
+      lookup: rv.compare,
+      locale: undefined,
+    });
+    const keys = [...definition.clusters.map((c) => c.id), UNCLUSTERED];
+    return keys.flatMap((key) => {
+      const tableItems = items.filter(
+        (item) => tableKeyOf(item, clusters) === key
+      );
+      const unit = rv.tableUnit(key || null);
+      if (tableItems.length === 0 || !unit) {
+        return [];
+      }
+      const mode = state.sort.mode;
+      const resorted =
+        mode === "median" || mode === "uncertainty" || mode === "similarity"
+          ? sortItems(
+              tableItems,
+              sortOptions(context, {
+                sort: state.sort,
+                defaultOrder: tableItems,
+                unit,
+              })
+            )
+          : tableItems;
+      return [
+        {
+          key,
+          cluster: clusters.get(key),
+          items: resorted,
+          unit,
+        },
+      ];
+    });
+  }, [
+    display.list.groupByCluster,
+    rv,
+    items,
+    definition,
+    clusters,
+    core.sorts,
+    state.sort,
+  ]);
 
+  // The pair sidebar (`state.selectedPair`, ids resolved against the current
+  // definition, so it closes when an item disappears). With
+  // `sidebarPosition: "side"`, it's a column next to the tables, or an
+  // overlay drawer over their right side when the list is narrower than
+  // LIST_SIDEBAR_DRAWER_BELOW_PX (QA #29); Esc and its close button close it.
   const rootRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
   const width = useWidth(rootRef);
-  const drawer = width !== undefined && width < LIST_SIDEBAR_DRAWER_BELOW_PX;
-  const viewportHeight = useScrollViewportHeight(
-    rootRef,
-    drawer && sidebarItemsExist
-  );
+  const below = display.list.sidebarPosition === "below";
+  const drawer =
+    !below && width !== undefined && width < LIST_SIDEBAR_DRAWER_BELOW_PX;
+  const sidebarOpen = controls.list.sidebar && state.selectedPair !== null;
+  const drawerOpen = drawer && sidebarOpen;
+  const viewportHeight = useScrollViewportHeight(rootRef, drawerOpen);
+  const pairLocked = core.isLocked("selectedPair");
 
-  // The drawer covers part of the table: put focus in it, so that Esc closes
-  // it right away.
-  const drawerOpen = drawer && sidebarItemsExist;
+  // The drawer covers part of the table: put focus in it (on its close
+  // button), so that Esc closes it right away.
   useEffect(() => {
-    if (drawerOpen) closeRef.current?.focus({ preventScroll: true });
+    if (!drawerOpen) return;
+    const panel = drawerRef.current;
+    const target =
+      panel?.querySelector<HTMLElement>("[data-rv-close]") ?? panel;
+    target?.focus({ preventScroll: true });
   }, [drawerOpen]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Escape" && sidebarPair !== undefined) {
+    if (event.key === "Escape" && sidebarOpen && !pairLocked) {
       event.stopPropagation();
-      setSidebarPair(undefined);
+      core.dispatch({ type: "selectPair", pair: null }, "user");
     }
   };
 
-  const clusterTable = (clusterId: string | null) => {
-    const clusterItems = filteredItems.filter((i) =>
-      clusterId === null
-        ? !i.clusterId || !clusters[i.clusterId]
-        : i.clusterId === clusterId
-    );
-    //It's possible that the recommended unit isn't itself in clusterItems, so we need to make sure it's passed in separately
-    const recommendedUnit =
-      (clusterId === null
-        ? undefined
-        : findItem(clusters[clusterId]?.recommendedUnit)) ??
-      findItem(definition.recommendedUnit) ??
-      definition.items[0];
-    return (
-      clusterItems.length > 0 && (
-        <ListViewTable
-          model={model}
-          items={clusterItems}
-          showDescriptions={showDescriptions}
-          recommendedUnit={recommendedUnit}
-          sidebarPair={sidebarPair}
-          setSidebarPair={setSidebarPair}
-        />
-      )
-    );
-  };
-
-  const sidebar =
-    sidebarNumerator && sidebarDenominator ? (
-      <ItemSideBar
-        model={model}
-        numeratorItem={sidebarNumerator}
-        denominatorItem={sidebarDenominator}
-      />
-    ) : undefined;
-  const close = () => setSidebarPair(undefined);
+  const panelClassName =
+    "rounded-[var(--squiggle-rv-radius,0.125rem)] border border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-[var(--squiggle-rv-panel-bg,#f8fafc)] px-2 py-4";
+  const sidebar = (className: string, style?: CSSProperties) =>
+    sidebarOpen ? (
+      <RelativeValuesPairDetails className={className} style={style} />
+    ) : null;
 
   return (
     <div
       ref={rootRef}
       className="relative"
       onKeyDown={onKeyDown}
+      data-rv-part="list"
+      data-rv-provider={core.id}
+      data-rv-count={items.length}
       data-rv-list=""
-      data-rv-sidebar-mode={drawer ? "drawer" : "column"}
+      data-rv-sidebar-mode={below ? "below" : drawer ? "drawer" : "column"}
     >
-      <div className="mb-2 flex">
-        <div className="mr-2">
-          <DropdownButton text="Table Settings">
-            {() => <AxisMenu axis="rows" sortByAverage={false} />}
-          </DropdownButton>
-        </div>
-
-        <input
-          type="text"
-          className="mb-4 rounded border border-gray-200 p-1"
-          defaultValue={search}
-          placeholder="Filter..."
-          aria-label="Filter items"
-          onChange={(e) => setSearch(e.currentTarget.value)}
-        />
-      </div>
-
-      <div className="flex">
-        <div className="min-w-0 flex-1">
-          {Object.keys(clusters).map((cluster) => (
-            <div key={cluster}>{clusterTable(cluster)}</div>
-          ))}
-          {clusterTable(null)}
-        </div>
-
-        {sidebar && !drawer && (
-          <div
-            className="relative w-[500px] shrink-0"
-            data-testid="rv-pair-sidebar"
-            data-mode="column"
-          >
-            <div className="sticky top-4 ml-4 rounded-sm border border-gray-200 bg-slate-50 px-2 py-4">
-              <SidebarCloseButton onClose={close} />
-              {sidebar}
+      {showToolbar && (
+        <ViewToolbar view="list" className="mb-2 flex">
+          {showSettings && (
+            <div className="mr-2">
+              <DropdownButton text={labels["list.tableSettings"]}>
+                {() => <AxisMenu axis="rows" sortByAverage={false} />}
+              </DropdownButton>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+          {showSearch && <RelativeValuesSearchBox className="mb-4" />}
+        </ViewToolbar>
+      )}
+      {!searchBoxShown && (
+        <div className="mb-2 empty:hidden">
+          <SearchChip />
+        </div>
+      )}
 
-      {sidebar && drawer && (
+      {items.length === 0 ? (
+        <ViewEmpty controller={rv} view="list" />
+      ) : (
+        <div className={clsx(below ? "flex flex-col" : "flex")}>
+          <div className="min-w-0 flex-1">
+            {tables.map((table) => (
+              <Fragment key={table.key}>
+                <ListViewTable
+                  rv={rv}
+                  items={table.items}
+                  unit={table.unit}
+                  cluster={table.cluster}
+                  showDescriptions={showDescriptions}
+                  setUnit={
+                    canPickUnit
+                      ? (item) =>
+                          core.dispatch(
+                            display.list.groupByCluster
+                              ? {
+                                  type: "setUnit",
+                                  unit: item.id,
+                                  cluster: table.key || null,
+                                }
+                              : { type: "setUnit", unit: item.id },
+                            "user"
+                          )
+                      : undefined
+                  }
+                />
+              </Fragment>
+            ))}
+          </div>
+
+          {sidebarOpen &&
+            !drawer &&
+            (below ? (
+              // `rv-pair-sidebar` [data-mode] is Squiggle Studio's test id for
+              // the pair sidebar.
+              <div data-testid="rv-pair-sidebar" data-mode="below">
+                {sidebar(clsx(panelClassName, "mt-4"))}
+              </div>
+            ) : (
+              <div
+                className="relative flex-none"
+                style={{ width: SIDEBAR_WIDTH }}
+                data-testid="rv-pair-sidebar"
+                data-mode="column"
+              >
+                {sidebar(clsx(panelClassName, "sticky top-4 ml-4"))}
+              </div>
+            ))}
+        </div>
+      )}
+
+      {sidebarOpen && drawer && items.length > 0 && (
         <div
-          className="absolute inset-y-0 right-0 z-30 w-full max-w-[500px]"
+          ref={drawerRef}
+          className="absolute inset-y-0 right-0 z-30 w-full outline-none"
+          style={{ maxWidth: SIDEBAR_WIDTH }}
+          tabIndex={-1}
           data-testid="rv-pair-sidebar"
           data-mode="drawer"
           role="dialog"
-          aria-label="Pair details"
+          aria-label={labels["sidebar.dialog"]}
         >
-          <div
-            className="sticky top-0 overflow-auto border-l border-gray-200 bg-slate-50 px-3 py-4 shadow-xl"
-            style={
-              viewportHeight === undefined
-                ? undefined
-                : { maxHeight: viewportHeight }
-            }
-          >
-            <SidebarCloseButton onClose={close} buttonRef={closeRef} />
-            {sidebar}
-          </div>
+          {sidebar(
+            "sticky top-0 overflow-auto border-l border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-[var(--squiggle-rv-panel-bg,#f8fafc)] px-3 py-4 shadow-xl",
+            viewportHeight === undefined
+              ? undefined
+              : { maxHeight: viewportHeight }
+          )}
         </div>
       )}
     </div>
   );
+};
+
+/** Items in tables (one per cluster, by default), valued in a unit. */
+export const ListView: FC = () => {
+  const { display } = usePresentation();
+  const groupByCluster = display.list.groupByCluster;
+  const requirement = useMemo(
+    (): ConsumerRequirement => ({ kind: "list", groupByCluster }),
+    [groupByCluster]
+  );
+  const rv = useRelativeValuesConsumer(requirement);
+  if (rv.status !== "ready") {
+    return <ViewStatus controller={rv} />;
+  }
+  return <ListViewContent rv={rv} />;
 };

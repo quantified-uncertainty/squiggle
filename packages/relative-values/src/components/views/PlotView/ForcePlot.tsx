@@ -1,6 +1,6 @@
 "use client";
 import * as d3 from "d3";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DrawContext,
@@ -9,15 +9,10 @@ import {
 } from "@quri/squiggle-components";
 import { MouseTooltip } from "@quri/ui";
 
-import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
-
-import { useFilteredItems } from "../hooks/index.js";
-import {
-  useDefinition,
-  useDefinitionClusters,
-  useRelativeValuesContext,
-  useRelativeValuesOptions,
-} from "../RelativeValuesProvider.js";
+import { getParamPercentiles } from "../../../values/ModelEvaluator.js";
+import type { Clusters, Item } from "../../../types.js";
+import type { RelativeValueResult } from "../../../values/types.js";
+import { cssVariable } from "./canvasColors.js";
 import { ItemTooltip } from "./ItemTooltip.js";
 
 export const distance = (
@@ -27,43 +22,36 @@ export const distance = (
   return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
 };
 
+type Node = d3.SimulationNodeDatum & {
+  id: string;
+  x: number;
+  y: number;
+  clusterId: string | null | undefined;
+  name: string;
+};
+
+/** Items as dots, pulled together by low pairwise uncertainty. */
 export const ForcePlot: FC<{
-  model: ModelEvaluator;
-}> = ({ model }) => {
-  const height = 450;
-
+  items: readonly Item[];
+  clusters: Clusters;
+  compare: (id1: string, id2: string) => RelativeValueResult | undefined;
+  height: number;
+  selectedItem: string | null;
+  onItemClick: (item: Item) => void;
+}> = ({ items, clusters, compare, height, selectedItem, onItemClick }) => {
   const { cursor, initCursor } = useCanvasCursor();
-
-  const { items } = useDefinition();
-  const clusters = useDefinitionClusters();
-
-  const {
-    axisConfig: { rows },
-  } = useRelativeValuesContext();
-
-  const filteredItems = useFilteredItems({ items, config: rows });
-  const { onItemClick } = useRelativeValuesOptions();
-
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
-
-  type Node = {
-    id: string;
-    x: number;
-    y: number;
-    clusterId: string | null | undefined;
-    name: string;
-  };
 
   const nodes: Node[] = useMemo(
     () =>
-      filteredItems.map((item) => ({
+      items.map((item) => ({
         id: item.id,
         x: 100,
         y: 100,
         clusterId: item.clusterId,
         name: item.name,
       })),
-    [filteredItems]
+    [items]
   );
 
   const draw = useCallback(
@@ -73,6 +61,11 @@ export const ForcePlot: FC<{
 
       context.translate(width / 2, height / 2);
       const r = 5;
+      const accent = cssVariable(
+        context.canvas,
+        "--squiggle-rv-accent",
+        "#334155"
+      );
       let newHoveredId: typeof hoveredId;
       for (let i = 0; i < nodes.length; i++) {
         const d = nodes[i];
@@ -96,8 +89,14 @@ export const ForcePlot: FC<{
           (!isHovered && d.clusterId && clusters[d.clusterId]?.color) ||
           "black";
         context.fill();
+        if (d.id === selectedItem) {
+          context.beginPath();
+          context.arc(d.x, d.y, r + 3, 0, 2 * Math.PI);
+          context.strokeStyle = accent;
+          context.lineWidth = 2;
+          context.stroke();
+        }
       }
-      // TODO - force render only if id has changed
 
       context.canvas.style.cursor =
         newHoveredId === undefined ? "auto" : "pointer";
@@ -106,7 +105,7 @@ export const ForcePlot: FC<{
 
       context.restore();
     },
-    [clusters, nodes, cursor]
+    [clusters, nodes, cursor, height, selectedItem]
   );
 
   const { ref, redraw } = useCanvas({
@@ -114,86 +113,77 @@ export const ForcePlot: FC<{
     draw,
     init: initCursor,
   });
+  const redrawRef = useRef(redraw);
+  redrawRef.current = redraw;
 
-  function getforceFn() {
+  const compareRef = useRef(compare);
+  compareRef.current = compare;
+
+  // The simulation runs a timer, so it's created in an effect (never while
+  // rendering, e.g. on the server) and stopped on cleanup.
+  useEffect(() => {
     //These params were eye-picked to look good
     const expParamater = 0.7;
     const multParameter = 250;
 
-    const diffPercentiles = model.getParamPercentiles(
-      filteredItems.map((item) => item.id),
+    const diffPercentiles = getParamPercentiles(
+      nodes.flatMap((a) =>
+        nodes.flatMap((b) => {
+          const result = compareRef.current(a.id, b.id);
+          return result?.ok ? [result.value] : [];
+        })
+      ),
       (r) => r.uncertainty,
       [10, 90],
       true
     );
-
     const expDiff =
       Math.log10(diffPercentiles[1]) - Math.log10(diffPercentiles[0]);
-
     const forceExp = expParamater / expDiff;
-
-    // ForceMultiplier is inversetly proportional to the 90th percentile uncertainty, to ensure a decent spread
+    // Inversely proportional to the 90th percentile uncertainty, to ensure a
+    // decent spread.
     const forceMultiplier = multParameter / diffPercentiles[1] ** forceExp;
+    const forceFn = (uncertainty: number) =>
+      uncertainty ** forceExp * forceMultiplier;
 
-    return (uncertainty: number) => uncertainty ** forceExp * forceMultiplier;
-  }
-
-  const forceFn = getforceFn();
-
-  const simulation = useMemo(() => {
     const simulation = d3.forceSimulation(nodes);
-
     simulation.alphaTarget(0.5);
-
     simulation.force("center", d3.forceCenter());
 
     const force = d3
       .forceLink<Node, d3.SimulationLinkDatum<Node>>()
       .distance((d) => {
-        const relativeValueResult = model.compare(
+        const result = compareRef.current(
           (d.source as Node).id,
           (d.target as Node).id
         );
-        if (!relativeValueResult.ok) {
+        if (!result?.ok) {
           return 200; // should eventually be just removed, this is a hack
         }
-        return forceFn(relativeValueResult.value.uncertainty);
+        return forceFn(result.value.uncertainty);
       });
-
     simulation.force("link", force);
-
     simulation.force("weak", d3.forceManyBody().strength(1));
 
     const links: { source: Node; target: Node }[] = [];
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
-        links.push({
-          source: nodes[i],
-          target: nodes[j],
-        });
+        links.push({ source: nodes[i], target: nodes[j] });
       }
     }
     force.links(links);
     simulation.nodes(nodes);
+    simulation.on("tick", () => redrawRef.current());
+    simulation.restart();
 
-    return simulation;
-    //Note: Don't add ``forceFn`` to the dependencies. ``forcefn`` is unstable, so this will cause unnecessary rerenders.
-  }, [model, nodes]);
-
-  useEffect(() => {
     return () => {
       simulation.stop();
     };
-  }, [simulation]);
-
-  useEffect(() => {
-    simulation.on("tick", redraw);
-    simulation.restart();
-  }, [simulation, redraw]);
+  }, [nodes]);
 
   const hoveredItem = useMemo(() => {
-    return hoveredId === undefined ? undefined : filteredItems[hoveredId];
-  }, [hoveredId, filteredItems]);
+    return hoveredId === undefined ? undefined : items[hoveredId];
+  }, [hoveredId, items]);
 
   const renderTooltip = useCallback(() => {
     if (hoveredItem === undefined) {
@@ -207,8 +197,10 @@ export const ForcePlot: FC<{
       <canvas
         ref={ref}
         className="w-full"
+        style={{ height }}
+        data-rv-plot="similarity"
         onClick={() => {
-          if (hoveredItem && onItemClick) {
+          if (hoveredItem) {
             onItemClick(hoveredItem);
           }
         }}

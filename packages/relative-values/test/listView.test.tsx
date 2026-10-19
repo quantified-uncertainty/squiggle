@@ -129,6 +129,38 @@ describe("ListView unit", () => {
     expect(unitOf(container)).toBe("huge");
   });
 
+  test("a controlled unit keeps its raw id: it's the unit again when the item comes back", async () => {
+    // Host state (a URL, saved preferences) isn't forgotten, unlike a unit
+    // picked in the dashboard (see "Unknown or stale ids" in the README).
+    const Controlled = ({ v }: { v: Version }) => (
+      <RelativeValuesDashboard
+        definition={v.spec.definition}
+        evaluator={v.evaluator}
+        precompute={false}
+        state={{ unit: "large" }}
+        onStateChange={() => {}}
+      />
+    );
+    const { container, rerender } = render(
+      <Controlled v={await version(sizes(ALL, "small"))} />
+    );
+    expect(unitOf(container)).toBe("large");
+    await act(async () => {
+      rerender(
+        <Controlled
+          v={await version(
+            sizes(`small: 1, medium: 3 to 6, huge: 50 to 200`, "medium")
+          )}
+        />
+      );
+    });
+    expect(unitOf(container)).toBe("medium");
+    await act(async () => {
+      rerender(<Controlled v={await version(sizes(ALL, "huge"))} />);
+    });
+    expect(unitOf(container)).toBe("large");
+  });
+
   test("falls back to the first item without a recommendedUnit", async () => {
     const { container } = render(
       <Dashboard v={await version(`spec = { values: { b: 1, a: 2 } }`)} />

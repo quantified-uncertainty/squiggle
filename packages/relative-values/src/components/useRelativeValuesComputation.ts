@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { RelativeValuesDefinition } from "../types.js";
+import { structureKey } from "./host/core.js";
 import {
   ComputeProgress,
   ItemPair,
@@ -60,18 +61,6 @@ function listViewPairs(definition: RelativeValuesDefinition): ItemPair[] {
     }
   }
   return pairs;
-}
-
-// Identifies the set of pairs, ignoring titles, names and colors.
-function structureKey(definition: RelativeValuesDefinition): string {
-  return JSON.stringify([
-    definition.items.map((item) => [item.id, item.clusterId ?? null]),
-    definition.clusters.map((cluster) => [
-      cluster.id,
-      cluster.recommendedUnit ?? null,
-    ]),
-    definition.recommendedUnit ?? null,
-  ]);
 }
 
 type Computed = {

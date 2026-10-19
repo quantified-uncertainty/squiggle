@@ -1,11 +1,7 @@
 "use client";
 import { FC, Fragment, useEffect, useState } from "react";
 
-import {
-  NumberShower,
-  SquiggleViewer,
-  useSimulator,
-} from "@quri/squiggle-components";
+import { SquiggleViewer, useSimulator } from "@quri/squiggle-components";
 import { result } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
@@ -15,24 +11,41 @@ import {
   PAIR_CHARTS_SOURCE_ID,
   relativeValuesPairCharts,
 } from "../../../values/pairCharts.js";
+import { useCore } from "../../host/core.js";
+import { FormattedNumber, uncertaintyNumber } from "../../host/format.js";
+import { usePresentation } from "../../host/presentation.js";
+import type {
+  RelativeValuesNumberKind,
+  RelativeValuesPairDetailsProps,
+} from "../../host/types.js";
 import { ItemName } from "../ItemName.js";
-import { useRelativeValuesOptions } from "../RelativeValuesProvider.js";
 
-interface TableRowProps {
+const TableRow: FC<{
   label: string;
   number: number;
-}
-
-const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
-  <Fragment key={label}>
-    <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-500">
-      {label}
-    </div>
-    <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
-      <NumberShower number={number} precision={2} />
-    </div>
-  </Fragment>
-);
+  kind: RelativeValuesNumberKind;
+  prefix?: string;
+  suffix?: string;
+}> = ({ label, number, kind, prefix, suffix }) => {
+  const { format } = usePresentation();
+  return (
+    <Fragment key={label}>
+      <div className="mt-1 min-w-0 break-words py-1 text-left text-xs font-normal text-[color:var(--squiggle-rv-muted,#64748b)]">
+        {label}
+      </div>
+      <div className="min-w-0 py-1 text-left text-[color:var(--squiggle-rv-text,#475569)]">
+        {prefix !== undefined && <span>{prefix} </span>}
+        <FormattedNumber
+          format={format}
+          value={number}
+          kind={kind}
+          place="sidebar"
+        />
+        {suffix !== undefined && <span className="text-xs"> {suffix}</span>}
+      </div>
+    </Fragment>
+  );
+};
 
 // Self-contained code for the "Open in Playground" link: the model followed by
 // the pair's charts. (The sidebar's own charts don't re-run the model, see
@@ -190,96 +203,133 @@ const PairCharts: FC<{
   return <PairChartsProgram code={charts.code.value} />;
 };
 
-type Props = {
-  model: ModelEvaluator;
-  numeratorItem: Item;
-  denominatorItem: Item;
-};
-
-export const ItemSideBar: FC<Props> = ({
-  model,
-  numeratorItem,
-  denominatorItem,
+/** The built-in pair details (the `Default` of the `PairDetails` slot). */
+export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
+  numerator: numeratorItem,
+  denominator: denominatorItem,
+  result,
+  close,
 }) => {
-  const { getPlaygroundUrl } = useRelativeValuesOptions();
-  const result = model.compare(numeratorItem.id, denominatorItem.id);
-  if (!result.ok) {
-    return <div>Result not found</div>;
-  } else {
-    const item = result.value;
-    const squiggleCode =
-      model.modelCode !== undefined && model.fnExpression !== undefined
-        ? buildSquiggleCode({
-            modelCode: model.modelCode,
-            fnExpression: model.fnExpression,
-            numeratorItem,
-            denominatorItem,
-          })
-        : undefined;
+  const { options, labels, format } = usePresentation();
+  const { getPlaygroundUrl } = options;
+  const evaluator = useCore().snapshot?.evaluator;
+  if (!result.ok || !evaluator) {
+    return <div>{labels["sidebar.notFound"]}</div>;
+  }
+  const item = result.value;
+  const squiggleCode =
+    evaluator.modelCode !== undefined && evaluator.fnExpression !== undefined
+      ? buildSquiggleCode({
+          modelCode: evaluator.modelCode,
+          fnExpression: evaluator.fnExpression,
+          numeratorItem,
+          denominatorItem,
+        })
+      : undefined;
 
-    return (
-      <div>
-        <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1">
-          <span className="mr-1 whitespace-nowrap text-slate-500">value</span>
-          <span className="whitespace-nowrap text-xl text-slate-500">(</span>
-          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
-            <ItemName item={numeratorItem} />
-          </span>
-          <span className="whitespace-nowrap px-1 text-xl text-slate-500">
-            /
-          </span>
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label={labels["sidebar.close"]}
+        title={`${labels["sidebar.close"]} (Esc)`}
+        // Focused when the sidebar opens as a drawer over the list.
+        data-rv-close=""
+        className="absolute right-0 top-0 z-10 rounded px-1.5 text-lg leading-none text-[color:var(--squiggle-rv-muted,#64748b)] hover:bg-slate-200 hover:text-slate-800"
+        onClick={close}
+      >
+        ×
+      </button>
+      <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1 pr-6">
+        <span className="mr-1 whitespace-nowrap text-[color:var(--squiggle-rv-muted,#64748b)]">
+          {labels["sidebar.value"]}
+        </span>
+        <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+          (
+        </span>
+        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
+          <ItemName item={numeratorItem} />
+        </span>
+        <span className="whitespace-nowrap px-1 text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+          /
+        </span>
 
-          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
-            <span className="inline-block">
-              <ItemName item={denominatorItem} />
-            </span>
+        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
+          <span className="inline-block">
+            <ItemName item={denominatorItem} />
           </span>
-          <span className="whitespace-nowrap text-xl text-slate-500">)</span>
-        </div>
+        </span>
+        <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+          )
+        </span>
+      </div>
 
-        <div className="xs mb-4 text-slate-500">
-          An estimate of the value of{" "}
-          <span className="font-semibold text-slate-700">
+      <div className="xs mb-4 text-[color:var(--squiggle-rv-muted,#64748b)]">
+        {labels["sidebar.summary"](
+          <span className="font-semibold text-[color:var(--squiggle-rv-text,#334155)]">
             {numeratorItem.name}
-          </span>{" "}
-          in terms of{" "}
-          <span className="font-semibold text-slate-700">
+          </span>,
+          <span className="font-semibold text-[color:var(--squiggle-rv-text,#334155)]">
             {denominatorItem.name}
           </span>
-        </div>
-
-        {model.canCompute ? (
-          <PairCharts
-            model={model}
-            numeratorItem={numeratorItem}
-            denominatorItem={denominatorItem}
-          />
-        ) : (
-          // Precomputed values (e.g. a bundle) don't include distributions.
-          <div className="text-xs text-slate-500">
-            Distribution charts aren&apos;t available for precomputed values.
-          </div>
-        )}
-
-        <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
-          <TableRow label="median" number={item.median} />
-          <TableRow label="mean" number={item.mean} />
-          <TableRow label="p5" number={item.min} />
-          <TableRow label="p95" number={item.max} />
-          <TableRow label="uncertainty" number={item.uncertainty} />
-        </div>
-
-        {squiggleCode !== undefined && getPlaygroundUrl && (
-          <a
-            href={getPlaygroundUrl(squiggleCode)}
-            className="text-slate-500 underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open in Playground
-          </a>
         )}
       </div>
-    );
-  }
+
+      {evaluator.canCompute ? (
+        <PairCharts
+          model={evaluator}
+          numeratorItem={numeratorItem}
+          denominatorItem={denominatorItem}
+        />
+      ) : (
+        // Precomputed values (e.g. a bundle) don't include distributions.
+        <div className="text-xs text-[color:var(--squiggle-rv-muted,#64748b)]">
+          {labels["sidebar.noCharts"]}
+        </div>
+      )}
+
+      {/* Label, value, label, value: label columns fit their (translated)
+          labels. */}
+      <div className="mb-10 mt-10 grid w-full grid-cols-[auto_1fr_auto_1fr] gap-x-2 gap-y-1">
+        <TableRow
+          label={labels["sidebar.median"]}
+          number={item.median}
+          kind="median"
+        />
+        <TableRow
+          label={labels["sidebar.mean"]}
+          number={item.mean}
+          kind="mean"
+        />
+        <TableRow label={labels["sidebar.p5"]} number={item.min} kind="p5" />
+        <TableRow label={labels["sidebar.p95"]} number={item.max} kind="p95" />
+        {format.uncertainty !== "hidden" && (
+          // As in the cells: half the 90% interval, in orders of magnitude,
+          // or as a factor.
+          <TableRow
+            label={labels["sidebar.uncertainty"]}
+            number={uncertaintyNumber(format, item)}
+            kind="uncertainty"
+            prefix={format.uncertainty === "factor" ? "×/÷" : "±"}
+            suffix={
+              format.uncertainty === "om"
+                ? labels["cell.uncertaintyUnit"]
+                : undefined
+            }
+          />
+        )}
+      </div>
+
+      {squiggleCode !== undefined && getPlaygroundUrl && (
+        <a
+          href={getPlaygroundUrl(squiggleCode)}
+          className="text-[color:var(--squiggle-rv-muted,#64748b)] underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {labels["sidebar.openInPlayground"]}
+        </a>
+      )}
+    </div>
+  );
 };

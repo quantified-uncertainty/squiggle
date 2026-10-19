@@ -150,6 +150,13 @@ export type ComputeOptions = {
 
 export type ItemPair = readonly [string, string];
 
+// `signal.throwIfAborted()`, which older environments (e.g. jsdom) lack.
+function throwIfAborted(signal: AbortSignal | undefined) {
+  if (signal?.aborted) {
+    throw signal.reason;
+  }
+}
+
 export type CreateModelEvaluatorOptions = Omit<
   ModelEvaluatorOptions,
   "modelCode" | "fnExpression"
@@ -397,6 +404,14 @@ export class ModelEvaluator {
     return { ok: true, value: [values[0], values[1]] };
   }
 
+  /**
+   * The cached result for a pair, if any. Never runs Squiggle code (unlike
+   * `compare`), so it's safe to call while rendering.
+   */
+  peek(id1: string, id2: string): RelativeValueResult | undefined {
+    return this.cache.get(makePairKey(id1, id2));
+  }
+
   compare(id1: string, id2: string): RelativeValueResult {
     const key = makePairKey(id1, id2);
     const cachedValue = this.cache.get(key);
@@ -441,7 +456,7 @@ export class ModelEvaluator {
     options: ComputeOptions = {}
   ): Promise<RelativeValueResult[]> {
     const { signal, onProgress, sliceMs = 12 } = options;
-    signal?.throwIfAborted();
+    throwIfAborted(signal);
 
     const total = pairs.length;
     const results: RelativeValueResult[] = [];
@@ -455,7 +470,7 @@ export class ModelEvaluator {
       if (performance.now() - sliceStart >= sliceMs) {
         onProgress?.({ done: results.length, total });
         await yieldToEventLoop();
-        signal?.throwIfAborted();
+        throwIfAborted(signal);
         sliceStart = performance.now();
       }
       results.push(this.compare(id1, id2));

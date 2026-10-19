@@ -11,20 +11,29 @@
  *   in custom tabs) loaded after this stylesheet still win;
  * - `html`, `:root` and `:host` become `.squiggle-rv` (so Tailwind's preflight
  *   styles the wrapper instead of the page), and `body` rules are dropped;
- * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv)`
+ * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv`
  *   are kept;
  * - keyframes are renamed to `squiggle-rv-<name>`, so that they don't clash
- *   with the host page's keyframes.
+ *   with the host page's keyframes;
+ * - rem values of `font-size` and `line-height` become multiples of
+ *   `--squiggle-rv-font-size` (default 1rem, so nothing changes without
+ *   it): `0.875rem` becomes `calc(0.875 * var(--squiggle-rv-font-size, 1rem))`.
+ *   rem is relative to the page's root, not to the dashboard, and em would
+ *   compound in nested text.
  *
  * Used at build time only.
  */
 const plugin = ({ scope }) => {
   const prefix = `.${scope}`;
 
+  // `.squiggle-rv...` or `:where(.squiggle-rv...)` (e.g. a modifier class:
+  // `:where(.squiggle-rv.squiggle-rv-compact)`).
   const isScoped = (selector) =>
-    selector.startsWith(`:where(${prefix})`) ||
-    (selector.startsWith(prefix) &&
-      /^($|[\s.:#>+~[])/.test(selector.slice(prefix.length)));
+    [prefix, `:where(${prefix}`].some(
+      (start) =>
+        selector.startsWith(start) &&
+        /^($|[\s.:#>+~[)])/.test(selector.slice(start.length))
+    );
 
   const scopeSelector = (selector) => {
     if (isScoped(selector)) {
@@ -85,6 +94,16 @@ const plugin = ({ scope }) => {
           rule.remove();
         } else {
           rule.selectors = selectors;
+        }
+      });
+
+      root.walkDecls(/^(font-size|line-height)$/i, (decl) => {
+        if (!decl.value.includes("var(")) {
+          decl.value = decl.value.replace(
+            /(^|[\s(,])(-?(?:\d+\.?\d*|\.\d+))rem\b/g,
+            (_match, before, number) =>
+              `${before}calc(${number} * var(--${scope}-font-size, 1rem))`
+          );
         }
       });
 
