@@ -1,7 +1,7 @@
 {
   "name": "squiggle",
   "displayName": "Squiggle",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Write, check, run, and visualize Squiggle models: probabilistic estimates, Fermi models, and cost-benefit analyses",
   "author": {
     "name": "Quantified Uncertainty Research Institute",
