@@ -1,0 +1,14 @@
+{
+  "name": "squiggle",
+  "displayName": "Squiggle",
+  "version": "0.1.0",
+  "description": "Write, check, run, and visualize Squiggle models: probabilistic estimates, Fermi models, and cost-benefit analyses",
+  "author": {
+    "name": "Quantified Uncertainty Research Institute",
+    "url": "https://quantifieduncertainty.org"
+  },
+  "homepage": "https://squiggle-language.com/docs/Ecosystem/LanguageModels",
+  "repository": "https://github.com/quantified-uncertainty/squiggle",
+  "license": "MIT",
+  "keywords": ["squiggle", "probability", "estimation", "monte-carlo", "fermi"]
+}

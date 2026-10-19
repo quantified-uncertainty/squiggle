@@ -11,7 +11,8 @@
     "lint:prettier": "prettier --check .",
     "eslint": "ESLINT_USE_FLAT_CONFIG=false NODE_NO_WARNINGS=1 eslint src",
     "format": "prettier --write .",
-    "build": "content-collections build && tsc -b && cp -r .content-collections dist/"
+    "build": "content-collections build && tsc -b && cp -r .content-collections dist/",
+    "gen:claude-plugin": "content-collections build && tsx scripts/genClaudePlugin.ts"
   },
   "dependencies": {
     "@content-collections/cli": "^0.1.6",
