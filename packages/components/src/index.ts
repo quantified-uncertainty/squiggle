@@ -18,6 +18,9 @@ export {
   type SquigglePlaygroundProps,
 } from "./components/SquigglePlayground/index.js";
 export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
+export { ViewerWithMenuBar } from "./components/ViewerWithMenuBar/index.js";
+export { ProjectContext } from "./components/ProjectProvider.js";
+export { type Simulation, useSimulator } from "./lib/hooks/useSimulator.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
 export { FnDocumentationFromName } from "./components/ui/FnDocumentation.js";
 
