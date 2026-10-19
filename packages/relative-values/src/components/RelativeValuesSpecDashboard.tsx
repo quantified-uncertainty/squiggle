@@ -1,3 +1,4 @@
+"use client";
 import { FC, useEffect, useState } from "react";
 
 import { Env, result } from "@quri/squiggle-lang";

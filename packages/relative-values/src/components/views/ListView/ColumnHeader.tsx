@@ -1,3 +1,4 @@
+"use client";
 import escapeRegExp from "lodash/escapeRegExp.js";
 import { FC, useState } from "react";
 

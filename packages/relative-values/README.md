@@ -147,6 +147,10 @@ if (!evaluator.ok) throw new Error(evaluator.value);
 
 `ModelEvaluator.create(code, variableName)` accepts either a comparison function (the classic Squiggle Hub convention) or a spec dict.
 
+### Server code
+
+The main entry point includes React components (marked with `"use client"`). For server code (React Server Components, server actions, Node scripts), import the non-React parts from `@quri/squiggle-relative-values/core`: types and schemas, `ModelEvaluator`, caches and spec parsing helpers.
+
 ### Lower-level components
 
 `RelativeValuesProvider` + `ListView` / `GridView` / `PlotView` let you render a single view, e.g. when tabs are controlled by your router. See `src/index.ts` for the full list of exports.

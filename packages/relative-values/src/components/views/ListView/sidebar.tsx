@@ -1,3 +1,4 @@
+"use client";
 import { FC, Fragment } from "react";
 
 import { NumberShower, SquiggleChart } from "@quri/squiggle-components";

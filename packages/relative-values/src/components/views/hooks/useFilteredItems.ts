@@ -1,3 +1,4 @@
+"use client";
 import { useMemo } from "react";
 
 import { Item } from "../../../types.js";

@@ -1,3 +1,4 @@
+"use client";
 import _ from "lodash";
 import { FC, Fragment, useCallback, useMemo } from "react";
 

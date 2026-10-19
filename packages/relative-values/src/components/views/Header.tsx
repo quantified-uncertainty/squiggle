@@ -1,3 +1,4 @@
+"use client";
 import { FC } from "react";
 
 import { ClusterIcon } from "../common/ClusterIcon.js";

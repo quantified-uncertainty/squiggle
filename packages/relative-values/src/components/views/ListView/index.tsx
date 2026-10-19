@@ -1,3 +1,4 @@
+"use client";
 import clsx from "clsx";
 import escapeRegExp from "lodash/escapeRegExp.js";
 import { FC, Fragment, useState } from "react";
