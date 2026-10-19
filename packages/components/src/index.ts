@@ -14,6 +14,11 @@ export {
 } from "./components/SquiggleChart.js";
 export { SquiggleEditor } from "./components/SquiggleEditor.js";
 export {
+  CodeEditor,
+  type CodeEditorHandle,
+  type CodeEditorProps,
+} from "./components/CodeEditor/index.js";
+export {
   SquigglePlayground,
   type SquigglePlaygroundProps,
 } from "./components/SquigglePlayground/index.js";

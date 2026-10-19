@@ -33,6 +33,9 @@ type Props = {
   externalViewerActions?: ExternalViewerActions;
   playgroundSettings: PartialPlaygroundSettings;
   showMenu?: boolean;
+  // Hides the whole top row (tab menu, simulation indicator, seed button), e.g.
+  // when rendering a single variable inside a card.
+  showToolbar?: boolean;
   defaultTab?: ViewerTab;
   useGlobalShortcuts?: boolean;
   randomizeSeed: (() => void) | undefined;
@@ -52,6 +55,7 @@ export const ViewerWithMenuBar = memo(
       playgroundSettings,
       randomizeSeed,
       showMenu = true,
+      showToolbar = true,
       externalViewerActions,
       defaultTab,
       useGlobalShortcuts: enableGlobalShortcuts = false,
@@ -136,6 +140,7 @@ export const ViewerWithMenuBar = memo(
           />
         }
         xPadding={xPadding}
+        showToolbar={showToolbar}
       />
     );
   })
