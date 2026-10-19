@@ -106,6 +106,7 @@ function columnAxis(
     clusters: state.clusters,
     sort: state.sort,
     limit: state.limit,
+    limitBy: state.limitBy,
   };
 }
 

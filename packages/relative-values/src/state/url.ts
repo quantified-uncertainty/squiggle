@@ -1,4 +1,5 @@
 // URL search params <-> state. Pure: never reads `location`.
+import { warnOnce } from "../components/host/warn.js";
 import { resolveSort, stableStringify } from "./resolve.js";
 import {
   defaultRelativeValuesState,
@@ -62,7 +63,14 @@ function paramsOf(key: RelativeValuesStateKey, p: string) {
       return { names: [`${p}limitby`] };
     case "columns":
       return {
-        names: [`${p}cols`, `${p}cids`, `${p}ccl`, `${p}csort`, `${p}climit`],
+        names: [
+          `${p}cols`,
+          `${p}cids`,
+          `${p}ccl`,
+          `${p}csort`,
+          `${p}climit`,
+          `${p}climitby`,
+        ],
       };
     case "gridMode":
       return { names: [`${p}grid`] };
@@ -157,6 +165,16 @@ export function relativeValuesStateToSearchParams(
 
   const has = (key: RelativeValuesStateKey) => keys.includes(key);
   const defaultView = options.views?.[0] ?? "list";
+  if (
+    has("view") &&
+    !options.views &&
+    state.view !== undefined &&
+    !(relativeValuesTabIds as readonly string[]).includes(state.view)
+  ) {
+    warnOnce(
+      `relativeValuesStateToSearchParams: view "${state.view}" isn't a built-in tab; pass the dashboard's tab ids as \`views\` (to the reader too), so that the first one is the default view`
+    );
+  }
 
   if (has("view") && state.view !== undefined && state.view !== defaultView) {
     params.set(`${p}view`, state.view);
@@ -203,6 +221,9 @@ export function relativeValuesStateToSearchParams(
       }
       if (typeof columns.limit === "number") {
         params.set(`${p}climit`, String(columns.limit));
+      }
+      if (columns.limitBy) {
+        params.set(`${p}climitby`, encodeSort(resolveSort(columns.limitBy)));
       }
     }
   }
@@ -294,6 +315,7 @@ export function relativeValuesStateFromSearchParams<
               decodeSort(params.get(`${p}csort`)) ??
               defaultRelativeValuesState.sort,
             limit: decodeLimit(params.get(`${p}climit`)),
+            limitBy: decodeSort(params.get(`${p}climitby`)) ?? null,
           };
         }
         break;

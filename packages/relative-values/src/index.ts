@@ -62,6 +62,7 @@ export type {
   RelativeValuesSlot,
   RelativeValuesSource,
   RelativeValuesStateProps,
+  RelativeValuesStateUpdate,
   RelativeValuesTabBarProps,
   RelativeValuesTabConfig,
   RelativeValuesTabContext,

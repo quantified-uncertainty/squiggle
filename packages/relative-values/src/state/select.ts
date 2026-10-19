@@ -278,16 +278,27 @@ export function selectNormalizedRelativeValues({
   } else {
     const axis = state.columns;
     const candidates = restrict(universe, axis.ids, axis.clusters, clusters);
+    // Rank, limit, sort (as the rows).
     columns = sortItems(
       candidates,
       sortOptions(context, {
-        sort: axis.sort,
+        sort: axis.limitBy ?? axis.sort,
         defaultOrder: candidates,
         unit,
       })
     );
     if (axis.limit !== null) {
       columns = columns.slice(0, axis.limit);
+    }
+    if (axis.limitBy !== null) {
+      columns = sortItems(
+        columns,
+        sortOptions(context, {
+          sort: axis.sort,
+          defaultOrder: candidates,
+          unit,
+        })
+      );
     }
   }
 

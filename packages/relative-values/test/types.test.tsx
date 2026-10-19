@@ -2,6 +2,7 @@
 // the API spec: Studio's and Hub's usage, inference of custom tab ids, and
 // invalid props.
 import { describe, expect, test } from "@jest/globals";
+import { useRef } from "react";
 
 import type { SqLinker } from "@quri/squiggle-lang";
 
@@ -94,6 +95,26 @@ export const handle = (api: { current: RelativeValuesHandle | null }) => {
   const view: RelativeValuesTab | undefined = api.current?.getState().view;
   return view;
 };
+
+// The README's `useRef<RelativeValuesHandle>(null)` also works as a
+// provider's apiRef (the provider's views are `string`), and on dashboards
+// and standalone single views.
+export function useProviderHandle() {
+  const api = useRef<RelativeValuesHandle>(null);
+  const views = useRef<RelativeValuesHandle<"list" | "ranking">>(null);
+  return (
+    <>
+      <RelativeValuesProvider bundle={bundle} apiRef={api} />
+      <RelativeValuesProvider bundle={bundle} apiRef={views} />
+      <RelativeValuesBundleDashboard bundle={bundle} apiRef={api} />
+      <RelativeValuesSingleView bundle={bundle} view="grid" apiRef={api} />
+    </>
+  );
+}
+// The updater still checks what it returns.
+export const updater = (api: RelativeValuesHandle) =>
+  // @ts-expect-error: unknown view
+  api.setState((state) => ({ ...state, view: "nope" }));
 
 // URL helpers type the view with `views`.
 export const urlState = () => {

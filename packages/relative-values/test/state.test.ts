@@ -71,6 +71,7 @@ describe("resolveRelativeValuesState", () => {
       clusters: null,
       sort: { mode: "default", desc: false },
       limit: 3,
+      limitBy: null,
     });
     expect(state.limitBy).toEqual({ mode: "median", desc: false });
   });
@@ -246,6 +247,7 @@ describe("reducer", () => {
       clusters: ["veg"],
       sort: { mode: "name", desc: true },
       limit: null,
+      limitBy: null,
     });
   });
 
@@ -354,13 +356,24 @@ describe("parseRelativeValuesState and pickRelativeValuesState", () => {
       nope: 1,
       view: "ranking",
     });
+    // Without `views`, only the built-in tabs are valid views (as in the
+    // URL reader, and as the return type says).
     expect(state).toEqual({
       unit: "a",
       sort: { mode: "median", desc: true },
       gridMode: "half",
-      view: "ranking",
     });
-    expect(warnings).toHaveLength(2);
+    expect(warnings).toHaveLength(3);
+    expect(warnings).toContain('Unknown view "ranking" ignored');
+    expect(parseRelativeValuesState({ view: "grid" }).state).toEqual({
+      view: "grid",
+    });
+    expect(
+      parseRelativeValuesState(
+        { view: "ranking" },
+        { views: ["list", "ranking"] }
+      ).state
+    ).toEqual({ view: "ranking" });
   });
 
   test("views validate the view; non-objects never throw", () => {

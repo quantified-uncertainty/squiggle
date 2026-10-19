@@ -49,6 +49,8 @@ export type RelativeValuesColumnAxis = {
   clusters: readonly string[] | null; // default null (all clusters)
   sort: RelativeValuesSort; // default { mode: "default", desc: false }
   limit: number | null; // default null
+  // Ranking used to pick the `limit` columns; null (default) = `sort`.
+  limitBy: RelativeValuesSort | null;
 };
 
 /**
@@ -110,8 +112,9 @@ export type RelativeValuesStateInput<View extends string = RelativeValuesTab> =
     limitBy?: Partial<RelativeValuesSort> | null;
     columns?:
       | "rows"
-      | (Partial<Omit<RelativeValuesColumnAxis, "sort">> & {
+      | (Partial<Omit<RelativeValuesColumnAxis, "sort" | "limitBy">> & {
           sort?: Partial<RelativeValuesSort>;
+          limitBy?: Partial<RelativeValuesSort> | null;
         });
     gridMode?: GridMode;
     selectedItem?: string | null;
@@ -172,6 +175,7 @@ export const defaultRelativeValuesColumnAxis: RelativeValuesColumnAxis = {
   clusters: null,
   sort: defaultRelativeValuesSort,
   limit: null,
+  limitBy: null,
 };
 
 export const defaultRelativeValuesState: Omit<RelativeValuesState, "view"> = {

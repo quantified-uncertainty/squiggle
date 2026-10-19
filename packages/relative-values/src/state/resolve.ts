@@ -39,6 +39,10 @@ function resolveColumns(
     clusters: input.clusters === undefined ? null : input.clusters,
     sort: resolveSort(input.sort),
     limit: input.limit === undefined ? null : input.limit,
+    limitBy:
+      input.limitBy === undefined || input.limitBy === null
+        ? null
+        : resolveSort(input.limitBy),
   };
 }
 
@@ -255,12 +259,18 @@ export function normalizeRelativeValuesState<View extends string>(
       clusters: normalizeClusters(columns.clusters, "columns.clusters"),
       sort: normalizeSort(columns.sort, "columns.sort"),
       limit: normalizeLimit(columns.limit, "columns.limit"),
+      // Stored states from before `limitBy` existed don't have it.
+      limitBy:
+        columns.limitBy === null || columns.limitBy === undefined
+          ? null
+          : normalizeSort(columns.limitBy, "columns.limitBy"),
     };
     columns =
       axis.ids === columns.ids &&
       axis.clusters === columns.clusters &&
       axis.sort === columns.sort &&
-      axis.limit === columns.limit
+      axis.limit === columns.limit &&
+      axis.limitBy === columns.limitBy
         ? columns
         : axis;
   }

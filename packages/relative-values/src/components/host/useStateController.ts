@@ -38,12 +38,30 @@ export type DispatchSource = "user" | "api";
 
 /** What `dispatch` needs to know about the dashboard as the user sees it. */
 export type DispatchContext = {
-  // The effective, normalized state.
+  // The effective, normalized state (with the uncontrolled changes that
+  // aren't rendered yet).
   effective: RelativeValuesState<string>;
-  normalize: NormalizeContext<string>;
+  // The last `next` proposed in the current event, until the event ends (or
+  // the next render). Later changes in the same event build on it, also for
+  // controlled keys that the host hasn't passed back yet.
+  proposed?: RelativeValuesState<string>;
+  // Undefined while the definition is loading: changes aren't normalized.
+  normalize: NormalizeContext<string> | undefined;
   // Known clusters in scope (for toggling a cluster while all are selected).
   universeClusters: readonly string[];
 };
+
+/** The state that the next change builds on. */
+export function dispatchBase(
+  context: DispatchContext
+): RelativeValuesState<string> {
+  return context.proposed ?? context.effective;
+}
+
+const afterEvent: (callback: () => void) => void =
+  typeof queueMicrotask === "function"
+    ? queueMicrotask
+    : (callback) => void Promise.resolve().then(callback);
 
 export type StateControllerOptions = {
   // The view used when none is given (the first tab).
@@ -180,14 +198,16 @@ export function useStateController(
       if (!dispatchContext) {
         return;
       }
-      const previous = dispatchContext.effective;
+      const previous = dispatchBase(dispatchContext);
       const reduced = reduceRelativeValuesState(previous, action, {
         universeClusters: dispatchContext.universeClusters,
         initial: initialRef.current,
       });
       const next = {
-        ...normalizeRelativeValuesState(reduced, dispatchContext.normalize)
-          .state,
+        ...(dispatchContext.normalize
+          ? normalizeRelativeValuesState(reduced, dispatchContext.normalize)
+              .state
+          : reduced),
       };
       if (source === "user") {
         for (const key of current.lockedKeys) {
@@ -207,8 +227,18 @@ export function useStateController(
       if (Object.keys(patch).length) {
         setInternal((state) => ({ ...state, ...patch }));
       }
-      // Later dispatches in the same event build on this one.
-      dispatchContext.effective = { ...previous, ...patch };
+      // Uncontrolled changes apply until the next render. Later dispatches in
+      // the same event build on all of `next`: e.g. setUnit then setSort in
+      // one click handler, with both keys controlled from the URL, gives a
+      // second `next` with both changes (rejected proposals don't outlive
+      // the event).
+      dispatchContext.effective = { ...dispatchContext.effective, ...patch };
+      if (dispatchContext.proposed === undefined) {
+        afterEvent(() => {
+          dispatchContext.proposed = undefined;
+        });
+      }
+      dispatchContext.proposed = next;
       const { reason, axis } = relativeValuesActionReason(action);
       current.onStateChange?.(next, {
         reason,

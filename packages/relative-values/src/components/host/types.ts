@@ -382,6 +382,20 @@ export type RelativeValuesFrameProps = {
 // Hook, actions, handle
 // ---------------------------------------------------------------------------
 
+/**
+ * `setState`'s argument. The updater is a method signature (bivariant), so
+ * that a handle typed for some views is assignable to one for any view: e.g.
+ * `useRef<RelativeValuesHandle>(null)` works as `RelativeValuesProvider`'s
+ * `apiRef`.
+ */
+export type RelativeValuesStateUpdate<View extends string = string> =
+  | RelativeValuesStateInput<View>
+  | {
+      bivarianceHack(
+        state: RelativeValuesState<View>
+      ): RelativeValuesStateInput<View>;
+    }["bivarianceHack"];
+
 /** All "api"-sourced. Bound to the provider; locked keys still apply. */
 export type RelativeValuesActions<View extends string = string> = {
   setView(view: View): void;
@@ -396,11 +410,7 @@ export type RelativeValuesActions<View extends string = string> = {
   setGridMode(mode: GridMode): void;
   selectItem(id: string | null): void;
   selectPair(pair: readonly [string, string] | null): void;
-  setState(
-    update:
-      | RelativeValuesStateInput<View>
-      | ((state: RelativeValuesState<View>) => RelativeValuesStateInput<View>)
-  ): void;
+  setState(update: RelativeValuesStateUpdate<View>): void;
   reset(keys?: readonly RelativeValuesStateKey[]): void; // to defaultState, then defaults
 };
 
@@ -447,11 +457,7 @@ export type RelativeValuesTabContext = RelativeValuesReadyController<string>;
 
 export type RelativeValuesHandle<View extends string = RelativeValuesTab> = {
   getState(): RelativeValuesState<View>;
-  setState(
-    update:
-      | RelativeValuesStateInput<View>
-      | ((state: RelativeValuesState<View>) => RelativeValuesStateInput<View>)
-  ): void;
+  setState(update: RelativeValuesStateUpdate<View>): void;
   reset(keys?: readonly RelativeValuesStateKey[]): void;
   getData(): RelativeValuesData; // what the views show, e.g. for CSV export
   scrollTo(

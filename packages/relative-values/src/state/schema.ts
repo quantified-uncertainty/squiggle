@@ -5,6 +5,7 @@ import {
   type RelativeValuesStateKey,
   relativeValuesStateKeys,
   type RelativeValuesTab,
+  relativeValuesTabIds,
 } from "./types.js";
 
 const sortSchema = z.object({
@@ -32,6 +33,7 @@ const keySchemas = {
       clusters: idsSchema.optional(),
       sort: sortSchema.optional(),
       limit: z.number().nullable().optional(),
+      limitBy: sortSchema.nullable().optional(),
     }),
   ]),
   gridMode: z.enum(["full", "half"]),
@@ -54,6 +56,10 @@ function assign<K extends RelativeValuesStateKey>(
  * Validates saved state (e.g. from localStorage). Lenient: invalid fields are
  * dropped with a warning; never throws. Ids aren't checked against a
  * definition here; dashboards ignore unknown ids (see the README).
+ *
+ * `view` is checked against `views` (default: the built-in tabs, as in
+ * `relativeValuesStateFromSearchParams`); pass your tab ids if you have
+ * custom tabs.
  */
 export function parseRelativeValuesState<
   View extends string = RelativeValuesTab,
@@ -61,6 +67,8 @@ export function parseRelativeValuesState<
   json: unknown,
   options: { views?: readonly View[] } = {}
 ): { state: RelativeValuesStateInput<View>; warnings: string[] } {
+  // Without `views`, View is the built-in tab union.
+  const views = (options.views ?? relativeValuesTabIds) as readonly string[];
   const warnings: string[] = [];
   if (json === null || json === undefined) {
     return { state: {}, warnings };
@@ -83,11 +91,7 @@ export function parseRelativeValuesState<
       warnings.push(`Invalid state key "${key}" ignored`);
       continue;
     }
-    if (
-      key === "view" &&
-      options.views &&
-      !options.views.some((view) => view === parsed.data)
-    ) {
+    if (key === "view" && !views.some((view) => view === parsed.data)) {
       warnings.push(`Unknown view "${String(parsed.data)}" ignored`);
       continue;
     }

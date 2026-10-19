@@ -24,6 +24,7 @@ const full: RelativeValuesState = {
     clusters: ["platform", "research"],
     sort: { mode: "name", desc: true },
     limit: 5,
+    limitBy: { mode: "median", desc: true },
   },
   gridMode: "half",
   selectedItem: "sso",

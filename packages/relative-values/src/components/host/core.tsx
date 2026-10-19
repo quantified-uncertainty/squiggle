@@ -44,6 +44,7 @@ import type {
   RelativeValuesProviderProps,
 } from "./types.js";
 import {
+  dispatchBase,
   type DispatchContext,
   type DispatchSource,
   useIsomorphicLayoutEffect,
@@ -80,6 +81,10 @@ export type CoreContextValue = {
   selectWith(overrides: RelativeValuesStateInput<string>): RelativeValuesData;
   // Increases when pairs were computed.
   version: number;
+  // Increases when a consumer registers or changes its requirement; with
+  // `version`, consumers re-check whether their pairs are cached (another
+  // provider on the same evaluator may have computed them).
+  registryVersion: number;
   register(id: string, entry: RequirementEntry): void;
   unregister(id: string): void;
   // Every mounted consumer's pairs are computed.
@@ -161,7 +166,8 @@ export function applyClusterOverrides(
 type Prepared = {
   universe: Item[];
   universeKey: string;
-  normalize: NormalizeContext<string>;
+  // Undefined while the definition is loading.
+  normalize: NormalizeContext<string> | undefined;
   state: RelativeValuesState<string>;
   warnings: string[];
   universeClusters: string[];
@@ -191,10 +197,23 @@ function usePrepared(
 
   return useMemo(() => {
     const { universe, sorts, raw } = latest.current;
-    const def = definition ?? emptyDefinition;
+    if (!definition) {
+      // Loading: ids can't be checked yet (and aren't reported as unknown).
+      return {
+        universe: [],
+        universeKey,
+        normalize: undefined,
+        state:
+          views.length > 0 && !views.includes(raw.view)
+            ? { ...raw, view: views[0] }
+            : raw,
+        warnings: [],
+        universeClusters: [],
+      };
+    }
     // A scope without functions that gives the same universe.
     const normalize: NormalizeContext<string> = {
-      definition: def,
+      definition,
       views,
       scope: { ids: universe.items.map((item) => item.id) },
       sorts,
@@ -206,7 +225,7 @@ function usePrepared(
       normalize,
       state: normalized.state,
       warnings: [...universe.warnings, ...normalized.warnings],
-      universeClusters: clustersIn(def, universe.items).map(
+      universeClusters: clustersIn(definition, universe.items).map(
         (cluster) => cluster.id
       ),
     };
@@ -230,7 +249,7 @@ function selectFor(
     state,
     warnings,
     universe: prepared.universe,
-    scope: prepared.normalize.scope,
+    scope: prepared.normalize?.scope,
     sorts,
     compute,
     locale,
@@ -240,14 +259,50 @@ function selectFor(
 function withOverrides(
   prepared: Prepared,
   overrides: RelativeValuesStateInput<string>
-) {
-  return normalizeRelativeValuesState(
-    { ...prepared.state, ...resolveRelativeValuesStateKeys(overrides) },
-    prepared.normalize
-  );
+): { state: RelativeValuesState<string>; warnings: string[] } {
+  const state = {
+    ...prepared.state,
+    ...resolveRelativeValuesStateKeys(overrides),
+  };
+  return prepared.normalize
+    ? normalizeRelativeValuesState(state, prepared.normalize)
+    : { state, warnings: [] };
+}
+
+// Ids of the sort modes that a state uses.
+function sortModesOf(
+  state: RelativeValuesState<string> | RelativeValuesStateInput<string>
+): string[] {
+  const modes: string[] = [];
+  const add = (sort: { mode?: string } | null | undefined) => {
+    if (sort?.mode !== undefined) {
+      modes.push(sort.mode);
+    }
+  };
+  add(state.sort);
+  add(state.limitBy);
+  if (state.columns !== undefined && state.columns !== "rows") {
+    add(state.columns.sort);
+    add(state.columns.limitBy);
+  }
+  return modes;
 }
 
 const quote = (value: string) => value.replace(/["\\]/g, "\\$&");
+
+// `display: contents` elements (list rows) have no box to scroll to: use
+// their first descendant that has one.
+function scrollableElement(element: Element): Element {
+  let current: Element = element;
+  while (
+    typeof getComputedStyle === "function" &&
+    getComputedStyle(current).display === "contents" &&
+    current.firstElementChild
+  ) {
+    current = current.firstElementChild;
+  }
+  return current;
+}
 
 function scrollToTarget(
   providerId: string,
@@ -270,7 +325,10 @@ function scrollToTarget(
   for (const selector of selectors) {
     const element = document.querySelector(selector);
     if (element) {
-      element.scrollIntoView({ block: "nearest", inline: "nearest" });
+      scrollableElement(element).scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+      });
       return;
     }
   }
@@ -400,6 +458,32 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     : "";
   const sortsRef = useRef(sorts);
   sortsRef.current = sorts;
+  // Increases when the compare function of a sort in use changes (e.g. it
+  // closes over host data that loaded later), so that the order is
+  // recomputed. Compared by identity: memoize compare functions if the host
+  // re-renders often.
+  const activeCompares = sorts
+    ? [
+        ...sortModesOf(controller.raw),
+        ...[...registry.current.values()].flatMap((entry) =>
+          entry.overrides ? sortModesOf(entry.overrides) : []
+        ),
+      ].map((mode) =>
+        Object.prototype.hasOwnProperty.call(sorts, mode)
+          ? sorts[mode].compare
+          : undefined
+      )
+    : [];
+  const lastCompares = useRef(activeCompares);
+  const comparesRevision = useRef(0);
+  if (
+    activeCompares.length !== lastCompares.current.length ||
+    activeCompares.some((compare, i) => compare !== lastCompares.current[i])
+  ) {
+    lastCompares.current = activeCompares;
+    comparesRevision.current++;
+  }
+  const sortsRevision = comparesRevision.current;
 
   // Snapshot: the current source if its pairs are computed, else the last
   // complete one (stale while recomputing, e.g. after a live reload).
@@ -456,6 +540,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     registryVersion,
     version,
     locale,
+    sortsRevision,
   ]);
 
   const currentComplete = useMemo(
@@ -519,7 +604,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       ),
     // `version`: the pipeline reads computed values.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shown, prepared, compute, version, locale]
+    [shown, prepared, compute, version, locale, sortsRevision]
   );
   const dataRef = useRef(data);
   dataRef.current = data;
@@ -539,7 +624,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     },
     // `version`: a new function when values were computed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [shown, prepared, compute, version, locale]
+    [shown, prepared, compute, version, locale, sortsRevision]
   );
 
   useIsomorphicLayoutEffect(() => {
@@ -596,6 +681,13 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
           return;
         }
       }
+      if (!currentComplete) {
+        // Another provider on the same evaluator computed the pairs between
+        // this render and this effect: render again, so that the views
+        // (and whenReady) see them.
+        computed();
+        return;
+      }
       if (precompute === true) {
         const set = new PairSet();
         set.addProduct(preparedCurrent.universe, preparedCurrent.universe);
@@ -622,6 +714,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     current,
     currentAsync,
     currentRequired,
+    currentComplete,
     precompute,
     mounted,
     preparedCurrent,
@@ -681,13 +774,16 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       selectItem: (item) => api({ type: "selectItem", id: item }),
       selectPair: (pair) => api({ type: "selectPair", pair }),
       setState: (update) => {
-        const effective = dispatchContext.current?.effective;
-        if (!effective) {
+        const context = dispatchContext.current;
+        if (!context) {
           return;
         }
         api({
           type: "set",
-          input: typeof update === "function" ? update(effective) : update,
+          input:
+            typeof update === "function"
+              ? update(dispatchBase(context))
+              : update,
         });
       },
       reset: (keys) => api({ type: "reset", keys }),
@@ -698,7 +794,9 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     apiRef as Ref<RelativeValuesHandle<string>> | undefined,
     (): RelativeValuesHandle<string> => ({
       getState: () =>
-        dispatchContext.current?.effective ?? dataRef.current.state,
+        dispatchContext.current
+          ? dispatchBase(dispatchContext.current)
+          : dataRef.current.state,
       setState: actions.setState,
       reset: actions.reset,
       getData: () => dataRef.current,
@@ -723,6 +821,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       data,
       selectWith,
       version,
+      registryVersion,
       register,
       unregister,
       allReady,
@@ -742,6 +841,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       data,
       selectWith,
       version,
+      registryVersion,
       register,
       unregister,
       allReady,

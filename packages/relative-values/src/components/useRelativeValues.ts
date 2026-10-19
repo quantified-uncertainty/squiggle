@@ -38,20 +38,8 @@ export function useRelativeValuesConsumer(
   const core = useCore();
   const { formatter, labels } = usePresentation();
   const consumerId = useId();
-  const key = requirementKey(requirement, consumerId);
   const { overrides, progress } = options;
   const overridesKey = stableStringify(overrides ?? null);
-
-  const entry = useRef<RequirementEntry>({ requirement, overrides });
-  entry.current = { requirement, overrides };
-  const { register, unregister } = core;
-  useIsomorphicLayoutEffect(() => {
-    register(consumerId, entry.current);
-  }, [register, consumerId, key, overridesKey]);
-  useIsomorphicLayoutEffect(
-    () => () => unregister(consumerId),
-    [unregister, consumerId]
-  );
 
   const { selectWith, snapshot, asyncCompute } = core;
   const data = useMemo(
@@ -61,6 +49,39 @@ export function useRelativeValuesConsumer(
     [core.data, selectWith, overridesKey]
   );
 
+  // A function requirement is identified by the pairs it returns, so that
+  // a new function (e.g. one that closes over a changed prop) registers
+  // again when it needs other pairs, but an equivalent inline function on
+  // every render doesn't.
+  const requires =
+    requirement.kind === "requires" ? requirement.requires : undefined;
+  // (Only matters while pairs are computed asynchronously.)
+  const fnPairsKey = useMemo(
+    () =>
+      typeof requires === "function" && snapshot && asyncCompute
+        ? requires(data)
+            .map(([id1, id2]) => `${id1}\0${id2}`)
+            .join("\n")
+        : "",
+    [requires, data, snapshot, asyncCompute]
+  );
+  const key = `${requirementKey(requirement, consumerId)}:${fnPairsKey}`;
+
+  // The registered entry is updated in place, so that the provider always
+  // reads the latest requirement (e.g. the latest `requires` function).
+  const entry = useRef<RequirementEntry>({ requirement, overrides });
+  entry.current.requirement = requirement;
+  entry.current.overrides = overrides;
+  const { register, unregister } = core;
+  useIsomorphicLayoutEffect(() => {
+    register(consumerId, entry.current);
+  }, [register, consumerId, key, overridesKey]);
+  useIsomorphicLayoutEffect(
+    () => () => unregister(consumerId),
+    [unregister, consumerId]
+  );
+
+  const { registryVersion } = core;
   const computed = useMemo(
     () =>
       !snapshot ||
@@ -68,9 +89,11 @@ export function useRelativeValuesConsumer(
       snapshot.evaluator.isCached(
         allRequirementPairs(entry.current.requirement, data)
       ),
-    // `key` identifies the requirement.
+    // `key` identifies the requirement. `registryVersion`: re-checked when
+    // the provider re-reads the requirements (the pairs may have been
+    // computed by another provider on the same evaluator).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [snapshot, asyncCompute, data, key]
+    [snapshot, asyncCompute, data, key, registryVersion]
   );
 
   const { status, error, actions, isStale } = core;

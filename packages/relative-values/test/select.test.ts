@@ -375,6 +375,51 @@ describe("units and columns", () => {
     });
     expect(ids(byIds.columns)).toEqual(["ciSpeedup", "sso"]);
   });
+
+  test("columns.limitBy picks the same columns whatever columns.sort is", () => {
+    const top = (sort: { mode: string; desc?: boolean }) =>
+      selectRelativeValues({
+        definition,
+        evaluator,
+        state: {
+          unit: "sso",
+          columns: {
+            limit: 3,
+            limitBy: { mode: "median", desc: true },
+            sort,
+          },
+        },
+      });
+    const byValue = definition.items
+      .map((item) => ({ id: item.id, median: median(item.id, "sso") }))
+      .sort((a, b) => b.median - a.median)
+      .slice(0, 3)
+      .map((row) => row.id);
+    expect(ids(top({ mode: "default" }).columns)).toEqual(
+      definition.items
+        .map((item) => item.id)
+        .filter((id) => byValue.includes(id))
+    );
+    const byName = ids(top({ mode: "name" }).columns);
+    expect([...byName].sort()).toEqual([...byValue].sort());
+    expect(byName).toEqual(
+      [...byName].sort((a, b) =>
+        (definition.items.find((i) => i.id === a)?.name ?? "").localeCompare(
+          definition.items.find((i) => i.id === b)?.name ?? ""
+        )
+      )
+    );
+    // Without limitBy, the limit ranks by columns.sort.
+    const plain = selectRelativeValues({
+      definition,
+      evaluator,
+      state: { unit: "sso", columns: { limit: 3, sort: { mode: "name" } } },
+    });
+    expect(ids(plain.columns)).not.toEqual(byName);
+    // The ranking pairs include the column candidates × the unit.
+    const pairs = requiredRelativeValuesPairs(top({ mode: "name" }), "grid");
+    expect(pairs).toContainEqual(["partnerApi", "sso"]);
+  });
 });
 
 describe("computation", () => {

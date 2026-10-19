@@ -89,16 +89,23 @@ export function rankingPairs(
       set.addProduct(data.items, [unit]);
     }
   }
-  if (
-    options.columns &&
-    state.columns !== "rows" &&
-    isValueSort(state.columns.sort.mode)
-  ) {
+  if (options.columns && state.columns !== "rows") {
+    const axis = state.columns;
     const candidates = restrictColumns(data);
-    if (state.columns.sort.mode === "similarity") {
-      set.addProduct(candidates, candidates);
-    } else {
-      set.addProduct(candidates, [unit]);
+    const columnRanking = axis.limitBy ?? axis.sort;
+    if (isValueSort(columnRanking.mode)) {
+      if (columnRanking.mode === "similarity") {
+        set.addProduct(candidates, candidates);
+      } else {
+        set.addProduct(candidates, [unit]);
+      }
+    }
+    if (axis.limitBy !== null && isValueSort(axis.sort.mode)) {
+      if (axis.sort.mode === "similarity") {
+        set.addProduct(data.columns, data.columns);
+      } else {
+        set.addProduct(data.columns, [unit]);
+      }
     }
   }
   return set.pairs;
