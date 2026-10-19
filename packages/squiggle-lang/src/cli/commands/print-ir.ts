@@ -9,6 +9,9 @@ import { loadSrc } from "../utils.js";
 export function addPrintIrCommand(program: Command) {
   program
     .command("print-ir")
+    .description(
+      "Compile code and print the intermediate representation (debugging)"
+    )
     .arguments("[filename]")
     .option(
       "-e, --eval <code>",

@@ -9,6 +9,7 @@ import { coloredJson, loadSrc } from "../utils.js";
 export function addParseCommand(program: Command) {
   program
     .command("parse")
+    .description("Parse code and print the AST (debugging)")
     .arguments("[filename]")
     .option(
       "-e, --eval <code>",
