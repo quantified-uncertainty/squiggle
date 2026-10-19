@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -16,6 +15,7 @@ import {
 import { findRelativeValuesExports } from "@quri/squiggle-relative-values/core";
 
 import { normalizeRelPath } from "../shared/paths.js";
+import { hashContent } from "./files.js";
 import { makeNodeLinker } from "./linker.js";
 import { PathError, resolveSafePath } from "./paths.js";
 
@@ -54,12 +54,6 @@ export function studioEnvironment(
     xyPointLength: opts.sampleCount ?? defaultEnvironment.xyPointLength,
     seed: opts.seed ?? defaultEnvironment.seed,
   };
-}
-
-// sha256 of the content, hex, first 32 characters: the server's file hash
-// (`diskHash` in the client, `data-studio-disk-hash` on <html>).
-export function contentHash(content: string | Buffer): string {
-  return createHash("sha256").update(content).digest("hex").slice(0, 32);
 }
 
 function isInside(root: string, target: string): boolean {
@@ -148,7 +142,7 @@ export type StudioRun = {
   imports: string[]; // source ids loaded through imports, sorted
   environment: Env;
   code: string;
-  codeHash: string; // contentHash of the file (or of `code`)
+  codeHash: string; // the server's hash of the file (or of `code`): `diskHash`
 };
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -170,9 +164,9 @@ export async function runStudioFile(
       await resolveSafePath(opts.root, opts.path)
     );
     code = buffer.toString("utf-8");
-    codeHash = contentHash(buffer);
+    codeHash = hashContent(buffer);
   } else {
-    codeHash = contentHash(code);
+    codeHash = hashContent(code);
   }
   const environment = { ...studioEnvironment(), ...opts.environment };
   const linker = makeNodeLinker({ root: opts.root, hubUrl: opts.hubUrl });

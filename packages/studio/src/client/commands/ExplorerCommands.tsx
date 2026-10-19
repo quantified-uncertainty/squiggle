@@ -163,8 +163,22 @@ export const ExplorerCommands: FC = () => {
   });
 
   // A quick pick of recent folders (when Open Folder is allowed) and the
-  // recent files of this folder.
-  useCommand("workbench.action.openRecent", async () => {
+  // recent files of this folder. The command is done once the pick is shown
+  // (window.squiggleStudio.commands.run doesn't wait for a choice); the
+  // choice is handled when it's made.
+  const openPicked = async (picked: QuickPickItem | undefined) => {
+    if (!picked) return;
+    if (picked.id.startsWith("folder:")) {
+      await openRecentFolder(picked.id.slice("folder:".length));
+    } else if (picked.id.startsWith("file:")) {
+      latest.current.workspace.openFile(picked.id.slice("file:".length), {
+        reason: "quick-open",
+        focus: "main",
+      });
+      await focusMain();
+    }
+  };
+  useCommand("workbench.action.openRecent", () => {
     const { workspace } = latest.current;
     const folders = workspace.rootInfo?.allowOpenFolder
       ? workspace.recentFolders.filter(
@@ -189,20 +203,12 @@ export const ExplorerCommands: FC = () => {
     if (!items.length) {
       items.push({ id: "none", label: "No recent items", disabled: true });
     }
-    const picked = await showQuickPick(items, {
+    showQuickPick(items, {
       title: "Open Recent",
       placeholder: "Open a recent folder or file",
-    });
-    if (!picked) return;
-    if (picked.id.startsWith("folder:")) {
-      await openRecentFolder(picked.id.slice("folder:".length));
-    } else if (picked.id.startsWith("file:")) {
-      latest.current.workspace.openFile(picked.id.slice("file:".length), {
-        reason: "quick-open",
-        focus: "main",
-      });
-      await focusMain();
-    }
+    })
+      .then(openPicked)
+      .catch((e: unknown) => toast(errorMessage(e), "error"));
   });
 
   if (modal === "open-folder") {

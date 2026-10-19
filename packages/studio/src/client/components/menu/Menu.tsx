@@ -55,7 +55,7 @@ export type InitialFocus = "first" | "last" | "none";
 export type CloseReason = "escape" | "left" | "tab";
 
 export const PANEL_CLASS =
-  "z-50 max-h-[calc(100vh-3rem)] min-w-[16rem] max-w-[24rem] overflow-y-auto rounded-md border border-slate-300 bg-white py-1 shadow-xl outline-none focus-visible:!outline-none";
+  "z-50 max-h-[calc(100vh-3rem)] min-w-[16rem] max-w-[24rem] overflow-y-auto rounded-md border border-slate-300 bg-white py-1 shadow-xl outline-none";
 
 const TYPEAHEAD_MS = 500;
 

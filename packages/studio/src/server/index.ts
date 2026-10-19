@@ -16,6 +16,7 @@ export {
   type Host,
   isAvailableOnHost,
   type KeyBinding,
+  keyForPlatform,
   type MenuNode,
   type MenuSpec,
   type MenuState,

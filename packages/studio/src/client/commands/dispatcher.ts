@@ -161,12 +161,18 @@ export function installDispatcher(runtime: DispatcherRuntime): () => void {
     return match;
   };
 
-  const matchesAnyBinding = (stroke: string): boolean =>
+  // Step 4: a bare `?` typed into an input (Quick Open, the sheet's filter)
+  // is text, never a key to swallow.
+  const matchesAnyBinding = (stroke: string, ctx: WhenContext): boolean =>
     bindings().some(
       (c) =>
         !c.binding.display &&
         c.spec.owner !== "region" &&
         isDispatchableStroke(c.strokes[0]) &&
+        !(
+          c.strokes[0].key === "?" &&
+          (ctx["editorTextFocus"] || ctx["textInputFocus"])
+        ) &&
         c.first === stroke
     );
 
@@ -225,7 +231,7 @@ export function installDispatcher(runtime: DispatcherRuntime): () => void {
 
     // 4. Overlay or menu open.
     if (overlay) {
-      if (canonical === save || matchesAnyBinding(canonical))
+      if (canonical === save || matchesAnyBinding(canonical, ctx))
         e.preventDefault();
       return;
     }

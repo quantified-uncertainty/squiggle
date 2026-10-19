@@ -72,6 +72,8 @@ export const TextFileWorkspace: FC<Props> = ({
       line,
       column,
       selected: Math.abs(el.selectionEnd - el.selectionStart),
+      fromLine: cursorOf(el.value, el.selectionStart).line,
+      toLine: line,
     });
   }, [file.path]);
 

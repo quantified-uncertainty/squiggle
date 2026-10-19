@@ -8,6 +8,9 @@ export type Cursor = {
   line: number;
   column: number;
   selected: number; // selected characters; 0 for a plain cursor
+  // The selection's first and last line (⌘K P copies `path:from-to`).
+  fromLine?: number;
+  toLine?: number;
 };
 
 let current: Cursor | undefined;
@@ -20,7 +23,9 @@ function same(a: Cursor | undefined, b: Cursor | undefined): boolean {
     a.path === b.path &&
     a.line === b.line &&
     a.column === b.column &&
-    a.selected === b.selected
+    a.selected === b.selected &&
+    a.fromLine === b.fromLine &&
+    a.toLine === b.toLine
   );
 }
 

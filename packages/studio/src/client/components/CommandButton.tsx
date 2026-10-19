@@ -3,15 +3,9 @@ import { FC, ReactNode } from "react";
 
 import { TextTooltip } from "@quri/ui";
 
-import {
-  bindingsFor,
-  getCommand,
-  keyForPlatform,
-  toAriaKeyshortcuts,
-} from "../../shared/commands/index.js";
+import { getCommand } from "../../shared/commands/index.js";
 import { runCommand, useCommandState } from "../commands/registry.js";
-import { host } from "../lib/host.js";
-import { primaryKeyLabel } from "./Kbd.js";
+import { primaryAriaKeyshortcuts, primaryKeyLabel } from "./Kbd.js";
 
 type Props = {
   command: string;
@@ -46,11 +40,6 @@ export const CommandButton: FC<Props> = ({
   const spec = getCommand(command);
   const name = label ?? spec?.menuTitle ?? spec?.title ?? command;
   const key = primaryKeyLabel(command);
-  const [binding] = spec ? bindingsFor(spec, host.platform, host.kind) : [];
-  const keyString = binding
-    ? keyForPlatform(binding, host.platform)
-    : undefined;
-  const aria = keyString ? toAriaKeyshortcuts(keyString, host.platform) : "";
   const tooltip = key ? `${name} (${key})` : name;
 
   return (
@@ -61,7 +50,7 @@ export const CommandButton: FC<Props> = ({
         data-testid={testId}
         aria-label={children ? undefined : name}
         aria-pressed={pressed}
-        aria-keyshortcuts={aria || undefined}
+        aria-keyshortcuts={primaryAriaKeyshortcuts(command)}
         disabled={!state.enabled}
         className={clsx(
           "inline-flex items-center gap-1 rounded p-1 text-slate-600 hover:bg-slate-200 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 disabled:cursor-default disabled:text-slate-400 disabled:hover:bg-transparent",

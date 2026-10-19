@@ -220,8 +220,8 @@ describe("rv --format csv", () => {
 
 describe("usage errors exit 2", () => {
   test.each([
-    ["missing file", "rv/nope.squiggle", {}, /No such file/],
-    ["not .squiggle", "text/notes.md", {}, /Not a \.squiggle file/],
+    ["missing file", "rv/nope.squiggle", {}, /File not found/],
+    ["not .squiggle", "text/notes.md", {}, /Expected a \.squiggle file/],
     ["a directory", "rv", {}, /Not a file/],
     ["bad --format", "rv/minimal.squiggle", { format: "xml" }, /--format/],
     ["bad --metric", "rv/minimal.squiggle", { metric: "p50" }, /--metric/],
@@ -256,7 +256,7 @@ describe("usage errors exit 2", () => {
       { cwd: tmp }
     );
     expect(result.exitCode).toBe(2);
-    expect(result.stderr).toMatch(/Hidden files/);
+    expect(result.stderr).toMatch(/are hidden/);
   });
 
   test("a file outside --root", async () => {
@@ -266,7 +266,7 @@ describe("usage errors exit 2", () => {
       cwd
     );
     expect(result.exitCode).toBe(2);
-    expect(result.stderr).toMatch(/outside the root folder/);
+    expect(result.stderr).toMatch(/isn't inside the root folder/);
   });
 });
 

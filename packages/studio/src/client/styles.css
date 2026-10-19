@@ -46,8 +46,9 @@ html.studio-test *::after {
   caret-color: transparent;
 }
 
-/* A subtle outline when a region itself receives keyboard focus (F6, ⇧⌘E). */
-[data-studio-region]:focus-visible {
+/* A subtle outline when a region itself receives keyboard focus (F6, ⇧⌘E).
+   Menu panels are regions too, but show their focus with the active row. */
+[data-studio-region]:not([role="menu"]):focus-visible {
   outline: 2px solid rgb(253 186 116); /* orange-300 */
   outline-offset: -2px;
 }

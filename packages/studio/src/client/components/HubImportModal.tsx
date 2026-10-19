@@ -106,7 +106,7 @@ export const HubImportModal: FC<Props> = ({
       title="Import from Squiggle Hub"
       close={close}
       footer={
-        <div className="flex justify-end gap-2" data-modal-actions>
+        <div className="flex justify-end gap-2" data-testid={TID.modalActions}>
           <Button onClick={close}>Cancel</Button>
           <Button
             theme="primary"

@@ -101,3 +101,11 @@ export const EyeIcon: FC<Props> = (props) => (
     <circle cx="10" cy="10" r="2.5" />
   </Outline>
 );
+
+// Three lines: the ☰ app menu that replaces the logo while the menubar is
+// hidden (View ▸ Menu Bar off).
+export const HamburgerIcon: FC<Props> = (props) => (
+  <Outline {...props}>
+    <path d="M3.25 5.25h13.5M3.25 10h13.5M3.25 14.75h13.5" />
+  </Outline>
+);

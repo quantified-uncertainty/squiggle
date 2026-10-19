@@ -3,12 +3,6 @@ import { FC, ReactNode, useMemo } from "react";
 
 import { DocumentTextIcon, GlobeIcon, PlusIcon, SearchIcon } from "@quri/ui";
 
-import {
-  bindingsFor,
-  getCommand,
-  keyForPlatform,
-  toAriaKeyshortcuts,
-} from "../../shared/commands/index.js";
 import { TID } from "../../shared/testIds.js";
 import { runCommand, useCommandState } from "../commands/registry.js";
 import { host } from "../lib/host.js";
@@ -18,7 +12,7 @@ import {
   useWorkspaceContext,
 } from "../lib/workspaceTypes.js";
 import { FileIcon, FolderIcon, SquiggleIcon } from "./icons.js";
-import { Kbd, primaryKeyLabel } from "./Kbd.js";
+import { Kbd, primaryAriaKeyshortcuts, primaryKeyLabel } from "./Kbd.js";
 import { ChangedDot, DirtyDot } from "./QuickPick.js";
 
 const AGENTS_GUIDE =
@@ -34,18 +28,13 @@ const ActionButton: FC<{
   children: ReactNode;
 }> = ({ command, icon, primary = false, children }) => {
   const state = useCommandState(command);
-  const spec = getCommand(command);
-  const [binding] = spec ? bindingsFor(spec, host.platform, host.kind) : [];
-  const key = binding ? keyForPlatform(binding, host.platform) : undefined;
   const label = primaryKeyLabel(command);
   return (
     <button
       type="button"
       data-command={command}
       data-primary={primary ? "1" : undefined}
-      aria-keyshortcuts={
-        key ? toAriaKeyshortcuts(key, host.platform) : undefined
-      }
+      aria-keyshortcuts={primaryAriaKeyshortcuts(command)}
       title={label ? `${state.title} (${label})` : state.title}
       disabled={!state.enabled}
       className={clsx(

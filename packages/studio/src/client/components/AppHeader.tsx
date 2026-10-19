@@ -14,7 +14,7 @@ import { host } from "../lib/host.js";
 import { useLayout } from "../lib/stores/layout.js";
 import { CommandButton } from "./CommandButton.js";
 import { CommandCenter } from "./CommandCenter.js";
-import { SidebarIcon, SquiggleIcon } from "./icons.js";
+import { HamburgerIcon, SidebarIcon, SquiggleIcon } from "./icons.js";
 import type { InitialFocus } from "./menu/Menu.js";
 import { MenuBar, registerMenuBarFocuser } from "./menu/MenuBar.js";
 import { PopupMenu } from "./menu/PopupMenu.js";
@@ -43,21 +43,6 @@ const APP_MENU: readonly MenuNode[] = STUDIO_MENUS.map((menu) => ({
   title: menu.title,
   items: menu.items,
 }));
-
-const HamburgerIcon: FC<{ size?: number }> = ({ size = 16 }) => (
-  <svg
-    aria-hidden="true"
-    width={size}
-    height={size}
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-  >
-    <path d="M2.5 4h11M2.5 8h11M2.5 12h11" />
-  </svg>
-);
 
 // The ☰ button that replaces the logo while the menubar is hidden; F10 opens
 // it.

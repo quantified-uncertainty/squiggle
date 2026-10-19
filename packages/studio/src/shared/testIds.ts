@@ -24,7 +24,9 @@ export const TID = {
   fileTreeItem: "file-tree-item", // [data-path, data-kind=file|dir, data-dirty, data-changed, aria-expanded, aria-selected]
   nameInput: "name-input", // [data-mode=create|rename]
   modalOpenFolder: "modal-open-folder",
+  openFolderRecent: "open-folder-recent", // [data-recent-folder]
   modalHubImport: "modal-hub-import",
+  modalActions: "modal-actions", // a modal's Cancel / primary buttons
   // Editor
   editorHeader: "editor-header",
   breadcrumb: "breadcrumb",

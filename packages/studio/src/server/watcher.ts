@@ -12,6 +12,23 @@ export const DEBOUNCE_MS = 60;
 const RESCAN_MS = 150;
 // How often a missing root is checked for coming back.
 const ROOT_POLL_MS = 1000;
+// File timestamps can be truncated to the second (HFS+, some network
+// filesystems).
+const TIMESTAMP_SLACK_MS = 1000;
+
+// When a watch starts (a newly opened folder, a restart), macOS can deliver
+// events for recent changes made before it started. An event for a file
+// whose content and inode haven't changed since well before the watch
+// started is one of those replays, not a change (a rename or any write
+// updates ctime, which can't be set back).
+export function isReplayedEvent(
+  stat: { mtimeMs: number; ctimeMs: number },
+  watchStartedAt: number
+): boolean {
+  return (
+    Math.max(stat.mtimeMs, stat.ctimeMs) < watchStartedAt - TIMESTAMP_SLACK_MS
+  );
+}
 
 // fs.statSync without throwing (ENOENT, EACCES, …): events arrive in a
 // callback where an exception would take the process down.
@@ -67,6 +84,7 @@ export function watchFolder(
   let complete = false;
   let scanning: Promise<void> | undefined;
   let rescanAgain = false;
+  let startedAt = Date.now();
 
   const emit = (event: StudioEvent) => {
     if (!closed) onEvent(event);
@@ -151,6 +169,11 @@ export function watchFolder(
     if (exists) known.add(apiPath);
     else known.delete(apiPath);
     if (!exists && !wasKnown && complete) return; // a temp file
+    // A replay of a change from before this watch started: a spurious
+    // Changed-on-disk entry after a folder switch otherwise.
+    if (stat && exists && (wasKnown || !complete)) {
+      if (isReplayedEvent(stat, startedAt)) return;
+    }
     await emitFile(apiPath, exists);
     if (exists !== wasKnown) scheduleRescan(); // the tree changed
   };
@@ -191,6 +214,7 @@ export function watchFolder(
 
   const startFsWatcher = () => {
     watcher?.close();
+    startedAt = Date.now();
     try {
       watcher = fs.watch(root, { recursive: true }, (_type, filename) =>
         onFsEvent(filename)

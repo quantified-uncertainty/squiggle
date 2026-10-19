@@ -6,7 +6,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 
 import type { StudioEvent } from "../src/shared/api.js";
 import { atomicWrite, hashContent } from "../src/server/files.js";
-import { type FolderWatcher, watchFolder } from "../src/server/watcher.js";
+import {
+  type FolderWatcher,
+  isReplayedEvent,
+  watchFolder,
+} from "../src/server/watcher.js";
 
 // The folder watcher (§2.7, WP7): hashes and `root` in every event, rescans
 // on folder-level events, temp files dropped, root-missing.
@@ -64,6 +68,29 @@ async function watched(files: Record<string, string>) {
 
 const fileEvents = (events: StudioEvent[], p: string) =>
   events.filter((e) => e.type === "file-changed" && e.path === p);
+
+describe("isReplayedEvent", () => {
+  const start = 1_000_000;
+  test("a file unchanged since well before the watch started is a replay", () => {
+    expect(
+      isReplayedEvent({ mtimeMs: start - 5000, ctimeMs: start - 5000 }, start)
+    ).toBe(true);
+  });
+  test("a write or rename after the start is a change", () => {
+    expect(
+      isReplayedEvent({ mtimeMs: start + 10, ctimeMs: start + 10 }, start)
+    ).toBe(false);
+    // `mv` keeps the mtime but updates the ctime.
+    expect(
+      isReplayedEvent({ mtimeMs: start - 5000, ctimeMs: start + 10 }, start)
+    ).toBe(false);
+  });
+  test("timestamps truncated to the second never hide a change", () => {
+    expect(
+      isReplayedEvent({ mtimeMs: start - 999, ctimeMs: start - 999 }, start)
+    ).toBe(false);
+  });
+});
 
 describe("watchFolder", () => {
   test("file-changed carries the root and the content's hash", async () => {

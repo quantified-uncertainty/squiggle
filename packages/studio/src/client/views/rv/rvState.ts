@@ -3,8 +3,8 @@
 //
 // - which files have specs (keeps the view for a spec with a mistake, #30);
 // - the per-file UI state: the shown spec and tab, persisted in the root's
-//   state (`relativeValues:<path>`, §2.2) with the URL as initial state only
-//   (#17);
+//   state (key `rv`: Record<path, {variable?, tab?}>, §2.2) with the URL as
+//   initial state only (#17);
 // - the pair caches, keyed by SqProject, spec and semantic key (#15).
 
 import { useSyncExternalStore } from "react";
@@ -18,10 +18,10 @@ import {
 } from "@quri/squiggle-relative-values";
 
 import type { ViewState } from "../../../shared/viewState.js";
-import { readStorage } from "../../lib/storage.js";
 import {
   getRootState,
   isRootStateLoaded,
+  ROOT_STATE_KEYS,
   setRootState,
 } from "../../lib/studioState.js";
 import type { StudioRunOutput } from "../types.js";
@@ -144,10 +144,8 @@ const rvFileStateSchema = z.object({
 });
 export type RvFileState = z.infer<typeof rvFileStateSchema>;
 
-const rootStateKey = (path: string) => `relativeValues:${path}`;
-// Before the root's state store has loaded (until WP4 loads it), and for
-// state saved by earlier versions.
-const legacyKey = (path: string) => `squiggle-studio:relative-values:${path}`;
+const RV_KEY = ROOT_STATE_KEYS.relativeValues;
+const rvRootSchema = z.record(z.string(), rvFileStateSchema);
 
 // This page's copy, the source of truth while the page lives.
 const memory = new Map<string, RvFileState>();
@@ -158,33 +156,23 @@ const listeners = new Set<() => void>();
 const memoryKey = (root: string | undefined, path: string) =>
   `${root ?? ""}\0${path}`;
 
+const savedForRoot = (root: string): Record<string, RvFileState> =>
+  getRootState(root, RV_KEY, rvRootSchema, {});
+
 function persisted(root: string | undefined, path: string): RvFileState {
-  if (root !== undefined && isRootStateLoaded(root)) {
-    const saved = getRootState(
-      root,
-      rootStateKey(path),
-      rvFileStateSchema.optional(),
-      undefined
-    );
-    if (saved) return saved;
-  }
-  return readStorage(legacyKey(path), rvFileStateSchema) ?? {};
+  if (root === undefined || !isRootStateLoaded(root)) return {};
+  return savedForRoot(root)[path] ?? {};
 }
 
+// Nothing is saved before the root's state has loaded (it would overwrite
+// it, #4); the workspace loads it before it shows a file.
 function writePersisted(
   root: string | undefined,
   path: string,
   state: RvFileState
 ) {
-  if (root !== undefined && isRootStateLoaded(root)) {
-    setRootState(root, rootStateKey(path), state);
-  } else {
-    try {
-      window.localStorage.setItem(legacyKey(path), JSON.stringify(state));
-    } catch {
-      // Private windows and blocked storage: this page's copy only.
-    }
-  }
+  if (root === undefined || !isRootStateLoaded(root)) return;
+  setRootState(root, RV_KEY, { ...savedForRoot(root), [path]: state });
 }
 
 export function getRvFileState(

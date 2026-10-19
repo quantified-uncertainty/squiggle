@@ -5,8 +5,8 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import { type HubStub, startHubStub } from "../e2e/lib/hubStub.js";
+import { hashContent } from "../src/server/files.js";
 import {
-  contentHash,
   resolveRunTarget,
   RunTimeoutError,
   runStudioFile,
@@ -131,7 +131,7 @@ describe("runStudioFile", () => {
       code: "a = 2 * 3",
     });
     expect(result.json.bindings).toEqual({ a: 6 });
-    expect(result.codeHash).toBe(contentHash("a = 2 * 3"));
+    expect(result.codeHash).toBe(hashContent("a = 2 * 3"));
     expect(result.codeHash).toMatch(/^[0-9a-f]{32}$/);
   });
 
@@ -180,7 +180,7 @@ describe("studioRunInfo", () => {
       ["veg", true],
     ]);
     expect(info.codeHash).toBe(
-      contentHash(await fs.readFile(path.join(root, "rv/two-specs.squiggle")))
+      hashContent(await fs.readFile(path.join(root, "rv/two-specs.squiggle")))
     );
 
     const misc = studioRunInfo(root, await run("values/misc.squiggle"));

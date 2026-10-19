@@ -2,27 +2,13 @@ import { FC } from "react";
 
 import { SearchIcon } from "@quri/ui";
 
-import {
-  bindingsFor,
-  getCommand,
-  keyForPlatform,
-  toAriaKeyshortcuts,
-} from "../../shared/commands/index.js";
 import { TID } from "../../shared/testIds.js";
 import { runCommand, useCommandState } from "../commands/registry.js";
-import { host } from "../lib/host.js";
 import { useWorkspaceContext } from "../lib/workspaceTypes.js";
 import { CommandButton } from "./CommandButton.js";
-import { Kbd } from "./Kbd.js";
+import { Kbd, primaryAriaKeyshortcuts } from "./Kbd.js";
 
 const COMMAND = "workbench.action.quickOpen";
-
-function ariaKeys(): string | undefined {
-  const spec = getCommand(COMMAND);
-  const [binding] = spec ? bindingsFor(spec, host.platform, host.kind) : [];
-  const key = binding && keyForPlatform(binding, host.platform);
-  return key ? toAriaKeyshortcuts(key, host.platform) || undefined : undefined;
-}
 
 // The header's command center (§3.2): "models — Go to file or run a command
 // ⌘P", which opens Quick Open. `compact` (windows under 900 px) shows only a
@@ -51,7 +37,7 @@ export const CommandCenter: FC<{ compact: boolean }> = ({ compact }) => {
       type="button"
       data-testid={TID.commandCenter}
       data-command={COMMAND}
-      aria-keyshortcuts={ariaKeys()}
+      aria-keyshortcuts={primaryAriaKeyshortcuts(COMMAND)}
       aria-disabled={state.enabled ? undefined : true}
       className="flex h-6 w-full min-w-0 items-center gap-2 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-500 outline-none hover:border-slate-300 focus-visible:ring-2 focus-visible:ring-orange-300"
       onClick={() => runCommand(COMMAND, undefined, "button")}

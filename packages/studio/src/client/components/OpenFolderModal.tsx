@@ -113,7 +113,7 @@ export const OpenFolderModal: FC<Props> = ({
       title="Open folder"
       close={close}
       footer={
-        <div className="flex justify-end gap-2" data-modal-actions>
+        <div className="flex justify-end gap-2" data-testid={TID.modalActions}>
           <Button onClick={close}>Cancel</Button>
           <Button
             theme="primary"
@@ -193,6 +193,7 @@ export const OpenFolderModal: FC<Props> = ({
               key={f.path}
               type="button"
               title={f.path}
+              data-testid={TID.openFolderRecent}
               data-recent-folder={f.path}
               disabled={busy}
               className="flex w-full min-w-0 items-baseline gap-2 rounded px-2 py-1 text-left hover:bg-slate-100"

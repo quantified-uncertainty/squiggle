@@ -32,7 +32,7 @@ import {
   defaultRecentFile,
   getCommand,
   isAvailableOnHost,
-  type KeyBinding,
+  keyForPlatform,
   loadRecentFolders,
   type MenuNode,
   type MenuState,
@@ -98,12 +98,6 @@ export function studioPlatform(platform: NodeJS.Platform): Platform {
   return "linux";
 }
 
-function keyFor(binding: KeyBinding, platform: Platform): string | undefined {
-  if (platform === "mac") return binding.mac;
-  if (platform === "linux") return binding.linux ?? binding.win;
-  return binding.win;
-}
-
 // "~/models" for folders in the home directory.
 export function displayPath(folder: string, home: string): string {
   if (folder === home) return "~";
@@ -158,7 +152,7 @@ export function buildMenuTemplate(
       return undefined; // ⌘R never reloads the packaged app by accident
     }
     const [binding] = bindingsFor(spec, platform, "electron");
-    const key = binding && keyFor(binding, platform);
+    const key = binding && keyForPlatform(binding, platform);
     const accelerator = key ? toElectronAccelerator(key, platform) : undefined;
     if (!accelerator) return undefined;
     // CodeMirror handles these keys (⌘F, ⌘/, ⇧⌥F): shown, never registered,

@@ -1,18 +1,10 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
-import fsp from "node:fs/promises";
-import path from "node:path";
 
 import type { Command } from "@commander-js/extra-typings";
 import { z } from "zod";
 
-import {
-  defaultEnvironment,
-  type SqLinker,
-  SqModule,
-  type SqModuleOutput,
-  SqProject,
-} from "@quri/squiggle-lang";
+import type { SqModuleOutput } from "@quri/squiggle-lang";
 import {
   createRelativeValuesBundle,
   findRelativeValuesExports,
@@ -26,10 +18,12 @@ import {
   relativeValuesSpecFromSqValue,
 } from "@quri/squiggle-relative-values/core";
 
-import { DEFAULT_HUB_URL, makeHubClient } from "../../server/hub.js";
-import { PathError, resolveSafePath } from "../../server/paths.js";
-import { parseHubImport } from "../../shared/api.js";
-import { dirname, joinPath } from "../../shared/paths.js";
+import {
+  resolveRunTarget,
+  runStudioFile,
+  type StudioRun,
+  StudioUsageError,
+} from "../../server/runner.js";
 
 // `squiggle-studio rv <file>` (spec §6.3): the relative values pair matrix of
 // a file, computed like the UI computes it (the UI's import rules and seed),
@@ -114,87 +108,35 @@ type SpecResult =
 
 // ── Running a file ──────────────────────────────────────────────────────────
 
-// TEMPORARY (spec §10.10): the UI's import rules for the CLI until WP8's
-// runner (src/server/runner.ts) lands; integration replaces this with
-// `runStudioFile`. Relative imports resolve against the importing file and
-// stay inside the root (as `resolveSafePath` enforces for the server's file
-// routes); `hub:owner/slug` goes through server/hub.ts.
-function makeRootLinker(
-  root: string,
-  hubUrl: string,
-  sources: Map<string, string>
-): SqLinker {
-  const hub = makeHubClient(hubUrl);
-  return {
-    resolve(name, fromId) {
-      if (name.startsWith("hub:")) {
-        if (!parseHubImport(name)) {
-          throw new Error(
-            `Invalid Hub import "${name}", expected "hub:owner/slug"`
-          );
-        }
-        return name;
-      }
-      if (name.startsWith("./") || name.startsWith("../")) {
-        return joinPath(dirname(fromId), name);
-      }
-      throw new Error(
-        `Unsupported import "${name}". Use a relative path ("./other.squiggle") or a Hub id ("hub:owner/slug").`
-      );
-    },
-    async loadModule(sourceId, hash) {
-      if (hash) {
-        throw new Error("Pinned import hashes are not supported in Studio");
-      }
-      const hubId = parseHubImport(sourceId);
-      const code = hubId
-        ? await hub.getSource(hubId.owner, hubId.slug)
-        : await fsp.readFile(await resolveSafePath(root, sourceId), "utf-8");
-      sources.set(sourceId, code);
-      return new SqModule({ name: sourceId, code });
-    },
-  };
-}
-
-function isInside(root: string, target: string): boolean {
-  const rel = path.relative(root, target);
-  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
-}
-
-// The file, its root and its root-relative path. Root: --root, else the cwd
-// when the file is inside it, else the file's directory (§6.3).
-async function locate(
+// The file and its root (resolveRunTarget: --root, else the cwd when the file
+// is inside it, else the file's folder), run like `squiggle-studio run` runs
+// it: the UI's import rules and seed (runStudioFile).
+async function runFile(
   fileArg: string,
   rootOpt: string | undefined,
-  cwd: string
-): Promise<{ root: string; rel: string; code: string }> {
-  const abs = path.resolve(cwd, fileArg);
-  const stat = await fsp.stat(abs).catch(() => undefined);
-  if (!stat) throw new UsageError(`No such file: ${fileArg}`);
-  if (!stat.isFile()) throw new UsageError(`Not a file: ${fileArg}`);
-  if (!abs.endsWith(".squiggle")) {
-    throw new UsageError(`Not a .squiggle file: ${fileArg}`);
-  }
-  const root = rootOpt
-    ? path.resolve(cwd, rootOpt)
-    : isInside(cwd, abs)
-      ? cwd
-      : path.dirname(abs);
-  if (!isInside(root, abs)) {
-    throw new UsageError(`${fileArg} is outside the root folder ${root}`);
-  }
-  const rel = path.relative(root, abs).split(path.sep).join("/");
+  run: RvRunOptions
+): Promise<StudioRun> {
+  let target;
   try {
-    await resolveSafePath(root, rel);
+    target = await resolveRunTarget({
+      file: fileArg,
+      root: rootOpt,
+      cwd: run.cwd,
+    });
   } catch (e) {
-    if (e instanceof PathError) throw new UsageError(`${rel}: ${e.message}`);
+    if (e instanceof StudioUsageError) throw new UsageError(e.message);
     throw e;
   }
-  return { root, rel, code: await fsp.readFile(abs, "utf-8") };
+  return runStudioFile({
+    root: target.root,
+    path: target.path,
+    hubUrl: run.hubUrl ?? process.env["SQUIGGLE_HUB_URL"],
+    timeoutMs: 0, // a big model may take a while; pairs are computed after
+  });
 }
 
 // sha256 of the file and its imports (like `squiggle-rv bundle`).
-function hashSources(sources: Map<string, string>): string {
+function hashSources(sources: ReadonlyMap<string, string>): string {
   const hash = crypto.createHash("sha256");
   for (const [id, code] of [...sources].sort(([a], [b]) =>
     a < b ? -1 : a > b ? 1 : 0
@@ -202,25 +144,6 @@ function hashSources(sources: Map<string, string>): string {
     hash.update(`${id}\0${code}\0`);
   }
   return `sha256:${hash.digest("hex")}`;
-}
-
-function errorsOf(output: SqModuleOutput) {
-  const result = output.result;
-  if (result.ok) return [];
-  return result.value.errors.map((error) => {
-    const location = error.tag === "other" ? undefined : error.location();
-    return {
-      kind: error.tag,
-      message: error.toString(),
-      ...(location && {
-        location: {
-          source: location.source,
-          line: location.start.line,
-          column: location.start.column,
-        },
-      }),
-    };
-  });
 }
 
 function studioVersion(): string {
@@ -295,24 +218,12 @@ export async function runRv(
       "--metric"
     );
     const precision = parsePrecision(options.precision);
-    const { root, rel, code } = await locate(
-      fileArg,
-      options.root,
-      run.cwd ?? process.cwd()
-    );
-    const sources = new Map([[rel, code]]);
-    const linker = makeRootLinker(
-      root,
-      run.hubUrl ?? process.env["SQUIGGLE_HUB_URL"] ?? DEFAULT_HUB_URL,
-      sources
-    );
-    // The UI's environment (default seed, 1000 samples), so the numbers match.
-    const project = new SqProject({ environment: defaultEnvironment, linker });
-    project.setHead("root", { module: new SqModule({ name: rel, code }) });
-    const output = await project.waitForOutput("root");
+    const studioRun = await runFile(fileArg, options.root, run);
+    const { output, sources, environment, path: rel } = studioRun;
 
     if (!output.result.ok) {
-      const errors = errorsOf(output);
+      // As in `run --json`: kind, message, root-relative location, hints.
+      const errors = studioRun.json.errors;
       return format === "json"
         ? { exitCode: 1, stdout: out({ ok: false, errors }), stderr: "" }
         : {
@@ -360,7 +271,7 @@ export async function runRv(
         throw new UsageError(`No item "${unit}" in ${name} (--unit)`);
       }
       const evaluator = await ModelEvaluator.fromSpec(spec.spec, {
-        environment: defaultEnvironment,
+        environment,
       });
       if (!evaluator.ok) {
         results.push({ ok: false, variable: name, error: evaluator.value });

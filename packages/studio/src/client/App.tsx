@@ -26,6 +26,7 @@ import { StatusBar } from "./components/StatusBar.js";
 import { installAgentHooks } from "./lib/agentHooks.js";
 import { installIdleTracking } from "./lib/idle.js";
 import { useLayout } from "./lib/stores/layout.js";
+import { useSettingsWarningToast } from "./lib/studioState.js";
 import { useWorkspace } from "./lib/useWorkspace.js";
 import {
   isDirty,
@@ -121,6 +122,8 @@ export const App: FC = () => {
   const [sidebarVisible] = useLayout("sidebarVisible");
   const [statusBarVisible] = useLayout("statusBarVisible");
   useUnloadGuardAndAgentHooks(workspace);
+  // An invalid ~/.squiggle-studio/settings.json: defaults, and a toast (§7).
+  useSettingsWarningToast();
   const initialDone = useInitialViewOnce(workspace);
 
   const activeFile = workspace.activePath

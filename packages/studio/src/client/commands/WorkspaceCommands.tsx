@@ -137,13 +137,18 @@ export const WorkspaceCommands: FC = () => {
   useCommand("copyRelativeFilePath", async () => {
     const path = workspace.activePath;
     if (!path) return;
-    // With focus in the editor, add the cursor's line.
+    // With focus in the editor, add the cursor's line, or the selected
+    // lines (`:12-14`).
     const cursor = getCursor();
-    const line =
-      getContext()["editorTextFocus"] === true && cursor?.path === path
-        ? `:${cursor.line}`
-        : "";
-    await copyText(`${path}${line}`);
+    const inEditor =
+      getContext()["editorTextFocus"] === true && cursor?.path === path;
+    const range =
+      cursor?.fromLine !== undefined &&
+      cursor.toLine !== undefined &&
+      cursor.toLine > cursor.fromLine
+        ? `:${cursor.fromLine}-${cursor.toLine}`
+        : `:${cursor?.line}`;
+    await copyText(`${path}${inEditor ? range : ""}`);
     toast("Copied the relative path", "confirmation");
   });
 

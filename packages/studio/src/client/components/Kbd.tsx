@@ -7,17 +7,29 @@ import {
   getCommand,
   keyForPlatform,
   type KeyString,
+  toAriaKeyshortcuts,
 } from "../../shared/commands/index.js";
 import { host } from "../lib/host.js";
 
-// The key to show for a command on this platform and host: its first binding
-// (Electron shows ⌘W, a browser ⌃W).
-export function primaryKeyLabel(commandId: string): string | undefined {
+// A command's first binding on this platform and host (Electron has ⌘W, a
+// browser ⌃W).
+function primaryKey(commandId: string): KeyString | undefined {
   const spec = getCommand(commandId);
   if (!spec) return undefined;
   const [binding] = bindingsFor(spec, host.platform, host.kind);
-  const key = binding && keyForPlatform(binding, host.platform);
+  return binding && keyForPlatform(binding, host.platform);
+}
+
+// The key to show for a command ("⇧⌘P").
+export function primaryKeyLabel(commandId: string): string | undefined {
+  const key = primaryKey(commandId);
   return key ? formatKey(key, host.platform) : undefined;
+}
+
+// The same key for `aria-keyshortcuts` ("Shift+Meta+P").
+export function primaryAriaKeyshortcuts(commandId: string): string | undefined {
+  const key = primaryKey(commandId);
+  return key ? toAriaKeyshortcuts(key, host.platform) || undefined : undefined;
 }
 
 // A formatted key ("⇧⌘P" / "Ctrl+Shift+P"), from a command's first binding

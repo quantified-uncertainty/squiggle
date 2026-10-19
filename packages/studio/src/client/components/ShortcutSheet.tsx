@@ -19,6 +19,7 @@ import {
 } from "../../shared/commands/index.js";
 import { TID } from "../../shared/testIds.js";
 import { host } from "../lib/host.js";
+import { useSettingsFileInfo } from "../lib/studioState.js";
 import { OverlayFrame } from "./OverlayFrame.js";
 
 // ── The sheet's data, generated from the manifest ──────────────────────────
@@ -276,6 +277,7 @@ export function desktopOnlyKeys(platform: Platform): string[] {
   return out;
 }
 
+// Until the server has said where it is (and without a server).
 export const SETTINGS_PATH = "~/.squiggle-studio/settings.json";
 
 // §5.8, for the sheet's footer and the README.
@@ -296,7 +298,8 @@ const platformName = (p: Platform) =>
 export function sheetToMarkdown(
   sections: readonly SheetSection[],
   platform: Platform,
-  hostKind: Host
+  hostKind: Host,
+  settingsPath: string = SETTINGS_PATH
 ): string {
   const cell = (s: string) => s.replace(/\|/g, "\\|");
   const lines = [
@@ -322,7 +325,7 @@ export function sheetToMarkdown(
     }
     lines.push("");
   }
-  lines.push(`Settings: \`${SETTINGS_PATH}\``, "");
+  lines.push(`Settings: \`${settingsPath}\``, "");
   return lines.join("\n");
 }
 
@@ -343,6 +346,7 @@ const KeyChip: FC<{ label: string }> = ({ label }) => (
 // Keyboard Shortcuts. Generated from the manifest for this platform and host.
 export const ShortcutSheet: FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const toast = useToast();
+  const settingsPath = useSettingsFileInfo().path ?? SETTINGS_PATH;
   const [filter, setFilter] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const sections = useMemo(
@@ -367,7 +371,7 @@ export const ShortcutSheet: FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(
-        sheetToMarkdown(sections, host.platform, host.kind)
+        sheetToMarkdown(sections, host.platform, host.kind, settingsPath)
       );
       toast("Copied the shortcuts as Markdown", "confirmation");
     } catch (e) {
@@ -477,7 +481,7 @@ export const ShortcutSheet: FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
           <p>In the desktop app also: {desktopOnly.join(", ")}.</p>
         )}
         <p>
-          Settings: <code className="text-slate-700">{SETTINGS_PATH}</code>.
+          Settings: <code className="text-slate-700">{settingsPath}</code>.
           Differences from VS Code: {vsCodeDeviations(host.platform).join(" ")}
         </p>
       </div>

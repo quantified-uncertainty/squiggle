@@ -228,6 +228,17 @@ describe("dispatcher (macOS, browser)", () => {
     expect(toggle).toHaveBeenCalledTimes(1);
   });
 
+  test("a ? typed into an input while a menu or overlay is open is text", () => {
+    handle("workbench.action.openGlobalKeybindings");
+    setContext({ menuOpen: true });
+    const input = focusable(`<input type="text" />`);
+    const typed = press({ key: "?", code: "Slash", shiftKey: true }, input);
+    expect(typed.defaultPrevented).toBe(false);
+    focusable(`<div tabindex="0"></div>`);
+    const outside = press({ key: "?", code: "Slash", shiftKey: true });
+    expect(outside.defaultPrevented).toBe(true);
+  });
+
   test("? opens the sheet outside editors and inputs only", () => {
     const sheet = handle("workbench.action.openGlobalKeybindings");
     focusable(`<div tabindex="0"></div>`);
