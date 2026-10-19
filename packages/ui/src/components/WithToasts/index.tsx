@@ -74,6 +74,10 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
     <motion.div
       layout="position"
       transition={{ duration: 0.15 }}
+      // Errors interrupt screen readers; confirmations wait their turn.
+      role={toast.type === "error" ? "alert" : "status"}
+      data-testid="toast"
+      data-toast-type={toast.type}
       className={clsx(
         "flex items-center gap-2",
         "cursor-pointer rounded border px-8 py-4 text-sm shadow-lg",
