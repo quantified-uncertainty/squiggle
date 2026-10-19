@@ -1,13 +1,20 @@
 "use client";
 import { FC, Fragment, useEffect, useState } from "react";
 
-import { NumberShower, SquiggleViewer } from "@quri/squiggle-components";
-import { result, SqValue } from "@quri/squiggle-lang";
+import {
+  NumberShower,
+  SquiggleViewer,
+  useSimulator,
+} from "@quri/squiggle-components";
+import { result } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
 import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
-import { relativeValuesPairCharts } from "../../../values/pairCharts.js";
+import {
+  PAIR_CHARTS_SOURCE_ID,
+  relativeValuesPairCharts,
+} from "../../../values/pairCharts.js";
 import { ItemName } from "../ItemName.js";
 import { useRelativeValuesOptions } from "../RelativeValuesProvider.js";
 
@@ -101,9 +108,32 @@ ratio
 `;
 };
 
-// The pair's charts, from the evaluator's own comparison function (see
-// `relativeValuesPairCharts`): the model isn't re-run, so models with numbers
-// as values, with a trailing result expression or with imports all work.
+// Runs the pair's chart program (see `relativeValuesPairCharts`) and shows
+// its result, a dict of the charts.
+const PairChartsProgram: FC<{ code: string }> = ({ code }) => {
+  const { simulation } = useSimulator({
+    code,
+    sourceId: PAIR_CHARTS_SOURCE_ID,
+    setup: { type: "standalone" },
+  });
+
+  if (!simulation) {
+    return <RefreshIcon className="animate-spin text-slate-400" />;
+  }
+  const result = simulation.output.result;
+  if (!result.ok) {
+    return (
+      <div className="text-xs text-red-700" data-rv-chart-error="">
+        Chart helper: {result.value.errors.map((e) => e.toString()).join("\n")}
+      </div>
+    );
+  }
+  return <SquiggleViewer value={result.value.result} />;
+};
+
+// The pair's charts, from the evaluator's own comparison function: the model
+// isn't re-run, so models with numbers as values, with a trailing result
+// expression or with imports all work.
 const PairCharts: FC<{
   model: ModelEvaluator;
   numeratorItem: Item;
@@ -118,21 +148,21 @@ const PairCharts: FC<{
   const [charts, setCharts] = useState<{
     key: string;
     model: ModelEvaluator;
-    value: result<SqValue, string>;
+    code: result<string, string>;
   }>();
 
   useEffect(() => {
     let cancelled = false;
     relativeValuesPairCharts(model, numeratorItem, denominatorItem).then(
-      (value) => {
-        if (!cancelled) setCharts({ key, model, value });
+      (code) => {
+        if (!cancelled) setCharts({ key, model, code });
       },
       (e: unknown) => {
         if (!cancelled) {
           setCharts({
             key,
             model,
-            value: {
+            code: {
               ok: false,
               value: e instanceof Error ? e.message : String(e),
             },
@@ -150,14 +180,14 @@ const PairCharts: FC<{
   if (!charts || charts.key !== key || charts.model !== model) {
     return <RefreshIcon className="animate-spin text-slate-400" />;
   }
-  if (!charts.value.ok) {
+  if (!charts.code.ok) {
     return (
       <div className="text-xs text-red-700" data-rv-chart-error="">
-        {charts.value.value}
+        {charts.code.value}
       </div>
     );
   }
-  return <SquiggleViewer value={charts.value.value} />;
+  return <PairChartsProgram code={charts.code.value} />;
 };
 
 type Props = {

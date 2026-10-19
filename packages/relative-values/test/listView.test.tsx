@@ -7,6 +7,7 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { run } from "@quri/squiggle-lang";
 
 import {
+  createRelativeValuesBundle,
   findRelativeValuesExports,
   InMemoryRelativeValuesCache,
   ModelEvaluator,
@@ -23,13 +24,27 @@ type Version = { spec: RelativeValuesSpec; evaluator: ModelEvaluator };
 
 async function version(
   code: string,
-  cache = new InMemoryRelativeValuesCache()
+  opts: { cache?: InMemoryRelativeValuesCache; bundled?: boolean } = {}
 ): Promise<Version> {
   const [found] = findRelativeValuesExports(await run(code));
   if (!found.spec.ok) throw new Error(found.spec.value);
-  const evaluator = await ModelEvaluator.fromSpec(found.spec.value, { cache });
+  const evaluator = await ModelEvaluator.fromSpec(found.spec.value, {
+    cache: opts.cache,
+  });
   if (!evaluator.ok) throw new Error(evaluator.value);
-  return { spec: found.spec.value, evaluator: evaluator.value };
+  if (!opts.bundled) {
+    return { spec: found.spec.value, evaluator: evaluator.value };
+  }
+  // Precomputed: the sidebar shows no charts (jsdom has no canvas).
+  const bundle = await createRelativeValuesBundle({
+    definition: found.spec.value.definition,
+    evaluator: evaluator.value,
+    meta: { variableName: found.name },
+  });
+  return {
+    spec: found.spec.value,
+    evaluator: ModelEvaluator.fromBundle(bundle),
+  };
 }
 
 const sizes = (values: string, recommendedUnit: string) => `
@@ -139,13 +154,15 @@ sizes = {
   recommendedUnit: "small",
 }`;
     const { container, rerender } = render(
-      <Dashboard v={await version(named("Medium"))} />
+      <Dashboard v={await version(named("Medium"), { bundled: true })} />
     );
     clickCell(container, "medium");
     expect(sidebar(container)?.textContent).toContain("Medium");
 
     await act(async () => {
-      rerender(<Dashboard v={await version(named("Mid-sized"))} />);
+      rerender(
+        <Dashboard v={await version(named("Mid-sized"), { bundled: true })} />
+      );
     });
     expect(sidebar(container)?.textContent).toContain("Mid-sized");
 
@@ -155,7 +172,8 @@ sizes = {
       rerender(
         <Dashboard
           v={await version(
-            named("Mid-sized", `small: 1, medium: 3 to 6, huge: 50 to 200`)
+            named("Mid-sized", `small: 1, medium: 3 to 6, huge: 50 to 200`),
+            { bundled: true }
           )}
         />
       );
@@ -165,7 +183,7 @@ sizes = {
 
   test("Esc and the close button close it", async () => {
     const { container } = render(
-      <Dashboard v={await version(sizes(ALL, "small"))} />
+      <Dashboard v={await version(sizes(ALL, "small"), { bundled: true })} />
     );
     clickCell(container, "medium");
     const panel = sidebar(container);
@@ -198,7 +216,7 @@ describe("ListView computes only the pairs it shows", () => {
     const cache = new InMemoryRelativeValuesCache();
     const v = await version(
       `catalog = { values: { ${values} }, recommendedUnit: "item0" }`,
-      cache
+      { cache }
     );
     const { container } = render(<Dashboard v={v} />);
     expect(

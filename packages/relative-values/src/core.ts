@@ -59,7 +59,11 @@ export {
   type RelativeValuesCsvMetric,
   type RelativeValuesCsvOptions,
 } from "./values/csv.js";
-export { relativeValuesPairCharts } from "./values/pairCharts.js";
+export {
+  PAIR_CHARTS_SOURCE_ID,
+  pairChartsCode,
+  relativeValuesPairCharts,
+} from "./values/pairCharts.js";
 export { hasInvalid } from "./values/value.js";
 export { cartesianProduct, yieldToEventLoop } from "./lib/utils.js";
 

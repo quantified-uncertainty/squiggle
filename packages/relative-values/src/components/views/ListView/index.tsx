@@ -409,7 +409,13 @@ export const ListView: FC = () => {
   const close = () => setSidebarPair(undefined);
 
   return (
-    <div ref={rootRef} className="relative" onKeyDown={onKeyDown}>
+    <div
+      ref={rootRef}
+      className="relative"
+      onKeyDown={onKeyDown}
+      data-rv-list=""
+      data-rv-sidebar-mode={drawer ? "drawer" : "column"}
+    >
       <div className="mb-2 flex">
         <div className="mr-2">
           <DropdownButton text="Table Settings">
