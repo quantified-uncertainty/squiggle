@@ -547,7 +547,7 @@ export const OutputView: FC<{ context: StudioViewContext }> = ({ context }) => {
                 // The viewer's own "simulation #N in N ms" is hidden: the
                 // status bar shows the run (#61).
                 <div className={embed ? "p-2" : "p-4"}>
-                  <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm [&_.whitespace-nowrap.text-sm.text-zinc-200]:hidden [&_.whitespace-nowrap.text-sm.text-zinc-400]:hidden">
+                  <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm [&_[data-simulation-indicator]]:hidden">
                     <ViewerWithMenuBar
                       ref={listRef}
                       simulation={shown.simulation}

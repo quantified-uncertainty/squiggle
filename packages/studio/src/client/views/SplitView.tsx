@@ -8,7 +8,8 @@ import type { StudioView, StudioViewContext } from "./types.js";
 export const SplitView: FC<{ context: StudioViewContext }> = ({ context }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   // The playground runs the code itself. It has run once its viewer shows a
-  // result that isn't being recomputed (no dimmed "simulation #N" indicator).
+  // result that isn't being recomputed (its "simulation #N" indicator isn't
+  // running).
   const [ran, setRan] = useState(false);
   useEffect(() => {
     const root = rootRef.current;
@@ -16,14 +17,16 @@ export const SplitView: FC<{ context: StudioViewContext }> = ({ context }) => {
     const check = () =>
       setRan(
         root.querySelector('[data-testid="dynamic-viewer-result"]') !== null &&
-          root.querySelector(".whitespace-nowrap.text-zinc-200") === null
+          root.querySelector(
+            "[data-simulation-indicator][data-running='1']"
+          ) === null
       );
     const observer = new MutationObserver(check);
     observer.observe(root, {
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ["class"],
+      attributeFilter: ["data-running"],
     });
     check();
     return () => observer.disconnect();

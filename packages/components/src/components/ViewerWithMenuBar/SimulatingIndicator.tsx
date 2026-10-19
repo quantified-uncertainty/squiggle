@@ -15,6 +15,10 @@ export const SimulatingIndicator: FC<{
 
   return (
     <div
+      // Stable hooks for apps that show the run time elsewhere (Squiggle
+      // Studio hides this) or wait for the run to finish.
+      data-simulation-indicator=""
+      data-running={_isSimulating ? "1" : "0"}
       className={clsx(
         "whitespace-nowrap text-sm",
         _isSimulating ? "text-zinc-200" : "text-zinc-500"

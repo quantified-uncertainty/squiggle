@@ -63,7 +63,61 @@ async function markers(h: Harness) {
   }));
 }
 
+// Visible text matching `pattern` in the Output view (the viewer's own
+// "simulation #N in N ms" must not show: the status bar has the run, #61).
+async function visibleText(h: Harness, pattern: string): Promise<string[]> {
+  return h.page.evaluate(
+    (sel: string, source: string) => {
+      const re = new RegExp(source);
+      const root = document.querySelector(sel);
+      if (!root) return [];
+      return [...root.querySelectorAll<HTMLElement>("*")]
+        .filter(
+          (el) =>
+            [...el.childNodes].some(
+              (n) =>
+                n.nodeType === Node.TEXT_NODE && re.test(n.textContent ?? "")
+            ) && el.checkVisibility()
+        )
+        .map((el) => el.textContent ?? "");
+    },
+    OUTPUT,
+    pattern
+  );
+}
+
 export const scenarios: Scenario[] = [
+  {
+    id: "output/list-layout",
+    title:
+      "The List layout has no 'simulation #N in N ms' of its own: the status bar shows the run (#61)",
+    tags: ["output"],
+    state: { file: "values/numbers.squiggle", view: "output", layout: "list" },
+    steps: async (h) => {
+      await h.shot("output-list");
+    },
+    check: async (h) => {
+      expect(
+        await h.page.$eval(OUTPUT, (el) => el.getAttribute("data-layout"))
+      ).toBe("list");
+      expect(await visibleText(h, "simulation #")).toEqual([]);
+    },
+  },
+  {
+    id: "output/embed-list-layout",
+    title:
+      "render --layout list: no 'simulation #N in N ms', so the PNG is the same every run (#61)",
+    tags: ["output", "embed"],
+    viewport: { width: 1000, height: 700 },
+    query: { embed: "1" },
+    state: { file: "values/numbers.squiggle", layout: "list" },
+    check: async (h) => {
+      expect(
+        await h.page.$eval(OUTPUT, (el) => el.getAttribute("data-layout"))
+      ).toBe("list");
+      expect(await visibleText(h, "simulation #")).toEqual([]);
+    },
+  },
   {
     id: "output/narrow-720",
     title:
