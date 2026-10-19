@@ -6,7 +6,7 @@ import { prisma } from "@/lib/server/prisma";
 import {
   relativeValuesClustersSchema,
   relativeValuesItemsSchema,
-} from "@/relative-values/types";
+} from "@quri/squiggle-relative-values/core";
 
 import {
   definitionCardSelect,
@@ -77,6 +77,7 @@ function toDefinitionFullDTO(
         .parse(row.currentRevision.clusters)
         .map((cluster) => ({
           ...cluster,
+          name: cluster.name ?? null,
           recommendedUnit: cluster.recommendedUnit ?? null,
         })),
       recommendedUnit: row.currentRevision.recommendedUnit,

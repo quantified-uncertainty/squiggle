@@ -30,6 +30,7 @@
     "@quri/squiggle-ai": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
     "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-relative-values": "workspace:*",
     "@quri/ui": "workspace:*",
     "@quri/versioned-squiggle-components": "workspace:*",
     "@vercel/analytics": "^1.5.0",

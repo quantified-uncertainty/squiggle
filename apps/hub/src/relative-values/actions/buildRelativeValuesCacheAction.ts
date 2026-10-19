@@ -5,9 +5,13 @@ import { z } from "zod";
 import { modelForRelativeValuesExportRoute } from "@/lib/routes";
 import { actionClient, ActionError } from "@/lib/server/actionClient";
 import { prisma } from "@/lib/server/prisma";
-import { cartesianProduct } from "@/relative-values/lib/utils";
-import { relativeValuesItemsSchema } from "@/relative-values/types";
-import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+import {
+  cartesianProduct,
+  ModelEvaluator,
+  relativeValuesItemsSchema,
+} from "@quri/squiggle-relative-values/core";
+
+import { relativeValuesHubLinker } from "@/relative-values/linker";
 
 import { getRelativeValuesExportForWriteableModel } from "../utils";
 
@@ -37,11 +41,12 @@ export const buildRelativeValuesCacheAction = actionClient
 
     const evaluatorResult = await ModelEvaluator.create(
       squiggleSnippet.code,
-      relativeValuesExport.variableName
+      relativeValuesExport.variableName,
+      { linker: relativeValuesHubLinker }
     );
     if (!evaluatorResult.ok) {
       throw new ActionError(
-        `Failed to create evaluator: ${evaluatorResult.value.toString()}`
+        `Failed to create evaluator: ${evaluatorResult.value}`
       );
     }
     const evaluator = evaluatorResult.value;

@@ -22,9 +22,6 @@ export default async function Layout({
 }>) {
   const { owner, slug, variableName } = await params;
 
-  // sleep
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   const model = await loadModelCard({ owner, slug });
   if (!model) {
     notFound();
