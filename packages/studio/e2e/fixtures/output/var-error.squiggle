@@ -1,0 +1,6 @@
+// For ?variable=alpha (QA #45): an agent breaks beta.
+
+@name("Alpha")
+alpha = 1 to 2
+
+beta = alpha * 2
