@@ -158,7 +158,9 @@ function useNodesAndEdges({
             })
           );
 
-          for (const importBinding of module.getImports(project.state.linker)) {
+          const imports = module.getImports(project.state.linker);
+          // Unresolvable imports have no target to draw an edge to.
+          for (const importBinding of imports.ok ? imports.value : []) {
             const target = project.state.getModuleDataByPointer({
               name: importBinding.name,
               hash: importBinding.hash,

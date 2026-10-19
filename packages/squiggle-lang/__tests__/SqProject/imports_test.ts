@@ -1,7 +1,8 @@
-import { SqProject } from "../../src/index.js";
+import { SqModule, SqProject } from "../../src/index.js";
 import {
   defaultLinker,
   makeSelfContainedLinker,
+  SqLinker,
 } from "../../src/public/SqLinker.js";
 
 describe("Imports", () => {
@@ -20,10 +21,110 @@ describe("Imports", () => {
     test("module.imports()", () => {
       // `module.imports()` always parses the source
       // (Also note how imported sources are missing but that's ok; it doesn't prevent parsing)
-      expect(project.getHead("main").getImports(linker)).toMatchObject([
-        { variable: "common", name: "./common" },
-        { variable: "myVariable", name: "./myModule" },
+      expect(project.getHead("main").getImports(linker)).toMatchObject({
+        ok: true,
+        value: [
+          { variable: "common", name: "./common" },
+          { variable: "myVariable", name: "./myModule" },
+        ],
+      });
+    });
+  });
+
+  describe("Linker resolve errors", () => {
+    // Resolves "./"-prefixed imports and throws for everything else.
+    const resolvingLinker = (sources: Record<string, string>): SqLinker => ({
+      ...makeSelfContainedLinker(sources),
+      resolve: (name) => {
+        if (!name.startsWith("./")) {
+          throw new Error(`Can't resolve ${name}`);
+        }
+        return name;
+      },
+    });
+
+    test("getImports reports every unresolvable import", () => {
+      const module = new SqModule({
+        name: "main",
+        code: `import "./ok" as ok\nimport "bad1" as b1\nimport "bad2" as b2\n1`,
+      });
+      const imports = module.getImports(resolvingLinker({}));
+      if (imports.ok) throw "assert";
+      expect(imports.value.errors.map((e) => e.toString())).toEqual([
+        "Error: Can't resolve bad1",
+        "Error: Can't resolve bad2",
       ]);
+      const [error] = imports.value.errors;
+      if (error.tag !== "import") throw "assert";
+      expect(error.location()).toMatchObject({
+        source: "main",
+        start: { line: 2, column: 8 },
+      });
+    });
+
+    test("in the root module", async () => {
+      const project = new SqProject({ linker: resolvingLinker({}) });
+      expect(() =>
+        project.setSimpleHead(
+          "main",
+          `import "./ok" as ok\nimport "bad" as bad\nbad`
+        )
+      ).not.toThrow();
+
+      const output = await project.waitForOutput("main");
+
+      if (output.result.ok) throw "assert";
+      expect(output.result.value.toString()).toEqual(
+        "Error: Can't resolve bad"
+      );
+      const [error] = output.result.value.errors;
+      if (error.tag !== "import") throw "assert";
+      expect(error.location()).toMatchObject({
+        source: "main",
+        start: { line: 2, column: 8 },
+      });
+      expect(output.result.value.toStringWithDetails()).toEqual(
+        `Error: Can't resolve bad
+Import chain:
+  import bad at line 2, column 8, file main`
+      );
+    });
+
+    test("in a nested import", async () => {
+      const project = new SqProject({
+        linker: resolvingLinker({
+          "./foo": `import "bad" as bad\nexport x = 1`,
+        }),
+      });
+      expect(() =>
+        project.setSimpleHead("main", `import "./foo" as foo\nfoo.x`)
+      ).not.toThrow();
+
+      const output = await project.waitForOutput("main");
+
+      if (output.result.ok) throw "assert";
+      expect(output.result.value.toString()).toEqual(
+        "Error: Can't resolve bad"
+      );
+      expect(output.result.value.toStringWithDetails()).toEqual(
+        `Error: Can't resolve bad
+Import chain:
+  import bad at line 1, column 8, file ./foo
+  import ./foo at line 1, column 8, file main`
+      );
+    });
+
+    test("project recovers when the import is fixed", async () => {
+      const project = new SqProject({
+        linker: resolvingLinker({ "./lib": "export x = 5" }),
+      });
+      project.setSimpleHead("main", `import "lib" as lib\nlib.x * 2`);
+      expect((await project.waitForOutput("main")).result.ok).toBe(false);
+
+      project.setSimpleHead("main", `import "./lib" as lib\nlib.x * 2`);
+      const output = await project.waitForOutput("main");
+      expect(output.getEndResult().ok).toBe(true);
+      expect(output.getEndResult().value.toString()).toBe("10");
     });
   });
 

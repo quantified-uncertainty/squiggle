@@ -216,7 +216,13 @@ export class SqProject {
   private loadImports(hash: string) {
     const module = this.getModuleOrThrow(hash);
 
-    for (const imp of module.getImports(this.state.linker)) {
+    const imports = module.getImports(this.state.linker);
+    if (!imports.ok) {
+      // Nothing to load; the module's output will fail with the resolution errors.
+      return;
+    }
+
+    for (const imp of imports.value) {
       if (module.pins[imp.name]) {
         if (this.state.modules.has(module.pins[imp.name])) {
           // pinned import is already loaded
