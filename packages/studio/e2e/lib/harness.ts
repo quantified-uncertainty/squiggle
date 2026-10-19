@@ -2,7 +2,6 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
 import puppeteer, {
   type Browser,
@@ -19,6 +18,10 @@ import {
   type StudioServerOptions,
   startStudioServer,
 } from "../../src/server/server.js";
+import {
+  type ViewState,
+  viewStateToSearch,
+} from "../../src/shared/viewState.js";
 import { writeGeneratedFixtures } from "../fixtures/gen.js";
 import { accessibilityText } from "./a11y.js";
 import { type HubStub, startHubStub } from "./hubStub.js";
@@ -52,36 +55,37 @@ export const DEFAULT_VIEWPORT = { width: 1440, height: 900 };
 
 // ── Frozen types (§6.6) ─────────────────────────────────────────────────────
 
-// Same shape as src/shared/viewState.ts (WP0); declared here too so that the
-// harness compiles before that file exists.
-export type ViewState = {
-  file?: string;
-  view?: string;
-  tab?: string;
-  variable?: string;
-  layout?: "cards" | "list";
-  code?: boolean;
-  line?: number;
-};
+export type { ViewState };
 
 // What `window.squiggleStudio.getState()` returns (§6.5): the ViewState plus
-// workspace facts. Before WP0's agent hooks exist, `state()` fills in only
-// `file` and `view`, from <html data-studio-*>, the window title and the
-// selected view tab.
+// workspace facts. The same type as `UiState` in src/client/lib/agentHooks.ts,
+// restated because the harness doesn't compile client code; keep them in step.
 export type UiState = ViewState & {
   root?: string;
-  host?: "web" | "electron";
-  dirtyFiles?: string[];
-  conflicts?: string[];
-  run?: {
-    status: string;
+  host: "web" | "electron";
+  dirtyFiles: string[];
+  conflicts: string[];
+  run: {
+    status: "running" | "ok" | "error" | "not-run" | "none";
     ms?: number;
     executionId?: number;
-    errors: unknown[];
+    errors: Array<{
+      kind: string;
+      message: string;
+      location?: { source: string; line: number; column: number };
+    }>;
   };
-  connected?: boolean;
-  followChanges?: boolean;
-  layout?: unknown;
+  connected: boolean;
+  followChanges: boolean;
+  // The global layout (not `layout`, which is Output's Cards/List).
+  shellLayout: {
+    sidebarVisible: boolean;
+    sidebarWidth: number;
+    statusBarVisible: boolean;
+    menuBarVisible: boolean;
+    codePane: { open: boolean; fraction: number };
+    outputLayout: "cards" | "list";
+  };
 };
 
 export type HarnessOptions = {
@@ -255,12 +259,9 @@ export async function startFixtureServer(
 
   const hub = opts.hub === "none" ? undefined : await startHubStub();
   const port = await freePort();
-  // `stateDir` and `trackRecent` arrive with WP7 (§10.4); until then the
-  // server ignores them, and `recentFile` keeps it away from ~/.squiggle-studio.
-  const serverOptions: StudioServerOptions & {
-    stateDir?: string;
-    trackRecent?: boolean;
-  } = {
+  // The server ignores `stateDir` and `trackRecent` until WP7 (§10.4);
+  // `recentFile` keeps it away from ~/.squiggle-studio meanwhile.
+  const serverOptions: StudioServerOptions = {
     root,
     port,
     strictPort: true,
@@ -300,51 +301,14 @@ export async function startFixtureServer(
   };
 }
 
-// ── URL encoding of a ViewState ────────────────────────────────────────────
-
-function fallbackViewStateToSearch(state: ViewState): URLSearchParams {
-  const params = new URLSearchParams();
-  if (state.file !== undefined) params.set("file", state.file);
-  if (state.view !== undefined) params.set("view", state.view);
-  if (state.tab !== undefined) params.set("tab", state.tab);
-  if (state.variable !== undefined) params.set("variable", state.variable);
-  if (state.layout !== undefined) params.set("layout", state.layout);
-  if (state.code !== undefined) params.set("code", state.code ? "1" : "0");
-  if (state.line !== undefined) params.set("line", String(state.line));
-  return params;
-}
-
-let codec: Promise<(state: ViewState) => URLSearchParams> | undefined;
-
-// WP0's src/shared/viewState.ts when it exists (so URLs match what the app
-// parses), else the fallback above. The fallback goes away at M2.
-function viewStateCodec(): Promise<(state: ViewState) => URLSearchParams> {
-  codec ??= (async () => {
-    const file = path.join(STUDIO_DIR, "src", "shared", "viewState.ts");
-    if (!fs.existsSync(file)) return fallbackViewStateToSearch;
-    const mod: unknown = await import(pathToFileURL(file).href);
-    const toSearch =
-      typeof mod === "object" && mod !== null && "viewStateToSearch" in mod
-        ? mod.viewStateToSearch
-        : undefined;
-    if (typeof toSearch !== "function") return fallbackViewStateToSearch;
-    return (state: ViewState) => {
-      const out: unknown = toSearch(state);
-      return new URLSearchParams(
-        out instanceof URLSearchParams ? out : String(out).replace(/^\?/, "")
-      );
-    };
-  })();
-  return codec;
-}
-
 // ── In-page access to Studio ───────────────────────────────────────────────
 
 type IdleResult = {
   idle: boolean;
   timedOut: boolean;
   waitedMs: number;
-  via: "api" | "fallback";
+  // window.squiggleStudio wasn't installed within the timeout.
+  noApi?: boolean;
   // window.squiggleStudio.whenIdle() resolved while the shown file's view
   // wasn't ready yet (its [data-studio-ready] marker missing or "0").
   earlyApi?: boolean;
@@ -364,29 +328,26 @@ type StudioWindow = Window & {
   __studioCommandLog?: CommandLogEntry[];
 };
 
-// Runs in the page. Waits for window.squiggleStudio.whenIdle() (WP0) when it
-// exists; in both cases the shown view must also have settled: when a
-// .squiggle file is shown (per <html data-studio-active-file>, the window title
-// "file — folder — …", or while nothing is shown yet, ?file=) outside the
-// Playground, every [data-studio-ready] marker is "1" or there is a
-// [data-studio-error], and no relative values dashboard is computing.
-// Without the API (older clients), the DOM must also be quiet for 200 ms.
-// Then fonts and two animation frames.
+// Runs in the page. Waits for window.squiggleStudio (App installs it in an
+// effect, so it can arrive just after "load"), then for its whenIdle().
+// The shown view must also have settled, which checks whenIdle() itself: when
+// a .squiggle file is shown (per <html data-studio-active-file>, or while
+// nothing is shown yet, ?file=) outside the Playground, every
+// [data-studio-ready] marker is "1" or there is a [data-studio-error], and no
+// relative values dashboard is computing. Then fonts and two animation frames.
 async function idleInPage(timeoutMs: number): Promise<IdleResult> {
   const w = window as StudioWindow;
   const start = performance.now();
   const elapsed = () => performance.now() - start;
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
   const frame = () =>
     new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   const settled = (): boolean => {
     const html = document.documentElement;
     const params = new URLSearchParams(location.search);
-    const titleParts = document.title.split(" — ");
     const activeFile =
-      html.dataset["studioActiveFile"] ??
-      (titleParts.length === 3 ? titleParts[0] : undefined) ??
-      params.get("file") ??
-      "";
+      html.dataset["studioActiveFile"] ?? params.get("file") ?? "";
     const view = html.dataset["studioView"] ?? params.get("view") ?? "";
     if (document.querySelector("[data-rv-computing]")) return false;
     if (document.querySelector("[data-studio-error]")) return true;
@@ -398,87 +359,35 @@ async function idleInPage(timeoutMs: number): Promise<IdleResult> {
     return !needsRun || markers.length > 0;
   };
 
-  const api = w.squiggleStudio?.whenIdle;
-  if (typeof api === "function") {
-    const result = await api(timeoutMs);
-    if (!result.idle || settled()) return { ...result, via: "api" };
-    while (elapsed() < timeoutMs && !settled()) {
-      await new Promise((resolve) => setTimeout(resolve, 25));
+  let api = w.squiggleStudio?.whenIdle;
+  while (typeof api !== "function") {
+    if (elapsed() >= timeoutMs) {
+      return { idle: false, timedOut: true, waitedMs: elapsed(), noApi: true };
     }
-    const idle = settled();
-    if (idle) {
-      await document.fonts.ready;
-      await frame();
-      await frame();
-    }
-    return {
-      idle,
-      timedOut: !idle,
-      waitedMs: elapsed(),
-      via: "api",
-      earlyApi: true,
-    };
+    await sleep(10);
+    api = w.squiggleStudio?.whenIdle;
   }
-
-  let quietSince = performance.now();
-  const observer = new MutationObserver(() => {
-    quietSince = performance.now();
-  });
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    characterData: true,
-  });
-  try {
-    while (elapsed() < timeoutMs) {
-      const rendered =
-        (document.getElementById("root")?.childElementCount ?? 0) > 0;
-      if (
-        document.readyState === "complete" &&
-        rendered &&
-        settled() &&
-        performance.now() - quietSince >= 200
-      ) {
-        await document.fonts.ready;
-        await frame();
-        await frame();
-        return {
-          idle: true,
-          timedOut: false,
-          waitedMs: elapsed(),
-          via: "fallback",
-        };
-      }
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    }
-    return {
-      idle: false,
-      timedOut: true,
-      waitedMs: elapsed(),
-      via: "fallback",
-    };
-  } finally {
-    observer.disconnect();
+  const result = await api(Math.max(0, timeoutMs - elapsed()));
+  if (!result.idle || settled()) {
+    return { ...result, waitedMs: elapsed() };
   }
+  while (elapsed() < timeoutMs && !settled()) await sleep(25);
+  const idle = settled();
+  if (idle) {
+    await document.fonts.ready;
+    await frame();
+    await frame();
+  }
+  return { idle, timedOut: !idle, waitedMs: elapsed(), earlyApi: true };
 }
 
-// Runs in the page: getState() (WP0) or what the DOM says.
+// Runs in the page.
 function stateInPage(): UiState {
-  const w = window as StudioWindow;
-  const getState = w.squiggleStudio?.getState;
-  if (typeof getState === "function") return getState() as UiState;
-  const html = document.documentElement;
-  const titleParts = document.title.split(" — ");
-  const file =
-    html.dataset["studioActiveFile"] ??
-    (titleParts.length === 3 ? titleParts[0] : undefined);
-  const tab =
-    document.querySelector("[data-testid='view-tab'][aria-selected='true']") ??
-    undefined;
-  const view =
-    html.dataset["studioView"] ?? tab?.getAttribute("data-view") ?? undefined;
-  return { file: file || undefined, view };
+  const getState = (window as StudioWindow).squiggleStudio?.getState;
+  if (typeof getState !== "function") {
+    throw new Error("window.squiggleStudio.getState is not installed");
+  }
+  return getState() as UiState;
 }
 
 // ── Keys ───────────────────────────────────────────────────────────────────
@@ -657,8 +566,7 @@ function createHarness(
     commandLog,
 
     async open(state) {
-      const toSearch = await viewStateCodec();
-      const params = toSearch(state);
+      const params = new URLSearchParams(viewStateToSearch(state));
       for (const [k, v] of Object.entries(opts.query ?? {})) params.set(k, v);
       params.set("test", "1");
       const started = Date.now();
@@ -676,7 +584,9 @@ function createHarness(
         );
       }
       if (!result.idle) {
-        const message = `Studio didn't go idle within ${timeoutMs} ms (${result.via === "api" ? "window.squiggleStudio.whenIdle" : "fallback idle check"}) at ${page.url()}`;
+        const message = result.noApi
+          ? `window.squiggleStudio wasn't installed within ${timeoutMs} ms at ${page.url()}`
+          : `Studio didn't go idle within ${timeoutMs} ms at ${page.url()}`;
         h.idleTimeouts.push(message);
         throw new IdleTimeoutError(message);
       }
@@ -704,8 +614,7 @@ function createHarness(
           if (!commands) {
             return {
               ok: false as const,
-              error:
-                "window.squiggleStudio.commands is not available (it arrives with WP0)",
+              error: "window.squiggleStudio is not installed",
             };
           }
           return commands.run(commandId, commandArgs);

@@ -194,7 +194,42 @@ describe.skipIf(only.length > 0)("harness", () => {
   });
 
   test("packages detected as merged", () => {
+    expect(merged.has("WP0")).toBe(true);
     expect(merged.has("WP0-H")).toBe(true);
+  });
+
+  // The harness against WP0's real agent hooks, registry and dispatcher.
+  test("key, command and state against the real App", async () => {
+    const h = await startHarnessInternal(
+      { viewport: { width: 1000, height: 700 } },
+      { dir: path.join(OUT_DIR, "test"), prefix: "selftest-real-app" }
+    );
+    try {
+      await h.open({ file: "values/numbers.squiggle" });
+      expect(h.idleResults.at(-1)?.earlyApi).toBeUndefined();
+      expect(await h.commandLog(), "?test=1 starts the command log").toEqual(
+        []
+      );
+      const state = await h.state();
+      expect(state.file).toBe("values/numbers.squiggle");
+      expect(state.host).toBe("web");
+      expect(state.root).toBe(h.root);
+
+      await h.key("F6");
+      const log = (await h.commandLog()) ?? [];
+      expect(log.map((e) => [e.id, e.source])).toEqual([
+        ["workbench.action.focusNextPart", "key"],
+      ]);
+      expect(h.keypressViolations).toEqual([]);
+
+      await h.command("workbench.action.toggleSidebarVisibility");
+      expect((await h.state()).shellLayout.sidebarVisible).toBe(false);
+      await expect(h.command("no.such.command")).rejects.toThrow(
+        /no\.such\.command/
+      );
+    } finally {
+      await h.stop();
+    }
   });
 
   // The harness's use of WP0's window.squiggleStudio and command log, against

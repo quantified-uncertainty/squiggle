@@ -1,24 +1,21 @@
 import type { HTTPRequest } from "puppeteer-core";
 
+import { TID } from "../../src/shared/testIds.js";
 import { expect } from "../lib/expect.js";
 import { expectationFor, type Harness, type Scenario } from "../lib/harness.js";
-import { isMerged } from "../lib/scenarios.js";
 
 // Smoke scenarios (WP0-H, spec §10.3a): the shell renders and goes idle, a
 // file opens from the URL, URL parameters are initial state only (#17), error
 // toasts are visible above the status bar (#33), and embed mode renders only
-// the workspace.
-//
-// They select by test id or ARIA landmark. Until WP0's App lands (detected by
-// isMerged("WP0")), smoke/start and smoke/open-file check only what the old
-// client has; those fallbacks go away at M2.
+// the workspace. They select by test id.
 
-// Shell regions: test id (WP0 onward) or the landmark the spec asks for (§6.5).
-const HEADER = "[data-testid='app-header']";
-const EXPLORER = "[data-testid='explorer'], aside[aria-label='Explorer']";
-const START_PAGE = "[data-testid='start-page']";
-const STATUSBAR = "[data-testid='statusbar'], footer[role='contentinfo']";
-const EDITOR_HEADER = "[data-testid='editor-header']";
+const byId = (id: string) => `[data-testid='${id}']`;
+const HEADER = byId(TID.appHeader);
+const EXPLORER = byId(TID.explorer);
+const START_PAGE = byId(TID.startPage);
+const STATUSBAR = byId(TID.statusbar);
+const EDITOR_HEADER = byId(TID.editorHeader);
+const TOAST = byId(TID.toast);
 
 type Rect = {
   top: number;
@@ -53,13 +50,13 @@ async function expectVisible(h: Harness, selector: string): Promise<Rect> {
   return rect as Rect;
 }
 
-// Clicks a file in the Explorer: the tree row's test id (WP3), or the old
-// sidebar's file button, whose title is the path.
+// Clicks a file in the Explorer: the tree row's test id (WP3), or, until WP3
+// lands, the current tree's file button, whose title is the path.
 async function clickTreeFile(h: Harness, path: string): Promise<void> {
   const row =
     (await h.page.$(
-      `[data-testid='file-tree-item'][data-path=${JSON.stringify(path)}]`
-    )) ?? (await h.page.$(`aside button[title=${JSON.stringify(path)}]`));
+      `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(path)}]`
+    )) ?? (await h.page.$(`${EXPLORER} button[title=${JSON.stringify(path)}]`));
   if (!row) throw new Error(`No Explorer row for ${path}`);
   await row.click();
   await h.whenIdle();
@@ -78,12 +75,6 @@ export const scenarios: Scenario[] = [
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight,
       }));
-      if (!isMerged("WP0")) {
-        // The old client: a sidebar and the main area.
-        await expectVisible(h, "aside");
-        await expectVisible(h, "main");
-        return;
-      }
       const header = await expectVisible(h, HEADER);
       expect(header.top).toBe(0);
       expect(header.height).toBe(36);
@@ -110,22 +101,20 @@ export const scenarios: Scenario[] = [
       expect(await h.page.title()).toMatch(/^values\/numbers\.squiggle — /);
       expect(await h.page.$("[data-studio-ready='1']")).not.toBeNull();
       expect(await h.page.$("[data-studio-error]")).toBeNull();
-      const cards = await h.page.$$("[data-testid='output-card']");
+      const cards = await h.page.$$(byId(TID.outputCard));
       if (cards.length > 0) {
         // Output cards carry test ids from WP5 on.
         expect(cards.length).toBe(expectationFor(file)?.cardCount);
       }
-      if (isMerged("WP0")) {
-        await expectVisible(h, EDITOR_HEADER);
-        await expectVisible(h, STATUSBAR);
-      }
+      await expectVisible(h, EDITOR_HEADER);
+      await expectVisible(h, STATUSBAR);
     },
   },
   {
     id: "smoke/url-initial-state",
     title:
       "URL parameters are initial state; the address bar mirrors the current view (#17)",
-    tags: ["smoke", "needs:WP0"],
+    tags: ["smoke"],
     viewport,
     // An explicit view for a, then a click on b, whose default view differs.
     state: { file: "values/numbers.squiggle", view: "output" },
@@ -158,7 +147,7 @@ export const scenarios: Scenario[] = [
   {
     id: "shell/toast-position",
     title: "An error toast is inside the viewport, above the status bar (#33)",
-    tags: ["smoke", "shell", "needs:WP0"],
+    tags: ["smoke", "shell"],
     viewport,
     steps: async (h) => {
       // Make the next GET /api/root fail, so the page shows an error toast.
@@ -182,18 +171,9 @@ export const scenarios: Scenario[] = [
       });
       await h.page.reload({ waitUntil: "load" });
       // Not whenIdle(): without a root, the workspace never finishes loading.
-      await h.page.waitForFunction(
-        () => {
-          const byId = document.querySelector("[data-testid='toast']");
-          if (byId) return true;
-          // @quri/ui's container: the fixed child of #root.
-          const container = [...document.querySelectorAll("#root > *")].find(
-            (el) => getComputedStyle(el).position === "fixed"
-          );
-          return (container?.childElementCount ?? 0) > 0;
-        },
-        { timeout: 10_000 }
-      );
+      await h.page.waitForSelector(`${TOAST}[data-toast-type='error']`, {
+        timeout: 10_000,
+      });
       await h.page.evaluate(
         () =>
           new Promise<void>((resolve) =>
@@ -203,16 +183,12 @@ export const scenarios: Scenario[] = [
       await h.shot("shell-toast-position");
     },
     check: async (h) => {
-      const toast = await h.page.evaluate(() => {
-        const container = [...document.querySelectorAll("#root > *")].find(
-          (el) => getComputedStyle(el).position === "fixed"
-        );
-        const el =
-          document.querySelector("[data-testid='toast']") ??
-          container?.firstElementChild;
+      const toast = await h.page.evaluate((selector: string) => {
+        const el = document.querySelector(selector);
         if (!el) return null;
         const r = el.getBoundingClientRect();
         return {
+          role: el.getAttribute("role"),
           top: r.top,
           bottom: r.bottom,
           left: r.left,
@@ -220,9 +196,10 @@ export const scenarios: Scenario[] = [
           vw: window.innerWidth,
           vh: window.innerHeight,
         };
-      });
+      }, `${TOAST}[data-toast-type='error']`);
       expect(toast, "an error toast is shown").not.toBeNull();
       if (!toast) return;
+      expect(toast.role, "an error toast is announced").toBe("alert");
       expect(toast.top, "toast top inside the viewport").toBeGreaterThanOrEqual(
         0
       );
@@ -261,7 +238,7 @@ export const scenarios: Scenario[] = [
         STATUSBAR,
         START_PAGE,
         "aside",
-        "[data-testid='menubar']",
+        byId(TID.menubar),
       ]) {
         expect(
           await h.page.$(selector),

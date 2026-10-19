@@ -62,8 +62,8 @@ export const scenarios: Scenario[] = [
 - After every scenario the harness checks: no page errors, idle within 15 s,
   every button has an accessible name, no visible text below 4.5:1 contrast
   (a warning unless `--strict`), `.hidden/` and `node_modules/` never in the
-  tree, and at most one command per keypress (when
-  `window.__studioCommandLog` exists).
+  tree, and at most one command per keypress (from
+  `window.__studioCommandLog`, which `?test=1` turns on).
 
 ## Fixtures
 
