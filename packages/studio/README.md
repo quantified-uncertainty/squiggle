@@ -4,13 +4,20 @@ A local, browser-first editor and viewer for `.squiggle` files. Point it at a fo
 
 ```sh
 squiggle-studio [dir] [--port 4321] [--host 127.0.0.1] [--no-open]
-squiggle-studio render <file.squiggle> [--out file.png] [--variable name] [--width 1000] [--chrome path]
+squiggle-studio render <file.squiggle> [--out file.png] [--variable name] [--view output|relative-values] [--tab list|grid|plot] [--width 1000] [--chrome path]
+```
+
+The package isn't published to npm yet. From a checkout of the Squiggle monorepo, build it and run the binary directly:
+
+```sh
+npx turbo run build --filter=@quri/squiggle-studio...
+node packages/studio/bin/squiggle-studio.js packages/studio/examples
 ```
 
 ## Features
 
 - File tree (`.squiggle`, `.json`, `.md`; skips `node_modules`, `.git`, dot-folders), open-file tabs, recent files (per folder, in localStorage) and recent folders (`~/.squiggle-studio/recent.json`).
-- Per-file view tabs: **Split** (the Squiggle playground: editor + output) and **Output** (full-window viewer). More views can be registered (see below).
+- Per-file view tabs: **Split** (the Squiggle playground: editor + output), **Output** (full-window viewer) and, for relative values models, **Relative values** (see below). More views can be registered (see below).
 - Cmd/Ctrl+S saves. Unsaved files are marked with a dot.
 - Live reload over Server-Sent Events. If the file changes on disk while you have unsaved edits, a banner offers "Reload from disk" or "Keep my edits". Files that import a changed file are re-run.
 - Imports:
@@ -18,6 +25,31 @@ squiggle-studio render <file.squiggle> [--out file.png] [--variable name] [--wid
   - Squiggle Hub: `import "hub:owner/slug" as model` (fetched through the local server from `https://squigglehub.org/api/get-source`, cached for a minute).
 - "Import from Squiggle Hub" (globe icon) downloads a Hub model into the folder as a `.squiggle` file.
 - `render` writes a PNG of a file's output (or one variable, zoomed in) so that agents can look at charts. It needs the optional dependency `puppeteer-core` and a local Chrome/Chromium (`--chrome` or `CHROME_PATH` to override).
+
+## Relative values
+
+Files with a top-level [relative values](../relative-values/README.md) spec get a **Relative values** tab: a dashboard (from `@quri/squiggle-relative-values`) with its own **List**, **Grid** and **Plot** tabs. A spec is a dict like
+
+```squiggle
+fruit = {
+  title: "Fruit", // optional
+  items: [{ id: "apple", name: "Apple", clusterId: "common" }, ...], // or plain ids
+  clusters: [{ id: "common", name: "Common", color: "#5D8CD3" }], // optional
+  recommendedUnit: "apple", // optional
+  fn: {|a, b| [dists[a], dists[b]]}, // values of a and b, in a shared unit
+}
+// or simply
+fruit = { values: { apple: 1, banana: 0.5 to 2, mango: 2 to 6 } }
+```
+
+- The variable doesn't need to be exported. With several specs, a picker chooses one (or use `?variable=name`).
+- The chosen variable and dashboard tab are remembered per file, across live reloads. When the file changes on disk the dashboard re-evaluates, keeping the previous results on screen until the new ones are ready. If the model fails to run, the tab stays and shows the error; an invalid spec shows what's wrong with it.
+- Computed pairs are cached per code version, so switching tabs or undoing an edit is instant.
+- Clicking a value in the List view opens a sidebar with charts for that pair; it re-runs the model with Studio's linker, so imports work.
+- Pairs are evaluated synchronously on the main thread: about 0.2 s for 24 items (576 pairs) and 0.5 s for 38 items. Expect the UI to pause for a few seconds with 100+ items.
+- `squiggle-studio render model.squiggle --view relative-values --tab grid` renders the dashboard to a PNG.
+
+Examples are in [`examples/relative-values/`](./examples/relative-values).
 
 ## Development
 
@@ -70,7 +102,7 @@ await server.close();
 
 ### Adding views
 
-Views are tabs next to Split/Output. Register them in `src/client/main.tsx` before rendering:
+Views are tabs next to Split/Output (the Relative values view in `src/client/views/RelativeValuesView.tsx` is a built-in example). Register them in `src/client/main.tsx` before rendering:
 
 ```tsx
 import { registerStudioView } from "./views/index.js";
@@ -87,4 +119,4 @@ See `src/client/views/types.ts` for `StudioView`, `StudioViewContext` and `Studi
 
 ### URL parameters
 
-`?file=path.squiggle&view=output&embed=1&variable=name` opens a file, picks a view, hides the chrome and/or zooms into one variable. `render` uses these.
+`?file=path.squiggle&view=output&embed=1&variable=name` opens a file, picks a view (`split`, `output` or `relative-values`), hides the chrome and/or zooms into one variable (in the Relative values view: picks the spec). `&tab=list|grid|plot` picks the relative values dashboard tab. `render` uses these.
