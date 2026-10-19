@@ -46,3 +46,7 @@ Here are the tools that we like and use:
 ## Next.js Apps Best Practices
 
 Described in `apps/hub/docs/nextjs.md`.
+
+## Working on Squiggle models
+
+For writing or debugging `.squiggle` code (not the language implementation), use the `squiggle` skill in `claude-plugin/skills/squiggle/` (installable as a Claude Code plugin from this repo's marketplace). Check and run models with the CLI: `node packages/squiggle-lang/bin/squiggle.js check|run --json|docs <file-or-query>`. Its reference docs are generated from `internal-packages/content`; after changing docs, run `pnpm --filter @quri/content gen:claude-plugin`.

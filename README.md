@@ -16,6 +16,7 @@ A simple programming language for probabilistic estimation that runs on Javascri
 - [Original Lesswrong sequence](https://www.lesswrong.com/s/rDe8QE5NvXcZYzgZ3)
 - [Author your Squiggle models as Observable notebooks](https://observablehq.com/@hazelfire/squiggle)
 - [Use Squiggle in VS Code](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle)
+- [Use Squiggle with Claude Code and other coding agents](https://www.squiggle-language.com/docs/Ecosystem/LanguageModels): in Claude Code, run `/plugin install squiggle --marketplace quantified-uncertainty/squiggle`
 
 ## Our deployments
 

@@ -153,7 +153,7 @@ export async function getDocumentationBundle() {
     convertSquiggleEditorTags(guideContent) +
     "\n\n---\n\n" +
     "# API\n\n" +
-    apiContent;
+    convertSquiggleEditorTags(apiContent);
 
   return content;
 }
