@@ -1,0 +1,31 @@
+{
+  "name": "@quri/squiggle-studio-electron",
+  "productName": "Squiggle Studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop (Electron) wrapper for Squiggle Studio",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/main.js",
+  "bin": {
+    "squiggle-studio-electron": "./bin/squiggle-studio-electron.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "build:studio": "pnpm --dir ../studio run build",
+    "dev": "node ./scripts/ensure-studio.js && tsc -b && electron . ../studio/examples",
+    "start": "electron .",
+    "lint": "prettier --check . && tsc -b",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@quri/squiggle-studio": "workspace:*",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@quri/configs": "workspace:*",
+    "@types/node": "^22.14.0",
+    "electron": "^44.9.0",
+    "typescript": "5.8.2"
+  }
+}

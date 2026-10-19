@@ -4,4 +4,5 @@ export {
   startStudioServer,
 } from "./server.js";
 export { PathError, resolveSafePath } from "./paths.js";
-export type { StudioEvent, TreeNode } from "../shared/api.js";
+export { defaultRecentFile, loadRecentFolders } from "./recent.js";
+export type { RecentFolder, StudioEvent, TreeNode } from "../shared/api.js";
