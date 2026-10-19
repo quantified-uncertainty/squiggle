@@ -6,14 +6,13 @@ import { SqModule } from "../../public/SqProject/SqModule.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { green } from "../colors.js";
 import {
-  ErrorJson,
+  type ErrorJson,
   exceptionToErrorJson,
-  errorToJson,
-  printErrorJson,
-  printWarnings,
-  WarningJson,
+  sqErrorToJson,
+  type WarningJson,
   warningsForSources,
-} from "../errorReport.js";
+} from "../../public/json.js";
+import { printErrorJson, printWarnings } from "../errorReport.js";
 import { EVAL_SOURCE_ID, FileLinker, makeFileLinker } from "../linker.js";
 import { loadSrc, myParsePositiveInt } from "../utils.js";
 import { makeEnvironment } from "./run.js";
@@ -33,7 +32,7 @@ function reportFromSqError(
   sources: ReadonlyMap<string, string>
 ): ErrorReport {
   return {
-    json: errorToJson(error, sources),
+    json: sqErrorToJson(error, sources),
     details: error.toStringWithDetails(),
   };
 }

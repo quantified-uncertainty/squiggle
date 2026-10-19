@@ -64,6 +64,18 @@ export {
   sqValueToJson,
   type SqValueToJsonOptions,
 } from "./public/SqValue/toJson.js";
+export {
+  type ErrorJson,
+  exceptionToErrorJson,
+  formatSqNumber,
+  type LocationJson,
+  type RunJson,
+  sqErrorToJson,
+  sqModuleOutputToJson,
+  type SqModuleOutputToJsonOptions,
+  type WarningJson,
+  warningsForSources,
+} from "./public/json.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
