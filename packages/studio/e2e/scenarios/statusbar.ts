@@ -245,6 +245,22 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "statusbar/tooltip-opaque",
+    title:
+      "In test mode a tooltip shows at full opacity at once, so shots and the contrast check never catch it mid-fade",
+    tags: ["statusbar"],
+    viewport,
+    state: { file: NOTES },
+    check: async (h) => {
+      await h.page.hover(item("save"));
+      const tooltip = await h.page.waitForSelector("[role='tooltip']");
+      // Read at once, inside framer-motion's 70 ms fade.
+      expect(
+        await tooltip?.evaluate((el) => getComputedStyle(el).opacity)
+      ).toBe("1");
+    },
+  },
+  {
     id: "statusbar/deleted",
     title: "The shown file deleted on disk: Deleted on disk",
     tags: ["statusbar"],

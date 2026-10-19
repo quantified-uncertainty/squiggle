@@ -52,6 +52,14 @@ html.studio-test *::after {
   caret-color: transparent;
 }
 
+/* Tooltips fade in through framer-motion (an inline opacity that the rules
+   above can't stop, and that reduced motion keeps): in test mode they show
+   at full opacity at once, so a screenshot or the contrast check never
+   catches one mid-fade. */
+html.studio-test [role="tooltip"] {
+  opacity: 1 !important;
+}
+
 /* A subtle outline when a region itself receives keyboard focus (F6, ⇧⌘E).
    Menu panels are regions too, but show their focus with the active row. */
 [data-studio-region]:not([role="menu"]):focus-visible {
