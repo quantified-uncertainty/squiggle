@@ -1237,16 +1237,8 @@ export const scenarios: Scenario[] = [
     state: { file: "numbers.squiggle" },
     check: async (h) => {
       await clickRow(h, "dists.squiggle");
-      // Not h.command(): the command waits for the pick.
-      await h.page.evaluate(() => {
-        void (
-          window as Window & {
-            squiggleStudio?: {
-              commands: { run(id: string): Promise<unknown> };
-            };
-          }
-        ).squiggleStudio?.commands.run("workbench.action.openRecent");
-      });
+      // The command is done once the pick is shown.
+      await h.command("workbench.action.openRecent");
       await h.page.waitForSelector(byId(TID.quickPick));
       expect(
         (await h.page.$$(byId(TID.quickPickItem))).length

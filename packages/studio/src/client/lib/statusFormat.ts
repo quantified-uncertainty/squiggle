@@ -257,6 +257,9 @@ export function saveStatus(
     autoSave: StudioSettings["files.autoSave"];
     otherDirty: number; // other working-set files with unsaved edits
     saveKey: string | undefined; // ⌘S
+    // Why saves are blocked: another window switched folders (default), or
+    // the folder was moved or deleted.
+    blockedBy?: "root-changed" | "root-missing";
   }
 ): StatusText & { state: SaveState } {
   const others = opts.otherDirty > 0 ? ` · ${opts.otherDirty} unsaved` : "";
@@ -304,12 +307,19 @@ export function saveStatus(
         tone: "error",
       };
     case "blocked":
-      return {
-        state,
-        text: `Can't save: folder switched${others}`,
-        title: `Another window opened a different folder. Choose in the banner above${othersTitle}`,
-        tone: "error",
-      };
+      return opts.blockedBy === "root-missing"
+        ? {
+            state,
+            text: `Can't save: folder missing${others}`,
+            title: `The folder was moved or deleted. Unsaved edits are kept in this window${othersTitle}`,
+            tone: "error",
+          }
+        : {
+            state,
+            text: `Can't save: folder switched${others}`,
+            title: `Another window opened a different folder. Choose in the banner above${othersTitle}`,
+            tone: "error",
+          };
   }
 }
 

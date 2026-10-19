@@ -23,9 +23,15 @@ body {
   height: 100%;
 }
 
-/* Toasts sit above the 24 px status bar. */
+/* Toasts sit above the 24 px status bar, and long messages (absolute paths)
+   wrap instead of spanning the window. */
 #root > div.fixed {
   bottom: 2rem;
+  max-width: min(36rem, calc(100vw - 2rem));
+}
+
+[data-testid="toast"] {
+  overflow-wrap: anywhere;
 }
 
 /* Embedded (render) mode: let the page grow with its content. */

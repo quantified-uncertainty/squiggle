@@ -348,6 +348,9 @@ export const scenarios: Scenario[] = [
     },
     check: async (h) => {
       expect((await statusItem(h, "connection"))?.text).toBe("Folder missing");
+      const save = await statusItem(h, "save");
+      expect(save?.state).toBe("blocked");
+      expect(save?.text).toBe("Can't save: folder missing");
     },
   },
   {

@@ -269,6 +269,11 @@ describe("save", () => {
       "Can't save: folder switched",
       "error",
     ]);
+    expect(pick(save("blocked", { blockedBy: "root-missing" }))).toEqual([
+      "blocked",
+      "Can't save: folder missing",
+      "error",
+    ]);
   });
 
   test("dirty shows the key only when autosave is off", () => {

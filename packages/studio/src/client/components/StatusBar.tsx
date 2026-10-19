@@ -192,6 +192,10 @@ export const StatusBar: FC = () => {
         autoSave,
         otherDirty,
         saveKey: primaryKeyLabel("workbench.action.files.save"),
+        blockedBy:
+          workspace.rootChangedTo === undefined && workspace.rootMissing
+            ? "root-missing"
+            : "root-changed",
       })
     : undefined;
   const showCursor = cursor && cursor.path === active;
