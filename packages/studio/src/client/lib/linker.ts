@@ -2,7 +2,7 @@ import { type SqLinker, SqModule } from "@quri/squiggle-lang";
 
 import { parseHubImport } from "../../shared/api.js";
 import { api } from "./api.js";
-import { dirname, joinPath } from "./paths.js";
+import { dirname, joinPath } from "../../shared/paths.js";
 
 // Linker for Studio projects. Source ids are root-relative file paths
 // ("models/main.squiggle") or Hub ids ("hub:owner/slug").

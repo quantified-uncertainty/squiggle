@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import type { StudioEvent } from "../shared/api.js";
+import type { StudioEventInput } from "../shared/api.js";
 import { isIgnoredPath, isVisibleFile } from "./files.js";
 
 const DEBOUNCE_MS = 60;
@@ -13,7 +13,7 @@ export type FolderWatcher = { close: () => void };
 // Windows and (since Node 20) Linux, so no extra dependency is needed.
 export function watchFolder(
   root: string,
-  onEvent: (event: StudioEvent) => void
+  onEvent: (event: StudioEventInput) => void
 ): FolderWatcher {
   const pending = new Map<string, NodeJS.Timeout>();
   let treeTimer: NodeJS.Timeout | undefined;

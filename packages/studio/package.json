@@ -34,18 +34,27 @@
     "start": "node ./bin/squiggle-studio.js examples",
     "test": "vitest run",
     "lint": "prettier --check . && pnpm run typecheck:client",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "e2e": "vite build && vitest run --config vitest.e2e.config.ts",
+    "e2e:shoot": "vite build && tsx e2e/shoot.ts",
+    "e2e:serve": "vite build && tsx e2e/serve.ts",
+    "e2e:golden": "vite build && vitest run --config vitest.e2e.config.ts --update parity"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^13.1.0",
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-relative-values": "workspace:*",
     "commander": "^13.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@codemirror/autocomplete": "^6.18.6",
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/search": "^6.5.10",
+    "@floating-ui/react": "^0.27.6",
     "@quri/configs": "workspace:*",
     "@quri/squiggle-components": "workspace:*",
-    "@quri/squiggle-lang": "workspace:*",
-    "@quri/squiggle-relative-values": "workspace:*",
     "@quri/ui": "workspace:*",
     "@tailwindcss/forms": "^0.5.10",
     "@types/node": "^22.14.0",
@@ -54,6 +63,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
+    "jsdom": "^26.0.0",
     "postcss": "^8.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",

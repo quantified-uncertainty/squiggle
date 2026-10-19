@@ -10,12 +10,12 @@ import { z } from "zod";
 import {
   API_ERROR_CODES,
   decodeRootHeader,
-  hubImportRequestSchema,
+  legacyHubImportRequestSchema,
   openFolderRequestSchema,
   renameFileRequestSchema,
   STUDIO_HEADER,
   STUDIO_ROOT_HEADER,
-  type StudioEvent,
+  type StudioEventInput,
   writeFileRequestSchema,
 } from "../shared/api.js";
 import { listTree, readFile, renameFile, writeFile } from "./files.js";
@@ -43,6 +43,12 @@ export type StudioServerOptions = {
   recentFile?: string; // defaults to ~/.squiggle-studio/recent.json
   hubUrl?: string; // defaults to https://squigglehub.org
   allowOpenFolder?: boolean; // allow the client to switch root folders; default true (false with a non-loopback host)
+  // Directory of state.json and settings.json; defaults to the directory of
+  // `recentFile` (~/.squiggle-studio). Accepted and ignored until WP7.
+  stateDir?: string;
+  // Record opened folders in `recentFile`; default true. `render` and the e2e
+  // harness pass false (#48). Accepted and ignored until WP7.
+  trackRecent?: boolean;
 };
 
 export type StudioServer = {
@@ -202,7 +208,7 @@ export async function startStudioServer(
   let watcher: FolderWatcher | undefined;
   const sseClients = new Set<ServerResponse>();
 
-  const broadcast = (event: StudioEvent) => {
+  const broadcast = (event: StudioEventInput) => {
     const data = `data: ${JSON.stringify(event)}\n\n`;
     for (const client of sseClients) client.write(data);
   };
@@ -358,7 +364,10 @@ export async function startStudioServer(
         return sendJson(res, 200, { owner, slug, code });
       }
       case "POST /api/hub/import": {
-        const body = parseBody(hubImportRequestSchema, await readJsonBody(req));
+        const body = parseBody(
+          legacyHubImportRequestSchema,
+          await readJsonBody(req)
+        );
         if (!/^[\w-]+$/.test(body.owner) || !/^[\w-]+$/.test(body.slug)) {
           throw new HttpError("Invalid owner or slug", 400);
         }

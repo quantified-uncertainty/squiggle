@@ -36,7 +36,7 @@ export function setExpectedRoot(root: string | undefined): void {
 }
 
 async function request<T>(
-  schema: z.ZodType<T>,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   url: string,
   init: {
     method?: string;

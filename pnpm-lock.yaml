@@ -1755,6 +1755,12 @@ importers:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
         version: 13.1.0(commander@13.1.0)
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
+      '@quri/squiggle-relative-values':
+        specifier: workspace:*
+        version: link:../relative-values
       commander:
         specifier: ^13.1.0
         version: 13.1.0
@@ -1762,18 +1768,27 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
+      '@codemirror/autocomplete':
+        specifier: ^6.18.6
+        version: 6.18.6
+      '@codemirror/commands':
+        specifier: ^6.8.1
+        version: 6.8.1
+      '@codemirror/language':
+        specifier: ^6.11.0
+        version: 6.11.0
+      '@codemirror/search':
+        specifier: ^6.5.10
+        version: 6.5.10
+      '@floating-ui/react':
+        specifier: ^0.27.6
+        version: 0.27.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@quri/configs':
         specifier: workspace:*
         version: link:../../internal-packages/configs
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
-      '@quri/squiggle-lang':
-        specifier: workspace:*
-        version: link:../squiggle-lang
-      '@quri/squiggle-relative-values':
-        specifier: workspace:*
-        version: link:../relative-values
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1798,6 +1813,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      jsdom:
+        specifier: ^26.0.0
+        version: 26.0.0
       postcss:
         specifier: 8.5.30
         version: 8.5.30
@@ -3525,9 +3543,6 @@ packages:
   '@floating-ui/core@1.6.8':
     resolution: {integrity: sha512-7XJ9cPU+yI2QeLS+FCSlqNFZJq8arvswefkZrYI1yQBbftw6FyrZOxYSh+9S7z7TpeWlRt9zJ5IhM1WIL334jA==}
 
-  '@floating-ui/core@1.6.9':
-    resolution: {integrity: sha512-uMXCuQ3BItDUbAMhIXw7UPXRfAlOAvZzdK9BWpE60MCn+Svt3aLn9jsPTi/WNGlRUu2uI0v5S7JiIUsbsvh3fw==}
-
   '@floating-ui/core@1.7.3':
     resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
 
@@ -3566,9 +3581,6 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
-
-  '@floating-ui/utils@0.2.9':
-    resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
 
   '@formatjs/intl-localematcher@0.5.7':
     resolution: {integrity: sha512-GGFtfHGQVFe/niOZp24Kal5b2i36eE2bNL0xi9Sg/yd0TR8aLjcteApZdHmismP5QQax1cMnZM9yWySUUjJteA==}
@@ -7694,9 +7706,6 @@ packages:
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
-
-  crelt@1.0.5:
-    resolution: {integrity: sha512-+BO9wPPi+DWTDcNYhr/W90myha8ptzftZT+LwcmUbbok0rcP/fequmFYCw8NMoH7pkAZQzU78b3kYrlua5a9eA==}
 
   crelt@1.0.6:
     resolution: {integrity: sha512-VQ2MBenTq1fWZUH9DJNGti7kKv6EeAuYr3cLwxUWhIu1baTaXh4Ib5W2CqHVqib4/MqbYGJqiL3Zb8GJZr3l4g==}
@@ -12947,9 +12956,6 @@ packages:
   structured-source@4.0.0:
     resolution: {integrity: sha512-qGzRFNJDjFieQkl/sVOI2dUjHKRyL9dAJi2gCPGJLbJHBIkyOHxjuocpIEfbLioX+qSJpvbYdT49/YCdMznKxA==}
 
-  style-mod@4.1.0:
-    resolution: {integrity: sha512-Ca5ib8HrFn+f+0n4N4ScTIA9iTOQ7MaGS1ylHcoVqW9J7w2w8PzN6g9gKmTYgGEBH8e120+RCmhpje6jC5uGWA==}
-
   style-mod@4.1.2:
     resolution: {integrity: sha512-wnD1HyVqpJUI2+eKZ+eo1UwghftP6yuFheBqqe+bWCotBjC2K1YnteJILRMs3SM4V/0dLEW1SC27MWP5y+mwmw==}
 
@@ -14773,7 +14779,7 @@ snapshots:
       '@babel/core': 7.29.6
       '@babel/helper-compilation-targets': 7.27.0
       '@babel/helper-plugin-utils': 7.29.7
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       lodash.debounce: 4.0.8
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -15552,7 +15558,7 @@ snapshots:
       '@babel/parser': 7.27.0
       '@babel/template': 7.27.0
       '@babel/types': 7.27.0
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -15766,9 +15772,9 @@ snapshots:
 
   '@codemirror/autocomplete@6.18.4':
     dependencies:
-      '@codemirror/language': 6.10.1
+      '@codemirror/language': 6.11.0
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.2
+      '@codemirror/view': 6.36.5
       '@lezer/common': 1.2.3
 
   '@codemirror/autocomplete@6.18.6':
@@ -15780,9 +15786,9 @@ snapshots:
 
   '@codemirror/commands@6.5.0':
     dependencies:
-      '@codemirror/language': 6.10.1
+      '@codemirror/language': 6.11.0
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.2
+      '@codemirror/view': 6.36.5
       '@lezer/common': 1.2.3
 
   '@codemirror/commands@6.8.1':
@@ -15795,11 +15801,11 @@ snapshots:
   '@codemirror/language@6.10.1':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.2
+      '@codemirror/view': 6.36.5
       '@lezer/common': 1.2.3
       '@lezer/highlight': 1.2.1
       '@lezer/lr': 1.4.2
-      style-mod: 4.1.0
+      style-mod: 4.1.2
 
   '@codemirror/language@6.11.0':
     dependencies:
@@ -15813,8 +15819,8 @@ snapshots:
   '@codemirror/lint@6.8.4':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.2
-      crelt: 1.0.5
+      '@codemirror/view': 6.36.5
+      crelt: 1.0.6
 
   '@codemirror/lint@6.8.5':
     dependencies:
@@ -15831,8 +15837,8 @@ snapshots:
   '@codemirror/search@6.5.6':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.2
-      crelt: 1.0.5
+      '@codemirror/view': 6.36.5
+      crelt: 1.0.6
 
   '@codemirror/state@6.5.2':
     dependencies:
@@ -15848,7 +15854,7 @@ snapshots:
   '@codemirror/view@6.36.2':
     dependencies:
       '@codemirror/state': 6.5.2
-      style-mod: 4.1.0
+      style-mod: 4.1.2
       w3c-keyname: 2.2.6
 
   '@codemirror/view@6.36.5':
@@ -16098,7 +16104,7 @@ snapshots:
   '@esbuild-plugins/node-resolve@0.2.2(esbuild@0.28.2)':
     dependencies:
       '@types/resolve': 1.20.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       esbuild: 0.28.2
       escape-string-regexp: 4.0.0
       resolve: 1.22.10
@@ -16213,7 +16219,7 @@ snapshots:
   '@eslint/config-array@0.23.5':
     dependencies:
       '@eslint/object-schema': 3.0.5
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       minimatch: 10.2.5
     transitivePeerDependencies:
       - supports-color
@@ -16296,11 +16302,7 @@ snapshots:
 
   '@floating-ui/core@1.6.8':
     dependencies:
-      '@floating-ui/utils': 0.2.9
-
-  '@floating-ui/core@1.6.9':
-    dependencies:
-      '@floating-ui/utils': 0.2.9
+      '@floating-ui/utils': 0.2.10
 
   '@floating-ui/core@1.7.3':
     dependencies:
@@ -16309,12 +16311,12 @@ snapshots:
   '@floating-ui/dom@1.6.12':
     dependencies:
       '@floating-ui/core': 1.6.8
-      '@floating-ui/utils': 0.2.9
+      '@floating-ui/utils': 0.2.10
 
   '@floating-ui/dom@1.6.13':
     dependencies:
-      '@floating-ui/core': 1.6.9
-      '@floating-ui/utils': 0.2.9
+      '@floating-ui/core': 1.7.3
+      '@floating-ui/utils': 0.2.10
 
   '@floating-ui/dom@1.7.4':
     dependencies:
@@ -16323,7 +16325,7 @@ snapshots:
 
   '@floating-ui/react-dom@2.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@floating-ui/dom': 1.6.13
+      '@floating-ui/dom': 1.7.4
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
@@ -16338,7 +16340,7 @@ snapshots:
   '@floating-ui/react@0.26.28(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@floating-ui/react-dom': 2.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@floating-ui/utils': 0.2.9
+      '@floating-ui/utils': 0.2.10
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       tabbable: 6.2.0
@@ -16346,14 +16348,12 @@ snapshots:
   '@floating-ui/react@0.27.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       '@floating-ui/react-dom': 2.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@floating-ui/utils': 0.2.9
+      '@floating-ui/utils': 0.2.10
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       tabbable: 6.2.0
 
   '@floating-ui/utils@0.2.10': {}
-
-  '@floating-ui/utils@0.2.9': {}
 
   '@formatjs/intl-localematcher@0.5.7':
     dependencies:
@@ -20955,7 +20955,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -22102,8 +22102,6 @@ snapshots:
 
   create-require@1.1.1: {}
 
-  crelt@1.0.5: {}
-
   crelt@1.0.6: {}
 
   cross-fetch@3.2.0(encoding@0.1.12):
@@ -22878,7 +22876,7 @@ snapshots:
 
   esbuild-register@3.6.0(esbuild@0.28.2):
     dependencies:
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       esbuild: 0.28.2
     transitivePeerDependencies:
       - supports-color
@@ -24253,14 +24251,14 @@ snapshots:
     dependencies:
       '@tootallnate/once': 2.0.1
       agent-base: 6.0.2
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -24276,7 +24274,7 @@ snapshots:
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.3
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -26572,7 +26570,7 @@ snapshots:
   micromark@4.0.0:
     dependencies:
       '@types/debug': 4.1.10
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.0
@@ -29300,8 +29298,6 @@ snapshots:
   structured-source@4.0.0:
     dependencies:
       boundary: 2.0.0
-
-  style-mod@4.1.0: {}
 
   style-mod@4.1.2: {}
 
