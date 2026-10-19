@@ -1,6 +1,6 @@
 "use client";
 
-import { ListView } from "@/relative-values/components/views/ListView";
+import { ListView } from "@quri/squiggle-relative-values";
 
 export default function ModelRelativeValuesPage() {
   return <ListView />;

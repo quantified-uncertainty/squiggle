@@ -1,14 +1,24 @@
 "use client";
 
-import { FC, PropsWithChildren, useEffect, useState } from "react";
+import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
 import { result } from "@quri/squiggle-lang";
+import {
+  ModelEvaluator,
+  RelativeValuesProvider,
+} from "@quri/squiggle-relative-values";
+import { getPlaygroundUrl } from "@quri/versioned-squiggle-components";
 
-import { RelativeValuesProvider } from "@/relative-values/components/views/RelativeValuesProvider";
+import { SQUIGGLE_PLAYGROUND } from "@/lib/constants";
+import { createRelativeValuesCacheFromDTO } from "@/relative-values/cache";
 import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
 import { RelativeValuesExportFullDTO } from "@/relative-values/data/fullExport";
-import { ModelEvaluator } from "@/relative-values/values/ModelEvaluator";
+import { relativeValuesHubLinker } from "@/relative-values/linker";
+
+function hubPlaygroundUrl(code: string) {
+  return getPlaygroundUrl({ code, baseUrl: SQUIGGLE_PLAYGROUND }).toString();
+}
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
@@ -22,16 +32,33 @@ export const RelativeValuesModelLayout: FC<
     result<ModelEvaluator, string> | undefined
   >();
 
+  const evaluatorCache = useMemo(
+    () => createRelativeValuesCacheFromDTO(cache),
+    [cache]
+  );
+
   useEffect(() => {
-    // ModelEvaluator.create is async because SqProject.run is async
-    ModelEvaluator.create(code, variableName, cache).then(setEvaluatorResult);
-  }, [code, variableName, cache]);
+    let cancelled = false;
+    // ModelEvaluator.create is async because Squiggle evaluation is async
+    ModelEvaluator.create(code, variableName, {
+      cache: evaluatorCache,
+      linker: relativeValuesHubLinker,
+    }).then((result) => {
+      if (!cancelled) {
+        setEvaluatorResult(result);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [code, variableName, evaluatorCache]);
 
   return evaluatorResult ? (
     evaluatorResult.ok ? (
       <RelativeValuesProvider
         definition={definitionRevision}
         evaluator={evaluatorResult.value}
+        getPlaygroundUrl={hubPlaygroundUrl}
       >
         {children}
       </RelativeValuesProvider>

@@ -1,11 +1,10 @@
 import { FC, Fragment } from "react";
 
+import { ClusterInfo } from "@quri/squiggle-relative-values";
 import { StyledTab, StyledTextArea } from "@quri/ui";
 
 import { H2 } from "@/components/ui/Headers";
 import { RelativeValuesDefinitionFullDTO } from "@/relative-values/data/full";
-
-import { ClusterInfo } from "./common/ClusterInfo";
 
 type Props = {
   revision: RelativeValuesDefinitionFullDTO["currentRevision"];
