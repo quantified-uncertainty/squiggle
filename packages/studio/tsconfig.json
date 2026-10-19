@@ -1,0 +1,8 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "dist/build.tsbuildinfo",
+    "types": ["node"],
+  },
+  "include": ["src/server/**/*", "src/shared/**/*", "src/cli/**/*"],
+}
