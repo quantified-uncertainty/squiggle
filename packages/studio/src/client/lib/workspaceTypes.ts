@@ -27,6 +27,7 @@ export type SaveState =
   | "saved"
   | "saving"
   | "dirty"
+  | "invalid" // dirty, and autosave waits: a .json buffer that doesn't parse
   | "conflict"
   | "deleted"
   | "blocked";

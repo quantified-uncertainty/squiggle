@@ -292,6 +292,15 @@ export function saveStatus(
         title: `Save${save}${othersTitle}`,
         tone: opts.autoSave === "off" ? "warning" : "normal",
       };
+    case "invalid":
+      // Autosave never writes JSON that doesn't parse (§2.5); say so, since
+      // an agent reading the file meanwhile sees the old content.
+      return {
+        state,
+        text: `${withKey("Not saved: invalid JSON", opts.saveKey)}${others}`,
+        title: `Autosave waits until the file is valid JSON. Save${save} writes it anyway${othersTitle}`,
+        tone: "warning",
+      };
     case "conflict":
       return {
         state,

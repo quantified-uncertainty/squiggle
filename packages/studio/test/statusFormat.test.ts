@@ -276,6 +276,18 @@ describe("save", () => {
     ]);
   });
 
+  test("invalid JSON says why autosave waits, and that ⌘S saves anyway", () => {
+    expect(pick(save("invalid"))).toEqual([
+      "invalid",
+      "Not saved: invalid JSON · ⌘S",
+      "warning",
+    ]);
+    expect(save("invalid").title).toContain("valid JSON");
+    expect(save("invalid", { otherDirty: 1 }).text).toBe(
+      "Not saved: invalid JSON · ⌘S · 1 unsaved"
+    );
+  });
+
   test("dirty shows the key only when autosave is off", () => {
     expect(save("dirty").text).toBe("Unsaved");
     expect(save("dirty", { autoSave: "onFocusChange" }).text).toBe("Unsaved");

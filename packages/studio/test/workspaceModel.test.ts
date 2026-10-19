@@ -542,7 +542,8 @@ describe.each(["hashed", "unhashed"] as const)(
       ws().setBuffer("d.json", '{"a": ');
       await flush(2000);
       expect(server.files.get("d.json")).toBe("{}");
-      expect(ws().saveState("d.json")).toBe("dirty");
+      // The save item says why autosave waits.
+      expect(ws().saveState("d.json")).toBe("invalid");
       await open("e.squiggle");
       ws().setBuffer("e.squiggle", "x = = 1");
       await flush(2000);

@@ -1296,7 +1296,16 @@ export class WorkspaceModel {
     if (!file) return "saved";
     if (file.conflict) return "conflict";
     if (file.deletedOnDisk) return "deleted";
-    return isDirty(file) ? "dirty" : "saved";
+    if (!isDirty(file)) return "saved";
+    // Autosave holds back a .json buffer that doesn't parse (§2.5).
+    if (
+      this.autosave.getMode() !== "off" &&
+      autosaveBlocker(file, { rootChanged: false, rootMissing: false }) ===
+        "invalid-json"
+    ) {
+      return "invalid";
+    }
+    return "dirty";
   };
 
   // ⌘S, Save All and the deleted banner's "Save to recreate". A file with a

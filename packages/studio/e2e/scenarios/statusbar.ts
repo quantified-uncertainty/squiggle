@@ -123,6 +123,29 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "statusbar/invalid-json",
+    title:
+      "A .json buffer that doesn't parse isn't autosaved, and the save item says why; ⌘S saves it anyway",
+    tags: ["statusbar", "sync"],
+    viewport,
+    state: { file: "text/data.json" },
+    steps: async (h) => {
+      await typeInTextFile(h, "{{broken");
+      await h.page.waitForSelector(item("save", "invalid"));
+      await h.whenIdle();
+      await frames(h);
+      await h.shot("invalid-json");
+    },
+    check: async (h) => {
+      const save = await statusItem(h, "save");
+      expect(save?.text).toBe("Not saved: invalid JSON · ⌘S");
+      expect(await h.readFile("text/data.json")).not.toContain("broken");
+      await h.key("Meta+S");
+      await h.page.waitForSelector(item("save", "saved"));
+      expect(await h.readFile("text/data.json")).toContain("{{broken");
+    },
+  },
+  {
     id: "statusbar/dirty-autosave-off",
     title:
       "With autosave off, a dirty file reads Unsaved · ⌘S, plus other unsaved files",
