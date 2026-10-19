@@ -220,20 +220,23 @@ fs.writeFileSync("bundle.json", stringifyRelativeValuesBundle(bundle));
 
 All dashboards (`RelativeValuesDashboard`, `RelativeValuesSpecDashboard`, `RelativeValuesBundleDashboard`) accept:
 
-| Prop                                     | Description                                                                                                                                                                                    |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tabs`                                   | Tabs to show, in order. Built-in ids (`"list"`, `"grid"`, `"plot"`) and custom tabs `{ id, label, icon?, render(context) }`. Defaults to `["list", "grid", "plot"]`.                           |
-| `tab`, `initialTab`, `onTabChange`       | Controlled or uncontrolled active tab (built-in or custom id); the default is the first tab.                                                                                                   |
-| `showTabs`, `header`                     | Hide the tab buttons; replace the title on the left of the header row.                                                                                                                         |
-| `onItemClick(item)`                      | Called when an item name is clicked (list rows, grid headers, list sidebar) or an item's dot is clicked in the plots. Without it, clicking a name in the list makes it the unit of comparison. |
-| `renderItemName(item)`                   | Custom rendering of item names, e.g. a link to the item's page in your app.                                                                                                                    |
-| `className`                              | Class of the outer (`.squiggle-rv`) element.                                                                                                                                                   |
-| `height`                                 | E.g. `640`, or `"100%"` to fill a parent with a definite height; the content scrolls inside. By default, the dashboard grows with its content.                                                 |
-| `clusterOverrides`                       | `{ [clusterId]: { name?, color? } }`, applied on top of the clusters from the spec or bundle. (In Squiggle, set them in the spec's `clusters`.)                                                |
-| `precompute`                             | See [Live mode](#live-mode); defaults to `true`.                                                                                                                                               |
-| `getPlaygroundUrl`, `linker`, `sourceId` | Live mode only: "Open in Playground" link and imports for the per-pair charts.                                                                                                                 |
+| Prop                                                                                     | Description                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tabs`                                                                                   | Tabs to show, in order. Built-in ids (`"list"`, `"grid"`, `"plot"`) and custom tabs `{ id, label, icon?, render(context) }`. Defaults to `["list", "grid", "plot"]`.                           |
+| `tab`, `initialTab`, `onTabChange`                                                       | Controlled or uncontrolled active tab (built-in or custom id); the default is the first tab.                                                                                                   |
+| `showTabs`, `header`                                                                     | Hide the tab buttons; replace the title on the left of the header row.                                                                                                                         |
+| `onItemClick(item)`                                                                      | Called when an item name is clicked (list rows, grid headers, list sidebar) or an item's dot is clicked in the plots. Without it, clicking a name in the list makes it the unit of comparison. |
+| `renderItemName(item)`                                                                   | Custom rendering of item names, e.g. a link to the item's page in your app.                                                                                                                    |
+| `className`                                                                              | Class of the outer (`.squiggle-rv`) element.                                                                                                                                                   |
+| `height`                                                                                 | E.g. `640`, or `"100%"` to fill a parent with a definite height; the content scrolls inside. By default, the dashboard grows with its content.                                                 |
+| `clusterOverrides`                                                                       | `{ [clusterId]: { name?, color? } }`, applied on top of the clusters from the spec or bundle. (In Squiggle, set them in the spec's `clusters`.)                                                |
+| `precompute`                                                                             | See [Live mode](#live-mode); defaults to `true`. `"visible"` computes what the views show, without the background pass.                                                                        |
+| `getPlaygroundUrl`, `linker`, `sourceId`                                                 | Live mode only: "Open in Playground" link and imports for the per-pair charts.                                                                                                                 |
+| `state`, `defaultState`, `onStateChange`, `locked`, `apiRef`                             | Control what is shown: view, unit, filters, search, sort, limit, grid columns and selection. See [Customizing in your app](#customizing-in-your-app).                                          |
+| `scope`, `sorts`                                                                         | Restrict the items (ids, clusters, a predicate); register custom sorts.                                                                                                                        |
+| `controls`, `components`, `labels`, `format`, `display`, `themeClassName`, `onPairClick` | Hide or replace built-in pieces, translate strings, format numbers, cell/plot/density options, theming.                                                                                        |
 
-A custom tab gets a `RelativeValuesTabContext`: `{ definition, evaluator, items, clusters }`, where `items` are filtered by the cluster filter and sorted by the sort settings (the grid's row settings; render `<ClusterFilter axis="rows" />` in your tab to let users change the filter), and `clusters` are keyed by id. All pairs are computed by the time a custom tab renders, so `evaluator.compare(id1, id2)` is cheap.
+A custom tab gets a `RelativeValuesTabContext`, the same controller as [`useRelativeValues()`](#s8-custom-views-from-headless-data): `definition`, `evaluator`, `clusters` (keyed by id), `items` (the items shown: scope, filters, search, sort and limit applied), `rows` (the items with their value in units of `unit`), `unit`, `state`, `actions`, `format`, `labels` and more. By default all pairs in scope are computed before a custom tab renders (`requires: "all"`), so `evaluator.compare(id1, id2)` is cheap; `requires: "unit"` only waits for each item's value in units of `unit`.
 
 ```tsx
 <RelativeValuesBundleDashboard
@@ -243,13 +246,8 @@ A custom tab gets a `RelativeValuesTabContext`: `{ definition, evaluator, items,
     {
       id: "ranking",
       label: "Ranking",
-      render: ({ items, evaluator, definition }) => (
-        <RankingTable
-          items={items}
-          evaluator={evaluator}
-          unit={definition.recommendedUnit}
-        />
-      ),
+      requires: "unit",
+      render: ({ rows, unit }) => <RankingTable rows={rows} unit={unit} />,
     },
     "grid",
   ]}
@@ -290,11 +288,11 @@ if (!evaluator.ok) throw new Error(evaluator.value);
 
 ### Server code
 
-The main entry point includes React components (marked with `"use client"`). For server code (React Server Components, server actions, Node scripts), import the non-React parts from `@quri/squiggle-relative-values/core`: types and schemas, `ModelEvaluator`, caches, bundles and spec parsing helpers.
+The main entry point includes React components (marked with `"use client"`). For server code (React Server Components, server actions, Node scripts), import the non-React parts from `@quri/squiggle-relative-values/core`: types and schemas, `ModelEvaluator`, caches, bundles, spec parsing helpers, and the [state, pipeline and URL helpers](#reference) (`selectRelativeValues`, `relativeValuesStateFromSearchParams`, ...).
 
 ### Lower-level components
 
-`RelativeValuesProvider` + `ListView` / `GridView` / `PlotView` let you render a single view, e.g. when tabs are controlled by your router. Wrap them in `<RelativeValuesRoot>` if you use `styles.css`, and use `useRelativeValuesComputation` to compute pairs without blocking (the dashboards do both). See `src/index.ts` for the full list of exports.
+`RelativeValuesSingleView` renders one view without a header or tab bar. `RelativeValuesProvider` + `ListView` / `GridView` / `PlotView`, the primitives and `useRelativeValues()` let you build your own layout; see [Customizing in your app](#customizing-in-your-app). Wrap the pieces in `<RelativeValuesRoot>` if you use `styles.css`. See `src/index.ts` for the full list of exports.
 
 ### Caches
 
@@ -311,14 +309,509 @@ Build keys with `makePairKey(id1, id2)` (and decode them with `parsePairKey`). T
 
 ### Example app
 
-[`examples/host-app`](./examples/host-app) is a Vite + React app that looks like a corporate portal, with its own fonts and global element styles. It embeds a live dashboard (`#/live`), a bundle dashboard with a custom tab and item links (`#/bundle`), and a 120-item model (`#/large`).
+[`examples/host-app`](./examples/host-app) is a Vite + React app that looks like a corporate portal, with its own fonts and global element styles. It embeds a live dashboard (`#/live`), a bundle dashboard with a custom tab and item links (`#/bundle`), a 120-item model (`#/large`), and one page per [customization scenario](#customizing-in-your-app) (`#/scenarios`, `#/s1` ... `#/s10`), each with its code.
 
 ```sh
 pnpm --filter @quri/relative-values-host-app-example dev          # dev server
 pnpm --filter @quri/relative-values-host-app-example bundle       # regenerate src/data/portfolio.bundle.json
 pnpm --filter @quri/relative-values-host-app-example build
-pnpm --filter @quri/relative-values-host-app-example screenshots  # headless Chrome screenshots + style isolation checks
+pnpm --filter @quri/relative-values-host-app-example screenshots  # screenshots + checks (screenshots/checks.json)
 ```
+
+## Customizing in your app
+
+A host app usually wants to change many settings: show one view instead of the tabs, restrict or limit the items, fix the unit, hide some controls, keep the settings in its URL, or draw its own views on the same data. Everything below works the same for bundles, specs and explicit evaluators. Each scenario has a page in the [example app](#example-app) (`#/s1` ... `#/s10`), with its code and screenshots.
+
+There are three kinds of input:
+
+| Kind             | What it is                                                                                                                                                   | Props                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| **State**        | _What_ is shown and selected: view, unit, filters, search, sort, limit, grid columns, grid mode, selection. Plain JSON (it can go in a URL or localStorage). | `state` (controlled keys), `defaultState`, `onStateChange`, `locked`, `apiRef`           |
+| **Scope, sorts** | The host's definition of the items (it may contain functions), and custom sorts.                                                                             | `scope`, `sorts`                                                                         |
+| **Presentation** | _How_ it looks: which controls exist, replacement components, strings, number format, cell and plot options, density, theme.                                 | `controls`, `components`, `labels`, `format`, `display`, `themeClassName`, `onPairClick` |
+
+Components, from the most packaged to the least:
+
+| Component                                                                                 | Use                                                                                                                                                                                                      |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RelativeValuesDashboard`, `RelativeValuesSpecDashboard`, `RelativeValuesBundleDashboard` | Header, tab bar and views.                                                                                                                                                                               |
+| `RelativeValuesSingleView`                                                                | One view (`"list"`, `"grid"`, `"plot"` or a custom view), with no header or tab bar. Standalone with a source (`bundle`, `spec`, or `definition` + `evaluator`); otherwise it uses the nearest provider. |
+| `RelativeValuesProvider` + views, primitives and `useRelativeValues()`                    | Your own layout: several views sharing one state, controls in your chrome, fully custom views. The provider renders no DOM.                                                                              |
+| `selectRelativeValues` and the state and URL helpers (from `/core`)                       | React-free: server components, Node, tests, exports.                                                                                                                                                     |
+
+Quick reference:
+
+| The host wants to…                     | Use                                                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| show one view, no chrome               | `<RelativeValuesSingleView bundle={b} view="grid" controls={false} />`                                             |
+| restrict to items, clusters, a test    | `scope={{ ids \| clusters \| exclude \| where }}`                                                                  |
+| a filter or search the user can change | `defaultState={{ clusters, search, ids }}` (or controlled `state`)                                                 |
+| the top N by value in units of X       | `state={{ unit: "x", sort: { mode: "median", desc: true }, limit: N }}`                                            |
+| fix a setting                          | `state={{ … }}` without `onStateChange`, or list the keys in `locked`                                              |
+| hide a control                         | `controls={{ list: { search: false } }}`                                                                           |
+| replace a control in place             | `components={{ TabBar \| Toolbar \| Progress \| Cell \| PairDetails \| Empty \| Error }}` (each gets `Default`)    |
+| move a control into your chrome        | hide it, then place `RelativeValuesSearchBox` etc. under the provider, or call `useRelativeValues().actions`       |
+| sync with the URL                      | `relativeValuesStateFromSearchParams` / `relativeValuesStateToSearchParams` with `state` and `onStateChange`       |
+| a custom view                          | a custom tab or single view (`render(ctx)` with `ctx.rows`), or `useRelativeValues({ requires })` under a provider |
+
+### S1: one view, no chrome
+
+```tsx
+<RelativeValuesSingleView bundle={bundle} view="grid" controls={false} />
+<RelativeValuesSingleView spec={spec} modelCode={code} view="list" /> // keeps its toolbar
+<RelativeValuesSingleView
+  bundle={bundle}
+  view={{
+    id: "ranking",
+    label: "Ranking",
+    requires: "unit", // only item × unit pairs
+    render: (ctx) => <Ranking rows={ctx.rows} unit={ctx.unit} />,
+  }}
+  state={{ unit: "sso", sort: { mode: "median", desc: true } }} // fixed
+/>
+<RelativeValuesBundleDashboard bundle={bundle} tabs={["plot"]} controls={{ header: false, tabs: false }} />
+```
+
+A single view never renders a header or a tab bar, and ignores `state.view`. `controls={false}` also removes the toolbars, unit pickers, the sidebar and the plot's cluster panel; item clicks (`onItemClick`) and cell clicks (`onPairClick`, selection) keep working.
+
+### S2: subsets and top N
+
+```tsx
+// A fixed universe: the user can't widen it; it bounds the views, menus and computation.
+<RelativeValuesBundleDashboard bundle={bundle} scope={{ ids: teamIds }} />
+<RelativeValuesBundleDashboard bundle={bundle} scope={{ clusters: ["platform", null], exclude: ["legacy"] }} />
+<RelativeValuesBundleDashboard bundle={bundle} scope={{ where: (item, cluster) => owners[item.id] === "Data team" }} />
+
+// Filters the user can change (initial values):
+<RelativeValuesBundleDashboard bundle={bundle} defaultState={{ clusters: ["research"], search: "audit" }} />
+
+// The top 10 by value in units of SSO, as one ranked table:
+<RelativeValuesSingleView bundle={bundle} view="list"
+  state={{ unit: "sso", sort: { mode: "median", desc: true }, limit: 10 }}
+  display={{ list: { groupByCluster: false } }} />
+
+// The 10 most valuable, which the user may re-sort (e.g. by name) without changing which 10:
+<RelativeValuesSingleView bundle={bundle} view="list"
+  state={{ unit: "sso", limit: 10, limitBy: { mode: "median", desc: true } }}
+  onStateChange={…} locked={["unit", "limit", "limitBy"]}
+  display={{ list: { groupByCluster: false } }} />
+```
+
+`scope.ids` sets the default order; `null` in `scope.clusters` stands for items without a cluster. `scope.where` runs on every render and needn't be memoized (its result is compared by ids); to toggle a predicate, pass a different `scope`. `state.ids` is an allowlist the user can't see; if none of its ids exist, nothing is shown (the `Empty` slot), not everything.
+
+### S3: fixed or controlled unit and sort
+
+```tsx
+// Fixed: controlled without onStateChange, so locked; the unit pickers and "Sort by" are hidden.
+<RelativeValuesBundleDashboard
+  bundle={bundle}
+  state={{ unit: "sso", sort: { mode: "name", desc: false } }}
+/>;
+
+// Controlled and user-changeable, with a host-registered sort:
+const [unit, setUnit] = useState<string | null>("sso");
+<RelativeValuesBundleDashboard
+  bundle={bundle}
+  state={{ unit }}
+  onStateChange={(next, change) =>
+    change.keys.includes("unit") && setUnit(next.unit)
+  }
+  sorts={{
+    revenue: {
+      label: "Revenue",
+      compare: (a, b) => revenue[a.item.id] - revenue[b.item.id],
+    },
+  }}
+  controls={{
+    sortMenu: { sortOptions: ["median", "uncertainty", "name", "revenue"] },
+  }}
+/>;
+```
+
+Sort modes: `default` (the default order: `state.ids`, else `scope.ids`, else the definition), `median` ("Value"), `uncertainty`, `similarity`, `name` (locale-aware, `format.locale`), `cluster`, and the ids of `sorts`. Ties keep the default order in both directions, and missing values (not computed yet, or errors) sort last in both directions. Custom sort ids can't start with `-`.
+
+In grouped lists (the default), the compass icons and the column-header dropdown pick the unit of one table (`clusterUnits`); in a flat list (`display.list.groupByCluster: false`) and in `RelativeValuesUnitPicker` they set the global `unit`.
+
+### S4: hide or replace controls
+
+```tsx
+<RelativeValuesBundleDashboard
+  bundle={bundle}
+  controls={{
+    header: false,
+    progress: false,
+    list: { settings: false, sidebar: false },
+    grid: { columnSettings: false, clusterDiagram: false, modeControls: false },
+    plot: { clusterFilter: false },
+    sortMenu: { sortOptions: ["default", "median", "name"] },
+  }}
+  components={{
+    TabBar: ({ tabs, active, onChange }) => <MySegmented value={active} onChange={onChange} options={tabs} />,
+    Toolbar: ({ children }) => <div className="row">{children}<ExportButton /></div>,
+    Progress: ({ variant, progress, Default }) => (variant === "compact" ? <Default variant={variant} progress={progress} /> : <MySpinner />),
+    PairDetails: ({ Default, ...props }) => <MyDrawer title={`${props.numerator.name} / ${props.denominator.name}`} onClose={props.close}><Default {...props} /></MyDrawer>,
+    Empty: ({ reason }) => <p>{reason === "scope" ? "Nothing here" : "No matches"}</p>,
+    Error: ({ error }) => <MyAlert>{error}</MyAlert>,
+  }}
+/>
+
+// …or move controls into your layout. Wrap each piece in RelativeValuesRoot, so that
+// your markup between them keeps your styles.
+<RelativeValuesProvider bundle={bundle} precompute>
+  <header className="my-toolbar">
+    <h2>Portfolio</h2>
+    <RelativeValuesRoot><RelativeValuesSearchBox placeholder="Search initiatives" /></RelativeValuesRoot>
+    <RelativeValuesRoot><RelativeValuesUnitPicker /></RelativeValuesRoot>
+    <RelativeValuesRoot><RelativeValuesSortMenu axis="rows" sections={["sort"]} /></RelativeValuesRoot>
+  </header>
+  <RelativeValuesSingleView view="list" controls={{ list: { toolbar: false, sidebar: false } }} />
+  <aside><RelativeValuesRoot><RelativeValuesPairDetails /></RelativeValuesRoot></aside>
+</RelativeValuesProvider>
+```
+
+`controls={false}` turns everything off, `true` (the default) everything on, and an object is merged over the defaults (a single view under a provider merges its `controls` over the provider's). Slots get the built-in implementation as `Default`; define slot components outside of render, so that they keep their identity.
+
+| Control                        | Hide with                                                           | Replace or place with                           |
+| ------------------------------ | ------------------------------------------------------------------- | ----------------------------------------------- |
+| title                          | `controls.header`, `header={null}`                                  | `header` (a node)                               |
+| tab bar                        | `controls.tabs` (alias `showTabs`)                                  | `TabBar` slot                                   |
+| Table / Row / Column Settings  | `controls.list.settings`, `grid.rowSettings`, `grid.columnSettings` | `RelativeValuesSortMenu`                        |
+| their sections and sort modes  | `controls.sortMenu.clusters`, `.sort`, `.sortOptions`               | `RelativeValuesSortMenu sections sortOptions`   |
+| cluster filter                 | `controls.sortMenu.clusters`, `controls.plot.clusterFilter`         | `ClusterFilter`                                 |
+| search box                     | `controls.list.search` (a "Search: x ×" chip stays visible)         | `RelativeValuesSearchBox`                       |
+| unit pickers (compass, header) | `controls.list.unitPicker`                                          | `RelativeValuesUnitPicker`                      |
+| list sidebar                   | `controls.list.sidebar`                                             | `PairDetails` slot, `RelativeValuesPairDetails` |
+| cluster diagram                | `controls.grid.clusterDiagram`                                      | `RelativeValuesClusterDiagram`                  |
+| grid mode icons                | `controls.grid.modeControls`                                        | `RelativeValuesGridModeControls`                |
+| toolbars                       | `controls.list.toolbar`, `controls.grid.toolbar`                    | `Toolbar` slot                                  |
+| progress                       | `controls.progress` (the compact one)                               | `Progress` slot, `RelativeValuesProgressBar`    |
+| value cells                    |                                                                     | `Cell` slot                                     |
+
+Not replaceable: the drawing inside the canvas plots, and the Squiggle charts in the live-mode sidebar.
+
+### S5: host state, URL, preferences, linking, imperative handle
+
+```tsx
+const URL_KEYS: RelativeValuesStateKey[] = ["view", "unit", "clusters", "search", "sort", "limit", "gridMode", "selectedPair"];
+
+function PortfolioRoute() {
+  const [params, setParams] = useSearchParams(); // any router
+  const state = useMemo(() => relativeValuesStateFromSearchParams(params, { keys: URL_KEYS }), [params]);
+  const api = useRef<RelativeValuesHandle>(null);
+  return (
+    <>
+      <button onClick={() => api.current?.setState({ view: "list", selectedPair: ["sso", "auditLog"] })}>Compare</button>
+      <RelativeValuesBundleDashboard
+        bundle={bundle}
+        apiRef={api}
+        state={state}
+        onStateChange={(next, change) =>
+          setParams(relativeValuesStateToSearchParams(next, { keys: URL_KEYS, base: params }), {
+            replace: change.reason === "search" || change.reason === "selection",
+          })
+        }
+        onItemClick={(item) => openInspector(item)}
+        onPairClick={({ numerator, denominator }) => track(numerator.id, denominator.id)}
+      />
+    </>
+  );
+}
+
+// Saved preferences: uncontrolled, with saved defaults.
+const saved = parseRelativeValuesState(JSON.parse(localStorage.getItem(key) ?? "null")).state;
+<RelativeValuesBundleDashboard bundle={bundle} defaultState={saved}
+  onStateChange={(next) => localStorage.setItem(key, JSON.stringify(pickRelativeValuesState(next, ["unit", "sort", "gridMode"])))} />
+
+// Linked dashboards share some keys through the host…
+const [link, setLink] = useState<RelativeValuesStateInput>({ unit: null, clusters: null, search: "" });
+const onLink = (next: RelativeValuesState<string>) => setLink({ unit: next.unit, clusters: next.clusters, search: next.search });
+<RelativeValuesSingleView bundle={bundle} view="list" state={link} onStateChange={onLink} />
+<RelativeValuesSingleView bundle={bundle} view="plot" state={link} onStateChange={onLink} />
+// …or share everything with one provider (S10).
+```
+
+`onStateChange(next, change)` gets the whole new state and `change`: `reason` (`"view"`, `"unit"`, `"filter"`, `"search"`, `"sort"`, `"limit"`, `"columns"`, `"gridMode"`, `"selection"`, `"set"`, `"reset"`), the `keys` that changed, `axis` (`"rows"` or `"columns"`, for axis changes), `source` (`"user"` for built-in UI, `"api"` for `actions`, `apiRef` and host code) and the `previous` state. It's called synchronously in the event handler, never while rendering. Custom tab ids are typed: with `tabs={["list", { id: "ranking", … }]}`, `next.view` is `"list" | "grid" | "plot" | "ranking"`; pass `views` to the URL helpers to validate them (`relativeValuesStateFromSearchParams(params, { views: ["list", "ranking"] as const })`).
+
+`apiRef` (a prop, not `ref`, so that it works with generic components and React 18): `getState()`, `setState(input | (state) => input)`, `reset(keys?)` (back to `defaultState`, then the defaults), `getData()` (what the views show, e.g. for an export), `scrollTo({ item } | { pair })` and `whenReady()` (resolves once the mounted views' pairs are computed; the root then has `data-rv-ready`).
+
+To keep two dashboards' state in one URL, give them different `prefix`es (default `"rv."`).
+
+### S6: grid
+
+```tsx
+// These four items as rows and columns, in this order; a half matrix; values only.
+<RelativeValuesSingleView bundle={bundle} view="grid"
+  scope={{ ids: ["sso", "auditLog", "partnerApi", "dbMigration"] }}
+  defaultState={{ columns: "rows", gridMode: "half" }}
+  display={{ grid: { cell: "value", heatmap: false, cellWidth: 110 } }} />
+
+// Rows: one cluster. Columns: the 5 most valuable items. Cluster bands.
+<RelativeValuesSingleView bundle={bundle} view="grid"
+  defaultState={{ clusters: ["research"], sort: { mode: "cluster" },
+                  columns: { sort: { mode: "median", desc: true }, limit: 5 } }}
+  display={{ grid: { cell: "full", groupByCluster: true } }} />
+
+// Explicit rows and columns:
+<RelativeValuesSingleView bundle={bundle} view="grid"
+  defaultState={{ ids: ["usageBilling", "partnerApi"], columns: { ids: ["sso", "ciSpeedup"] } }} />
+
+// The cluster-level matrix as the main view:
+<RelativeValuesProvider bundle={bundle}>
+  <RelativeValuesRoot><RelativeValuesClusterDiagram /></RelativeValuesRoot>
+</RelativeValuesProvider>
+```
+
+`columns: "rows"` mirrors the rows (Column Settings is then hidden, and half mode hides the diagonal and above, by display order); otherwise columns are an independent axis with their own `ids`, `clusters`, `sort` and `limit` (search doesn't apply to columns). Cell display: `"value"` (median), `"valueAndUncertainty"` (median ± uncertainty, the default) or `"full"` (with the 90% interval). Cell clicks set `selectedPair` (highlighting the cell) and call `onPairClick`.
+
+### S7: plot
+
+```tsx
+<RelativeValuesSingleView
+  bundle={bundle}
+  view="plot"
+  state={{ unit: "sso" }}
+  controls={{ plot: { clusterFilter: false } }}
+  display={{
+    plot: {
+      plots: ["valueUncertainty"],
+      height: 320,
+      titles: false,
+      valueUncertainty: { reference: "unit", xScale: "log", yScale: "linear" },
+    },
+  }}
+/>
+```
+
+`plots`: `"similarity"` and/or `"valueUncertainty"`. The value / uncertainty plot's `reference` is `"auto"` (the unit if set, else the recommended unit, else the average over all items in scope), `"unit"` or `"average"`. The dots follow scope, filters, search and limit; `selectedItem` rings a dot, and clicking a dot selects it (and calls `onItemClick`). New kinds of plots are custom views (S8).
+
+### S8: custom views from headless data
+
+```tsx
+const TopInitiatives: FC<{ count: number }> = ({ count }) => {
+  const rv = useRelativeValues({
+    requires: "unit",
+    overrides: { sort: { mode: "median", desc: true }, limit: count }, // this consumer only
+  });
+  if (rv.status === "loading") return <Spinner />;
+  if (rv.status === "error") return <Alert>{rv.error}</Alert>;
+  return (
+    <ol aria-busy={rv.status === "computing"}>
+      {rv.rows.map(({ item, value }) => (
+        <li key={item.id} onClick={() => rv.actions.selectItem(item.id)}>
+          {item.name}: {value ? rv.format.value(value) : "…"} × {rv.unit?.name}
+        </li>
+      ))}
+    </ol>
+  );
+};
+
+<RelativeValuesProvider bundle={bundle} defaultState={{ unit: "sso" }}>
+  <TopInitiatives count={5} />
+</RelativeValuesProvider>
+
+<RelativeValuesProvider spec={spec} modelCode={code} precompute>
+  <TopInitiatives count={5} />
+  <RelativeValuesRoot><RelativeValuesProgressBar variant="compact" /></RelativeValuesRoot>
+</RelativeValuesProvider>
+
+// Server (RSC or Node), bundle mode, from "/core":
+const parsed = parseRelativeValuesBundle(json);
+if (!parsed.ok) throw new Error(parsed.value);
+const { rows } = selectRelativeValues({
+  definition: parsed.value.definition,
+  evaluator: ModelEvaluator.fromBundle(parsed.value),
+  state: { unit: "sso", sort: { mode: "median", desc: true }, limit: 10 },
+  compute: "cached",
+});
+```
+
+The controller (`useRelativeValues()`, and the context of custom tabs and views) has: `status` (`"loading"` while a spec's evaluator is created, `"computing"` until this consumer's pairs are computed, `"ready"`, or `"error"` with `error`), `items`, `rows` (`{ item, cluster, rank, unit, result, value }`, the value in units of `unit`; `value` is undefined until computed), `filtered` (the items before `limit`), `universe` (the items in scope), `columns`, `unit`, `recommendedUnit`, `tableUnit(clusterId)`, `clusters`, `state`, `actions` (`setView`, `setUnit`, `setSearch`, `setClusters`, `toggleCluster`, `setSort`, `setLimit`, `setGridMode`, `selectItem`, `selectPair`, `setState`, `reset`), `definition`, `evaluator`, `compare(id1, id2)` (cache only while precomputing, so it never blocks), `format` (`number`, `value`, `uncertainty`, `range`), `labels`, `progress`, `isStale` and `warnings`.
+
+`requires` says which pairs must be computed before `status` is `"ready"`: `"none"`, `"unit"` (each item × the unit; the default), `"items"` (all pairs of the shown items), `"all"` (all pairs in scope; the default for custom tabs) or a function `(data) => pairs`. A top 10 over 1,000 items with `"unit"` needs about 1,000 pairs, not a million. `overrides` apply to this consumer only and are never written back: that's how a "top 5" widget sits next to the full list on one provider.
+
+### S9: labels, numbers, density, theme
+
+```tsx
+const fr = new Intl.NumberFormat("fr-FR", { maximumSignificantDigits: 2 });
+<RelativeValuesBundleDashboard
+  bundle={bundle}
+  themeClassName="acme-rv"
+  labels={{
+    "tab.list": "Liste",
+    "list.searchPlaceholder": "Filtrer…",
+    "list.valueInTermsOf": "Valeur estimée, en",
+    "cell.rangeSeparator": "à",
+    "sidebar.summary": (a, b) => (
+      <>
+        Valeur de {a} en {b}
+      </>
+    ),
+    "search.chip": (query) => `Recherche : ${query}`,
+  }}
+  format={{
+    locale: "fr-FR",
+    uncertainty: "factor", // "×/÷ 2.5" instead of "± 0.4 om"
+    precision: { value: 2 },
+    formatNumber: (n, { kind }) =>
+      kind === "median" ? fr.format(n) : undefined, // undefined: built-in
+  }}
+  display={{
+    density: "compact",
+    list: { itemIds: false },
+    grid: { cellWidth: 112 },
+  }}
+/>;
+```
+
+```css
+/* Your CSS: themeClassName also goes on the dropdown and tooltip portals. */
+.acme-rv {
+  --squiggle-rv-font-family: "Acme Sans", sans-serif;
+  --squiggle-rv-accent: #0b3d91;
+  --squiggle-rv-border: #d8dee9;
+  --squiggle-rv-header-bg: #f5f7fb;
+}
+.acme-rv [data-rv-part="tab-bar"] {
+  margin-inline-start: auto;
+}
+```
+
+- `labels`: every built-in string, by key; see `defaultRelativeValuesLabels` for the keys and the English defaults.
+- `format`: `locale` (name sort, progress counts), `precision` (significant digits of `value`, `uncertainty`, `range` and `summary`: 1 / 2 / 1 / 2), `uncertainty` (`"om"`, `"factor"` or `"hidden"`), and `formatNumber(value, { kind, place, precision })` returning a string or undefined.
+- `display`: `density` (`"comfortable"` or `"compact"`, which also adds `squiggle-rv-compact` to the root and portals); `list` (`groupByCluster`, `cell`, `descriptions`, `itemIds`, `clusterTags`, `sidebarPosition: "side" | "below"`); `grid` (`cell`, `heatmap`, `cellWidth`, `groupByCluster`); `plot` (`plots`, `height`, `titles`, `valueUncertainty`).
+- CSS variables, set on any ancestor, or with `themeClassName` to reach portals too (custom properties aren't reset by the wrapper's `all: initial`): `--squiggle-rv-font-family`, `--squiggle-rv-font-size`, `--squiggle-rv-text`, `--squiggle-rv-muted`, `--squiggle-rv-bg`, `--squiggle-rv-border`, `--squiggle-rv-header-bg`, `--squiggle-rv-accent` (selected tab, selected cell and dot, progress), `--squiggle-rv-selected-bg`, `--squiggle-rv-radius`, `--squiggle-rv-cell-padding`, `--squiggle-rv-grid-cell-width` and `--squiggle-rv-sidebar-width`. Each falls back to the default look.
+- Stable hooks for your CSS and tests: `data-rv-part` (`header`, `tab-bar`, `toolbar`, `list`, `list-table`, `list-row`, `list-unit`, `grid`, `grid-cell`, `grid-band`, `plot`, `sidebar`, `progress`, `search`, `search-chip`, `empty`, `custom`, `cluster-filter`, `cluster-diagram`, `sort-menu`, `unit-picker`, `grid-mode`), `data-rv-item` (list rows), `data-rv-row` / `data-rv-column` (grid cells), `data-rv-count` (items shown by a view), `data-rv-ready` and `data-rv-computing`. The library's classes are scoped as `.squiggle-rv .x`, so your rules need a class and a part: `.acme-rv [data-rv-part="tab-bar"]`. Internal class names are not API.
+
+Not covered: plurals, right-to-left layouts, number formatting in the live sidebar's Squiggle charts, and dark canvas axes.
+
+### S10: several dashboards on a page; server rendering
+
+```tsx
+// The same bundle object: one parse, one cache.
+<RelativeValuesSingleView bundle={bundle} view="list" scope={{ clusters: ["platform"] }} />
+<RelativeValuesSingleView bundle={bundle} view="grid" scope={{ clusters: ["platform"] }} />
+
+// One live evaluator, two dashboards: each pair is computed once.
+<RelativeValuesDashboard definition={definition} evaluator={evaluator} />
+<RelativeValuesDashboard definition={definition} evaluator={evaluator} tabs={["grid"]} />
+
+// One provider, two views, one state:
+<RelativeValuesProvider definition={definition} evaluator={evaluator} precompute>
+  <RelativeValuesRoot><RelativeValuesSearchBox /></RelativeValuesRoot>
+  <RelativeValuesSingleView view="list" />
+  <RelativeValuesSingleView view="plot" />
+</RelativeValuesProvider>
+```
+
+Bundles are memoized per object (`loadRelativeValuesBundle`), and specs per (spec, cache, modelCode, environment). Several providers on one evaluator never compute a pair twice: the cache is checked before each pair.
+
+Server rendering: nothing touches `window` or `document` at import or while rendering (the plots' simulation starts in an effect). Bundle mode renders the full markup on the server; live mode renders the fallback. State is plain JSON, so it crosses the server/client boundary: in Next.js, parse `searchParams` in the server component with `relativeValuesStateFromSearchParams(await searchParams)` (it accepts the record form) and pass the state and the bundle to a `"use client"` wrapper. `scope.where`, `sorts`, `components`, label functions and callbacks need the client wrapper.
+
+### Reference
+
+#### State
+
+| Key            | Default                                                                              | Meaning                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `view`         | the first tab (`"list"` for a provider)                                              | active tab                                                                                         |
+| `unit`         | `null`                                                                               | global unit; `null`: recommended (each list table uses its cluster's recommended unit)             |
+| `clusterUnits` | `{}`                                                                                 | per-table units of grouped lists, by cluster id (`UNCLUSTERED`, `""`, for items without a cluster) |
+| `ids`          | `null`                                                                               | allowlist of the shown items; its order is the default order                                       |
+| `clusters`     | `null`                                                                               | selected clusters (`null`: all; `[]`: none, so only items without a cluster)                       |
+| `search`       | `""`                                                                                 | case-insensitive substring of name, id, description, cluster id or cluster name                    |
+| `sort`         | `{ mode: "default", desc: false }`                                                   | display order                                                                                      |
+| `limit`        | `null`                                                                               | keep the first N after ranking                                                                     |
+| `limitBy`      | `null`                                                                               | the ranking that picks the `limit` items (`null`: `sort`)                                          |
+| `columns`      | `{ ids: null, clusters: null, sort: { mode: "default", desc: false }, limit: null }` | the grid's columns: an independent axis, or `"rows"` to mirror the rows                            |
+| `gridMode`     | `"full"`                                                                             | `"half"` hides the upper triangle                                                                  |
+| `selectedItem` | `null`                                                                               | highlighted item                                                                                   |
+| `selectedPair` | `null`                                                                               | `[numerator, denominator]`: the list sidebar / `RelativeValuesPairDetails`                         |
+
+Inputs are partial (`RelativeValuesStateInput`): a given key controls its whole value, and missing fields of an object value (`sort`, `limitBy`, `columns`) come from the defaults. `resolveRelativeValuesState`, `normalizeRelativeValuesState`, `pickRelativeValuesState` and `parseRelativeValuesState` (lenient: invalid fields are dropped with a warning) work with state outside of React.
+
+#### The pipeline
+
+`selectRelativeValues` is the one implementation behind every view, custom tab, `useRelativeValues`, `apiRef.getData()` and server code, so "the top 10 in units of SSO" means the same everywhere:
+
+1. **Universe**: the definition's items, then `scope.ids` (and their order), `scope.clusters`, `scope.exclude`, `scope.where`.
+2. **Filter**: `ids` (and their order: the default order), `clusters` (items without a cluster always pass; use `scope` to remove them), `search`.
+3. **Ranking unit**: `unit`, else the definition's recommended unit, else the first item in scope. It may be outside the scope.
+4. **Rank** by `limitBy ?? sort`, measured as item / unit, then **limit**, then **sort** the picked items by `sort`.
+5. **Columns** (grid): the rows when `columns === "rows"`; otherwise the universe filtered by `columns.ids` and `columns.clusters`, ranked by `columns.sort` and limited by `columns.limit`.
+
+The pick is the same everywhere; views order the picked items with their own rules: grouped lists split them into cluster tables and measure value sorts against each table's unit (`clusterUnits[cluster]`, else `unit`, else the cluster's recommended unit, else the definition's, else the first item); the grid's value sorts average over the other axis ("Average value"). For rankings, use a flat list (`display.list.groupByCluster: false`).
+
+#### Controlled, uncontrolled and locked state
+
+- Each key of `state` that isn't undefined is controlled; the others are uncontrolled, starting from `defaultState` (read on mount, like React's `defaultValue`; change the component's `key` to start over).
+- Built-in UI and `actions` produce a new state; the uncontrolled keys update at once, and `onStateChange` is called. A controlled key doesn't change until you pass a new `state`: not updating it is how you reject a change.
+- When you stop controlling a key, the dashboard keeps its last controlled value.
+- Controlled values are compared by value, so a new object literal on every render is free.
+- **Locked** keys (listed in `locked`, or controlled without a change handler: `onStateChange`, or `onTabChange` for `view`) ignore the built-in UI ("user" changes) and hide its controls; `actions` and `apiRef` ("api" changes) still apply. Hiding a control with `controls` doesn't lock its key.
+
+| Locked key             | Hidden                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `view`                 | the tab bar                                                                              |
+| `unit`, `clusterUnits` | unit dropdowns, compass icons, name clicks that set the unit, `RelativeValuesUnitPicker` |
+| `clusters`             | "Clusters" sections, the plot's cluster panel, the cluster diagram                       |
+| `search`               | the search box and the search chip                                                       |
+| `sort`                 | the rows' "Sort by" section                                                              |
+| `columns`              | Column Settings, the cluster diagram                                                     |
+| `gridMode`             | the grid mode icons                                                                      |
+| `selectedPair`         | cell clicks no longer select (`onPairClick` still fires)                                 |
+| `selectedItem`         | plot dot clicks no longer select (`onItemClick` still fires)                             |
+
+#### Unknown or stale ids
+
+State is normalized whenever it's read (after a live reload, from a stale URL or old saved state); the stored values keep their raw ids, so an item that disappears and comes back gets its settings back. Each fix adds a message to `warnings` (and a development-mode `console.warn`, once per message): unknown views become the first tab; an unknown `unit` becomes `null`; `clusterUnits` entries with unknown clusters or items are ignored; unknown or out-of-scope `ids` are dropped (none left: nothing is shown); unknown `clusters` are dropped, and selecting every cluster in scope becomes `null`; unknown sort modes become `"default"`; a `limit` that isn't a positive integer becomes `null`; selections with unknown ids become `null`.
+
+#### Computation
+
+| Consumer                                   | Pairs                                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| ranking (value or custom sorts, `limitBy`) | the filtered items × the ranking unit (similarity: all their pairs), first |
+| list                                       | each table's items × its unit, and all pairs within the table              |
+| grid                                       | rows × columns, and all pairs of the rows                                  |
+| plot                                       | all pairs of the shown items, and each item × the reference                |
+| cluster diagram                            | all pairs in scope                                                         |
+| custom tab or view                         | `requires` (default `"all"`)                                               |
+| `useRelativeValues`                        | `requires` (default `"unit"`)                                              |
+
+`precompute`: `true` (dashboards, standalone single views, and providers with a `bundle` or `spec`) computes what the mounted views need without blocking, then all pairs in scope in the background; `"visible"` skips the background pass; `false` (a provider with `definition` + `evaluator`) computes synchronously while rendering. While a new evaluator computes (e.g. after a live reload), the views keep showing the previous one (`isStale`).
+
+#### URL format
+
+Prefix `rv.` by default. Defaults are omitted, arrays are repeated params (so ids may contain any character), and other params are kept.
+
+| Key                | Params                                                          | Example                          |
+| ------------------ | --------------------------------------------------------------- | -------------------------------- |
+| `view`             | `rv.view`                                                       | `rv.view=grid`                   |
+| `unit`             | `rv.unit`                                                       | `rv.unit=sso`                    |
+| `clusterUnits`     | `rv.cu.<clusterId>` (`rv.cu.` for items without a cluster)      | `rv.cu.platform=dbMigration`     |
+| `ids`              | `rv.ids`, repeated                                              | `rv.ids=sso&rv.ids=auditLog`     |
+| `clusters`         | `rv.cl`, repeated; one empty value is `[]`                      | `rv.cl=platform&rv.cl=research`  |
+| `search`           | `rv.q`                                                          | `rv.q=audit`                     |
+| `sort`             | `rv.sort`; a leading `-` is descending                          | `rv.sort=-median`                |
+| `limit`, `limitBy` | `rv.limit`, `rv.limitby`                                        | `rv.limit=10&rv.limitby=-median` |
+| `columns`          | `rv.cols=rows`, or `rv.cids`, `rv.ccl`, `rv.csort`, `rv.climit` | `rv.cols=rows`                   |
+| `gridMode`         | `rv.grid`                                                       | `rv.grid=half`                   |
+| `selectedItem`     | `rv.sel`                                                        | `rv.sel=sso`                     |
+| `selectedPair`     | `rv.pair`, twice                                                | `rv.pair=sso&rv.pair=auditLog`   |
+
+`relativeValuesStateFromSearchParams` returns every key in `keys` (default: all); an absent param gives the default, so URL-managed keys are always controlled and Back/Forward resets them. Invalid values become the default.
+
+#### Changes in behavior
+
+Compared with earlier versions of this package (no code changes are needed in Studio or Hub):
+
+1. The list's search, per-table units and sidebar pair persist across tab switches. Search filters every view's primary axis; views without a search box show a "Search: x ×" chip.
+2. The provider no longer resets filters, sort and grid mode when the set of clusters changes.
+3. Custom tab `items` also reflect scope, search and limit; value sorts there are measured against the ranking unit.
+4. The plot's y axis says "orders of magnitude" instead of "decibels".
+5. Under `desc`, ties keep the default order, and missing values sort last.
+6. Grid cell clicks highlight the cell (`selectedPair`); the list sidebar then shows that pair.
+7. Empty results show the `Empty` slot instead of nothing.
+8. The sort menus also offer "Name" and "Cluster", and the registered `sorts`.
 
 ## Development
 
