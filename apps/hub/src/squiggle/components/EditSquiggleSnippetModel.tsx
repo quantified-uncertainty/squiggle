@@ -46,6 +46,7 @@ import { modelRoute, variableRoute } from "@/lib/routes";
 import { updateSquiggleSnippetModelAction } from "@/models/actions/updateSquiggleSnippetModelAction";
 import { ModelFullDTO } from "@/models/data/full";
 import { ImportTooltip } from "@/squiggle/components/ImportTooltip";
+import { hubLinkerOptions } from "@/squiggle/hubLinkerOptions";
 
 import { SaveButton, SaveButtonHandle } from "./SaveButton";
 import {
@@ -246,7 +247,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       owner: model.owner.slug,
       slug: model.slug,
     }),
-    linker: getHubLinker(squiggle),
+    linker: getHubLinker(squiggle, hubLinkerOptions()),
     height: height ?? "100vh",
     onCodeChange,
     renderExtraControls: () => (

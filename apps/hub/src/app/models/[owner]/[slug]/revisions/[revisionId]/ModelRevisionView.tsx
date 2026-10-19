@@ -7,6 +7,7 @@ import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
+import { hubLinkerOptions } from "@/squiggle/hubLinkerOptions";
 
 import { ModelRevisionFullDTO } from "@/models/data/fullRevision";
 
@@ -22,7 +23,7 @@ export const ModelRevisionView: FC<{
   return (
     <squiggle.components.SquigglePlayground
       defaultCode={revision.squiggleSnippet.code}
-      linker={getHubLinker(squiggle)}
+      linker={getHubLinker(squiggle, hubLinkerOptions())}
     />
   );
 };

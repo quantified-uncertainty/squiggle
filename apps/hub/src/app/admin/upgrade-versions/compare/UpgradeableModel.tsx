@@ -8,6 +8,7 @@ import {
   versionedSquigglePackages,
   versionSupportsSquiggleChart,
 } from "@quri/versioned-squiggle-components";
+import { hubLinkerOptions } from "@/squiggle/hubLinkerOptions";
 
 import { ModelFullDTO } from "@/models/data/full";
 import { EditSquiggleSnippetModel } from "@/squiggle/components/EditSquiggleSnippetModel";
@@ -27,8 +28,11 @@ export const UpgradeableModel: FC<{
   const squiggle = use(versionedSquigglePackages(version));
   const updatedSquiggle = use(versionedSquigglePackages(updatedVersion));
 
-  const project = sqProjectWithHubLinker(squiggle);
-  const updatedProject = sqProjectWithHubLinker(updatedSquiggle);
+  const project = sqProjectWithHubLinker(squiggle, hubLinkerOptions());
+  const updatedProject = sqProjectWithHubLinker(
+    updatedSquiggle,
+    hubLinkerOptions()
+  );
 
   // TODO - compare outputs with compareVersions
 
