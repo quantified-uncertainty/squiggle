@@ -111,12 +111,19 @@ export function installNavigation(): void {
     idx = state.idx;
     currentIsArrow = state.arrow === true;
     current = viewStateOf(state);
+    // A reload or a back/forward to this entry: the forward entries Studio
+    // pushed are still there.
+    maxIdx = Math.max(idx, readMaxIdx());
   } else {
+    // A fresh navigation to this document (a link, a pasted URL): it starts
+    // a new entry, which drops every forward entry, so the max index stored
+    // by the previous document in this tab no longer applies.
     idx = 0;
     currentIsArrow = false;
     current = viewStateFromSearch(window.location.search);
+    maxIdx = 0;
+    writeMaxIdx();
   }
-  maxIdx = Math.max(idx, readMaxIdx());
   historyFlags = { canGoBack: idx > 0, canGoForward: idx < maxIdx };
   window.addEventListener("popstate", onPopState);
 }

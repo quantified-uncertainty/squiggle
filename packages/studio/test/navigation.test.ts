@@ -179,4 +179,42 @@ describe("navigation history (§2.4)", () => {
     expect(getViewState().file).toBe("b.squiggle");
     expect(getHistoryFlags().canGoBack).toBe(true);
   });
+
+  // The tab's session storage outlives the document; history.state doesn't.
+  function newDocument(state: unknown, url: string) {
+    const stored = window.sessionStorage.getItem("squiggle-studio:history-max");
+    resetNavigationForTests();
+    if (stored !== null) {
+      window.sessionStorage.setItem("squiggle-studio:history-max", stored);
+    }
+    window.history.replaceState(state, "", url);
+    installNavigation();
+  }
+
+  test("a reload after Back keeps Forward", async () => {
+    recordNavigation({ file: "a.squiggle" }, "tree");
+    recordNavigation({ file: "b.squiggle" }, "tree");
+    recordNavigation({ file: "c.squiggle" }, "tree");
+    await back();
+    newDocument(window.history.state, window.location.href);
+    expect(getViewState().file).toBe("b.squiggle");
+    expect(getHistoryFlags()).toEqual({ canGoBack: true, canGoForward: true });
+  });
+
+  test("a Studio link loaded in the same tab has no Forward", () => {
+    recordNavigation({ file: "a.squiggle" }, "tree");
+    recordNavigation({ file: "b.squiggle" }, "tree");
+    recordNavigation({ file: "c.squiggle" }, "tree");
+    // A pasted Copy Link URL: a new document entry without Studio's state.
+    newDocument(null, "/?file=a.squiggle");
+    expect(getViewState().file).toBe("a.squiggle");
+    expect(getHistoryFlags()).toEqual({
+      canGoBack: false,
+      canGoForward: false,
+    });
+    // …and a later reload of it doesn't bring the stale Forward back.
+    recordNavigation({ file: "a.squiggle", view: "output" }, "url");
+    newDocument(window.history.state, window.location.href);
+    expect(getHistoryFlags().canGoForward).toBe(false);
+  });
 });
