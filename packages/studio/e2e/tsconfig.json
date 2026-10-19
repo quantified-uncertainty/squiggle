@@ -1,0 +1,14 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "rootDir": "..",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "target": "es2022",
+    "types": ["node"],
+    "tsBuildInfoFile": "../dist/e2e.tsbuildinfo",
+  },
+  "include": ["./**/*.ts", "../vitest.e2e.config.ts"],
+}
