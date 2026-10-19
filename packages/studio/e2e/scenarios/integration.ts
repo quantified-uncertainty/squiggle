@@ -79,6 +79,12 @@ export const scenarios: Scenario[] = [
       expect(await notice?.evaluate((el) => el.textContent)).toContain(
         "Simulated tree failure"
       );
+      // The start page doesn't call the folder empty.
+      expect(
+        await h.page.$eval(byId(TID.startPage), (el) =>
+          el.getAttribute("data-empty")
+        )
+      ).toBeNull();
       await frames(h);
       await h.shot("tree-error");
       failing = false;

@@ -87,10 +87,10 @@ const Toast: FC<{ toast: ToastShape }> = ({ toast }) => {
       onClick={remove}
     >
       {toast.type === "error" && (
-        <ErrorIcon size={16} className="text-red-400" />
+        <ErrorIcon size={16} className="shrink-0 text-red-400" />
       )}
       {toast.type === "confirmation" && (
-        <CheckCircleIcon size={16} className="text-green-600" />
+        <CheckCircleIcon size={16} className="shrink-0 text-green-600" />
       )}
       <div>{toast.text}</div>
     </motion.div>

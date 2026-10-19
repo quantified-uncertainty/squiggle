@@ -71,9 +71,11 @@ const Hint: FC<{ command: string; children: ReactNode }> = ({
 // empty folder says so and makes New File the primary action (#60).
 export const StartPage: FC = () => {
   const workspace = useWorkspaceContext();
-  const { rootInfo, mru, tree, treeLoaded, files, externalChanges } = workspace;
+  const { rootInfo, mru, tree, treeLoaded, treeError, files, externalChanges } =
+    workspace;
   const fileCount = useMemo(() => treeFilePaths(tree).length, [tree]);
-  const empty = treeLoaded && fileCount === 0;
+  // A folder that failed to load isn't empty (the Explorer names the error).
+  const empty = treeLoaded && treeError === undefined && fileCount === 0;
   const recent = mru.slice(0, 8);
   const allowOpenFolder = rootInfo?.allowOpenFolder ?? false;
 
