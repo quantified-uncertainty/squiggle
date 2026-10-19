@@ -782,10 +782,28 @@ export class WorkspaceModel {
       }
       if (gen !== this.generation) return;
       await this.checkHashes(gen);
+      if (gen !== this.generation) return;
+      this.retryAutosaves();
     } finally {
       reportBusy("resync", false);
       this.set({ resyncing: false });
     }
+  }
+
+  // After a resync (the server is reachable again): autosaves that failed
+  // meanwhile (the server was down) are retried, so the disk catches up
+  // without another edit. The resync ran first, so a file the agent changed
+  // meanwhile is a conflict by now and isn't written (§2.5, §2.6).
+  private retryAutosaves() {
+    const waiting = Object.values(this.state.files)
+      .filter(
+        (f) =>
+          isDirty(f) &&
+          !this.autosave.isPending(f.path) &&
+          !this.state.saving.has(f.path)
+      )
+      .map((f) => f.path);
+    if (waiting.length) this.autosave.flush(waiting);
   }
 
   // Compares the hash of every buffer (and every file they import) with the
@@ -1447,8 +1465,13 @@ export class WorkspaceModel {
         if (!opts.explicit) return;
       }
       if (opts.explicit) throw e;
-      // Autosave failures: one toast per file and message.
-      const message = `Couldn't save ${path}: ${errorMessage(e)}`;
+      // Autosave failures: one toast per file and message. A network failure
+      // (the server is down or restarting) is retried after the reconnect.
+      // (fetch rejects with a TypeError when the request can't be sent.)
+      const message =
+        e instanceof TypeError
+          ? `Couldn't save ${path}: the Studio server isn't reachable. Studio saves it when the connection is back.`
+          : `Couldn't save ${path}: ${errorMessage(e)}`;
       if (this.autosaveErrors.get(path) !== message) {
         this.autosaveErrors.set(path, message);
         this.onError(message);

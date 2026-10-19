@@ -494,6 +494,50 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "sync/server-restart-autosave",
+    title:
+      "An autosave that fails while the server is down is written once the server is back, without another edit",
+    tags: ["sync"],
+    fixtures: FIXTURES,
+    viewport,
+    state: { file: "restart.squiggle" },
+    steps: async (h) => {
+      await h.stopServer();
+      await waitFor(h, (w) => w.connection === "reconnecting", "Reconnecting");
+      await typeAtEnd(h, "\nduring = 1");
+      // The autosave runs about a second later and can't reach the server.
+      const toast = await h.page.waitForSelector(
+        `${byId(TID.toast)}[data-toast-type='error']`,
+        { timeout: 8_000 }
+      );
+      expect(await toast?.evaluate((el) => el.textContent)).toContain(
+        "isn't reachable"
+      );
+      await h.startServer();
+      await waitFor(h, (w) => w.connection === "live", "the reconnect");
+      const start = Date.now();
+      while (
+        !(await h.readFile("restart.squiggle")).includes("during = 1") &&
+        Date.now() - start < 8_000
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      await h.whenIdle();
+    },
+    check: async (h) => {
+      expect(await h.readFile("restart.squiggle")).toContain("during = 1");
+      const w = await workspace(h);
+      const file = w.files["restart.squiggle"];
+      expect(file?.buffer).toBe(file?.disk);
+      const save = await h.byTestId(TID.statusbarItem, {
+        "status-item": "save",
+      });
+      expect(await save.evaluate((el) => el.getAttribute("data-state"))).toBe(
+        "saved"
+      );
+    },
+  },
+  {
     id: "sync/follow-while-typing",
     title:
       "With Follow on, an agent edit elsewhere never switches files while the user types (#11)",
