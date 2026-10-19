@@ -4,16 +4,28 @@
 // Usage: pnpm build && pnpm screenshots
 //
 // - Screenshots of the production build (`vite preview`).
+// - The host-control scenario pages (#/s1 ... #/s10, see scenarios.mjs): one
+//   screenshot per example (`s<n>-<variant>.png`) and checks of what each
+//   example claims.
 // - Style isolation checks against the dev server, where each CSS file is a
 //   separate <style> element that can be removed: the computed styles of the
 //   host page are compared with and without the dashboard stylesheet, and the
-//   dashboard's computed styles with and without the host stylesheet.
+//   dashboard's computed styles with and without the host stylesheet, on the
+//   live page and on every scenario page.
+//
+// Results are written to screenshots/checks.json.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import puppeteer from "puppeteer-core";
 import { createServer, preview } from "vite";
+
+import {
+  runScenarios,
+  scenarioIds,
+  waitForScenarioPage,
+} from "./scenarios.mjs";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const outDir = path.join(root, "screenshots");
@@ -142,7 +154,12 @@ try {
   await cells[5].click();
   await page.waitForSelector(".squiggle-rv canvas", { timeout: 30_000 });
   await sleep(1500);
-  await shot(page, "live-sidebar.png", { fullPage: true });
+  // Captured at the full page size: beyond the viewport, Chrome paints the
+  // sticky sidebar's charts from a stale raster (its loading spinner).
+  await shot(page, "live-sidebar.png", {
+    fullPage: true,
+    captureBeyondViewport: false,
+  });
 
   await page.goto(`${url}#/bundle`, { waitUntil: "load" });
   await page.reload({ waitUntil: "load" });
@@ -231,6 +248,10 @@ try {
 
   check("no page errors", errors.length === 0, errors.join("; "));
   await page.close();
+
+  // --- Host-control scenarios ---
+  console.log("Scenarios:");
+  await runScenarios({ browser, url, outDir, root, check });
   await server.close();
 
   // --- Style isolation, against the dev server ---
@@ -255,11 +276,14 @@ try {
         // The wrapper itself is the boundary: it's laid out by the host page
         // (e.g. `className`, or a global `* { box-sizing }` rule), so only
         // the elements inside it count as the dashboard.
+        // Host content inside dashboards (custom tabs, slots, item names;
+        // marked with data-host-content) is styled by the host on purpose.
         const elements = [...document.body.querySelectorAll("*")].filter(
           (el) =>
             scope === "host"
               ? !el.closest(".squiggle-rv")
-              : !!el.parentElement?.closest(".squiggle-rv")
+              : !!el.parentElement?.closest(".squiggle-rv") &&
+                !el.closest("[data-host-content]")
         );
         return elements.map((el) => {
           const style = getComputedStyle(el);
@@ -288,6 +312,8 @@ try {
     "inline-size",
     "perspective-origin",
     "transform-origin",
+    "grid-template-rows",
+    "grid-template-columns",
   ]);
   const diff = (before, after) => {
     const diffs = [];
@@ -315,8 +341,30 @@ try {
     }, suffix);
 
   // 1. The dashboard stylesheet doesn't change the host page.
-  await devPage.goto(`${devUrl}#/live`, { waitUntil: "load" });
-  await waitForDashboard(devPage);
+  const loadDevPage = async (route) => {
+    await devPage.goto(`${devUrl}#/${route}`, { waitUntil: "load" });
+    await devPage.reload({ waitUntil: "load" });
+    if (route === "live") {
+      await waitForDashboard(devPage);
+    } else {
+      await waitForScenarioPage(devPage, route);
+    }
+  };
+  const hostIsolation = async (route) => {
+    await loadDevPage(route);
+    const hostBefore = await collect("host");
+    const removed = await removeStyle("/dist/styles.css");
+    await sleep(300);
+    const hostAfter = await collect("host");
+    const hostDiffs = diff(hostBefore, hostAfter);
+    check(
+      `dashboard CSS doesn't affect the host page (computed styles, #/${route})`,
+      removed === 1 && hostDiffs.length === 0,
+      `removed ${removed} stylesheet; compared ${hostBefore.length} host elements x all properties; ${hostDiffs.length} differences ${hostDiffs.slice(0, 5).join(", ")}`
+    );
+  };
+
+  await loadDevPage("live");
   const hostClip = await devPage.evaluate(() => {
     const rect = document.querySelector(".acme-intro").getBoundingClientRect();
     return {
@@ -326,27 +374,22 @@ try {
       height: Math.ceil(rect.bottom + 16),
     };
   });
-  const hostBefore = await collect("host");
   const withCss = fs.readFileSync(
     await shot(devPage, "host-with-dashboard-css.png", { clip: hostClip })
   );
-  const removed = await removeStyle("/dist/styles.css");
+  await removeStyle("/dist/styles.css");
   await sleep(300);
-  const hostAfter = await collect("host");
   const withoutCss = fs.readFileSync(
     await shot(devPage, "host-without-dashboard-css.png", { clip: hostClip })
-  );
-  const hostDiffs = diff(hostBefore, hostAfter);
-  check(
-    "dashboard CSS doesn't affect the host page (computed styles)",
-    removed === 1 && hostDiffs.length === 0,
-    `removed ${removed} stylesheet; compared ${hostBefore.length} host elements x all properties; ${hostDiffs.length} differences ${hostDiffs.slice(0, 5).join(", ")}`
   );
   check(
     "dashboard CSS doesn't affect the host page (pixels)",
     withCss.equals(withoutCss),
     "header + intro screenshots are byte-identical"
   );
+  for (const route of ["live", ...scenarioIds]) {
+    await hostIsolation(route);
+  }
 
   // 2. The host stylesheet doesn't change the dashboard.
   const dashboardProperties = [
@@ -378,26 +421,35 @@ try {
     "cursor",
     "box-sizing",
   ];
-  await devPage.goto(`${devUrl}#/live`, { waitUntil: "load" });
-  await devPage.reload({ waitUntil: "load" });
-  await waitForDashboard(devPage);
-  const dashboardBefore = await collect("dashboard", dashboardProperties);
-  const card = await devPage.$(".squiggle-rv");
-  await card.screenshot({
-    path: path.join(outDir, "dashboard-with-host-css.png"),
-  });
-  const removedHost = await removeStyle("/src/host.css");
-  await sleep(300);
-  const dashboardAfter = await collect("dashboard", dashboardProperties);
-  await card.screenshot({
-    path: path.join(outDir, "dashboard-without-host-css.png"),
-  });
-  const dashboardDiffs = diff(dashboardBefore, dashboardAfter);
-  check(
-    "host CSS doesn't affect the dashboard (computed styles)",
-    removedHost === 1 && dashboardDiffs.length === 0,
-    `compared ${dashboardBefore.length} dashboard elements x ${dashboardProperties.length} properties; ${dashboardDiffs.length} differences ${dashboardDiffs.slice(0, 5).join(", ")}`
-  );
+  const dashboardIsolation = async (route) => {
+    await loadDevPage(route);
+    const dashboardBefore = await collect("dashboard", dashboardProperties);
+    if (route === "live") {
+      const card = await devPage.$(".squiggle-rv");
+      await card.screenshot({
+        path: path.join(outDir, "dashboard-with-host-css.png"),
+      });
+    }
+    const removedHost = await removeStyle("/src/host.css");
+    await sleep(300);
+    const dashboardAfter = await collect("dashboard", dashboardProperties);
+    if (route === "live") {
+      const card = await devPage.$(".squiggle-rv");
+      await card.screenshot({
+        path: path.join(outDir, "dashboard-without-host-css.png"),
+      });
+    }
+    const dashboardDiffs = diff(dashboardBefore, dashboardAfter);
+    check(
+      `host CSS doesn't affect the dashboard (computed styles, #/${route})`,
+      removedHost === 1 && dashboardDiffs.length === 0,
+      `compared ${dashboardBefore.length} dashboard elements x ${dashboardProperties.length} properties; ${dashboardDiffs.length} differences ${dashboardDiffs.slice(0, 5).join(", ")}`
+    );
+  };
+  // S9's theme variables come from host.css on purpose, so it's left out.
+  for (const route of ["live", ...scenarioIds.filter((id) => id !== "s9")]) {
+    await dashboardIsolation(route);
+  }
 
   await devPage.close();
   await dev.close();
