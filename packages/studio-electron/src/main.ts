@@ -1,15 +1,25 @@
-import { app, BrowserWindow, dialog, session } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
 import { z } from "zod";
 
 import { defaultRecentFile, loadRecentFolders } from "@quri/squiggle-studio";
 
+import {
+  MENU_STATE_CHANNEL,
+  sendCommand,
+  validateMenuState,
+} from "./bridge.js";
 import { log } from "./log.js";
-import { buildMenu, type MenuActions } from "./menu.js";
+import {
+  type MenuActions,
+  type MenuContext,
+  requestMenuRebuild,
+} from "./menu.js";
 import { type OpenTarget, resolveTarget, targetsFromArgv } from "./target.js";
 import {
   allowedOrigins,
   createStudioWindow,
   findStudioWindow,
+  findStudioWindowByContents,
   studioWindows,
 } from "./windows.js";
 
@@ -69,6 +79,38 @@ const actions: MenuActions = {
     if (target) await openInNewWindow(target);
   },
 };
+
+// The application menu shows the focused window's state (§3.5).
+const menuContext: MenuContext = {
+  actions,
+  focused: () => findStudioWindow(BrowserWindow.getFocusedWindow()),
+  find: (win) => findStudioWindow(win),
+  send: (target, message) => {
+    if (target.win.isDestroyed()) return;
+    sendCommand(target.win.webContents, message);
+  },
+};
+const rebuildMenu = () => void requestMenuRebuild(menuContext);
+
+// Menu state pushed by a page through the preload: accepted only from the
+// window's own server origin and in the shared schema.
+function listenForMenuState() {
+  ipcMain.on(MENU_STATE_CHANNEL, (event, payload: unknown) => {
+    const studioWindow = findStudioWindowByContents(event.sender);
+    if (!studioWindow) return;
+    const result = validateMenuState(
+      event.senderFrame?.url,
+      studioWindow.origin,
+      payload
+    );
+    if (!result.ok) {
+      log(`ignored menu state: ${result.reason}`);
+      return;
+    }
+    studioWindow.menuState = result.state;
+    if (BrowserWindow.getFocusedWindow() === studioWindow.win) rebuildMenu();
+  });
+}
 
 function hardenSession() {
   const ses = session.defaultSession;
@@ -154,9 +196,13 @@ if (!app.requestSingleInstanceLock({ targets: argvTargets })) {
     if (process.platform !== "darwin") app.quit();
   });
 
-  // Folders opened from the in-app picker update recent.json; keep the
-  // Open Recent menu in sync.
-  app.on("browser-window-focus", () => void buildMenu(actions));
+  // The menu follows the focused window's state; folders opened from the
+  // in-app picker also update recent.json (Open Recent).
+  app.on("browser-window-focus", rebuildMenu);
+  // With no window left, page-handled items go back to disabled.
+  app.on("browser-window-created", (_event, win) => {
+    win.on("closed", rebuildMenu);
+  });
 
   app.on("activate", () => {
     if (ready && studioWindows().length === 0) void actions.newWindow();
@@ -166,7 +212,12 @@ if (!app.requestSingleInstanceLock({ targets: argvTargets })) {
 
   void app.whenReady().then(async () => {
     hardenSession();
-    await buildMenu(actions);
+    listenForMenuState();
+    app.setAboutPanelOptions({
+      applicationName: "Squiggle Studio",
+      applicationVersion: app.getVersion(),
+    });
+    await requestMenuRebuild(menuContext);
     ready = true;
 
     const targets = [...pendingTargets, ...argvTargets];
@@ -176,7 +227,7 @@ if (!app.requestSingleInstanceLock({ targets: argvTargets })) {
     }
     for (const target of targets) await openInNewWindow(target);
     // Recent folders changed by opening windows.
-    await buildMenu(actions);
+    await requestMenuRebuild(menuContext);
 
     if (studioWindows().length === 0 && process.platform !== "darwin") {
       app.quit();
