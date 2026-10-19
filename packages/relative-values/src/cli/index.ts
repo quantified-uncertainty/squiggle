@@ -16,6 +16,8 @@ Options:
   --out <file>           Output file (default: stdout)
   --seed <seed>          Random seed (default: Squiggle's default seed)
   --sample-count <n>     Samples per distribution (default: 1000)
+  --precision <digits>   Round numbers to this many significant digits, for
+                         smaller bundles (default: full precision)
   --quiet                Don't print progress
   -h, --help             Show this help
 `;
@@ -41,6 +43,7 @@ async function bundleCommand(args: string[]) {
       out: { type: "string", short: "o" },
       seed: { type: "string" },
       "sample-count": { type: "string" },
+      precision: { type: "string" },
       quiet: { type: "boolean", short: "q" },
       help: { type: "boolean", short: "h" },
     },
@@ -62,6 +65,14 @@ async function bundleCommand(args: string[]) {
     }
   }
 
+  let precision: number | undefined;
+  if (values.precision !== undefined) {
+    precision = Number(values.precision);
+    if (!Number.isInteger(precision) || precision < 1 || precision > 100) {
+      throw new Error("--precision must be an integer between 1 and 100");
+    }
+  }
+
   const showProgress = !values.quiet && process.stderr.isTTY;
   const started = performance.now();
   const bundle = await bundleSquiggleFile({
@@ -69,6 +80,7 @@ async function bundleCommand(args: string[]) {
     variable: values.variable,
     seed: values.seed,
     sampleCount,
+    precision,
     generator: `squiggle-rv@${await readVersion()}`,
     onProgress: showProgress
       ? ({ done, total }) => {

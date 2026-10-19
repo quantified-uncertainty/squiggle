@@ -125,6 +125,8 @@ export type BundleSquiggleFileParams = {
   variable?: string;
   seed?: string;
   sampleCount?: number;
+  // Significant digits; see `createRelativeValuesBundle`.
+  precision?: number;
   generator?: string;
   onProgress?: (progress: ComputeProgress) => void;
   signal?: AbortSignal;
@@ -139,6 +141,7 @@ export async function bundleSquiggleFile({
   variable,
   seed,
   sampleCount,
+  precision,
   generator,
   onProgress,
   signal,
@@ -172,6 +175,7 @@ export async function bundleSquiggleFile({
       sourceHash: hashSources(entry, linker.sources),
       ...(generator !== undefined && { generator }),
     },
+    precision,
     onProgress,
     signal,
   });

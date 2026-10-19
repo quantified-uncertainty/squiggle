@@ -41,6 +41,8 @@ export const relativeValuesBundleMetaSchema = z
     // Squiggle environment that the pairs were computed with.
     seed: z.string(),
     sampleCount: z.number().int().positive(),
+    // Significant digits that numbers were rounded to, if any.
+    precision: z.number().int().positive().optional(),
     // Hash of the model's source code (including imports), e.g. "sha256:...".
     // Lets you check whether a bundle is stale.
     sourceHash: z.string().optional(),
@@ -90,9 +92,11 @@ export type RelativeValuesBundleMeta = z.infer<
 
 export type RelativeValuesBundlePair = RelativeValuesBundle["pairs"][number];
 
-function encodeNumber(value: number): BundleNumber {
+function encodeNumber(value: number, precision?: number): BundleNumber {
   if (Number.isFinite(value)) {
-    return value;
+    return precision === undefined
+      ? value
+      : Number(value.toPrecision(precision));
   }
   return Number.isNaN(value) ? "NaN" : value > 0 ? "Infinity" : "-Infinity";
 }
@@ -102,18 +106,19 @@ function decodeNumber(value: BundleNumber): number {
 }
 
 function encodePairValue(
-  result: RelativeValueResult
+  result: RelativeValueResult,
+  precision: number | undefined
 ): RelativeValuesBundlePair[2] {
   if (!result.ok) {
     return { error: result.value };
   }
   const { median, mean, min, max, uncertainty } = result.value;
   return {
-    median: encodeNumber(median),
-    mean: encodeNumber(mean),
-    min: encodeNumber(min),
-    max: encodeNumber(max),
-    uncertainty: encodeNumber(uncertainty),
+    median: encodeNumber(median, precision),
+    mean: encodeNumber(mean, precision),
+    min: encodeNumber(min, precision),
+    max: encodeNumber(max, precision),
+    uncertainty: encodeNumber(uncertainty, precision),
   };
 }
 
@@ -193,6 +198,10 @@ export type CreateRelativeValuesBundleParams = {
     // Custom metadata.
     [key: string]: unknown;
   };
+  // Round numbers to this many significant digits, to make the bundle
+  // smaller. Monte Carlo estimates rarely have more than 3-4 meaningful
+  // digits. Defaults to full precision.
+  precision?: number;
 } & ComputeOptions;
 
 /**
@@ -203,8 +212,15 @@ export async function createRelativeValuesBundle({
   definition,
   evaluator,
   meta,
+  precision,
   ...computeOptions
 }: CreateRelativeValuesBundleParams): Promise<RelativeValuesBundle> {
+  if (
+    precision !== undefined &&
+    (!Number.isInteger(precision) || precision < 1 || precision > 100)
+  ) {
+    throw new Error("precision must be an integer between 1 and 100");
+  }
   const environment = evaluator.environment;
   if (!evaluator.canCompute || !environment) {
     throw new Error(
@@ -212,6 +228,7 @@ export async function createRelativeValuesBundle({
     );
   }
 
+  const { generatedAt, variableName, seed, sampleCount, ...otherMeta } = meta;
   const ids = definition.items.map((item) => item.id);
   const results = await evaluator.computeAll(ids, computeOptions);
 
@@ -219,7 +236,7 @@ export async function createRelativeValuesBundle({
   let i = 0;
   for (const id1 of ids) {
     for (const id2 of ids) {
-      pairs.push([id1, id2, encodePairValue(results[i])]);
+      pairs.push([id1, id2, encodePairValue(results[i], precision)]);
       i++;
     }
   }
@@ -234,10 +251,12 @@ export async function createRelativeValuesBundle({
     },
     pairs,
     meta: {
-      ...meta,
-      generatedAt: meta.generatedAt ?? new Date().toISOString(),
-      seed: meta.seed ?? environment.seed,
-      sampleCount: meta.sampleCount ?? environment.sampleCount,
+      generatedAt: generatedAt ?? new Date().toISOString(),
+      variableName,
+      seed: seed ?? environment.seed,
+      sampleCount: sampleCount ?? environment.sampleCount,
+      ...(precision !== undefined && { precision }),
+      ...otherMeta,
     },
   };
 }

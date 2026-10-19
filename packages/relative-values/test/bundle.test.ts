@@ -136,6 +136,36 @@ spec = {
     ).rejects.toThrow("cache-only");
   });
 
+  test("precision", async () => {
+    const spec = await specFromCode(
+      readExample("health-interventions.squiggle")
+    );
+    const evaluator = unwrap(await ModelEvaluator.fromSpec(spec));
+    const params = {
+      definition: spec.definition,
+      evaluator,
+      meta: { variableName: "x" },
+    };
+    const full = await createRelativeValuesBundle(params);
+    const rounded = await createRelativeValuesBundle({
+      ...params,
+      precision: 3,
+    });
+    expect(stringifyRelativeValuesBundle(rounded).length).toBeLessThan(
+      stringifyRelativeValuesBundle(full).length * 0.75
+    );
+    const [, , value] = rounded.pairs[1];
+    if ("error" in value || typeof value.median !== "number") {
+      throw new Error("unexpected pair");
+    }
+    expect(
+      String(value.median).replace(/^0\.0*|\./g, "").length
+    ).toBeLessThanOrEqual(3);
+    await expect(
+      createRelativeValuesBundle({ ...params, precision: 0 })
+    ).rejects.toThrow("precision");
+  });
+
   test("custom metadata is kept", async () => {
     const spec = await specFromCode(readExample("minimal.squiggle"));
     const evaluator = unwrap(await ModelEvaluator.fromSpec(spec));

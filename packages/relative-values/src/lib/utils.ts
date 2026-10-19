@@ -2,19 +2,15 @@ export const cartesianProduct = <A, B>(a: A[], b: B[]): [A, B][] => {
   return a.flatMap((aItem) => b.map<[A, B]>((bItem) => [aItem, bItem]));
 };
 
-type Scheduler = { yield?: () => Promise<void> };
-
 /**
- * Let the browser handle pending events and render a frame.
+ * Let the browser handle pending events (input, timers, network) and render a
+ * frame.
  *
- * Uses `scheduler.yield()` where available, then `MessageChannel` (unlike
- * `setTimeout(0)`, it isn't clamped to 4ms), then `setTimeout`.
+ * Uses `MessageChannel`, which (unlike `setTimeout(0)`) isn't clamped to 4ms
+ * when nested. Not `scheduler.yield()`: its continuations are prioritized over
+ * other tasks, so the page's own timers would starve until we're done.
  */
 export function yieldToEventLoop(): Promise<void> {
-  const scheduler = (globalThis as { scheduler?: Scheduler }).scheduler;
-  if (scheduler?.yield) {
-    return scheduler.yield();
-  }
   if (typeof MessageChannel !== "undefined") {
     return new Promise((resolve) => {
       const channel = new MessageChannel();
