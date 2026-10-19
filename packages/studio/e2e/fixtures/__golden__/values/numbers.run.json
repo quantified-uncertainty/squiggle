@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "plain": 42,
+    "price": 1234.5678,
+    "share": 0.4231,
+    "population": 8100000000,
+    "small": 0.000123,
+    "negative": -3.75,
+    "uncertainCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 7505.119145,
+      "stdev": 5379.696177,
+      "p5": 1919.100871,
+      "p25": 3940.550377,
+      "p50": 6109.151317,
+      "p75": 9644.221816,
+      "p95": 16989.54004,
+      "min": 827.6760223,
+      "max": 51598.23997,
+      "sampleCount": 1000,
+      "name": "Uncertain cost ($)"
+    }
+  },
+  "errors": []
+}

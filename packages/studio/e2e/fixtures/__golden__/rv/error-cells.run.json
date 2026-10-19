@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "dists": {
+      "alpha": 1,
+      "beta": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 3.298149995,
+        "stdev": 0.9113368931,
+        "p5": 1.965856784,
+        "p25": 2.653712511,
+        "p50": 3.186141546,
+        "p75": 3.854382857,
+        "p95": 4.880973515,
+        "min": 1.384330789,
+        "max": 7.757113156,
+        "sampleCount": 1000
+      },
+      "gamma": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 22.15111413,
+        "stdev": 9.492536356,
+        "p5": 9.982425497,
+        "p25": 15.43877124,
+        "p50": 20.3646674,
+        "p75": 27.08576185,
+        "p95": 40.22252839,
+        "min": 4.331651329,
+        "max": 81.34903968,
+        "sampleCount": 1000
+      },
+      "broken": 1
+    },
+    "withErrors": {
+      "items": ["alpha", "beta", "gamma", "broken"],
+      "fn": {
+        "type": "Lambda",
+        "kind": "UserDefinedLambda",
+        "signature": "(a,b)",
+        "parameters": [[{ "name": "a" }, { "name": "b" }]]
+      }
+    }
+  },
+  "errors": []
+}

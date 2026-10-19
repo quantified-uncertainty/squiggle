@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "weeks": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 13.19259998,
+      "stdev": 3.645347572,
+      "p5": 7.863427135,
+      "p25": 10.61485004,
+      "p50": 12.74456619,
+      "p75": 15.41753143,
+      "p95": 19.52389406,
+      "min": 5.537323157,
+      "max": 31.02845262,
+      "sampleCount": 1000,
+      "name": "Weeks of work"
+    },
+    "totalCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 8277.707602,
+      "stdev": 5606.707793,
+      "p5": 2225.397784,
+      "p25": 4320.931232,
+      "p50": 6764.797915,
+      "p75": 10691.40553,
+      "p95": 18342.06369,
+      "min": 763.3297572,
+      "max": 36453.57321,
+      "sampleCount": 1000,
+      "name": "Total project cost ($)"
+    }
+  },
+  "errors": []
+}

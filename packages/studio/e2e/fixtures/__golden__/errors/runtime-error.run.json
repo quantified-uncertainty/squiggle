@@ -1,0 +1,43 @@
+{
+  "ok": false,
+  "result": null,
+  "bindings": {},
+  "errors": [
+    {
+      "kind": "runtime",
+      "message": "Expected a positive number, got -1",
+      "location": {
+        "file": "errors/runtime-error.squiggle",
+        "start": { "line": 3, "column": 41 },
+        "end": { "line": 3, "column": 94 }
+      },
+      "stack": [
+        { "name": "throw" },
+        {
+          "name": "checkPositive",
+          "location": {
+            "file": "errors/runtime-error.squiggle",
+            "start": { "line": 3, "column": 41 },
+            "end": { "line": 3, "column": 94 }
+          }
+        },
+        {
+          "name": "scaled",
+          "location": {
+            "file": "errors/runtime-error.squiggle",
+            "start": { "line": 5, "column": 13 },
+            "end": { "line": 5, "column": 29 }
+          }
+        },
+        {
+          "name": "<top>",
+          "location": {
+            "file": "errors/runtime-error.squiggle",
+            "start": { "line": 11, "column": 9 },
+            "end": { "line": 11, "column": 19 }
+          }
+        }
+      ]
+    }
+  ]
+}

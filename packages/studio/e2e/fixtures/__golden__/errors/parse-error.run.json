@@ -1,0 +1,16 @@
+{
+  "ok": false,
+  "result": null,
+  "bindings": {},
+  "errors": [
+    {
+      "kind": "compile",
+      "message": "Expected \")\", \"->\", operator, or whitespace but end of input found.",
+      "location": {
+        "file": "errors/parse-error.squiggle",
+        "start": { "line": 5, "column": 1 },
+        "end": { "line": 5, "column": 1 }
+      }
+    }
+  ]
+}

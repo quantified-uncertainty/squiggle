@@ -1,0 +1,50 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "square": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(x)",
+      "parameters": [[{ "name": "x" }]],
+      "name": "Square",
+      "doc": "Returns x squared. One parameter, so it can be plotted."
+    },
+    "growth": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(principal,rate,years)",
+      "parameters": [
+        [{ "name": "principal" }, { "name": "rate" }, { "name": "years" }]
+      ],
+      "name": "Growth",
+      "doc": "Compound growth of `principal` at `rate` for `years` years."
+    },
+    "costFn": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(x)",
+      "parameters": [[{ "name": "x", "type": "Number.rangeDomain(1, 100)" }]],
+      "name": "Cost with a domain"
+    },
+    "double": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(x)",
+      "parameters": [[{ "name": "x" }]],
+      "name": "Anonymous lambda"
+    },
+    "calculator": {
+      "type": "Calculator",
+      "title": "Compound growth",
+      "description": "Compound growth of `principal` at `rate` for `years` years.",
+      "inputs": [
+        { "name": "principal", "inputType": "text" },
+        { "name": "rate", "inputType": "text" },
+        { "name": "years", "inputType": "text" }
+      ],
+      "name": "Calculator"
+    }
+  },
+  "errors": []
+}
