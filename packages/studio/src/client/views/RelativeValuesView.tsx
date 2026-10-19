@@ -1,175 +1,160 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { z } from "zod";
 
 import { SquiggleErrorAlert } from "@quri/squiggle-components";
-import type { SqModuleOutput, SqProject } from "@quri/squiggle-lang";
+import type { SqProject } from "@quri/squiggle-lang";
 import {
-  findRelativeValuesExports,
-  InMemoryRelativeValuesCache,
   ModelEvaluator,
   RelativeValuesDashboard,
-  type RelativeValuesExport,
   type RelativeValuesSpec,
-  type RelativeValuesTab,
 } from "@quri/squiggle-relative-values";
-import { RefreshIcon } from "@quri/ui";
+import { RefreshIcon, useToast } from "@quri/ui";
 
-import { readStorage, writeStorage } from "../lib/storage.js";
-import type {
-  StudioRunOutput,
-  StudioView,
-  StudioViewContext,
-} from "./types.js";
+import { TID } from "../../shared/testIds.js";
+import { useContextKeys } from "../commands/context.js";
+import { registerFocuser } from "../commands/focus.js";
+import { useCommand } from "../commands/registry.js";
+import { useReportBusy } from "../lib/idle.js";
+import { updateViewState } from "../lib/navigation.js";
+import { getRvMatrixCsv, setRvLiveSource } from "../lib/rvMatrix.js";
+import { WorkspaceContext } from "../lib/workspaceTypes.js";
+import { RV_TOOLBAR_SELECTOR, RvToolbar } from "./rv/RvToolbar.js";
+import {
+  DEFAULT_RV_TAB,
+  formerSpecs,
+  getPairCache,
+  getRelativeValuesExports,
+  hasRelativeValues,
+  rvTabSchema,
+  selectSpec,
+  useRvFileState,
+} from "./rv/rvState.js";
+import { semanticKey } from "./rv/semanticKey.js";
+import type { StudioView, StudioViewContext } from "./types.js";
 
-// `isAvailable` runs on every render, so detection is memoized per run.
-const exportsByOutput = new WeakMap<SqModuleOutput, RelativeValuesExport[]>();
+export { getRelativeValuesExports, hasRelativeValues };
 
-export function getRelativeValuesExports(
-  output: SqModuleOutput
-): RelativeValuesExport[] {
-  let found = exportsByOutput.get(output);
-  if (!found) {
-    found = findRelativeValuesExports(output);
-    exportsByOutput.set(output, found);
-  }
-  return found;
-}
+// While the code changes, the dashboard keeps its evaluator and swaps to the
+// new one only after this long without changes, or on save (QA #15).
+export const RV_SWAP_DELAY_MS = 600;
 
-// Files that had a relative values spec in an earlier run. The tab stays
-// visible for them while the model is broken (e.g. a syntax error in the middle
-// of an edit), instead of jumping back to another view.
-const filesWithSpecs = new Set<string>();
+const setTabArgsSchema = z.object({ tab: rvTabSchema });
 
-export function hasRelativeValues(
-  filePath: string,
-  runOutput: StudioRunOutput | undefined
-): boolean {
-  if (!runOutput) return filesWithSpecs.has(filePath);
-  if (!runOutput.output.result.ok) return filesWithSpecs.has(filePath);
-  const found = getRelativeValuesExports(runOutput.output).length > 0;
-  if (found) filesWithSpecs.add(filePath);
-  else filesWithSpecs.delete(filePath);
-  return found;
-}
+// ── Evaluator swapping ──────────────────────────────────────────────────────
 
-// Pair caches, per project (a project lives until the file's imports change on
-// disk) and per (variable, code) version. Re-renders, tab switches and returning
-// to an earlier version of the code (e.g. undo) reuse computed pairs.
-const MAX_CACHES_PER_PROJECT = 20;
-const cachesByProject = new WeakMap<
-  SqProject,
-  Map<string, InMemoryRelativeValuesCache>
->();
-
-function getPairCache(
-  project: SqProject,
-  variable: string,
-  code: string
-): InMemoryRelativeValuesCache {
-  let caches = cachesByProject.get(project);
-  if (!caches) {
-    caches = new Map();
-    cachesByProject.set(project, caches);
-  }
-  const key = `${variable}\0${code}`;
-  let cache = caches.get(key);
-  if (cache) {
-    // Map preserves insertion order; move to the end (most recently used).
-    caches.delete(key);
-  } else {
-    cache = new InMemoryRelativeValuesCache();
-  }
-  caches.set(key, cache);
-  while (caches.size > MAX_CACHES_PER_PROJECT) {
-    caches.delete(caches.keys().next().value as string);
-  }
-  return cache;
-}
-
-// UI state per file, kept across live reloads and page reloads.
-const uiStateSchema = z.object({
-  variable: z.string().optional(),
-  tab: z.enum(["list", "grid", "plot"]).optional(),
-});
-type UiState = z.infer<typeof uiStateSchema>;
-const tabSchema = uiStateSchema.shape.tab;
-
-// `?tab=grid` (used by `squiggle-studio render --tab`) overrides the saved tab.
-const urlTab = tabSchema.safeParse(
-  new URLSearchParams(window.location.search).get("tab") ?? undefined
-).data;
-
-const uiStateKey = (filePath: string) =>
-  `squiggle-studio:relative-values:${filePath}`;
-
-// In-memory copy, in case localStorage is unavailable. The view remounts when
-// a file's imports change on disk.
-const uiStateMemory = new Map<string, UiState>();
-
-function useUiState(filePath: string) {
-  const [state, setState] = useState<UiState>(() => {
-    const saved =
-      uiStateMemory.get(filePath) ??
-      readStorage(uiStateKey(filePath), uiStateSchema) ??
-      {};
-    return urlTab ? { ...saved, tab: urlTab } : saved;
-  });
-  const update = (patch: UiState) => {
-    const next = { ...state, ...patch };
-    setState(next);
-    uiStateMemory.set(filePath, next);
-    writeStorage(uiStateKey(filePath), next);
-  };
-  return [state, update] as const;
-}
-
-type EvaluatorState = {
+type Latest = {
+  variable: string;
   spec: RelativeValuesSpec;
-  evaluator: ModelEvaluator;
+  key: string; // semantic key of the run's module
+  project: SqProject;
+  executionId: number;
 };
 
-// Builds an evaluator for the spec. Until a new evaluator is ready, the
-// previous one is kept, so that live reloads don't flash a spinner (and don't
-// reset the dashboard's sorting and filters).
-function useEvaluator(
-  spec: RelativeValuesSpec | undefined,
-  project: SqProject,
-  variable: string,
-  modelCode: string
-) {
-  const [state, setState] = useState<EvaluatorState | undefined>();
-  const [error, setError] = useState<string | undefined>();
+type Shown = Omit<Latest, "spec" | "executionId"> & {
+  spec: RelativeValuesSpec;
+  evaluator: ModelEvaluator;
+  executionId: number; // the latest run the shown evaluator stands for
+};
+
+// The evaluator the dashboard shows for the latest run's spec. A run whose
+// module means the same as the shown one (same semantic key: a comment or
+// whitespace edit) keeps the shown evaluator and its computed pairs. A
+// different one swaps after RV_SWAP_DELAY_MS without further runs, or at once
+// when the run is of the saved file, a new spec is picked or nothing is
+// shown yet. Until then the previous dashboard stays (with its sorting and
+// filters), and the view isn't ready.
+function useSwappedEvaluator(latest: Latest | undefined, saved: boolean) {
+  const [shown, setShown] = useState<Shown | undefined>();
+  const [error, setError] = useState<
+    { executionId: number; variable: string; message: string } | undefined
+  >();
+  const shownRef = useRef(shown);
+  shownRef.current = shown;
 
   useEffect(() => {
-    if (!spec) return;
-    let cancelled = false;
-    ModelEvaluator.fromSpec(spec, {
-      cache: getPairCache(project, variable, modelCode),
-      modelCode,
-    }).then(
-      (result) => {
-        if (cancelled) return;
-        if (result.ok) {
-          setState({ spec, evaluator: result.value });
-          setError(undefined);
-        } else {
-          setError(result.value);
-        }
-      },
-      (e: unknown) => {
-        if (!cancelled) setError(String(e));
+    if (!latest) return;
+    const current = shownRef.current;
+    if (
+      current &&
+      current.variable === latest.variable &&
+      current.key === latest.key &&
+      current.project === latest.project
+    ) {
+      if (current.executionId !== latest.executionId) {
+        setShown({ ...current, executionId: latest.executionId });
       }
-    );
+      setError(undefined);
+      return;
+    }
+    let cancelled = false;
+    const build = () => {
+      ModelEvaluator.fromSpec(latest.spec, {
+        cache: getPairCache(latest.project, latest.variable, latest.key),
+      }).then(
+        (result) => {
+          if (cancelled) return;
+          if (result.ok) {
+            setShown({ ...latest, evaluator: result.value });
+            setError(undefined);
+          } else {
+            setError({
+              executionId: latest.executionId,
+              variable: latest.variable,
+              message: result.value,
+            });
+          }
+        },
+        (e: unknown) => {
+          if (cancelled) return;
+          setError({
+            executionId: latest.executionId,
+            variable: latest.variable,
+            message: e instanceof Error ? e.message : String(e),
+          });
+        }
+      );
+    };
+    const now =
+      !current ||
+      current.variable !== latest.variable ||
+      current.project !== latest.project ||
+      saved;
+    const timer = now ? undefined : setTimeout(build, RV_SWAP_DELAY_MS);
+    if (now) build();
     return () => {
       cancelled = true;
+      if (timer !== undefined) clearTimeout(timer);
     };
-  }, [spec, project, variable, modelCode]);
+  }, [latest, saved]);
 
-  return { state, error };
+  const currentError =
+    error &&
+    latest &&
+    error.executionId === latest.executionId &&
+    error.variable === latest.variable
+      ? error.message
+      : undefined;
+  const pending =
+    latest !== undefined &&
+    currentError === undefined &&
+    (shown === undefined ||
+      shown.executionId !== latest.executionId ||
+      shown.variable !== latest.variable);
+  return { shown, pending, error: currentError };
 }
 
+// ── Pieces ──────────────────────────────────────────────────────────────────
+
 const ConventionHint: FC = () => (
-  <p className="mt-2 text-xs text-slate-500">
+  <p className="mt-2 text-xs text-slate-600">
     A relative values spec is a top-level dict like{" "}
     <code className="rounded bg-slate-100 px-1">
       {"{ items: [...], fn: {|a, b| [distA, distB]} }"}
@@ -187,7 +172,10 @@ const SpecError: FC<{ name: string; message: string }> = ({
   name,
   message,
 }) => (
-  <div className="rounded-md border border-red-200 bg-red-50 p-4">
+  <div
+    className="max-w-3xl rounded-md border border-red-200 bg-red-50 p-4"
+    data-testid={TID.rvError}
+  >
     <div className="text-sm font-medium text-red-800">
       <code>{name}</code> looks like a relative values spec, but it&apos;s
       invalid:
@@ -203,105 +191,169 @@ const SpecError: FC<{ name: string; message: string }> = ({
   </div>
 );
 
-const Dashboard: FC<{
-  context: StudioViewContext;
-  runOutput: StudioRunOutput;
-  found: RelativeValuesExport;
-  picker: React.ReactNode;
-  tab: RelativeValuesTab;
-  onTabChange: (tab: RelativeValuesTab) => void;
-}> = ({ context, runOutput, found, picker, tab, onTabChange }) => {
-  const spec = found.spec.ok ? found.spec.value : undefined;
-  const modelCode = runOutput.output.module.code;
-  const { state, error } = useEvaluator(
-    spec,
-    runOutput.project,
-    found.name,
-    modelCode
-  );
+// `data-studio-ready` for `render`, the e2e harness and whenIdle: "1" once the
+// view shows the latest run.
+const ReadyMarker: FC<{ ready: boolean }> = ({ ready }) => (
+  <span data-studio-ready={ready ? "1" : "0"} hidden />
+);
 
-  if (!found.spec.ok) {
-    return (
-      <div className="flex flex-col gap-4">
-        {picker}
-        <SpecError name={found.name} message={found.spec.value} />
-        {!runOutput.isStale && <span data-studio-ready="1" hidden />}
-      </div>
-    );
-  }
-  if (error !== undefined) {
-    return (
-      <div className="flex flex-col gap-4">
-        {picker}
-        <SpecError name={found.name} message={error} />
-        {!runOutput.isStale && <span data-studio-ready="1" hidden />}
-      </div>
-    );
-  }
-  if (!state) {
-    return <RefreshIcon className="animate-spin text-slate-400" size={20} />;
-  }
-
-  return (
-    <>
-      {state.spec === spec && !runOutput.isStale && (
-        // Marker for `squiggle-studio render`: the dashboard shows this run.
-        <span data-studio-ready="1" hidden />
-      )}
-      <RelativeValuesDashboard
-        definition={state.spec.definition}
-        evaluator={state.evaluator}
-        tab={tab}
-        onTabChange={onTabChange}
-        header={
-          <div className="flex items-center gap-3">
-            <div className="font-semibold text-slate-700">
-              {state.spec.definition.title}
-            </div>
-            {picker}
-          </div>
-        }
-        linker={context.linker}
-        sourceId={runOutput.sourceId}
-      />
-    </>
-  );
-};
+// ── The view ────────────────────────────────────────────────────────────────
 
 export const RelativeValuesView: FC<{ context: StudioViewContext }> = ({
   context,
 }) => {
-  const { runOutput } = context;
-  const [uiState, updateUiState] = useUiState(context.filePath);
+  const workspace = useContext(WorkspaceContext);
+  const root = workspace?.rootInfo?.root;
+  const { runOutput, filePath, embed, initial } = context;
+  const toast = useToast();
+  const [state, update] = useRvFileState(root, filePath, { initial, embed });
+  const tab = state.tab ?? DEFAULT_RV_TAB;
 
   const found = useMemo(
     () => (runOutput ? getRelativeValuesExports(runOutput.output) : []),
     [runOutput]
   );
+  const runOk = runOutput?.output.result.ok ?? false;
+  const selected = selectSpec(found, state.variable);
+  // In embed mode (`render --variable`) the URL's spec must exist (#47).
+  const unknownVariable =
+    embed &&
+    runOk &&
+    found.length > 0 &&
+    state.variable !== undefined &&
+    !found.some((f) => f.name === state.variable);
 
-  if (!runOutput) {
-    return (
-      <div className="grid h-full place-items-center">
-        <RefreshIcon className="animate-spin text-slate-400" size={24} />
-      </div>
-    );
-  }
+  const latest = useMemo((): Latest | undefined => {
+    if (!runOutput || !runOk || !selected?.spec.ok || unknownVariable) {
+      return undefined;
+    }
+    return {
+      variable: selected.name,
+      spec: selected.spec.value,
+      key: semanticKey(runOutput.output.module),
+      project: runOutput.project,
+      executionId: runOutput.executionId,
+    };
+  }, [runOutput, runOk, selected, unknownVariable]);
 
-  // `ready`: marker for `squiggle-studio render`. The dashboard sets its own
-  // marker once its evaluator is ready.
-  const wrap = (children: React.ReactNode, ready = false) => (
+  // The run is of the file on disk (saved, or changed by an agent): swap the
+  // evaluator at once.
+  const file = workspace?.files[filePath];
+  const saved =
+    !file || !runOutput || runOutput.output.module.code === file.disk;
+  const { shown, pending, error } = useSwappedEvaluator(latest, saved);
+  const current =
+    shown && shown.variable === selected?.name ? shown : undefined;
+  const rvReady = !!current && !error && !unknownVariable;
+
+  useReportBusy(`rv:${filePath}`, !runOutput || pending);
+
+  // Context keys (§4.4). `squiggle.view` is FileWorkspace's (WP5); it's
+  // published here too while this view is mounted, with the same value.
+  useContextKeys({
+    "squiggle.view": "relative-values",
+    "squiggle.rvTab": tab,
+    rvReady,
+  });
+
+  useCommand("squiggle.rv.setTab", (args) => {
+    const parsed = setTabArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      throw new Error(
+        'squiggle.rv.setTab needs {tab: "list" | "grid" | "plot"}'
+      );
+    }
+    update({ tab: parsed.data.tab });
+  });
+
+  useCommand(
+    "squiggle.rv.copyCsv",
+    async () => {
+      const name = selected?.name;
+      const csv = await getRvMatrixCsv({ variable: name });
+      // Missing on non-secure origins (`--allow-network` over plain http).
+      if (!navigator.clipboard) {
+        throw new Error(
+          "The clipboard isn't available on this address; use `squiggle-studio rv --format csv` instead"
+        );
+      }
+      await navigator.clipboard.writeText(csv);
+      toast(`Copied ${name ?? "relative values"} as CSV`, "confirmation");
+    },
+    { enabled: rvReady }
+  );
+
+  // F6 / focusing the view lands on the toolbar's tabs (§4.5). Registered in
+  // an effect, after the workspace's own view focuser, so it wins while this
+  // view is mounted.
+  useEffect(
+    () =>
+      registerFocuser("view", () => {
+        const button = document.querySelector<HTMLElement>(
+          `${RV_TOOLBAR_SELECTOR} [role="radio"][aria-checked="true"]`
+        );
+        if (!button) return false;
+        button.focus();
+        return true;
+      }),
+    []
+  );
+
+  // The address bar mirrors the tab and spec (replaceState), and drops them
+  // when another view is shown.
+  const selectedName = selected?.name;
+  useEffect(() => {
+    if (!embed) updateViewState({ tab, variable: selectedName });
+  }, [embed, tab, selectedName]);
+  useEffect(
+    () => () => {
+      if (!embed) updateViewState({ tab: undefined, variable: undefined });
+    },
+    [embed]
+  );
+
+  // window.squiggleStudio.getRvMatrix() reuses this evaluator.
+  useEffect(() => {
+    if (!runOutput) return;
+    return setRvLiveSource({
+      path: filePath,
+      output: runOutput.output,
+      project: runOutput.project,
+      variable: selectedName,
+      evaluator: current
+        ? {
+            variable: current.variable,
+            key: current.key,
+            evaluator: current.evaluator,
+          }
+        : undefined,
+    });
+  }, [filePath, runOutput, selectedName, current]);
+
+  const wrap = (children: ReactNode) => (
     <div
-      className={context.embed ? "p-4" : "h-full overflow-auto p-4"}
-      data-studio-ready={ready && !runOutput.isStale ? "1" : undefined}
+      data-testid={TID.rvView}
+      className={embed ? "bg-white p-4" : "h-full overflow-auto bg-white p-4"}
     >
       {children}
     </div>
   );
 
+  if (!runOutput) {
+    return wrap(
+      <div className="grid h-full place-items-center">
+        <ReadyMarker ready={false} />
+        <RefreshIcon className="animate-spin text-slate-400" size={24} />
+      </div>
+    );
+  }
+  const notStale = !runOutput.isStale;
+
   const result = runOutput.output.result;
   if (!result.ok) {
     return wrap(
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" data-testid={TID.rvError}>
+        <ReadyMarker ready={notStale} />
         <div className="text-sm text-slate-600">
           The model failed to run, so relative values can&apos;t be shown.
         </div>
@@ -309,62 +361,90 @@ export const RelativeValuesView: FC<{ context: StudioViewContext }> = ({
         <pre data-studio-error="" className="hidden">
           {result.value.errors.map((e) => e.toString()).join("\n")}
         </pre>
-      </div>,
-      true
+      </div>
     );
   }
 
-  if (found.length === 0) {
+  if (found.length === 0 || !selected) {
+    const former = formerSpecs(filePath, runOutput.output);
     return wrap(
-      <div className="text-sm text-slate-600">
-        No relative values specs found in this file.
+      <div className="text-sm text-slate-600" data-testid={TID.rvError}>
+        <ReadyMarker ready={notStale} />
+        {former.length > 0 ? (
+          <>
+            <code>{former.join(", ")}</code> {former.length > 1 ? "are" : "is"}{" "}
+            no longer a relative values spec.
+          </>
+        ) : (
+          <span data-studio-error={embed ? "" : undefined}>
+            No relative values specs found in this file.
+          </span>
+        )}
         <ConventionHint />
-      </div>,
-      true
+      </div>
     );
   }
 
-  const preferred = context.variable ?? uiState.variable;
-  const selected = found.find((f) => f.name === preferred) ?? found[0];
-
-  const picker =
-    found.length > 1 ? (
-      <select
-        className="rounded border border-slate-300 py-0.5 pl-2 pr-8 text-sm text-slate-700"
-        aria-label="Relative values variable"
-        value={selected.name}
-        onChange={(e) => updateUiState({ variable: e.target.value })}
+  if (unknownVariable) {
+    return wrap(
+      <div
+        className="text-sm text-red-700"
+        data-testid={TID.rvError}
+        data-studio-error=""
       >
-        {found.map((f) => (
-          <option key={f.name} value={f.name}>
-            {f.name}
-            {f.spec.ok ? "" : " (invalid)"}
-          </option>
-        ))}
-      </select>
-    ) : null;
+        No relative values spec named <code>{state.variable}</code> in this
+        file; its specs are {found.map((f) => f.name).join(", ")}.
+      </div>
+    );
+  }
+
+  if (!selected.spec.ok || error !== undefined) {
+    return wrap(
+      <>
+        <ReadyMarker ready={notStale} />
+        <SpecError
+          name={selected.name}
+          message={selected.spec.ok ? (error ?? "") : selected.spec.value}
+        />
+      </>
+    );
+  }
+
+  if (!current) {
+    return wrap(
+      <div className="grid h-full place-items-center">
+        <ReadyMarker ready={false} />
+        <RefreshIcon className="animate-spin text-slate-400" size={20} />
+      </div>
+    );
+  }
 
   return wrap(
-    <Dashboard
-      // A fresh evaluator state per variable.
-      key={selected.name}
-      context={context}
-      runOutput={runOutput}
-      found={selected}
-      picker={picker}
-      tab={uiState.tab ?? "list"}
-      onTabChange={(tab) => updateUiState({ tab })}
-    />
+    <>
+      <ReadyMarker ready={notStale && !pending} />
+      <RelativeValuesDashboard
+        // Fresh sorting and filters per spec.
+        key={current.variable}
+        definition={current.spec.definition}
+        evaluator={current.evaluator}
+        tab={tab}
+        onTabChange={(next) => update({ tab: next })}
+        showTabs={false}
+        // The title only in embed mode (`render`), which has no editor header.
+        header={embed ? undefined : null}
+      />
+    </>
   );
 };
 
 // Shown for files with a top-level relative values spec (see
-// @quri/squiggle-relative-values). The dashboard has its own List / Grid / Plot
-// tabs.
+// @quri/squiggle-relative-values). Its List / Grid / Plot tabs and spec
+// picker are in the editor header.
 export const relativeValuesView: StudioView = {
   id: "relative-values",
   label: "Relative values",
   isAvailable: ({ filePath, runOutput }) =>
     hasRelativeValues(filePath, runOutput),
   render: (context) => <RelativeValuesView context={context} />,
+  renderToolbar: (context) => <RvToolbar context={context} />,
 };
