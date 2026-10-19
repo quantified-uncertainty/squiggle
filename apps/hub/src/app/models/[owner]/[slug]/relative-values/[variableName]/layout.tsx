@@ -88,6 +88,8 @@ export default async function Layout({
         </div>
       </div>
       <RelativeValuesModelLayout
+        owner={owner}
+        slug={slug}
         code={content.code}
         variableName={variableName}
         cache={relativeValuesExport.cache}

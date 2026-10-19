@@ -11,7 +11,7 @@ import {
   relativeValuesItemsSchema,
 } from "@quri/squiggle-relative-values/core";
 
-import { relativeValuesHubLinker } from "@/relative-values/linker";
+import { relativeValuesServerLinker } from "@/relative-values/serverLinker";
 
 import { getRelativeValuesExportForWriteableModel } from "../utils";
 
@@ -42,7 +42,7 @@ export const buildRelativeValuesCacheAction = actionClient
     const evaluatorResult = await ModelEvaluator.create(
       squiggleSnippet.code,
       relativeValuesExport.variableName,
-      { linker: relativeValuesHubLinker }
+      { linker: relativeValuesServerLinker }
     );
     if (!evaluatorResult.ok) {
       throw new ActionError(
