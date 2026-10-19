@@ -2,7 +2,13 @@
  * PostCSS plugin that scopes a stylesheet to `.squiggle-rv` (see
  * `src/styles/styles.css`):
  *
- * - `.foo` becomes `.squiggle-rv .foo`, and `*` becomes `.squiggle-rv *`;
+ * - selectors with a class (utilities, library styles) are prefixed:
+ *   `.foo` becomes `.squiggle-rv .foo`;
+ * - selectors without classes (Tailwind's preflight: `button`, `h1`, `*`, ...)
+ *   are wrapped in `:where()`, so that they have the specificity of a single
+ *   class: `button` becomes `.squiggle-rv :where(button)`. That's enough to
+ *   override the page's element rules, while class rules of the page (e.g.
+ *   in custom tabs) loaded after this stylesheet still win;
  * - `html`, `:root` and `:host` become `.squiggle-rv` (so Tailwind's preflight
  *   styles the wrapper instead of the page), and `body` rules are dropped;
  * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv)`
@@ -34,9 +40,23 @@ const plugin = ({ scope }) => {
       /^(?:html|:root|:host|body)\s*(>)?\s+(.*)$/
     );
     if (rootPrefix) {
-      return [`${prefix} ${rootPrefix[2]}`];
+      return [scopeRest(rootPrefix[2])];
     }
-    return [`${prefix} ${selector}`];
+    return [scopeRest(selector)];
+  };
+
+  // `input::placeholder` -> `.squiggle-rv :where(input)::placeholder`
+  const scopeRest = (selector) => {
+    if (selector.includes(".")) {
+      return `${prefix} ${selector}`;
+    }
+    const pseudoElement = selector.indexOf("::");
+    const subject =
+      pseudoElement === -1 ? selector : selector.slice(0, pseudoElement);
+    const rest = pseudoElement === -1 ? "" : selector.slice(pseudoElement);
+    return subject.trim()
+      ? `${prefix} :where(${subject.trim()})${rest}`
+      : `${prefix} ${rest}`;
   };
 
   return {
