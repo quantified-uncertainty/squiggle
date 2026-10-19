@@ -132,6 +132,7 @@ export const scenarios: Scenario[] = [
     tags: ["server"],
     state: { file: "values/numbers.squiggle" },
     steps: async (h) => {
+      shared = undefined;
       const base = h.url;
       await h.command("workbench.action.toggleSidebarVisibility");
       await h.command("squiggle.toggleFollowChanges");
@@ -205,6 +206,7 @@ export const scenarios: Scenario[] = [
     tags: ["server", "needs:WP4", "needs:WP5"],
     state: { file: "values/numbers.squiggle" },
     steps: async (h) => {
+      mruCapture = undefined;
       await h.open({ file: "values/dists.squiggle" });
       await h.open({ file: "rv/minimal.squiggle" });
       await h.command("squiggle.view.select", { id: "relative-values" });
@@ -274,6 +276,7 @@ export const scenarios: Scenario[] = [
     tags: ["server"],
     state: { file: "values/numbers.squiggle" },
     steps: async (h) => {
+      invalidCapture = undefined;
       const file = path.join(fixtureServerOf(h).stateDir, "settings.json");
       await fs.writeFile(file, INVALID_SETTINGS);
       await h.page.reload({ waitUntil: "load" });
