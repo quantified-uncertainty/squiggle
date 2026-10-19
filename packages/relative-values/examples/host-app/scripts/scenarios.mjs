@@ -258,13 +258,15 @@ const pageChecks = {
     );
 
     const custom = section("S3", "custom-sort");
+    await page.waitForSelector(`${custom} [data-host-revenue="loaded"]`);
+    await sleep(300);
     const order = await h.rows(custom);
     await h.clickText(`${custom} button`, "Table Settings");
     await page.waitForSelector(`${h.portal} [data-rv-sort="revenue"]`);
     const options = await h.attrs(`${h.portal} [data-rv-sort]`, "data-rv-sort");
     await h.closePortal();
     check(
-      "S3 custom sort: Revenue is in the menu and orders the rows",
+      "S3 custom sort: Revenue is in the menu and orders the rows (once the host's data loaded)",
       order.slice(0, 4).join() ===
         "usageBilling,partnerApi,pricingExperiment,sso" &&
         options.join() === "median,uncertainty,name,revenue",
@@ -335,6 +337,7 @@ const pageChecks = {
       "S4 primitives: host header keeps its font; search and pair details work from host chrome",
       headingFont.includes("Georgia") &&
         searched.join() === "auditLog" &&
+        (await h.count(`${primitives} [data-rv-part="search-chip"]`)) === 0 &&
         (await h.count(
           `${primitives} .acme-toolbar [data-rv-part="unit-picker"]`
         )) === 1 &&
@@ -343,6 +346,61 @@ const pageChecks = {
         )) === 1,
       `heading font ${headingFont}; rows ${searched.join()}`
     );
+    // Inline slots: typing in the toolbar's search box (the host re-renders
+    // on each keystroke) keeps the box mounted and focused.
+    const inline = section("S4", "inline");
+    await page.click(`${inline} input[data-rv-part="search"]`);
+    await page.keyboard.type("bil", { delay: 60 });
+    await sleep(400);
+    const typed = await page.$eval(
+      `${inline} input[data-rv-part="search"]`,
+      (el) => ({ value: el.value, focused: document.activeElement === el })
+    );
+    const inlineRows = await h.rows(inline);
+    check(
+      "S4 inline slots: the search box keeps focus while the host re-renders",
+      typed.value === "bil" &&
+        typed.focused &&
+        inlineRows.join() === "usageBilling,observability" &&
+        (await h.text(`${inline} [data-host-search]`)) === "bil",
+      `${JSON.stringify(typed)}; rows ${inlineRows.join()}`
+    );
+    // Fast typing (no delay between keys) into the controlled box: no
+    // character is lost while earlier keystrokes' renders land.
+    const box = `${inline} input[data-rv-part="search"]`;
+    await page.click(box, { clickCount: 3 });
+    await page.keyboard.press("Backspace");
+    await page.keyboard.type("partner api");
+    await sleep(500);
+    const fast = await page.$eval(box, (el) => el.value);
+    check(
+      "S4 inline slots: fast typing into a controlled search keeps every character",
+      fast === "partner api" &&
+        (await h.rows(inline)).join() === "partnerApi" &&
+        (await h.text(`${inline} [data-host-search]`)) === "partner api",
+      fast
+    );
+    await h.clickText(`${inline} button`, "Plot");
+    await sleep(600);
+    check(
+      "S4 Toolbar slot in the plot view",
+      (await h.count(`${inline} [data-host-toolbar="plot"]`)) === 1 &&
+        (await h.text(`${inline} [data-host-toolbar="plot"]`)).includes(
+          "Export plot"
+        ),
+      ""
+    );
+    const hiddenToolbar = section("S4", "toolbar-hidden");
+    check(
+      "S4 list.toolbar: false shows the active search as a chip",
+      (await h.count(`${hiddenToolbar} [data-rv-part="toolbar"]`)) === 0 &&
+        (
+          await h.text(`${hiddenToolbar} [data-rv-part="search-chip"]`)
+        ).includes("sign") &&
+        (await h.rows(hiddenToolbar)).join() === "sso",
+      ""
+    );
+
     const error = await h.text(`${section("S4", "error")} .acme-alert`);
     check(
       "S4 Error slot",
@@ -405,6 +463,36 @@ const pageChecks = {
         hash.includes("rv.view") === false &&
         events.includes("api: set"),
       `${pair.join(" / ")}; ${hash}`
+    );
+
+    // Two setState calls in one click, both keys controlled from the URL.
+    await h.clickText(`${urlScope} button`, "Rank by value in SSO");
+    await sleep(500);
+    const ranked = await page.evaluate(() => location.hash);
+    check(
+      "S5 URL: two changes in one handler both reach the URL",
+      ranked.includes("rv.unit=sso") && ranked.includes("rv.sort=-median"),
+      ranked
+    );
+    // scrollTo in the list view (rows are display: contents).
+    const scroller = `${urlScope} .squiggle-rv .overflow-auto`;
+    const before = await page.$eval(scroller, (el) => el.scrollTop);
+    await h.clickText(`${urlScope} button`, "Scroll to Pricing experiment");
+    await sleep(500);
+    const after = await page.$eval(scroller, (el) => el.scrollTop);
+    const visible = await page.$eval(
+      `${urlScope} [data-rv-item="pricingExperiment"] > *`,
+      (cell, selector) => {
+        const box = cell.getBoundingClientRect();
+        const view = document.querySelector(selector).getBoundingClientRect();
+        return box.top >= view.top - 1 && box.bottom <= view.bottom + 1;
+      },
+      scroller
+    );
+    check(
+      "S5 apiRef.scrollTo({ item }) scrolls the list to the row",
+      after > before && visible,
+      `scrollTop ${before} -> ${after}`
     );
 
     // Preferences survive a reload.
@@ -486,6 +574,22 @@ const pageChecks = {
         (await h.count(`${bands} [data-rv-part="grid-band"]`)) > 1,
       `${rowCount[0]} rows × ${columns[0]} columns`
     );
+    // columns.limitBy: sorting the columns by name keeps the same 5.
+    const columnIds = () =>
+      h.attrs(`${bands} [data-rv-column-header]`, "data-rv-column-header");
+    const top5 = await columnIds();
+    await h.clickText(`${bands} button`, "Column Settings");
+    await page.waitForSelector(`${h.portal} [data-rv-sort="name"]`);
+    await page.click(`${h.portal} [data-rv-sort="name"]`);
+    await sleep(300);
+    await h.closePortal();
+    const byName = await columnIds();
+    check(
+      "S6 columns.limitBy: re-sorting the columns keeps the same 5",
+      top5.length === 5 &&
+        [...byName].sort().join() === [...top5].sort().join(),
+      `${top5.join(", ")} -> ${byName.join(", ")}`
+    );
     const explicit = section("S6", "explicit");
     const headers = await h.attrs(
       `${explicit} [data-rv-column-header]`,
@@ -537,6 +641,20 @@ const pageChecks = {
         similarity[0][1] === 360,
       JSON.stringify(similarity)
     );
+    const drawn = (scope) =>
+      page.$eval(`${scope} canvas`, (canvas) => window.__rvCanvas(canvas));
+    const ylog = await drawn(section("S7", "ylog"));
+    check(
+      "S7 log uncertainty axis with a single-unit reference draws the dots",
+      ylog.arcs === 14 && ylog.texts.some((t) => /\d/.test(t)),
+      `${ylog.arcs} dots; texts ${ylog.texts.slice(0, 6).join(" | ")}`
+    );
+    const order = await canvasHeights(section("S7", "order"));
+    check(
+      "S7 plots in the order of display.plot.plots",
+      order.map(([plot]) => plot).join() === "valueUncertainty,similarity",
+      JSON.stringify(order)
+    );
   },
 
   async s8(page, check) {
@@ -586,13 +704,17 @@ const pageChecks = {
       (el) => el.className
     );
     const menu = await h.text(h.portal);
+    // As rendered (innerText applies CSS text-transform).
+    const menuShown = await page.$eval(h.portal, (el) => el.innerText);
     await h.closePortal();
     check(
-      "S9 labels: French strings",
+      "S9 labels: French strings, with their casing",
       content.includes("Liste") &&
         content.includes("Réglages du tableau") &&
-        menu.includes("Trier par"),
-      ""
+        menu.includes("Trier par") &&
+        menuShown.includes("Trier par") &&
+        !menuShown.includes("Trier Par"),
+      menuShown.replace(/\s+/g, " ").slice(0, 80)
     );
     check(
       "S9 format: factor uncertainty and decimal commas",
@@ -613,6 +735,98 @@ const pageChecks = {
       "S9 theme variables: font and accent",
       root.font.includes("Avenir") && selectedTab.includes("rgb(11, 61, 145)"),
       `font ${root.font}; selected tab ${selectedTab}`
+    );
+
+    const plotTexts = await page.$eval(
+      `${section("S9", "plot-format")} canvas`,
+      (canvas) => window.__rvCanvas(canvas).texts
+    );
+    check(
+      "S9 formatNumber formats the plot's tick labels",
+      plotTexts.some((t) => /^\d+,\d+$/.test(t)) &&
+        !plotTexts.some((t) => /^\d+\.\d+$/.test(t)),
+      plotTexts.slice(0, 10).join(" | ")
+    );
+
+    const sidebarScope = section("S9", "sidebar");
+    const sidebarText = await h.text(
+      `${sidebarScope} [data-rv-part="sidebar"]`
+    );
+    const closeLabel = await page.$eval(
+      `${sidebarScope} [data-rv-part="sidebar"] button[aria-label]`,
+      (el) => el.getAttribute("aria-label")
+    );
+    const labelCells = await page.$$eval(
+      `${sidebarScope} [data-rv-part="sidebar"] .grid > div`,
+      (els) => els.filter((el) => el.scrollWidth > el.clientWidth + 1).length
+    );
+    check(
+      "S9 sidebar: factor uncertainty, translated close label, no overflowing labels",
+      sidebarText.includes("×/÷") &&
+        sidebarText.includes("incertitude (facteur)") &&
+        closeLabel === "Fermer" &&
+        labelCells === 0,
+      `close "${closeLabel}", ${labelCells} overflowing cells`
+    );
+
+    const nameSize = await page.$eval(
+      `${section("S9", "font-size")} [data-rv-part="list-row"] .text-sm`,
+      (el) => getComputedStyle(el).fontSize
+    );
+    check(
+      "S9 --squiggle-rv-font-size scales the text (text-sm = 0.875 × 20px)",
+      nameSize === "17.5px",
+      nameSize
+    );
+
+    const ancestor = section("S9", "ancestor");
+    const columnWidth = (scope) =>
+      page.$eval(
+        `${scope} [data-rv-part="grid-cell"]`,
+        (el) => el.getBoundingClientRect().width
+      );
+    const wide = await columnWidth(`${ancestor} [data-host-wide]`);
+    const inProvider = await columnWidth(`${ancestor} [data-host-in-provider]`);
+    const inProviderClass = await page.$eval(
+      `${ancestor} [data-host-in-provider] [data-rv-part="grid"]`,
+      (el) => el.closest(".squiggle-rv").className
+    );
+    check(
+      "S9 compact density: an ancestor's cell width wins; a compact view in a provider's root is compact",
+      Math.round(wide) === 180 &&
+        Math.round(inProvider) === 112 &&
+        inProviderClass.includes("squiggle-rv-compact"),
+      `ancestor ${wide}px; in provider ${inProvider}px (${inProviderClass})`
+    );
+
+    const dark = section("S9", "dark");
+    const darkColors = await page.evaluate((scope) => {
+      const color = (selector, property) => {
+        const el = document.querySelector(`${scope} ${selector}`);
+        return el ? getComputedStyle(el)[property] : "missing";
+      };
+      // The unit's own cell: tier-1 uncertainty text.
+      const own = document.querySelector(
+        `${scope} [data-rv-part="list-row"][data-rv-item="sso"] [data-rv-uncertainty]`
+      );
+      return {
+        cellText: own ? getComputedStyle(own).color : "missing",
+        sidebar: color('[data-rv-part="sidebar"]', "backgroundColor"),
+        chip: color('[data-rv-part="search-chip"]', "backgroundColor"),
+        corner: color('[data-rv-part="grid"] .sticky.z-20', "backgroundColor"),
+        hidden: color("[data-rv-hidden]", "backgroundColor"),
+        tier5: color('[data-rv-tier="5"]', "color"),
+      };
+    }, dark);
+    check(
+      "S9 dark theme: cell text, sidebar, search chip, grid corner and hidden cells follow the variables; [data-rv-tier] recolors the warm tiers",
+      darkColors.cellText === "rgb(229, 231, 235)" &&
+        darkColors.sidebar === "rgb(31, 41, 55)" &&
+        darkColors.chip === "rgb(31, 41, 55)" &&
+        darkColors.corner === "rgb(17, 24, 39)" &&
+        darkColors.hidden === "rgb(55, 65, 81)" &&
+        darkColors.tier5 === "rgb(252, 165, 165)",
+      JSON.stringify(darkColors)
     );
   },
 
@@ -646,6 +860,16 @@ const pageChecks = {
       writes[0] === "144" && writes[1] === "0",
       `${writes[0]} pairs written, ${writes[1]} more than once`
     );
+    const ranked = section("S10", "spec-ranked");
+    const top3 = await h.rows(`${ranked} [data-host-ranked="top3"]`);
+    const all = await h.rows(`${ranked} [data-host-ranked="all"]`);
+    check(
+      "S10 two ranked views on one live spec both finish, with the same top 3",
+      top3.length === 3 &&
+        all.length === 12 &&
+        top3.join() === all.slice(0, 3).join(),
+      `${top3.join(", ")} / ${all.slice(0, 3).join(", ")}`
+    );
     const provider = section("S10", "provider");
     await page.type(`${provider} input[data-rv-part="search"]`, "audit");
     await sleep(500);
@@ -671,9 +895,42 @@ const pageChecks = {
 };
 
 /** Screenshots and checks of every scenario page. */
+// Records what the canvas plots draw: the number of dots (arcs) and the texts
+// (tick labels, axis titles), per canvas; `window.__rvCanvas(canvas)`.
+function recordCanvases() {
+  const log = new WeakMap();
+  const entry = (canvas) => {
+    let value = log.get(canvas);
+    if (!value) {
+      value = { arcs: 0, texts: [] };
+      log.set(canvas, value);
+    }
+    return value;
+  };
+  const proto = CanvasRenderingContext2D.prototype;
+  const { arc, fillText, clearRect } = proto;
+  proto.clearRect = function (...args) {
+    // A new drawing.
+    log.set(this.canvas, { arcs: 0, texts: [] });
+    return clearRect.apply(this, args);
+  };
+  proto.arc = function (...args) {
+    if (args.every(Number.isFinite)) {
+      entry(this.canvas).arcs++;
+    }
+    return arc.apply(this, args);
+  };
+  proto.fillText = function (...args) {
+    entry(this.canvas).texts.push(String(args[0]));
+    return fillText.apply(this, args);
+  };
+  window.__rvCanvas = (canvas) => log.get(canvas) ?? { arcs: 0, texts: [] };
+}
+
 export async function runScenarios({ browser, url, outDir, root, check }) {
   for (const id of scenarioIds) {
     const page = await browser.newPage();
+    await page.evaluateOnNewDocument(recordCanvases);
     await page.setViewport({ width: 1400, height: 1000, deviceScaleFactor: 1 });
     const errors = [];
     page.on("pageerror", (error) => errors.push(String(error)));

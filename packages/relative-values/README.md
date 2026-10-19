@@ -410,6 +410,7 @@ A single view never renders a header or a tab bar, and ignores `state.view`. `co
 
 // Controlled and user-changeable, with a host-registered sort:
 const [unit, setUnit] = useState<string | null>("sso");
+const revenue = useRevenue(); // host data, e.g. loaded after the dashboard
 <RelativeValuesBundleDashboard
   bundle={bundle}
   state={{ unit }}
@@ -419,7 +420,8 @@ const [unit, setUnit] = useState<string | null>("sso");
   sorts={{
     revenue: {
       label: "Revenue",
-      compare: (a, b) => revenue[a.item.id] - revenue[b.item.id],
+      compare: (a, b) =>
+        (revenue?.[a.item.id] ?? 0) - (revenue?.[b.item.id] ?? 0),
     },
   }}
   controls={{
@@ -429,6 +431,8 @@ const [unit, setUnit] = useState<string | null>("sso");
 ```
 
 Sort modes: `default` (the default order: `state.ids`, else `scope.ids`, else the definition), `median` ("Value"), `uncertainty`, `similarity`, `name` (locale-aware, `format.locale`), `cluster`, and the ids of `sorts`. Ties keep the default order in both directions, and missing values (not computed yet, or errors) sort last in both directions. Custom sort ids can't start with `-`.
+
+A custom sort's `compare` may close over host data: when the `compare` of a sort in use (by `sort`, `limitBy` or `columns`) is a new function, the order is recomputed, so the list re-sorts when the data arrives. Functions are compared by identity, so an inline `compare` re-sorts on every render of your component; wrap it in `useCallback` if that component re-renders often.
 
 In grouped lists (the default), the compass icons and the column-header dropdown pick the unit of one table (`clusterUnits`); in a flat list (`display.list.groupByCluster: false`) and in `RelativeValuesUnitPicker` they set the global `unit`.
 
@@ -447,7 +451,7 @@ In grouped lists (the default), the compass icons and the column-header dropdown
   }}
   components={{
     TabBar: ({ tabs, active, onChange }) => <MySegmented value={active} onChange={onChange} options={tabs} />,
-    Toolbar: ({ children }) => <div className="row">{children}<ExportButton /></div>,
+    Toolbar: ({ view, children }) => <div className="row">{children}<ExportButton view={view} /></div>,
     Progress: ({ variant, progress, Default }) => (variant === "compact" ? <Default variant={variant} progress={progress} /> : <MySpinner />),
     PairDetails: ({ Default, ...props }) => <MyDrawer title={`${props.numerator.name} / ${props.denominator.name}`} onClose={props.close}><Default {...props} /></MyDrawer>,
     Empty: ({ reason }) => <p>{reason === "scope" ? "Nothing here" : "No matches"}</p>,
@@ -464,28 +468,31 @@ In grouped lists (the default), the compass icons and the column-header dropdown
     <RelativeValuesRoot><RelativeValuesUnitPicker /></RelativeValuesRoot>
     <RelativeValuesRoot><RelativeValuesSortMenu axis="rows" sections={["sort"]} /></RelativeValuesRoot>
   </header>
-  <RelativeValuesSingleView view="list" controls={{ list: { toolbar: false, sidebar: false } }} />
+  {/* Your search box is the only one: no "Search: x ×" chip either. */}
+  <RelativeValuesSingleView view="list" controls={{ list: { toolbar: false, sidebar: false }, searchChip: false }} />
   <aside><RelativeValuesRoot><RelativeValuesPairDetails /></RelativeValuesRoot></aside>
 </RelativeValuesProvider>
 ```
 
-`controls={false}` turns everything off, `true` (the default) everything on, and an object is merged over the defaults (a single view under a provider merges its `controls` over the provider's). Slots get the built-in implementation as `Default`; define slot components outside of render, so that they keep their identity.
+`controls={false}` turns everything off, `true` (the default) everything on, and an object is merged over the defaults (a single view under a provider merges its `controls` over the provider's).
 
-| Control                        | Hide with                                                           | Replace or place with                           |
-| ------------------------------ | ------------------------------------------------------------------- | ----------------------------------------------- |
-| title                          | `controls.header`, `header={null}`                                  | `header` (a node)                               |
-| tab bar                        | `controls.tabs` (alias `showTabs`)                                  | `TabBar` slot                                   |
-| Table / Row / Column Settings  | `controls.list.settings`, `grid.rowSettings`, `grid.columnSettings` | `RelativeValuesSortMenu`                        |
-| their sections and sort modes  | `controls.sortMenu.clusters`, `.sort`, `.sortOptions`               | `RelativeValuesSortMenu sections sortOptions`   |
-| cluster filter                 | `controls.sortMenu.clusters`, `controls.plot.clusterFilter`         | `ClusterFilter`                                 |
-| search box                     | `controls.list.search` (a "Search: x ×" chip stays visible)         | `RelativeValuesSearchBox`                       |
-| unit pickers (compass, header) | `controls.list.unitPicker`                                          | `RelativeValuesUnitPicker`                      |
-| list sidebar                   | `controls.list.sidebar`                                             | `PairDetails` slot, `RelativeValuesPairDetails` |
-| cluster diagram                | `controls.grid.clusterDiagram`                                      | `RelativeValuesClusterDiagram`                  |
-| grid mode icons                | `controls.grid.modeControls`                                        | `RelativeValuesGridModeControls`                |
-| toolbars                       | `controls.list.toolbar`, `controls.grid.toolbar`                    | `Toolbar` slot                                  |
-| progress                       | `controls.progress` (the compact one)                               | `Progress` slot, `RelativeValuesProgressBar`    |
-| value cells                    |                                                                     | `Cell` slot                                     |
+Slots get the built-in implementation as `Default`. They can be written inline, as above: a new function with the same code (as an inline slot is on every render) re-renders the slot instead of remounting it, so the toolbar's search box keeps its focus while you type, and the live sidebar's charts don't re-run. A slot with different code is remounted. The `Toolbar` slot gets the `view` (`"list"`, `"grid"` or `"plot"`) and the built-in toolbar as `children`; it's rendered in every view whose `toolbar` control is on (`controls.list.toolbar`, `grid.toolbar`, `plot.toolbar`), also when no built-in control is left in it (the plot's built-in toolbar is empty), so an Export button can go in every view.
+
+| Control                        | Hide with                                                                                                                           | Replace or place with                           |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| title                          | `controls.header`, `header={null}`                                                                                                  | `header` (a node)                               |
+| tab bar                        | `controls.tabs` (alias `showTabs`)                                                                                                  | `TabBar` slot                                   |
+| Table / Row / Column Settings  | `controls.list.settings`, `grid.rowSettings`, `grid.columnSettings`                                                                 | `RelativeValuesSortMenu`                        |
+| their sections and sort modes  | `controls.sortMenu.clusters`, `.sort`, `.sortOptions` (`[]` hides "Sort by")                                                        | `RelativeValuesSortMenu sections sortOptions`   |
+| cluster filter                 | `controls.sortMenu.clusters`, `controls.plot.clusterFilter`                                                                         | `ClusterFilter`                                 |
+| search box                     | `controls.list.search`, `list.toolbar` (an active search then shows as a "Search: x ×" chip; `controls.searchChip: false` hides it) | `RelativeValuesSearchBox`                       |
+| unit pickers (compass, header) | `controls.list.unitPicker`                                                                                                          | `RelativeValuesUnitPicker`                      |
+| list sidebar                   | `controls.list.sidebar`                                                                                                             | `PairDetails` slot, `RelativeValuesPairDetails` |
+| cluster diagram                | `controls.grid.clusterDiagram`                                                                                                      | `RelativeValuesClusterDiagram`                  |
+| grid mode icons                | `controls.grid.modeControls`                                                                                                        | `RelativeValuesGridModeControls`                |
+| toolbars                       | `controls.list.toolbar`, `grid.toolbar`, `plot.toolbar`                                                                             | `Toolbar` slot                                  |
+| progress                       | `controls.progress` (the compact one)                                                                                               | `Progress` slot, `RelativeValuesProgressBar`    |
+| value cells                    |                                                                                                                                     | `Cell` slot                                     |
 
 Not replaceable: the drawing inside the canvas plots, and the Squiggle charts in the live-mode sidebar.
 
@@ -517,6 +524,13 @@ function PortfolioRoute() {
   );
 }
 
+// Custom tabs, or a first tab other than "list": pass the tab ids to both helpers (the
+// first one is the default view, which the URL omits).
+const views = ["ranking", "list", "grid"] as const;
+const state = relativeValuesStateFromSearchParams(params, { keys: URL_KEYS, views });
+// …and in onStateChange:
+setParams(relativeValuesStateToSearchParams(next, { keys: URL_KEYS, views, base: params }));
+
 // Saved preferences: uncontrolled, with saved defaults.
 const saved = parseRelativeValuesState(JSON.parse(localStorage.getItem(key) ?? "null")).state;
 <RelativeValuesBundleDashboard bundle={bundle} defaultState={saved}
@@ -525,14 +539,20 @@ const saved = parseRelativeValuesState(JSON.parse(localStorage.getItem(key) ?? "
 // Linked dashboards share some keys through the host…
 const [link, setLink] = useState<RelativeValuesStateInput>({ unit: null, clusters: null, search: "" });
 const onLink = (next: RelativeValuesState<string>) => setLink({ unit: next.unit, clusters: next.clusters, search: next.search });
-<RelativeValuesSingleView bundle={bundle} view="list" state={link} onStateChange={onLink} />
+// A flat list: its compass icons set `unit` (in a grouped list they set `clusterUnits`, per table).
+<RelativeValuesSingleView bundle={bundle} view="list" state={link} onStateChange={onLink}
+  display={{ list: { groupByCluster: false } }} />
 <RelativeValuesSingleView bundle={bundle} view="plot" state={link} onStateChange={onLink} />
 // …or share everything with one provider (S10).
 ```
 
 `onStateChange(next, change)` gets the whole new state and `change`: `reason` (`"view"`, `"unit"`, `"filter"`, `"search"`, `"sort"`, `"limit"`, `"columns"`, `"gridMode"`, `"selection"`, `"set"`, `"reset"`), the `keys` that changed, `axis` (`"rows"` or `"columns"`, for axis changes), `source` (`"user"` for built-in UI, `"api"` for `actions`, `apiRef` and host code) and the `previous` state. It's called synchronously in the event handler, never while rendering. Custom tab ids are typed: with `tabs={["list", { id: "ranking", … }]}`, `next.view` is `"list" | "grid" | "plot" | "ranking"`; pass `views` to the URL helpers to validate them (`relativeValuesStateFromSearchParams(params, { views: ["list", "ranking"] as const })`).
 
-`apiRef` (a prop, not `ref`, so that it works with generic components and React 18): `getState()`, `setState(input | (state) => input)`, `reset(keys?)` (back to `defaultState`, then the defaults), `getData()` (what the views show, e.g. for an export), `scrollTo({ item } | { pair })` and `whenReady()` (resolves once the mounted views' pairs are computed; the root then has `data-rv-ready`).
+Several changes in one event build on each other: after `setUnit("sso")` and `setSort(…)` in one click handler, the second `next` has both changes, also when both keys are controlled and the host hasn't passed them back yet. A proposal that the host doesn't take ends with the event.
+
+The search box shows what you type at once and filters the views in a transition. With a controlled `search`, update it in `onStateChange` (synchronously, or within a microtask, as routers do); once the transition has rendered, the box shows the effective value again, so a rejected change disappears. To debounce, debounce the URL write, not the state.
+
+`apiRef` (a prop, not `ref`, so that it works with generic components and React 18): `getState()`, `setState(input | (state) => input)`, `reset(keys?)` (back to `defaultState`, then the defaults), `getData()`, `scrollTo({ item } | { pair })` and `whenReady()` (resolves once the mounted views' pairs are computed; the root then has `data-rv-ready`). `useRef<RelativeValuesHandle>(null)` works for dashboards, single views and `RelativeValuesProvider` (whose views are `string`). `getData()` returns the pipeline's result (`items`, `rows`, `columns`) in the pipeline's order, which is what a flat list shows and what custom views and headless code get; the grid and grouped lists re-order it for display (see [the pipeline](#the-pipeline)).
 
 To keep two dashboards' state in one URL, give them different `prefix`es (default `"rv."`).
 
@@ -545,10 +565,12 @@ To keep two dashboards' state in one URL, give them different `prefix`es (defaul
   defaultState={{ columns: "rows", gridMode: "half" }}
   display={{ grid: { cell: "value", heatmap: false, cellWidth: 110 } }} />
 
-// Rows: one cluster. Columns: the 5 most valuable items. Cluster bands.
+// Rows: one cluster. Columns: the 5 most valuable items, which Column Settings re-sorts
+// without changing which 5 (limitBy). Cluster bands.
 <RelativeValuesSingleView bundle={bundle} view="grid"
   defaultState={{ clusters: ["research"], sort: { mode: "cluster" },
-                  columns: { sort: { mode: "median", desc: true }, limit: 5 } }}
+                  columns: { limit: 5, limitBy: { mode: "median", desc: true },
+                             sort: { mode: "median", desc: true } } }}
   display={{ grid: { cell: "full", groupByCluster: true } }} />
 
 // Explicit rows and columns:
@@ -561,7 +583,7 @@ To keep two dashboards' state in one URL, give them different `prefix`es (defaul
 </RelativeValuesProvider>
 ```
 
-`columns: "rows"` mirrors the rows (Column Settings is then hidden, and half mode hides the diagonal and above, by display order); otherwise columns are an independent axis with their own `ids`, `clusters`, `sort` and `limit` (search doesn't apply to columns). Cell display: `"value"` (median), `"valueAndUncertainty"` (median ± uncertainty, the default) or `"full"` (with the 90% interval). Cell clicks set `selectedPair` (highlighting the cell) and call `onPairClick`.
+`columns: "rows"` mirrors the rows (Column Settings is then hidden, and half mode hides the diagonal and above, by display order); otherwise columns are an independent axis with their own `ids`, `clusters`, `sort`, `limit` and `limitBy`, which work as the rows' (search doesn't apply to columns). Without `limitBy`, `limit` keeps the first N by `columns.sort`, so re-sorting the columns changes which N. Cell display: `"value"` (median), `"valueAndUncertainty"` (median ± uncertainty, the default) or `"full"` (with the 90% interval). Cell clicks set `selectedPair` (highlighting the cell) and call `onPairClick`.
 
 ### S7: plot
 
@@ -582,7 +604,7 @@ To keep two dashboards' state in one URL, give them different `prefix`es (defaul
 />
 ```
 
-`plots`: `"similarity"` and/or `"valueUncertainty"`. The value / uncertainty plot's `reference` is `"auto"` (the unit if set, else the recommended unit, else the average over all items in scope), `"unit"` or `"average"`. The dots follow scope, filters, search and limit; `selectedItem` rings a dot, and clicking a dot selects it (and calls `onItemClick`). New kinds of plots are custom views (S8).
+`plots`: `"similarity"` and/or `"valueUncertainty"`, in the order shown (`[]` shows no plot). The value / uncertainty plot's `reference` is `"auto"` (the unit if set, else the recommended unit, else the average over all items in scope), `"unit"` or `"average"`. A log scale leaves out the points it can't show: with `yScale: "log"`, the unit against itself (no uncertainty); with `xScale: "log"`, zero medians. The dots follow scope, filters, search and limit; `selectedItem` rings a dot, and clicking a dot selects it (and calls `onItemClick`). New kinds of plots are custom views (S8).
 
 ### S8: custom views from headless data
 
@@ -609,7 +631,9 @@ const TopInitiatives: FC<{ count: number }> = ({ count }) => {
   <TopInitiatives count={5} />
 </RelativeValuesProvider>
 
-<RelativeValuesProvider spec={spec} modelCode={code} precompute>
+// Live: "visible" computes only what the widget needs (items × unit). With
+// `precompute` (true), every pair in scope follows in the background.
+<RelativeValuesProvider spec={spec} modelCode={code} precompute="visible">
   <TopInitiatives count={5} />
   <RelativeValuesRoot><RelativeValuesProgressBar variant="compact" /></RelativeValuesRoot>
 </RelativeValuesProvider>
@@ -627,7 +651,7 @@ const { rows } = selectRelativeValues({
 
 The controller (`useRelativeValues()`, and the context of custom tabs and views) has: `status` (`"loading"` while a spec's evaluator is created, `"computing"` until this consumer's pairs are computed, `"ready"`, or `"error"` with `error`), `items`, `rows` (`{ item, cluster, rank, unit, result, value }`, the value in units of `unit`; `value` is undefined until computed), `filtered` (the items before `limit`), `universe` (the items in scope), `columns`, `unit`, `recommendedUnit`, `tableUnit(clusterId)`, `clusters`, `state`, `actions` (`setView`, `setUnit`, `setSearch`, `setClusters`, `toggleCluster`, `setSort`, `setLimit`, `setGridMode`, `selectItem`, `selectPair`, `setState`, `reset`), `definition`, `evaluator`, `compare(id1, id2)` (cache only while precomputing, so it never blocks), `format` (`number`, `value`, `uncertainty`, `range`), `labels`, `progress`, `isStale` and `warnings`.
 
-`requires` says which pairs must be computed before `status` is `"ready"`: `"none"`, `"unit"` (each item × the unit; the default), `"items"` (all pairs of the shown items), `"all"` (all pairs in scope; the default for custom tabs) or a function `(data) => pairs`. A top 10 over 1,000 items with `"unit"` needs about 1,000 pairs, not a million. `overrides` apply to this consumer only and are never written back: that's how a "top 5" widget sits next to the full list on one provider.
+`requires` says which pairs must be computed before `status` is `"ready"`: `"none"`, `"unit"` (each item × the unit; the default), `"items"` (all pairs of the shown items), `"all"` (all pairs in scope; the default for custom tabs) or a function `(data) => pairs` (it may close over props: when it returns other pairs, they're computed). A top 10 over 1,000 items with `"unit"` needs about 1,000 pairs, not a million, with `precompute="visible"`; `precompute` (true) adds a background pass over all the pairs in scope (a million here). `overrides` apply to this consumer only and are never written back: that's how a "top 5" widget sits next to the full list on one provider.
 
 ### S9: labels, numbers, density, theme
 
@@ -677,12 +701,14 @@ const fr = new Intl.NumberFormat("fr-FR", { maximumSignificantDigits: 2 });
 ```
 
 - `labels`: every built-in string, by key; see `defaultRelativeValuesLabels` for the keys and the English defaults.
-- `format`: `locale` (name sort, progress counts), `precision` (significant digits of `value`, `uncertainty`, `range` and `summary`: 1 / 2 / 1 / 2), `uncertainty` (`"om"`, `"factor"` or `"hidden"`), and `formatNumber(value, { kind, place, precision })` returning a string or undefined.
+- `format`: `locale` (name sort, progress counts), `precision` (significant digits of `value`, `uncertainty`, `range` and `summary`: 1 / 2 / 1 / 2), `uncertainty` (`"om"`, `"factor"` or `"hidden"`, in the cells and the sidebar), and `formatNumber(value, { kind, place, precision })` returning a string or undefined. `place` is `"list"`, `"grid"`, `"clusterGrid"`, `"sidebar"` or `"plot"` (the value / uncertainty plot's tick labels).
 - `display`: `density` (`"comfortable"` or `"compact"`, which also adds `squiggle-rv-compact` to the root and portals); `list` (`groupByCluster`, `cell`, `descriptions`, `itemIds`, `clusterTags`, `sidebarPosition: "side" | "below"`); `grid` (`cell`, `heatmap`, `cellWidth`, `groupByCluster`); `plot` (`plots`, `height`, `titles`, `valueUncertainty`).
-- CSS variables, set on any ancestor, or with `themeClassName` to reach portals too (custom properties aren't reset by the wrapper's `all: initial`): `--squiggle-rv-font-family`, `--squiggle-rv-font-size`, `--squiggle-rv-text`, `--squiggle-rv-muted`, `--squiggle-rv-bg`, `--squiggle-rv-border`, `--squiggle-rv-header-bg`, `--squiggle-rv-accent` (selected tab, selected cell and dot, progress), `--squiggle-rv-selected-bg`, `--squiggle-rv-radius`, `--squiggle-rv-cell-padding`, `--squiggle-rv-grid-cell-width` and `--squiggle-rv-sidebar-width`. Each falls back to the default look.
-- Stable hooks for your CSS and tests: `data-rv-part` (`header`, `tab-bar`, `toolbar`, `list`, `list-table`, `list-row`, `list-unit`, `grid`, `grid-cell`, `grid-band`, `plot`, `sidebar`, `progress`, `search`, `search-chip`, `empty`, `custom`, `cluster-filter`, `cluster-diagram`, `sort-menu`, `unit-picker`, `grid-mode`), `data-rv-item` (list rows), `data-rv-row` / `data-rv-column` (grid cells), `data-rv-count` (items shown by a view), `data-rv-ready` and `data-rv-computing`. The library's classes are scoped as `.squiggle-rv .x`, so your rules need a class and a part: `.acme-rv [data-rv-part="tab-bar"]`. Internal class names are not API.
+- CSS variables, set on any ancestor, or with `themeClassName` to reach portals too (custom properties aren't reset by the wrapper's `all: initial`): `--squiggle-rv-font-family`, `--squiggle-rv-font-size` (the base size: all text sizes are multiples of it; use px or rem), `--squiggle-rv-text`, `--squiggle-rv-muted`, `--squiggle-rv-bg`, `--squiggle-rv-border`, `--squiggle-rv-header-bg`, `--squiggle-rv-panel-bg` (the list sidebar, the search chip), `--squiggle-rv-accent` (selected tab, selected cell and dot, progress), `--squiggle-rv-selected-bg` (also cell hover), `--squiggle-rv-radius`, `--squiggle-rv-cell-padding`, `--squiggle-rv-grid-cell-width` and `--squiggle-rv-sidebar-width`. Each falls back to the default look; compact density changes the defaults of the last two, never values you set.
+- Stable hooks for your CSS and tests: `data-rv-part` (`header`, `tab-bar`, `toolbar`, `list`, `list-table`, `list-row`, `list-unit`, `grid`, `grid-cell`, `grid-band`, `plot`, `sidebar`, `progress`, `search`, `search-chip`, `empty`, `custom`, `cluster-filter`, `cluster-diagram`, `sort-menu`, `unit-picker`, `grid-mode`), `data-rv-item` (list rows), `data-rv-row` / `data-rv-column` (grid cells), `data-rv-uncertainty` (a cell's uncertainty) and `data-rv-tier` (`1` to `5`, on its text and unit), `data-rv-count` (items shown by a view), `data-rv-ready` and `data-rv-computing`. The library's classes are scoped as `.squiggle-rv .x`, so your rules need a class and a part: `.acme-rv [data-rv-part="tab-bar"]`. Internal class names are not API.
 
-Not covered: plurals, right-to-left layouts, number formatting in the live sidebar's Squiggle charts, and dark canvas axes.
+A dark theme takes the variables above (example app, `#/s9`). Not themed: the canvas axes, the dropdown menus and tooltips (which keep @quri/ui's light styling), and the warm uncertainty colors of the cells, which you can recolor through `[data-rv-tier="3"]` (to `"5"`), e.g. `.squiggle-rv.acme-dark [data-rv-tier="5"] { color: #fca5a5; }`.
+
+Not covered: plurals, right-to-left layouts, and number formatting in the live sidebar's Squiggle charts.
 
 ### S10: several dashboards on a page; server rendering
 
@@ -711,21 +737,21 @@ Server rendering: nothing touches `window` or `document` at import or while rend
 
 #### State
 
-| Key            | Default                                                                              | Meaning                                                                                            |
-| -------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| `view`         | the first tab (`"list"` for a provider)                                              | active tab                                                                                         |
-| `unit`         | `null`                                                                               | global unit; `null`: recommended (each list table uses its cluster's recommended unit)             |
-| `clusterUnits` | `{}`                                                                                 | per-table units of grouped lists, by cluster id (`UNCLUSTERED`, `""`, for items without a cluster) |
-| `ids`          | `null`                                                                               | allowlist of the shown items; its order is the default order                                       |
-| `clusters`     | `null`                                                                               | selected clusters (`null`: all; `[]`: none, so only items without a cluster)                       |
-| `search`       | `""`                                                                                 | case-insensitive substring of name, id, description, cluster id or cluster name                    |
-| `sort`         | `{ mode: "default", desc: false }`                                                   | display order                                                                                      |
-| `limit`        | `null`                                                                               | keep the first N after ranking                                                                     |
-| `limitBy`      | `null`                                                                               | the ranking that picks the `limit` items (`null`: `sort`)                                          |
-| `columns`      | `{ ids: null, clusters: null, sort: { mode: "default", desc: false }, limit: null }` | the grid's columns: an independent axis, or `"rows"` to mirror the rows                            |
-| `gridMode`     | `"full"`                                                                             | `"half"` hides the upper triangle                                                                  |
-| `selectedItem` | `null`                                                                               | highlighted item                                                                                   |
-| `selectedPair` | `null`                                                                               | `[numerator, denominator]`: the list sidebar / `RelativeValuesPairDetails`                         |
+| Key            | Default                                                                                             | Meaning                                                                                            |
+| -------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `view`         | the first tab (`"list"` for a provider)                                                             | active tab                                                                                         |
+| `unit`         | `null`                                                                                              | global unit; `null`: recommended (each list table uses its cluster's recommended unit)             |
+| `clusterUnits` | `{}`                                                                                                | per-table units of grouped lists, by cluster id (`UNCLUSTERED`, `""`, for items without a cluster) |
+| `ids`          | `null`                                                                                              | allowlist of the shown items; its order is the default order                                       |
+| `clusters`     | `null`                                                                                              | selected clusters (`null`: all; `[]`: none, so only items without a cluster)                       |
+| `search`       | `""`                                                                                                | case-insensitive substring of name, id, description, cluster id or cluster name                    |
+| `sort`         | `{ mode: "default", desc: false }`                                                                  | display order                                                                                      |
+| `limit`        | `null`                                                                                              | keep the first N after ranking                                                                     |
+| `limitBy`      | `null`                                                                                              | the ranking that picks the `limit` items (`null`: `sort`)                                          |
+| `columns`      | `{ ids: null, clusters: null, sort: { mode: "default", desc: false }, limit: null, limitBy: null }` | the grid's columns: an independent axis, or `"rows"` to mirror the rows                            |
+| `gridMode`     | `"full"`                                                                                            | `"half"` hides the upper triangle                                                                  |
+| `selectedItem` | `null`                                                                                              | highlighted item                                                                                   |
+| `selectedPair` | `null`                                                                                              | `[numerator, denominator]`: the list sidebar / `RelativeValuesPairDetails`                         |
 
 Inputs are partial (`RelativeValuesStateInput`): a given key controls its whole value, and missing fields of an object value (`sort`, `limitBy`, `columns`) come from the defaults. `resolveRelativeValuesState`, `normalizeRelativeValuesState`, `pickRelativeValuesState` and `parseRelativeValuesState` (lenient: invalid fields are dropped with a warning) work with state outside of React.
 
@@ -737,14 +763,14 @@ Inputs are partial (`RelativeValuesStateInput`): a given key controls its whole 
 2. **Filter**: `ids` (and their order: the default order), `clusters` (items without a cluster always pass; use `scope` to remove them), `search`.
 3. **Ranking unit**: `unit`, else the definition's recommended unit, else the first item in scope. It may be outside the scope.
 4. **Rank** by `limitBy ?? sort`, measured as item / unit, then **limit**, then **sort** the picked items by `sort`.
-5. **Columns** (grid): the rows when `columns === "rows"`; otherwise the universe filtered by `columns.ids` and `columns.clusters`, ranked by `columns.sort` and limited by `columns.limit`.
+5. **Columns** (grid): the rows when `columns === "rows"`; otherwise the universe filtered by `columns.ids` and `columns.clusters`, ranked by `columns.limitBy ?? columns.sort`, limited by `columns.limit`, then sorted by `columns.sort`.
 
-The pick is the same everywhere; views order the picked items with their own rules: grouped lists split them into cluster tables and measure value sorts against each table's unit (`clusterUnits[cluster]`, else `unit`, else the cluster's recommended unit, else the definition's, else the first item); the grid's value sorts average over the other axis ("Average value"). For rankings, use a flat list (`display.list.groupByCluster: false`).
+The pick is the same everywhere; views order the picked items with their own rules: grouped lists split them into cluster tables and measure value sorts against each table's unit (`clusterUnits[cluster]`, else `unit`, else the cluster's recommended unit, else the definition's, else the first item); the grid's value sorts average over the other axis ("Average value"), and `display.grid.groupByCluster` partitions rows and columns by cluster. `rows`, `useRelativeValues()` and `apiRef.getData()` keep the pipeline's order. For rankings, use a flat list (`display.list.groupByCluster: false`).
 
 #### Controlled, uncontrolled and locked state
 
 - Each key of `state` that isn't undefined is controlled; the others are uncontrolled, starting from `defaultState` (read on mount, like React's `defaultValue`; change the component's `key` to start over).
-- Built-in UI and `actions` produce a new state; the uncontrolled keys update at once, and `onStateChange` is called. A controlled key doesn't change until you pass a new `state`: not updating it is how you reject a change.
+- Built-in UI and `actions` produce a new state; the uncontrolled keys update at once, and `onStateChange` is called. A controlled key doesn't change until you pass a new `state`: not updating it is how you reject a change. Several changes in one event build on each other's `next`.
 - When you stop controlling a key, the dashboard keeps its last controlled value.
 - Controlled values are compared by value, so a new object literal on every render is free.
 - **Locked** keys (listed in `locked`, or controlled without a change handler: `onStateChange`, or `onTabChange` for `view`) ignore the built-in UI ("user" changes) and hide its controls; `actions` and `apiRef` ("api" changes) still apply. Hiding a control with `controls` doesn't lock its key.
@@ -783,22 +809,22 @@ State is normalized whenever it's read (after a live reload, from a stale URL or
 
 Prefix `rv.` by default. Defaults are omitted, arrays are repeated params (so ids may contain any character), and other params are kept.
 
-| Key                | Params                                                          | Example                          |
-| ------------------ | --------------------------------------------------------------- | -------------------------------- |
-| `view`             | `rv.view`                                                       | `rv.view=grid`                   |
-| `unit`             | `rv.unit`                                                       | `rv.unit=sso`                    |
-| `clusterUnits`     | `rv.cu.<clusterId>` (`rv.cu.` for items without a cluster)      | `rv.cu.platform=dbMigration`     |
-| `ids`              | `rv.ids`, repeated                                              | `rv.ids=sso&rv.ids=auditLog`     |
-| `clusters`         | `rv.cl`, repeated; one empty value is `[]`                      | `rv.cl=platform&rv.cl=research`  |
-| `search`           | `rv.q`                                                          | `rv.q=audit`                     |
-| `sort`             | `rv.sort`; a leading `-` is descending                          | `rv.sort=-median`                |
-| `limit`, `limitBy` | `rv.limit`, `rv.limitby`                                        | `rv.limit=10&rv.limitby=-median` |
-| `columns`          | `rv.cols=rows`, or `rv.cids`, `rv.ccl`, `rv.csort`, `rv.climit` | `rv.cols=rows`                   |
-| `gridMode`         | `rv.grid`                                                       | `rv.grid=half`                   |
-| `selectedItem`     | `rv.sel`                                                        | `rv.sel=sso`                     |
-| `selectedPair`     | `rv.pair`, twice                                                | `rv.pair=sso&rv.pair=auditLog`   |
+| Key                | Params                                                                         | Example                          |
+| ------------------ | ------------------------------------------------------------------------------ | -------------------------------- |
+| `view`             | `rv.view`                                                                      | `rv.view=grid`                   |
+| `unit`             | `rv.unit`                                                                      | `rv.unit=sso`                    |
+| `clusterUnits`     | `rv.cu.<clusterId>` (`rv.cu.` for items without a cluster)                     | `rv.cu.platform=dbMigration`     |
+| `ids`              | `rv.ids`, repeated                                                             | `rv.ids=sso&rv.ids=auditLog`     |
+| `clusters`         | `rv.cl`, repeated; one empty value is `[]`                                     | `rv.cl=platform&rv.cl=research`  |
+| `search`           | `rv.q`                                                                         | `rv.q=audit`                     |
+| `sort`             | `rv.sort`; a leading `-` is descending                                         | `rv.sort=-median`                |
+| `limit`, `limitBy` | `rv.limit`, `rv.limitby`                                                       | `rv.limit=10&rv.limitby=-median` |
+| `columns`          | `rv.cols=rows`, or `rv.cids`, `rv.ccl`, `rv.csort`, `rv.climit`, `rv.climitby` | `rv.cols=rows`                   |
+| `gridMode`         | `rv.grid`                                                                      | `rv.grid=half`                   |
+| `selectedItem`     | `rv.sel`                                                                       | `rv.sel=sso`                     |
+| `selectedPair`     | `rv.pair`, twice                                                               | `rv.pair=sso&rv.pair=auditLog`   |
 
-`relativeValuesStateFromSearchParams` returns every key in `keys` (default: all); an absent param gives the default, so URL-managed keys are always controlled and Back/Forward resets them. Invalid values become the default.
+`relativeValuesStateFromSearchParams` returns every key in `keys` (default: all); an absent param gives the default, so URL-managed keys are always controlled and Back/Forward resets them. Invalid values become the default. `views` (default: the built-in tabs) are the valid views of both helpers and of `parseRelativeValuesState`, and the first one is the default view, which the writer omits and the reader returns for an absent param: pass the dashboard's tab ids to both helpers when its first tab isn't `"list"` or it has custom tabs (the writer warns in development when it gets a view that isn't a built-in tab and no `views`).
 
 #### Changes in behavior
 
@@ -812,6 +838,8 @@ Compared with earlier versions of this package (no code changes are needed in St
 6. Grid cell clicks highlight the cell (`selectedPair`); the list sidebar then shows that pair.
 7. Empty results show the `Empty` slot instead of nothing.
 8. The sort menus also offer "Name" and "Cluster", and the registered `sorts`.
+9. The list sidebar's uncertainty is shown as in the cells (± half the 90% interval, in orders of magnitude), and follows `format.uncertainty`.
+10. Menu section headers keep the labels' casing ("Sort by", no longer "Sort By").
 
 ## Development
 

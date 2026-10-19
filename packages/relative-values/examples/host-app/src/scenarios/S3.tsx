@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 import {
   type Item,
@@ -62,6 +62,73 @@ const ControlledUnit: FC = () => {
   );
 };
 
+// Revenue comes from the host's API, after the dashboard is shown; the
+// sort's compare function closes over it, so the order updates when it
+// loads.
+function useRevenue(): Record<string, number> | undefined {
+  const [revenue, setRevenue] = useState<Record<string, number>>();
+  useEffect(() => {
+    const timeout = setTimeout(() => setRevenue(revenueById), 300);
+    return () => clearTimeout(timeout);
+  }, []);
+  return revenue;
+}
+
+const CustomSort: FC = () => {
+  const revenue = useRevenue();
+  return (
+    <Scenario
+      id="S3"
+      variant="custom-sort"
+      title="A host-registered sort: revenue"
+      description={
+        <>
+          `sorts` adds “Revenue” to the sort menus; `sortOptions` picks and
+          orders the offered modes. The revenue figures load after the
+          dashboard:{" "}
+          <output data-host-revenue={revenue ? "loaded" : "loading"}>
+            {revenue ? "loaded" : "loading…"}
+          </output>
+        </>
+      }
+      code={`const revenue = useRevenue(); // loads later
+<RelativeValuesBundleDashboard bundle={bundle}
+  sorts={{ revenue: { label: "Revenue",
+    compare: (a, b) => (revenue?.[a.item.id] ?? 0) - (revenue?.[b.item.id] ?? 0) } }}
+  defaultState={{ sort: { mode: "revenue", desc: true } }}
+  controls={{ sortMenu: { sortOptions: ["median", "uncertainty", "name", "revenue"] } }}
+  display={{ list: { groupByCluster: false } }} />`}
+    >
+      <RelativeValuesBundleDashboard
+        bundle={portfolioBundle}
+        sorts={{
+          revenue: {
+            label: "Revenue",
+            compare: (a, b) =>
+              (revenue?.[a.item.id] ?? 0) - (revenue?.[b.item.id] ?? 0),
+          },
+        }}
+        defaultState={{ sort: { mode: "revenue", desc: true } }}
+        controls={{
+          sortMenu: {
+            sortOptions: ["median", "uncertainty", "name", "revenue"],
+          },
+        }}
+        display={{ list: { groupByCluster: false } }}
+        renderItemName={(item) => (
+          <span data-host-content="">
+            {item.name}{" "}
+            <span className="acme-revenue">
+              {revenue ? `$${revenue[item.id]}k` : "…"}
+            </span>
+          </span>
+        )}
+        height={420}
+      />
+    </Scenario>
+  );
+};
+
 export const S3: FC = () => (
   <ScenarioPage
     id="s3"
@@ -83,41 +150,6 @@ export const S3: FC = () => (
       />
     </Scenario>
     <ControlledUnit />
-    <Scenario
-      id="S3"
-      variant="custom-sort"
-      title="A host-registered sort: revenue"
-      description="`sorts` adds “Revenue” to the sort menus; `sortOptions` picks and orders the offered modes."
-      code={`<RelativeValuesBundleDashboard bundle={bundle}
-  sorts={{ revenue: { label: "Revenue", compare: (a, b) => revenue[a.item.id] - revenue[b.item.id] } }}
-  defaultState={{ sort: { mode: "revenue", desc: true } }}
-  controls={{ sortMenu: { sortOptions: ["median", "uncertainty", "name", "revenue"] } }}
-  display={{ list: { groupByCluster: false } }} />`}
-    >
-      <RelativeValuesBundleDashboard
-        bundle={portfolioBundle}
-        sorts={{
-          revenue: {
-            label: "Revenue",
-            compare: (a, b) =>
-              (revenueById[a.item.id] ?? 0) - (revenueById[b.item.id] ?? 0),
-          },
-        }}
-        defaultState={{ sort: { mode: "revenue", desc: true } }}
-        controls={{
-          sortMenu: {
-            sortOptions: ["median", "uncertainty", "name", "revenue"],
-          },
-        }}
-        display={{ list: { groupByCluster: false } }}
-        renderItemName={(item) => (
-          <span data-host-content="">
-            {item.name}{" "}
-            <span className="acme-revenue">${revenueById[item.id]}k</span>
-          </span>
-        )}
-        height={420}
-      />
-    </Scenario>
+    <CustomSort />
   </ScenarioPage>
 );

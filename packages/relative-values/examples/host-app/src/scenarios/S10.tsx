@@ -105,6 +105,49 @@ const SharedEvaluator: FC = () => {
   );
 };
 
+// Two views on one live spec (so one evaluator), ranked by value: each
+// waits for pairs that the other may compute first.
+const SharedSpecRanked: FC = () => {
+  const spec = useSpec(roadmapCode);
+  const state = { unit: "darkMode", sort: { mode: "median", desc: true } };
+  return (
+    <Scenario
+      id="S10"
+      variant="spec-ranked"
+      title="Two ranked views on one live spec"
+      description="The same spec object gives one evaluator; both views rank by value in units of dark mode (one keeps the top 3), and both finish, whichever computes a pair first."
+      code={`<RelativeValuesSingleView spec={spec} view="list" state={{ ...ranked, limit: 3 }} />
+<RelativeValuesSingleView spec={spec} view="list" state={ranked} />`}
+    >
+      {spec?.ok ? (
+        <div className="acme-two-col">
+          <div data-host-ranked="top3">
+            <RelativeValuesSingleView
+              spec={spec.value}
+              modelCode={roadmapCode}
+              view="list"
+              state={{ ...state, limit: 3 }}
+              display={{ list: { groupByCluster: false, itemIds: false } }}
+            />
+          </div>
+          <div data-host-ranked="all">
+            <RelativeValuesSingleView
+              spec={spec.value}
+              modelCode={roadmapCode}
+              view="list"
+              state={state}
+              display={{ list: { groupByCluster: false, itemIds: false } }}
+              height={420}
+            />
+          </div>
+        </div>
+      ) : (
+        <p className="acme-meta">Running the model…</p>
+      )}
+    </Scenario>
+  );
+};
+
 // Server rendering, here in the browser: the same markup a server component
 // would send, with no window access.
 const ServerMarkup: FC = () => {
@@ -167,6 +210,7 @@ export const S10: FC = () => (
       </div>
     </Scenario>
     <SharedEvaluator />
+    <SharedSpecRanked />
     <Scenario
       id="S10"
       variant="provider"

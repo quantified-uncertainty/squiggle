@@ -80,6 +80,23 @@ const UrlSynced: FC = () => {
           >
             Top 5 grid
           </button>{" "}
+          <button
+            type="button"
+            onClick={() => {
+              // Two changes in one handler: the second builds on the first,
+              // although both keys are controlled (from the URL).
+              api.current?.setState({ view: "list", unit: "sso" });
+              api.current?.setState({ sort: { mode: "median", desc: true } });
+            }}
+          >
+            Rank by value in SSO
+          </button>{" "}
+          <button
+            type="button"
+            onClick={() => api.current?.scrollTo({ item: "pricingExperiment" })}
+          >
+            Scroll to Pricing experiment
+          </button>{" "}
           <button type="button" onClick={() => api.current?.reset()}>
             Reset
           </button>
@@ -208,6 +225,8 @@ const Linked: FC = () => {
     clusters: null,
     search: "",
   });
+  // The list is flat (groupByCluster: false), so that its compass icons set
+  // the global `unit`; in a grouped list they set `clusterUnits`.
   const onLink = (next: RelativeValuesState<string>) =>
     setLink({ unit: next.unit, clusters: next.clusters, search: next.search });
   return (
@@ -218,7 +237,9 @@ const Linked: FC = () => {
       description="Two independent dashboards share the unit, clusters and search through the host's state: pick a unit (compass) or search on the left; the plot on the right follows."
       code={`const [link, setLink] = useState({ unit: "sso", clusters: null, search: "" });
 const onLink = (next) => setLink({ unit: next.unit, clusters: next.clusters, search: next.search });
-<RelativeValuesSingleView bundle={bundle} view="list" state={link} onStateChange={onLink} />
+// A flat list: its compass icons set \`unit\` (in a grouped list, \`clusterUnits\`).
+<RelativeValuesSingleView bundle={bundle} view="list" state={link} onStateChange={onLink}
+  display={{ list: { groupByCluster: false } }} />
 <RelativeValuesProvider bundle={bundle} state={link} onStateChange={onLink}>
   <PlotCaption /><RelativeValuesSingleView view="plot" />
 </RelativeValuesProvider>`}

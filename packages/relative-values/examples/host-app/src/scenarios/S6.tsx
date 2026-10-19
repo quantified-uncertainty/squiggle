@@ -38,10 +38,11 @@ export const S6: FC = () => (
       id="S6"
       variant="bands"
       title="Research rows × the 5 most valuable columns"
-      description="Rows are filtered to a cluster; the column axis is independent, ranked by value and limited to 5; cells show the full summary, grouped in cluster bands."
+      description="Rows are filtered to a cluster; the column axis is independent: the 5 most valuable columns (`limitBy`), which Column Settings re-sorts without changing which 5; cells show the full summary, grouped in cluster bands."
       code={`<RelativeValuesSingleView bundle={bundle} view="grid"
   defaultState={{ clusters: ["research"], sort: { mode: "cluster" },
-                  columns: { sort: { mode: "median", desc: true }, limit: 5 } }}
+                  columns: { limit: 5, limitBy: { mode: "median", desc: true },
+                             sort: { mode: "median", desc: true } } }}
   display={{ grid: { cell: "full", groupByCluster: true } }} />`}
     >
       <RelativeValuesSingleView
@@ -50,7 +51,11 @@ export const S6: FC = () => (
         defaultState={{
           clusters: ["research"],
           sort: { mode: "cluster" },
-          columns: { sort: { mode: "median", desc: true }, limit: 5 },
+          columns: {
+            limit: 5,
+            limitBy: { mode: "median", desc: true },
+            sort: { mode: "median", desc: true },
+          },
         }}
         display={{ grid: { cell: "full", groupByCluster: true } }}
       />

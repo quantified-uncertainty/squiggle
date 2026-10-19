@@ -450,3 +450,42 @@ ul {
   --squiggle-rv-selected-bg: #e3eafb;
   --squiggle-rv-radius: 6px;
 }
+
+/* S9: a larger base font size; all text scales with it. */
+.acme-rv-large {
+  --squiggle-rv-font-size: 20px;
+}
+
+/* S9: wider grid cells, set on an ancestor of the dashboard. */
+.acme-wide-cells {
+  --squiggle-rv-grid-cell-width: 180px;
+}
+
+/* S9: a dark theme, with the documented variables only. */
+.acme-rv-dark {
+  --squiggle-rv-bg: #111827;
+  --squiggle-rv-text: #e5e7eb;
+  --squiggle-rv-muted: #9ca3af;
+  --squiggle-rv-border: #374151;
+  --squiggle-rv-header-bg: #1f2937;
+  --squiggle-rv-panel-bg: #1f2937;
+  --squiggle-rv-selected-bg: #374151;
+  --squiggle-rv-accent: #93c5fd;
+}
+/*
+ * The warm uncertainty tiers (3 to 5) are made for light backgrounds.
+ * `.squiggle-rv.acme-rv-dark` (the root with the theme class): more specific
+ * than the library's `.squiggle-rv .text-…` classes.
+ */
+.squiggle-rv.acme-rv-dark [data-rv-tier="3"] {
+  color: #fde68a;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier="4"] {
+  color: #fdba74;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier="5"] {
+  color: #fca5a5;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier] {
+  opacity: 1;
+}

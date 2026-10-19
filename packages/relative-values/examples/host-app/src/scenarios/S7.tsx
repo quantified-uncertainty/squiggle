@@ -75,5 +75,43 @@ export const S7: FC = () => (
         }}
       />
     </Scenario>
+    <Scenario
+      id="S7"
+      variant="ylog"
+      title="Log uncertainty axis, in units of SSO"
+      description="SSO against itself has no uncertainty, which a log axis can't show: that dot is left out, the others are drawn."
+      code={`<RelativeValuesSingleView bundle={bundle} view="plot" state={{ unit: "sso" }}
+  display={{ plot: { plots: ["valueUncertainty"], height: 300,
+    valueUncertainty: { reference: "unit", yScale: "log" } } }} />`}
+    >
+      <RelativeValuesSingleView
+        bundle={portfolioBundle}
+        view="plot"
+        state={{ unit: "sso" }}
+        display={{
+          plot: {
+            plots: ["valueUncertainty"],
+            height: 300,
+            valueUncertainty: { reference: "unit", yScale: "log" },
+          },
+        }}
+      />
+    </Scenario>
+    <Scenario
+      id="S7"
+      variant="order"
+      title="Plots in the given order"
+      description="`plots` is ordered: the value / uncertainty plot first, then the similarity map."
+      code={`<RelativeValuesSingleView bundle={bundle} view="plot"
+  display={{ plot: { plots: ["valueUncertainty", "similarity"], height: 260 } }} />`}
+    >
+      <RelativeValuesSingleView
+        bundle={portfolioBundle}
+        view="plot"
+        display={{
+          plot: { plots: ["valueUncertainty", "similarity"], height: 260 },
+        }}
+      />
+    </Scenario>
   </ScenarioPage>
 );

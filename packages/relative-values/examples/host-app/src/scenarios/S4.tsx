@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useState } from "react";
 
 import {
   type RelativeValuesComponents,
@@ -52,8 +52,8 @@ const AcmeDrawer: FC<PropsWithChildren<{ title: string; onClose(): void }>> = ({
   </div>
 );
 
-// Slots get the built-in implementation as `Default`. Defined outside of
-// render, so that they keep their identity.
+// Slots get the built-in implementation as `Default`. Defined once here;
+// slots written inline in JSX work too (see InlineSlots).
 const components: Partial<RelativeValuesComponents> = {
   TabBar: ({ tabs, active, onChange }) => (
     <AcmeSegmented
@@ -89,6 +89,55 @@ const components: Partial<RelativeValuesComponents> = {
       {error.split("\n").slice(0, 2).join(" ")}
     </div>
   ),
+};
+
+// Slots written inline, in a host that re-renders on every change (here: a
+// controlled search). An inline slot is a new function on every render; it's
+// re-rendered, not remounted, so the search box keeps its focus.
+const InlineSlots: FC = () => {
+  const [search, setSearch] = useState("");
+  return (
+    <Scenario
+      id="S4"
+      variant="inline"
+      title="Slots written inline, with a controlled search"
+      description={
+        <>
+          `components` is a new object (with new functions) on every render of
+          the host, which re-renders on each keystroke. The toolbar slot adds an
+          Export button to every view, also to the plot. Search:{" "}
+          <code data-host-search="">{search || "(none)"}</code>
+        </>
+      }
+      code={`const [search, setSearch] = useState("");
+<RelativeValuesBundleDashboard bundle={bundle}
+  state={{ search }} onStateChange={(next) => setSearch(next.search)}
+  components={{ Toolbar: ({ view, children }) =>
+    <div className="acme-row">{children}<button>Export {view}</button></div> }} />`}
+    >
+      <RelativeValuesBundleDashboard
+        bundle={portfolioBundle}
+        state={{ search }}
+        onStateChange={(next) => setSearch(next.search)}
+        components={{
+          Toolbar: ({ view, children }) => (
+            <div
+              className="acme-row"
+              data-host-content=""
+              data-host-toolbar={view}
+            >
+              {children}
+              <button type="button" className="acme-small-button">
+                Export {view}
+              </button>
+            </div>
+          ),
+        }}
+        display={{ list: { groupByCluster: false, itemIds: false } }}
+        height={360}
+      />
+    </Scenario>
+  );
 };
 
 export const S4: FC = () => (
@@ -138,7 +187,7 @@ export const S4: FC = () => (
     <RelativeValuesRoot><RelativeValuesUnitPicker /></RelativeValuesRoot>
     <RelativeValuesRoot><RelativeValuesSortMenu sections={["sort"]} /></RelativeValuesRoot>
   </header>
-  <RelativeValuesSingleView view="list" controls={{ list: { toolbar: false, sidebar: false } }} />
+  <RelativeValuesSingleView view="list" controls={{ list: { toolbar: false, sidebar: false }, searchChip: false }} />
   <aside className="acme-panel"><RelativeValuesRoot><RelativeValuesPairDetails /></RelativeValuesRoot></aside>
 </RelativeValuesProvider>`}
     >
@@ -160,7 +209,11 @@ export const S4: FC = () => (
         <div className="acme-two-col">
           <RelativeValuesSingleView
             view="list"
-            controls={{ list: { toolbar: false, sidebar: false } }}
+            // The host's search box is the only one: no search chip either.
+            controls={{
+              list: { toolbar: false, sidebar: false },
+              searchChip: false,
+            }}
             display={{ list: { groupByCluster: false, itemIds: false } }}
           />
           <aside className="acme-panel" data-host-aside="">
@@ -172,6 +225,23 @@ export const S4: FC = () => (
           </aside>
         </div>
       </RelativeValuesProvider>
+    </Scenario>
+    <InlineSlots />
+    <Scenario
+      id="S4"
+      variant="toolbar-hidden"
+      title="No toolbar, an active search"
+      description="Without the search box, the search shows as a chip (× clears it), so the filter is never invisible."
+      code={`<RelativeValuesSingleView bundle={bundle} view="list"
+  controls={{ list: { toolbar: false } }} defaultState={{ search: "sign" }} />`}
+    >
+      <RelativeValuesSingleView
+        bundle={portfolioBundle}
+        view="list"
+        controls={{ list: { toolbar: false } }}
+        defaultState={{ search: "sign" }}
+        display={{ list: { groupByCluster: false } }}
+      />
     </Scenario>
     <Scenario
       id="S4"
