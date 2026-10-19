@@ -15,7 +15,7 @@ widgetRegistry.register("TableChart", {
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
         {value.value.rowCount}
-        <span className="opacity-60">x</span>
+        <span className="text-slate-500">x</span>
         {value.value.columnCount}
       </div>
     </div>

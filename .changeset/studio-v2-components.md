@@ -14,4 +14,4 @@ Editor bridge for apps that embed `CodeEditor`:
 - Long value titles are truncated with an ellipsis and a tooltip instead of overlapping themselves, and value headers carry `data-value-path`.
 - Editor views are now destroyed on unmount.
 - Gutter markers (the dots that reveal a value) now show for every visible top-level variable, not only the first.
-- Text contrast of at least 4.5:1, also on a hovered value header: line numbers (darker still on the active line), value previews (types, counts, the distribution "to", strings, functions), the simulation indicator, the search panel's close button and the relative values cells' range and uncertainty colours are darker.
+- Text contrast of at least 4.5:1, also on a hovered value header: line numbers (darker still on the active line), value previews (types, counts, the distribution "to", a table's "2x2", strings, functions), the simulation indicator, the search panel's close button and the relative values cells' range and uncertainty colours are darker.
