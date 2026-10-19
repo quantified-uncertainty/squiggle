@@ -185,9 +185,11 @@ describe.skipIf(!browserParity)("browser getRunJson() = Node", () => {
         const { idle } = await api.whenIdle(timeoutMs);
         if (!idle) throw new Error("Studio didn't go idle");
         // whenIdle() can answer before the file has loaded until the
-        // workspace reports file loads as busy (WP4); wait for the run.
+        // workspace reports file loads as busy (WP4); wait up to 3 s more
+        // for the run.
+        const idleAt = Date.now();
         let json = api.getRunJson();
-        while (!json && Date.now() - start < timeoutMs) {
+        while (!json && Date.now() - idleAt < 3_000) {
           await new Promise((resolve) => setTimeout(resolve, 25));
           json = api.getRunJson();
         }
