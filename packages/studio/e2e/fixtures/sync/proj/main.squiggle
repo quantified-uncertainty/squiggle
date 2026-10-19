@@ -1,0 +1,4 @@
+import "./lib/rates.squiggle" as r
+
+@name("Total")
+total = r.rate * 10

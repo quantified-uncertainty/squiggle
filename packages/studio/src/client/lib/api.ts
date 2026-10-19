@@ -6,6 +6,7 @@ import {
   browseResponseSchema,
   type DiskState,
   encodeRootHeader,
+  type FileResponse,
   fileResponseSchema,
   hashesResponseSchema,
   hubImportResponseSchema,
@@ -58,6 +59,26 @@ export function setExpectedRoot(root: string | undefined): void {
   expectedRoot = root;
 }
 
+// Every successful GET /api/file (the workspace's loads and the linker's
+// imports) is reported here, so the workspace learns the disk hash of files
+// it doesn't hold a buffer for (importers re-run only when a dependency's
+// hash changes, #10).
+let readObserver: ((file: FileResponse) => void) | undefined;
+
+export function observeFileReads(
+  cb: ((file: FileResponse) => void) | undefined
+): void {
+  readObserver = cb;
+}
+
+// Browsers cap the bodies of in-flight keepalive requests at 64 KiB; bigger
+// saves go out as normal requests (best effort while the page unloads).
+const KEEPALIVE_MAX_BODY = 60_000;
+
+export function fitsKeepalive(content: string): boolean {
+  return content.length * 3 < KEEPALIVE_MAX_BODY; // worst case UTF-8
+}
+
 async function request<T>(
   schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   url: string,
@@ -98,10 +119,13 @@ export const api = {
   openFolder: (path: string) =>
     request(rootInfoSchema, "/api/root", { method: "POST", body: { path } }),
   getTree: () => request(treeResponseSchema, "/api/tree", { guardRoot: true }),
-  readFile: (path: string) =>
-    request(fileResponseSchema, `/api/file?${q({ path })}`, {
+  readFile: async (path: string) => {
+    const file = await request(fileResponseSchema, `/api/file?${q({ path })}`, {
       guardRoot: true,
-    }),
+    });
+    readObserver?.(file);
+    return file;
+  },
   // With `baseHash`, the server refuses the write with ApiError 409, code
   // "disk-changed" (and `current`), if the file on disk has another hash.
   writeFile: (
@@ -117,7 +141,7 @@ export const api = {
         ...(opts.baseHash ? { baseHash: opts.baseHash } : {}),
       },
       guardRoot: true,
-      keepalive: opts.keepalive,
+      keepalive: opts.keepalive && fitsKeepalive(content),
     }),
   // Fails with ApiError 409, code "file-exists", if the file exists.
   createFile: (path: string, content: string) =>
