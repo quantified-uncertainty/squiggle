@@ -12,7 +12,16 @@ import {
   useRole,
 } from "@floating-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { cloneElement, FC, ReactElement, ReactNode, useState } from "react";
+import {
+  cloneElement,
+  FC,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useState,
+} from "react";
+
+import { TailwindContext } from "./TailwindProvider.js";
 
 type Props = {
   render: () => ReactNode;
@@ -28,6 +37,7 @@ export const Tooltip: FC<Props> = ({
   children,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { selector: tailwindSelector } = useContext(TailwindContext);
 
   const { x, y, refs, strategy, context } = useFloating({
     placement: placement ?? "top",
@@ -54,23 +64,25 @@ export const Tooltip: FC<Props> = ({
       <AnimatePresence>
         {isOpen && (
           <FloatingPortal>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.07 }}
-              {...getFloatingProps({
-                ref: refs.setFloating,
-                className: "z-10",
-                style: {
-                  position: strategy,
-                  top: y ?? 0,
-                  left: x ?? 0,
-                },
-              })}
-            >
-              {render()}
-            </motion.div>
+            <div className={tailwindSelector}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.07 }}
+                {...getFloatingProps({
+                  ref: refs.setFloating,
+                  className: "z-10",
+                  style: {
+                    position: strategy,
+                    top: y ?? 0,
+                    left: x ?? 0,
+                  },
+                })}
+              >
+                {render()}
+              </motion.div>
+            </div>
           </FloatingPortal>
         )}
       </AnimatePresence>
