@@ -9,6 +9,7 @@ import { coloredJson, loadSrc } from "../utils.js";
 export function addParseCommand(program: Command) {
   program
     .command("parse")
+    .description("Parse code and print the AST (debugging)")
     .arguments("[filename]")
     .option(
       "-e, --eval <code>",
@@ -33,7 +34,8 @@ export function addParseCommand(program: Command) {
           if (ast.ok) {
             console.log(astNodeToString(ast.value, { colored: true }));
           } else {
-            console.log(red(ast.value.toString()));
+            process.exitCode = 1;
+            console.error(red(ast.value.toString()));
           }
           break;
         }
@@ -42,7 +44,8 @@ export function addParseCommand(program: Command) {
           if (ast.ok) {
             console.log(coloredJson(ast.value));
           } else {
-            console.log(red(ast.value.toString()));
+            process.exitCode = 1;
+            console.error(red(ast.value.toString()));
           }
           break;
         }
@@ -56,7 +59,8 @@ export function addParseCommand(program: Command) {
               })
             );
           } else {
-            console.log(red(typedAst.value.toString()));
+            process.exitCode = 1;
+            console.error(red(typedAst.value.toString()));
           }
           break;
         }

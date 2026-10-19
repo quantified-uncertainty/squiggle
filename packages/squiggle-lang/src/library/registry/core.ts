@@ -44,6 +44,43 @@ type FnNameDict = Map<string, FnDefinition[]>;
 
 export type FnDocumentation = FRFunction & { signatures: string[] };
 
+function getShorthandName(name: string): Shorthand | undefined {
+  const infix: string | undefined = get(
+    invert(infixFunctions),
+    name,
+    undefined
+  );
+  if (infix) {
+    return { type: "infix", symbol: infix };
+  }
+  const unary: string | undefined = get(
+    invert(unaryFunctions),
+    name,
+    undefined
+  );
+  if (unary) {
+    return { type: "unary", symbol: unary };
+  }
+  return undefined;
+}
+
+function fnToDocumentation(fn: FRFunction): FnDocumentation {
+  return {
+    name: fn.name,
+    nameSpace: fn.nameSpace,
+    requiresNamespace: fn.requiresNamespace,
+    description: fn.description,
+    definitions: fn.definitions,
+    examples: fn.examples,
+    signatures: fn.definitions
+      .filter((d) => d.showInDocumentation())
+      .map((d) => d.toString()),
+    isUnit: fn.isUnit,
+    shorthand: getShorthandName(fn.name),
+    displaySection: fn.displaySection,
+  };
+}
+
 export class Registry {
   private constructor(
     private functions: FRFunction[],
@@ -107,38 +144,12 @@ export class Registry {
       }
     });
 
-    if (!fn) return;
+    return fn ? fnToDocumentation(fn) : undefined;
+  }
 
-    const _infixes = invert(infixFunctions);
-    const _unary = invert(unaryFunctions);
-
-    function getShorthandName(name: string): Shorthand | undefined {
-      const infix: string | undefined = get(_infixes, name, undefined);
-      if (infix) {
-        return { type: "infix", symbol: infix };
-      } else {
-        const unary: string | undefined = get(_unary, name, undefined);
-        if (unary) {
-          return { type: "unary", symbol: unary };
-        }
-        return undefined;
-      }
-    }
-
-    return {
-      name: fn.name,
-      nameSpace: fn.nameSpace,
-      requiresNamespace: fn.requiresNamespace,
-      description: fn.description,
-      definitions: fn.definitions,
-      examples: fn.examples,
-      signatures: fn.definitions
-        .filter((d) => d.showInDocumentation())
-        .map((d) => d.toString()),
-      isUnit: fn.isUnit,
-      shorthand: getShorthandName(fn.name),
-      displaySection: fn.displaySection,
-    };
+  // Documentation for every registered function, in registration order.
+  allFunctionDocumentation(): FnDocumentation[] {
+    return this.functions.map(fnToDocumentation);
   }
 
   makeLambda(fnName: string): Lambda {

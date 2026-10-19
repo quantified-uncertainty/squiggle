@@ -34,6 +34,26 @@ distribution settings.
 The return type of `run` is a bit complicated. We highly recommend using typescript
 when using this library to help navigate the return type.
 
+# Command-line interface
+
+The package ships a `squiggle` binary (`npx @quri/squiggle-lang <command>`, or `squiggle` after a global install).
+
+```sh
+squiggle run model.squiggle                 # evaluate a file and print the result
+squiggle run -e "2 to 10"                   # evaluate a code string
+squiggle run model.squiggle --json          # one JSON object: {ok, result, bindings, exports, errors, timeMs}
+squiggle run model.squiggle --seed 42 -n 10000   # fixed seed, 10000 samples (SAMPLE_COUNT env also works)
+squiggle run model.squiggle --watch         # re-run when the file or its relative imports change
+squiggle check model.squiggle [--json]      # type-check file + imports without running; errors with hints, lint warnings
+squiggle check model.squiggle --run         # ...and also evaluate to catch runtime errors
+squiggle docs --list                        # builtin namespaces
+squiggle docs Dist                          # functions in a namespace
+squiggle docs Dist.normal [--json]          # signatures and examples for a function
+squiggle docs lognorm                       # fuzzy search
+```
+
+All commands exit with code 1 on errors, including in `--json` mode. In JSON output, distributions are summarized as `{type: "Dist", subtype, mean, stdev, p5, p25, p50, p75, p95, min, max, sampleCount}` (add `--samples N` to include the first N raw samples); other non-primitive values are objects with a `type` field. The same conversion is available programmatically as `sqValueToJson(value)`.
+
 # Build for development
 
 We assume that you installed turborepo and ran `pnpm i`.

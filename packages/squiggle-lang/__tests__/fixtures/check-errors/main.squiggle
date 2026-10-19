@@ -1,0 +1,3 @@
+import "./lib.squiggle" as lib
+import "./missing.squiggle" as missing
+lib.x + 1
