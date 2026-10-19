@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import { z } from "zod";
@@ -56,6 +57,14 @@ export type UserState = {
   // wrote it. Returns a function that stops watching.
   watchSettings(onChange: () => void): () => void;
 };
+
+// `path` with the home folder as "~", for messages.
+function displayPath(p: string): string {
+  const home = os.homedir();
+  return p === home || p.startsWith(home + path.sep)
+    ? `~${p.slice(home.length)}`
+    : p;
+}
 
 // An absolute root path, as the key of its slice.
 function rootKey(root: string): string {
@@ -116,12 +125,15 @@ export function createUserState(dir: string): UserState {
     } catch (e) {
       return {
         ok: false,
-        error: `${settingsPath} isn't valid JSON (${e instanceof Error ? e.message : String(e)})`,
+        error: `${displayPath(settingsPath)} isn't valid JSON (${e instanceof Error ? e.message : String(e)})`,
       };
     }
     const parsed = recordSchema.safeParse(json);
     if (!parsed.success || Array.isArray(json)) {
-      return { ok: false, error: `${settingsPath} must contain a JSON object` };
+      return {
+        ok: false,
+        error: `${displayPath(settingsPath)} must contain a JSON object`,
+      };
     }
     return { ok: true, settings: parsed.data, exists: true };
   }

@@ -13,6 +13,16 @@ const RESCAN_MS = 150;
 // How often a missing root is checked for coming back.
 const ROOT_POLL_MS = 1000;
 
+// fs.statSync without throwing (ENOENT, EACCES, …): events arrive in a
+// callback where an exception would take the process down.
+function statSafe(p: string): fs.Stats | undefined {
+  try {
+    return fs.statSync(p, { throwIfNoEntry: false });
+  } catch {
+    return undefined;
+  }
+}
+
 const logError = (e: unknown) => {
   console.error("Studio's folder watcher failed:", e);
 };
@@ -146,7 +156,9 @@ export function watchFolder(
   };
 
   const onFsEvent = (filename: string | null) => {
-    if (closed) return;
+    // While the root is missing, its files' events are noise; pollRoot
+    // rescans once it is back.
+    if (closed || rootMissing) return;
     if (!filename) {
       checkRoot();
       scheduleRescan();
@@ -174,10 +186,7 @@ export function watchFolder(
       scheduleRescan();
       return;
     }
-    const stat = fs.statSync(path.join(root, apiPath), {
-      throwIfNoEntry: false,
-    });
-    if (stat?.isDirectory()) scheduleRescan();
+    if (statSafe(path.join(root, apiPath))?.isDirectory()) scheduleRescan();
   };
 
   const startFsWatcher = () => {
@@ -204,7 +213,7 @@ export function watchFolder(
     rootTimer = setTimeout(() => {
       rootTimer = undefined;
       if (closed) return;
-      if (!fs.existsSync(root)) {
+      if (!statSafe(root)?.isDirectory()) {
         pollRoot();
         return;
       }
@@ -218,8 +227,7 @@ export function watchFolder(
 
   function checkRoot() {
     if (closed || rootMissing) return;
-    const stat = fs.statSync(root, { throwIfNoEntry: false });
-    if (stat?.isDirectory()) return;
+    if (statSafe(root)?.isDirectory()) return;
     rootMissing = true;
     for (const t of pending.values()) clearTimeout(t);
     pending.clear();
