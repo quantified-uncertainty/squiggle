@@ -32,7 +32,8 @@ import {
 //   manifest.json           per state: id, url, viewport, png, readyMs, idle,
 //                           consoleErrors, pageErrors, studioErrors, commandLog,
 //                           contrast and unnamedButtons findings
-//   contact-sheet.png       every shot in one labelled grid; read it first
+//   contact-sheet.png       the shots in a labelled grid, 24 per page (then
+//                           contact-sheet-2.png, …); read them first
 // --strict exits 1 on page errors, idle timeouts, failing steps or unexpected
 // studio errors ([data-studio-error] in a file that expectations.json doesn't
 // list with errors, and without the tag "expect:studio-error").
@@ -197,9 +198,12 @@ function problems(state: ManifestState): string[] {
   return out;
 }
 
-export async function runShoot(
-  opts: ShootOptions = {}
-): Promise<{ exitCode: number; manifest: Manifest; dir: string }> {
+export async function runShoot(opts: ShootOptions = {}): Promise<{
+  exitCode: number;
+  manifest: Manifest;
+  dir: string;
+  contactSheets: string[]; // contact-sheet.png, contact-sheet-2.png, …
+}> {
   const label = sanitizeName(opts.label ?? "latest") || "latest";
   const dir = path.join(opts.outDir ?? OUT_DIR, label);
   fs.rmSync(dir, { recursive: true, force: true });
@@ -241,7 +245,7 @@ export async function runShoot(
     path.join(dir, "manifest.json"),
     `${JSON.stringify(manifest, null, 2)}\n`
   );
-  await renderContactSheet({
+  const contactSheets = await renderContactSheet({
     title: `e2e:shoot ${label}: ${states.length} states, ${states.filter((s) => s.failed).length} failed, ${new Date().toISOString().slice(0, 16)}`,
     out: path.join(dir, "contact-sheet.png"),
     entries: states.flatMap((s) =>
@@ -255,7 +259,12 @@ export async function runShoot(
   });
 
   const failed = states.some((s) => s.failed);
-  return { exitCode: opts.strict && failed ? 1 : 0, manifest, dir };
+  return {
+    exitCode: opts.strict && failed ? 1 : 0,
+    manifest,
+    dir,
+    contactSheets,
+  };
 }
 
 function parseViewport(value: string): { width: number; height: number } {
@@ -278,7 +287,7 @@ async function main() {
     allowPositionals: false,
   });
   try {
-    const { exitCode, dir, manifest } = await runShoot({
+    const { exitCode, dir, manifest, contactSheets } = await runShoot({
       only: (values.only ?? []).flatMap((v) => v.split(",")).filter(Boolean),
       viewport: values.viewport ? parseViewport(values.viewport) : undefined,
       label: values.label,
@@ -289,7 +298,7 @@ async function main() {
     const failed = manifest.states.filter((s) => s.failed).length;
     process.stdout.write(
       `${manifest.states.length} states (${failed} failed${manifest.skipped.length ? `, ${manifest.skipped.length} skipped for unmerged needs` : ""}).\n` +
-        `Contact sheet: ${path.join(dir, "contact-sheet.png")}\nManifest: ${path.join(dir, "manifest.json")}\n`
+        `Contact sheet${contactSheets.length > 1 ? `s (${contactSheets.length} pages)` : ""}: ${contactSheets.join(", ")}\nManifest: ${path.join(dir, "manifest.json")}\n`
     );
     process.exitCode = exitCode;
   } finally {

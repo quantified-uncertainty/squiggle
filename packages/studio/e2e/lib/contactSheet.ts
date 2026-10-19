@@ -3,9 +3,13 @@ import fs from "node:fs/promises";
 import { sharedBrowser } from "./harness.js";
 
 // A labelled N-column grid of screenshots, rendered in the harness's Chrome,
-// so one image shows every state of an e2e:shoot run. Thumbnails keep each
+// so a few images show every state of an e2e:shoot run. Thumbnails keep each
 // shot's aspect ratio up to a 16:10 frame; taller shots (embed pages) are
 // cropped to their top, and the label gives the full size.
+//
+// Long runs are split into pages of `perPage` shots: contact-sheet.png, then
+// contact-sheet-2.png, … (Chrome repeats content in screenshots taller than
+// about 16000 px, and a reader downscales tall images anyway).
 
 export type ContactSheetEntry = {
   png: string; // absolute path
@@ -30,12 +34,46 @@ function pngSize(data: Buffer): { width: number; height: number } {
   return { width: data.readUInt32BE(16), height: data.readUInt32BE(20) };
 }
 
+// The path of page `index` (0-based): out, then out with -2, -3, … before
+// the extension.
+export function contactSheetPage(out: string, index: number): string {
+  return index === 0 ? out : out.replace(/(\.png)?$/, `-${index + 1}.png`);
+}
+
+// Writes the pages and resolves to their paths.
 export async function renderContactSheet(opts: {
   entries: ContactSheetEntry[];
-  out: string; // PNG path
+  out: string; // PNG path of the first page
   title?: string;
   columns?: number; // default 3
   thumbWidth?: number; // default 480 px
+  perPage?: number; // default 24 shots (8 rows of 3)
+}): Promise<string[]> {
+  const perPage = opts.perPage ?? 24;
+  const pages: ContactSheetEntry[][] = [];
+  for (let i = 0; i < opts.entries.length; i += perPage) {
+    pages.push(opts.entries.slice(i, i + perPage));
+  }
+  if (pages.length === 0) pages.push([]);
+  const written: string[] = [];
+  for (const [index, entries] of pages.entries()) {
+    const out = contactSheetPage(opts.out, index);
+    const title =
+      pages.length > 1
+        ? `${opts.title ?? "Contact sheet"} (page ${index + 1} of ${pages.length})`
+        : opts.title;
+    await renderPage({ ...opts, entries, out, title });
+    written.push(out);
+  }
+  return written;
+}
+
+async function renderPage(opts: {
+  entries: ContactSheetEntry[];
+  out: string;
+  title?: string;
+  columns?: number;
+  thumbWidth?: number;
 }): Promise<void> {
   const columns = opts.columns ?? 3;
   const thumbWidth = opts.thumbWidth ?? 480;
