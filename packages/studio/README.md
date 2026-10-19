@@ -68,6 +68,8 @@ await server.openFolder("/another/folder"); // clients get a root-changed event
 await server.close();
 ```
 
+There is a desktop wrapper built on this API in [`packages/studio-electron`](../studio-electron).
+
 ### Adding views
 
 Views are tabs next to Split/Output. Register them in `src/client/main.tsx` before rendering:

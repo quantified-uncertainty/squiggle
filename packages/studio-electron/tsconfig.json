@@ -1,0 +1,12 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "dist/build.tsbuildinfo",
+    "types": ["node"],
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+  },
+  "include": ["src/**/*"],
+  "references": [{ "path": "../studio" }],
+}
