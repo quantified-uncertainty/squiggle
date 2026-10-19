@@ -352,6 +352,14 @@ export class ModelEvaluator {
     return parseRelativeValue(result.value);
   }
 
+  /**
+   * The cached result for a pair, if any. Never runs Squiggle code (unlike
+   * `compare`), so it's safe to call while rendering.
+   */
+  peek(id1: string, id2: string): RelativeValueResult | undefined {
+    return this.cache.get(makePairKey(id1, id2));
+  }
+
   compare(id1: string, id2: string): RelativeValueResult {
     const key = makePairKey(id1, id2);
     const cachedValue = this.cache.get(key);

@@ -52,6 +52,10 @@ export {
   relativeValuesCacheFromBundle,
   stringifyRelativeValuesBundle,
 } from "./values/bundle.js";
+export {
+  type LoadedRelativeValuesBundle,
+  loadRelativeValuesBundle,
+} from "./values/loadBundle.js";
 export { hasInvalid } from "./values/value.js";
 export { cartesianProduct, yieldToEventLoop } from "./lib/utils.js";
 
@@ -68,3 +72,6 @@ export {
   type RelativeValuesExport,
   relativeValuesSpecFromCode,
 } from "./spec/findExports.js";
+
+// Host-control state (see README, "Customizing in your app")
+export * from "./state/index.js";
