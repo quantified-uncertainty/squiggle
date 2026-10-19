@@ -304,13 +304,15 @@ export async function startStudioServer(
     const url = new URL(req.url ?? "/", "http://localhost");
     if (url.pathname.startsWith("/api/")) {
       handleApi(req, res, url).catch((e: unknown) => {
-        const status =
+        // Our own errors carry messages meant for the client; anything else
+        // is logged here and reported generically.
+        const known =
           e instanceof HttpError ||
           e instanceof PathError ||
-          e instanceof HubError
-            ? e.status
-            : 500;
-        const message = e instanceof Error ? e.message : String(e);
+          e instanceof HubError;
+        if (!known) console.error(e);
+        const status = known ? e.status : 500;
+        const message = known ? e.message : "Internal server error";
         if (!res.headersSent) sendJson(res, status, { error: message });
         else res.end();
       });
@@ -321,7 +323,8 @@ export async function startStudioServer(
       return;
     }
     serveStatic(clientDir, url.pathname, res).catch((e: unknown) => {
-      res.writeHead(500).end(e instanceof Error ? e.message : String(e));
+      console.error(e);
+      res.writeHead(500).end("Internal server error");
     });
   });
 
