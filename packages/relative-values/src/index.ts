@@ -2,18 +2,36 @@ export * from "./core.js";
 
 // Components
 export {
+  type ClusterOverrides,
+  type RelativeValuesCustomTab,
   RelativeValuesDashboard,
   type RelativeValuesDashboardProps,
   RelativeValuesTabButtons,
   type RelativeValuesTab,
+  type RelativeValuesTabConfig,
+  type RelativeValuesTabContext,
   relativeValuesTabs,
   RelativeValuesTabView,
+  useRelativeValuesTabContext,
 } from "./components/RelativeValuesDashboard.js";
 export {
   RelativeValuesSpecDashboard,
   type RelativeValuesSpecDashboardProps,
   useRelativeValuesEvaluator,
 } from "./components/RelativeValuesSpecDashboard.js";
+export {
+  RelativeValuesBundleDashboard,
+  type RelativeValuesBundleDashboardProps,
+  useRelativeValuesBundle,
+} from "./components/RelativeValuesBundleDashboard.js";
+export {
+  RELATIVE_VALUES_CSS_SCOPE,
+  RelativeValuesRoot,
+} from "./components/RelativeValuesRoot.js";
+export {
+  type ComputationScope,
+  useRelativeValuesComputation,
+} from "./components/useRelativeValuesComputation.js";
 export {
   type Axis,
   type AxisConfig,

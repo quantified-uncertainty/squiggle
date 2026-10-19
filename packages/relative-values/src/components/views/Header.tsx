@@ -4,11 +4,15 @@ import { FC } from "react";
 import { ClusterIcon } from "../common/ClusterIcon.js";
 import { Item } from "../../types.js";
 
+import { ItemName } from "./ItemName.js";
 import { useDefinitionClusters } from "./RelativeValuesProvider.js";
 
 export const Header: FC<{
   item: Item;
-}> = ({ item }) => {
+  // Render the name with `renderItemName` / `onItemClick`; false for
+  // pseudo-items, e.g. clusters in the cluster grid.
+  customName?: boolean;
+}> = ({ item, customName = false }) => {
   const clusters = useDefinitionClusters();
 
   const cluster = item.clusterId ? clusters[item.clusterId] : undefined;
@@ -19,7 +23,7 @@ export const Header: FC<{
           <ClusterIcon cluster={cluster} />
         </div>
       ) : null}
-      <div>{item.name}</div>
+      <div>{customName ? <ItemName item={item} /> : item.name}</div>
     </div>
   );
 };

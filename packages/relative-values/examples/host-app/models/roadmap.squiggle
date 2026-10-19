@@ -1,0 +1,43 @@
+// Roadmap bets for the next two quarters, valued in "points" relative to each
+// other. Evaluated live in the browser (imported with `?raw`).
+dists = {
+  darkMode: 2 to 6,
+  mobileOffline: 10 to 40,
+  bulkEdit: 5 to 15,
+  csvImport: 4 to 12,
+  slackAlerts: 3 to 10,
+  savedViews: 6 to 14,
+  commentThreads: 8 to 25,
+  templates: 5 to 30,
+  aiSummaries: 1 to 60,
+  publicStatusPage: 2 to 8,
+  rbac: 15 to 45,
+  sandboxEnvs: 6 to 30,
+}
+
+@name("Roadmap bets")
+roadmap = {
+  title: "Roadmap bets",
+  items: [
+    { id: "darkMode", name: "Dark mode", clusterId: "polish" },
+    { id: "savedViews", name: "Saved views", clusterId: "polish" },
+    { id: "bulkEdit", name: "Bulk edit", clusterId: "polish" },
+    { id: "csvImport", name: "CSV import", clusterId: "polish" },
+    { id: "mobileOffline", name: "Offline mobile app", clusterId: "bets", description: "Big swing; depends on the sync engine" },
+    { id: "aiSummaries", name: "AI summaries", clusterId: "bets", description: "Very uncertain demand" },
+    { id: "templates", name: "Templates gallery", clusterId: "bets" },
+    { id: "commentThreads", name: "Comment threads", clusterId: "collab" },
+    { id: "slackAlerts", name: "Slack alerts", clusterId: "collab" },
+    { id: "publicStatusPage", name: "Public status page", clusterId: "collab" },
+    { id: "rbac", name: "Role-based access", clusterId: "admin" },
+    { id: "sandboxEnvs", name: "Sandbox environments", clusterId: "admin" },
+  ],
+  clusters: [
+    { id: "polish", name: "Polish", recommendedUnit: "darkMode" },
+    { id: "bets", name: "Big bets" },
+    { id: "collab", name: "Collaboration" },
+    { id: "admin", name: "Admin" },
+  ],
+  recommendedUnit: "darkMode",
+  fn: {|x, y| [dists[x], dists[y]]},
+}

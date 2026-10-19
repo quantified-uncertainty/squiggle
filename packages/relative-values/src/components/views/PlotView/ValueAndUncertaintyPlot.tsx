@@ -20,6 +20,7 @@ import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
+  useRelativeValuesOptions,
 } from "../RelativeValuesProvider.js";
 import { distance } from "./ForcePlot.js";
 import { ItemTooltip } from "./ItemTooltip.js";
@@ -64,6 +65,7 @@ export const ValueAndUncertaintyPlot: FC<{
   model: ModelEvaluator;
 }> = ({ model }) => {
   const clusters = useDefinitionClusters();
+  const { onItemClick } = useRelativeValuesOptions();
 
   const { cursor, initCursor } = useCanvasCursor();
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
@@ -172,7 +174,15 @@ export const ValueAndUncertaintyPlot: FC<{
 
   return (
     <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
-      <canvas ref={ref} className="w-full" />
+      <canvas
+        ref={ref}
+        className="w-full"
+        onClick={() => {
+          if (hoveredId !== undefined && onItemClick) {
+            onItemClick(data[hoveredId].item);
+          }
+        }}
+      />
     </MouseTooltip>
   );
 };

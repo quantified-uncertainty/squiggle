@@ -1,0 +1,3 @@
+dist
+# Regenerate with `pnpm build && pnpm screenshots`.
+screenshots

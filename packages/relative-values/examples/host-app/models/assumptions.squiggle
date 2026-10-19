@@ -1,0 +1,5 @@
+// Shared assumptions for the portfolio model, in thousands of dollars per year.
+export customers = 1800 to 2600
+export revenuePerCustomer = 28 to 40
+export engineerCost = 180 to 240
+export churnRate = 0.08 to 0.14

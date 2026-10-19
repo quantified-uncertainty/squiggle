@@ -17,7 +17,9 @@ import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
+  useRelativeValuesOptions,
 } from "../RelativeValuesProvider.js";
+import { ItemName } from "../ItemName.js";
 import { ColumnHeader } from "./ColumnHeader.js";
 import { ItemSideBar } from "./sidebar.js";
 
@@ -40,6 +42,10 @@ export const ListViewTable: FC<TableProps> = ({
 }) => {
   const { axisConfig } = useRelativeValuesContext();
   const clusters = useDefinitionClusters();
+  const { onItemClick, renderItemName } = useRelativeValuesOptions();
+  // With custom item names or click handlers, only the compass icon changes
+  // the unit of comparison.
+  const namesSetUnit = !onItemClick && !renderItemName;
 
   const uncertaintyPercentiles = model.getParamPercentiles(
     items.map((i) => i.id),
@@ -85,11 +91,21 @@ export const ListViewTable: FC<TableProps> = ({
             <Fragment key={item.id}>
               <CellBox>
                 <div
-                  className="flex cursor-pointer justify-end p-2 text-sm font-bold text-slate-700"
-                  onClick={() => setDenominatorItem(item)}
+                  className={clsx(
+                    "flex justify-end p-2 text-sm font-bold text-slate-700",
+                    namesSetUnit && "cursor-pointer"
+                  )}
+                  onClick={
+                    namesSetUnit ? () => setDenominatorItem(item) : undefined
+                  }
                 >
-                  <div className="flex-grow text-sm hover:text-slate-900 hover:underline">
-                    {item.name}
+                  <div
+                    className={clsx(
+                      "flex-grow text-sm",
+                      namesSetUnit && "hover:text-slate-900 hover:underline"
+                    )}
+                  >
+                    <ItemName item={item} />
                   </div>
                   <div
                     onClick={() => setDenominatorItem(item)}

@@ -19,6 +19,10 @@ type PuppeteerPage = {
     selector: string,
     opts: { timeout: number }
   ): Promise<unknown>;
+  waitForFunction(
+    expression: string,
+    opts: { timeout: number }
+  ): Promise<unknown>;
   evaluate<T>(expression: string): Promise<T>;
   screenshot(opts: { path: string; fullPage: boolean }): Promise<unknown>;
 };
@@ -116,6 +120,12 @@ export async function renderToPng(params: {
       timeout: 60_000,
     });
     await page.waitForSelector("[data-studio-ready='1']", { timeout: 60_000 });
+    // Relative values dashboards compute pairs in the background, with a
+    // progress bar marked with `data-rv-computing`.
+    await page.waitForFunction(
+      `!document.querySelector("[data-rv-computing]")`,
+      { timeout: 120_000 }
+    );
     // Give canvases a moment to paint after layout.
     await new Promise((resolve) => setTimeout(resolve, 500));
     const error = await page.evaluate<string | null>(
