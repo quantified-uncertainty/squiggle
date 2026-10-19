@@ -4,7 +4,7 @@ import path from "node:path";
 
 import { startStudioServer } from "../server/server.js";
 import { viewStateToSearch } from "../shared/viewState.js";
-import { findChrome, loadPuppeteer } from "./browser.js";
+import { findChrome, loadPuppeteer, type PuppeteerBrowser } from "./browser.js";
 
 // `squiggle-studio render`'s browser part: serve the root with a temporary
 // Studio server, open the file in embed mode (`?embed=1`, the workspace
@@ -116,6 +116,51 @@ export function renderSearch(params: RenderParams): string {
   );
 }
 
+// Opens the view in `browser` and takes the screenshot.
+async function capture(
+  browser: PuppeteerBrowser,
+  url: string,
+  params: RenderParams
+): Promise<RenderResult> {
+  const consoleErrors: string[] = [];
+  const page = await browser.newPage();
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => {
+    consoleErrors.push(error instanceof Error ? error.message : String(error));
+  });
+  await page.emulateMediaFeatures([
+    { name: "prefers-reduced-motion", value: "reduce" },
+  ]);
+  await page.setViewport({
+    width: params.width,
+    height: 100, // the page grows to fit; we take a full-page screenshot
+    deviceScaleFactor: params.scale,
+  });
+  await page.goto(url, {
+    waitUntil: "load", // not networkidle: the SSE stream stays open
+    timeout: params.timeoutMs || 60_000,
+  });
+  const answer = await page.evaluate<IdleAnswer>(
+    `(${WAIT_FOR_STUDIO})(${params.timeoutMs || 24 * 3600_000})`
+  );
+  const studioErrors = await page.evaluate<string[]>(STUDIO_ERRORS);
+  const view = await page.evaluate<string | null>(
+    `document.documentElement.getAttribute("data-studio-view")`
+  );
+  await fs.mkdir(path.dirname(params.out), { recursive: true });
+  await page.screenshot({ path: params.out, fullPage: true });
+  return {
+    out: params.out,
+    ...(await pngSize(params.out)),
+    view: view ?? params.view,
+    studioErrors,
+    consoleErrors,
+    timedOut: answer.timedOut,
+  };
+}
+
 export async function renderToPng(params: RenderParams): Promise<RenderResult> {
   const puppeteer = await loadPuppeteer();
   const executablePath = findChrome(params.chromePath);
@@ -123,69 +168,36 @@ export async function renderToPng(params: RenderParams): Promise<RenderResult> {
   // State, settings and recent folders go to a throwaway folder, so renders
   // never touch ~/.squiggle-studio (#48).
   const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "studio-render-"));
-  const server = await startStudioServer({
-    root: params.root,
-    port: params.port ?? 0,
-    strictPort: params.port !== undefined,
-    allowOpenFolder: false,
-    trackRecent: false,
-    stateDir,
-    recentFile: path.join(stateDir, "recent.json"),
-    hubUrl: params.hubUrl,
-  });
-  const browser = await puppeteer
-    .launch({
-      executablePath,
-      headless: true,
-      args: ["--no-first-run", "--no-default-browser-check"],
-    })
-    .catch(async (e: unknown) => {
-      await server.close();
-      throw e;
-    });
-  const consoleErrors: string[] = [];
   try {
-    const page = await browser.newPage();
-    page.on("console", (message) => {
-      if (message.type() === "error") consoleErrors.push(message.text());
+    const server = await startStudioServer({
+      root: params.root,
+      port: params.port ?? 0,
+      strictPort: params.port !== undefined,
+      allowOpenFolder: false,
+      trackRecent: false,
+      stateDir,
+      recentFile: path.join(stateDir, "recent.json"),
+      hubUrl: params.hubUrl,
     });
-    page.on("pageerror", (error) => {
-      consoleErrors.push(
-        error instanceof Error ? error.message : String(error)
-      );
-    });
-    await page.emulateMediaFeatures([
-      { name: "prefers-reduced-motion", value: "reduce" },
-    ]);
-    await page.setViewport({
-      width: params.width,
-      height: 100, // the page grows to fit; we take a full-page screenshot
-      deviceScaleFactor: params.scale,
-    });
-    await page.goto(`${server.url}/${renderSearch(params)}`, {
-      waitUntil: "load", // not networkidle: the SSE stream stays open
-      timeout: params.timeoutMs || 60_000,
-    });
-    const answer = await page.evaluate<IdleAnswer>(
-      `(${WAIT_FOR_STUDIO})(${params.timeoutMs || 24 * 3600_000})`
-    );
-    const studioErrors = await page.evaluate<string[]>(STUDIO_ERRORS);
-    const view = await page.evaluate<string | null>(
-      `document.documentElement.getAttribute("data-studio-view")`
-    );
-    await fs.mkdir(path.dirname(params.out), { recursive: true });
-    await page.screenshot({ path: params.out, fullPage: true });
-    return {
-      out: params.out,
-      ...(await pngSize(params.out)),
-      view: view ?? params.view,
-      studioErrors,
-      consoleErrors,
-      timedOut: answer.timedOut,
-    };
+    try {
+      const browser = await puppeteer.launch({
+        executablePath,
+        headless: true,
+        args: ["--no-first-run", "--no-default-browser-check"],
+      });
+      try {
+        return await capture(
+          browser,
+          `${server.url}/${renderSearch(params)}`,
+          params
+        );
+      } finally {
+        await browser.close();
+      }
+    } finally {
+      await server.close();
+    }
   } finally {
-    await browser.close();
-    await server.close();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
