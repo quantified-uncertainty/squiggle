@@ -14,6 +14,7 @@ Library (`@quri/squiggle-relative-values`):
 - The pair sidebar becomes an overlay drawer (with a close button and Esc) when the list is narrower than 900 px.
 - The list view colors its cells from the n pairs it shows and only precomputes those, instead of all n² pairs.
 - `relativeValuesBundleToCsv(bundle, { metric, long })`: a wide matrix (`ERR` for failed comparisons) or tidy rows.
+- The grid's Row Settings, Column Settings and Cluster Diagram buttons stay on one line each and wrap as a row in a narrow view, and each grid cell's `data-testid="rv-grid-cell"` element is the cell's own box (it was a `display: contents` wrapper, which can't be measured or clicked).
 
 Studio (`@quri/squiggle-studio`):
 

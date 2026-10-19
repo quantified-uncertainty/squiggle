@@ -204,8 +204,8 @@ export const GridView: FC = () => {
 
   return (
     <div>
-      <div className="mb-4 flex items-center gap-8">
-        <div className="flex gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-x-8 gap-y-2">
+        <div className="flex flex-wrap gap-2">
           <DropdownButton text="Row Settings">
             {() => <AxisMenu axis="rows" />}
           </DropdownButton>
@@ -243,10 +243,11 @@ export const GridView: FC = () => {
               isHiddenPair(rowItem, columnItem) ? (
                 <div key={columnItem.id} className="bg-gray-200" />
               ) : (
-                // `rv-grid-cell` is Squiggle Studio's test id for grid cells.
+                // `rv-grid-cell` is Squiggle Studio's test id for grid cells;
+                // the wrapper is the grid item, so it has the cell's box.
                 <div
                   key={columnItem.id}
-                  className="contents"
+                  className="min-w-0"
                   data-testid="rv-grid-cell"
                   data-row={rowItem.id}
                   data-col={columnItem.id}

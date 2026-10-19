@@ -298,6 +298,59 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "rv/grid-cells-have-boxes",
+    title:
+      "Grid cells (rv-grid-cell) are real boxes an agent can measure and click",
+    tags: ["rv"],
+    state: { file: "rv/clusters.squiggle", tab: "grid" },
+    check: async (h) => {
+      const cell = await h.byTestId(TID.rvGridCell, {
+        "data-row": "paper",
+        "data-col": "essay",
+      });
+      const box = await cell.boundingBox();
+      expect(box?.width ?? 0).toBeGreaterThan(100);
+      expect(box?.height ?? 0).toBeGreaterThan(20);
+      await cell.click(); // throws for an element without a box
+      // Each cell's box is the grid's column, aligned with its neighbours.
+      const widths = await h.page.$$eval(byId(TID.rvGridCell), (els) =>
+        els.map((el) => Math.round(el.getBoundingClientRect().width))
+      );
+      expect(new Set(widths)).toEqual(new Set([140]));
+    },
+  },
+  {
+    id: "rv/grid-toolbar-1024",
+    title:
+      "At 1024 px with the code pane open, the Grid's Row Settings / Column Settings / Cluster Diagram buttons fit on one line each",
+    tags: ["rv", "layout"],
+    viewport: { width: 1024, height: 768 },
+    state: { file: "rv/error-cells.squiggle", tab: "grid", code: true },
+    steps: async (h) => {
+      await h.shot("rv-grid-toolbar-1024");
+    },
+    check: async (h) => {
+      const buttons = await h.page.$$eval(`${RV_VIEW} button`, (els) =>
+        els
+          .filter((el) =>
+            /Row Settings|Column Settings|Cluster Diagram/.test(
+              el.textContent ?? ""
+            )
+          )
+          .map((el) => ({
+            text: el.textContent,
+            overflows: el.scrollHeight > el.clientHeight + 1,
+            height: el.getBoundingClientRect().height,
+          }))
+      );
+      expect(buttons).toHaveLength(3);
+      for (const b of buttons) {
+        expect(b.overflows, `${b.text} fits its button`).toBe(false);
+        expect(b.height, `${b.text} is one line`).toBeLessThan(40);
+      }
+    },
+  },
+  {
     id: "rv/plot",
     title: "Plot: the cluster map and value/uncertainty plots",
     tags: ["rv"],
