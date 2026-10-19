@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import http, { type IncomingMessage, type ServerResponse } from "node:http";
-import type { AddressInfo } from "node:net";
+import net, { type AddressInfo } from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,13 +8,17 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 import {
+  API_ERROR_CODES,
+  decodeRootHeader,
   hubImportRequestSchema,
   openFolderRequestSchema,
+  renameFileRequestSchema,
   STUDIO_HEADER,
+  STUDIO_ROOT_HEADER,
   type StudioEvent,
   writeFileRequestSchema,
 } from "../shared/api.js";
-import { listTree, readFile, writeFile } from "./files.js";
+import { listTree, readFile, renameFile, writeFile } from "./files.js";
 import { HubError, makeHubClient } from "./hub.js";
 import { PathError } from "./paths.js";
 import {
@@ -28,13 +32,17 @@ import { type FolderWatcher, watchFolder } from "./watcher.js";
 export type StudioServerOptions = {
   root: string; // folder to open initially
   port?: number; // default 4321; 0 picks a random free port
-  host?: string; // default 127.0.0.1
+  host?: string; // default 127.0.0.1; non-loopback hosts need allowNetwork
+  // Allow binding a non-loopback host (e.g. 0.0.0.0). Anyone who can reach
+  // the port can then read and write files in the open folder, so this also
+  // disables allowOpenFolder.
+  allowNetwork?: boolean;
   strictPort?: boolean; // if false (default), try the next ports when busy
   dev?: boolean; // serve the client through Vite middleware (requires vite)
   clientDir?: string; // directory with the built client; defaults to dist/client
   recentFile?: string; // defaults to ~/.squiggle-studio/recent.json
   hubUrl?: string; // defaults to https://squigglehub.org
-  allowOpenFolder?: boolean; // allow the client to switch root folders; default true
+  allowOpenFolder?: boolean; // allow the client to switch root folders; default true (false with a non-loopback host)
 };
 
 export type StudioServer = {
@@ -50,7 +58,9 @@ const MAX_BODY_BYTES = 10 * 1024 * 1024;
 class HttpError extends Error {
   constructor(
     message: string,
-    public readonly status: number
+    public readonly status: number,
+    public readonly code?: string, // see API_ERROR_CODES
+    public readonly root?: string // sent along with code "root-changed"
   ) {
     super(message);
   }
@@ -91,12 +101,39 @@ function parseBody<T>(schema: z.ZodType<T>, body: unknown): T {
 
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]", "::1"]);
 
+const LOOPBACK = new net.BlockList();
+LOOPBACK.addSubnet("127.0.0.0", 8, "ipv4");
+LOOPBACK.addAddress("::1", "ipv6"); // also matches ::ffff:127.x.x.x
+
+// True for hosts that only accept connections from this machine.
+export function isLoopbackHost(host: string): boolean {
+  const h = host.replace(/^\[(.*)\]$/, "$1").toLowerCase();
+  if (h === "localhost") return true;
+  const family = net.isIP(h);
+  return family !== 0 && LOOPBACK.check(h, family === 4 ? "ipv4" : "ipv6");
+}
+
 // Protects against DNS rebinding: only accept requests addressed to us.
-function isAllowedHost(req: IncomingMessage, host: string): boolean {
+// A rebinding attack needs a domain name the attacker controls, so in
+// network mode IP literals (e.g. http://192.168.1.5:4321) are fine too.
+function isAllowedHost(
+  req: IncomingMessage,
+  host: string,
+  network: boolean
+): boolean {
   const header = req.headers.host;
   if (!header) return false;
-  const hostname = header.replace(/:\d+$/, "");
-  return LOCAL_HOSTNAMES.has(hostname) || hostname === host;
+  const hostname = header.replace(/:\d+$/, "").toLowerCase();
+  if (LOCAL_HOSTNAMES.has(hostname) || hostname === host.toLowerCase()) {
+    return true;
+  }
+  if (!network) return false;
+  const machine = os.hostname().toLowerCase();
+  return (
+    net.isIP(hostname.replace(/^\[(.*)\]$/, "$1")) !== 0 ||
+    hostname === machine ||
+    hostname === `${machine.replace(/\.local$/, "")}.local`
+  );
 }
 
 function packageDir(): string {
@@ -149,9 +186,17 @@ export async function startStudioServer(
   options: StudioServerOptions
 ): Promise<StudioServer> {
   const host = options.host ?? "127.0.0.1";
+  const network = !isLoopbackHost(host);
+  if (network && !options.allowNetwork) {
+    throw new Error(
+      `Refusing to listen on ${host}: it is reachable from other machines, and anyone who can connect could read and write files in the open folder. ` +
+        `Use the default host (127.0.0.1) or, if you trust your network, pass --allow-network (allowNetwork: true).`
+    );
+  }
   const recentFile = options.recentFile ?? defaultRecentFile();
   const hub = makeHubClient(options.hubUrl);
-  const allowOpenFolder = options.allowOpenFolder ?? true;
+  // Never let network clients switch the root to, say, the home folder.
+  const allowOpenFolder = !network && (options.allowOpenFolder ?? true);
 
   let root = await assertDirectory(options.root);
   let watcher: FolderWatcher | undefined;
@@ -219,6 +264,26 @@ export async function startStudioServer(
       throw new HttpError(`Missing ${STUDIO_HEADER} header`, 403);
     }
 
+    // See STUDIO_ROOT_HEADER. Requests without it (curl, tests) are fine.
+    const assertExpectedRoot = () => {
+      const value = req.headers[STUDIO_ROOT_HEADER];
+      if (value === undefined) return;
+      const expected = decodeRootHeader(
+        Array.isArray(value) ? value.join(",") : value
+      );
+      if (expected === undefined) {
+        throw new HttpError(`Malformed ${STUDIO_ROOT_HEADER} header`, 400);
+      }
+      if (path.resolve(expected) !== root) {
+        throw new HttpError(
+          `The open folder changed to ${root}`,
+          409,
+          API_ERROR_CODES.rootChanged,
+          root
+        );
+      }
+    };
+
     switch (route) {
       case "GET /api/root":
         return sendJson(res, 200, { root, name: path.basename(root) });
@@ -239,16 +304,29 @@ export async function startStudioServer(
       case "GET /api/tree":
         return sendJson(res, 200, { root, tree: await listTree(root) });
       case "GET /api/file": {
+        assertExpectedRoot();
         const p = url.searchParams.get("path") ?? "";
         return sendJson(res, 200, await readFile(root, p));
       }
       case "PUT /api/file": {
         const body = parseBody(writeFileRequestSchema, await readJsonBody(req));
+        // After reading the body: the root may have changed meanwhile.
+        assertExpectedRoot();
         return sendJson(
           res,
           200,
-          await writeFile(root, body.path, body.content)
+          await writeFile(root, body.path, body.content, {
+            overwrite: !body.create,
+          })
         );
+      }
+      case "POST /api/file/rename": {
+        const body = parseBody(
+          renameFileRequestSchema,
+          await readJsonBody(req)
+        );
+        assertExpectedRoot();
+        return sendJson(res, 200, await renameFile(root, body.from, body.to));
       }
       case "GET /api/recent":
         return sendJson(res, 200, await loadRecentFolders(recentFile));
@@ -284,8 +362,10 @@ export async function startStudioServer(
         if (!/^[\w-]+$/.test(body.owner) || !/^[\w-]+$/.test(body.slug)) {
           throw new HttpError("Invalid owner or slug", 400);
         }
+        assertExpectedRoot(); // fail fast, before the Hub request
         const code = await hub.getSource(body.owner, body.slug);
         const header = `// Imported from ${hub.hubUrl}/models/${body.owner}/${body.slug} on ${new Date().toISOString().slice(0, 10)}\n\n`;
+        assertExpectedRoot(); // and again: the Hub request takes a while
         const result = await writeFile(root, body.path, header + code, {
           overwrite: body.overwrite ?? false,
         });
@@ -297,7 +377,7 @@ export async function startStudioServer(
   };
 
   const server = http.createServer((req, res) => {
-    if (!isAllowedHost(req, host)) {
+    if (!isAllowedHost(req, host, network)) {
       res.writeHead(403).end("Forbidden host");
       return;
     }
@@ -311,8 +391,12 @@ export async function startStudioServer(
             ? e.status
             : 500;
         const message = e instanceof Error ? e.message : String(e);
-        if (!res.headersSent) sendJson(res, status, { error: message });
-        else res.end();
+        const code =
+          e instanceof HttpError || e instanceof PathError ? e.code : undefined;
+        const errorRoot = e instanceof HttpError ? e.root : undefined;
+        if (!res.headersSent) {
+          sendJson(res, status, { error: message, code, root: errorRoot });
+        } else res.end();
       });
       return;
     }

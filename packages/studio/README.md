@@ -3,7 +3,7 @@
 A local, browser-first editor and viewer for `.squiggle` files. Point it at a folder, and it shows a file tree, an editor with live output, and a full-window output view. Files changed on disk (for example, by a coding agent like Claude Code) update in the open view automatically.
 
 ```sh
-squiggle-studio [dir] [--port 4321] [--host 127.0.0.1] [--no-open]
+squiggle-studio [dir] [--port 4321] [--host 127.0.0.1 [--allow-network]] [--no-open]
 squiggle-studio render <file.squiggle> [--out file.png] [--variable name] [--view output|relative-values] [--tab list|grid|plot] [--width 1000] [--chrome path]
 ```
 
@@ -65,25 +65,36 @@ pnpm typecheck:client
 
 ## Architecture
 
-- `src/server/` — `node:http` server, no framework. All API paths are POSIX paths relative to the open folder and go through `resolveSafePath` (rejects absolute paths, `..`, NUL bytes, ignored dirs and symlinks pointing outside the root). The server binds `127.0.0.1` by default, rejects foreign `Host` headers (DNS rebinding) and requires an `x-squiggle-studio: 1` header on API calls (blocks cross-site form posts). Watching uses `fs.watch({ recursive: true })`.
+- `src/server/` — `node:http` server, no framework. Watching uses `fs.watch({ recursive: true })`.
 - `src/shared/api.ts` — zod schemas and types shared by server and client.
 - `src/client/` — Vite + React + Tailwind app using `@quri/squiggle-components` and `@quri/ui`.
 - `src/cli/` — the `squiggle-studio` command and `render`.
 
+### Security model
+
+Studio has no authentication: whoever can talk to the server can read and write files in the open folder. It relies on only being reachable from this machine:
+
+- It binds `127.0.0.1` by default. A non-loopback `--host` (e.g. `0.0.0.0`) is refused unless you also pass `--allow-network` (`allowNetwork: true`), which prints a warning and disables opening other folders (`POST /api/root`, `GET /api/browse`), so network clients are confined to the folder you started it with.
+- Websites can't use it from your browser: the server rejects foreign `Host` headers (DNS rebinding; in network mode, IP-literal hosts are also accepted) and requires an `x-squiggle-studio: 1` header on API calls, which cross-origin pages can't send without a CORS preflight that is never approved.
+- All file paths are POSIX paths relative to the open folder and go through `resolveSafePath`, which rejects absolute paths, `..`, NUL bytes, hidden files and folders (`.env`, `.git/…`), ignored dirs (`node_modules`, `dist`, …) and symlinks pointing outside the root. Only `.squiggle`, `.json` and `.md` files can be read, written or renamed.
+
 ### HTTP API
 
-| Route                            | Description                                         |
-| -------------------------------- | --------------------------------------------------- |
-| `GET /api/root`                  | `{ root, name }`                                    |
-| `POST /api/root` `{ path }`      | open another folder                                 |
-| `GET /api/tree`                  | `{ root, tree: TreeNode[] }`                        |
-| `GET /api/file?path=`            | `{ path, content, mtimeMs }`                        |
-| `PUT /api/file` `{path,content}` | write (atomic rename)                               |
-| `GET /api/recent`                | recent folders                                      |
-| `GET /api/browse?path=`          | list subdirectories (folder picker)                 |
-| `GET /api/hub/source?owner&slug` | Hub model source                                    |
-| `POST /api/hub/import`           | `{ owner, slug, path, overwrite? }`                 |
-| `GET /api/events`                | SSE: `file-changed`, `tree-changed`, `root-changed` |
+| Route                            | Description                                              |
+| -------------------------------- | -------------------------------------------------------- |
+| `GET /api/root`                  | `{ root, name }`                                         |
+| `POST /api/root` `{ path }`      | open another folder                                      |
+| `GET /api/tree`                  | `{ root, tree: TreeNode[] }`                             |
+| `GET /api/file?path=`            | `{ path, content, mtimeMs }`                             |
+| `PUT /api/file` `{path,content}` | write (atomic rename); `create: true` → 409 if it exists |
+| `POST /api/file/rename`          | `{ from, to }`; rename/move, 409 if `to` exists          |
+| `GET /api/recent`                | recent folders                                           |
+| `GET /api/browse?path=`          | list subdirectories (folder picker)                      |
+| `GET /api/hub/source?owner&slug` | Hub model source                                         |
+| `POST /api/hub/import`           | `{ owner, slug, path, overwrite? }`                      |
+| `GET /api/events`                | SSE: `file-changed`, `tree-changed`, `root-changed`      |
+
+Errors are `{ error, code? }` with a non-2xx status. The client sends `x-squiggle-studio-root: <encodeURIComponent(root)>` on file reads, writes, renames and Hub imports; if the server has switched to another folder since, it answers 409 `{ code: "root-changed", root }` instead of touching the new folder. Requests without the header (e.g. `curl`) skip this check. A 409 for an existing file has `code: "file-exists"`.
 
 ### Programmatic server (e.g. for Electron)
 
@@ -93,7 +104,7 @@ import { startStudioServer } from "@quri/squiggle-studio";
 const server = await startStudioServer({
   root: "/path/to/folder",
   port: 0, // 0 = random free port; default 4321 (tries the next ports if busy)
-  // host, strictPort, dev, clientDir, recentFile, hubUrl, allowOpenFolder
+  // host, allowNetwork, strictPort, dev, clientDir, recentFile, hubUrl, allowOpenFolder
 });
 server.url; // "http://127.0.0.1:54321"
 await server.openFolder("/another/folder"); // clients get a root-changed event

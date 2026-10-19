@@ -40,12 +40,38 @@ export type FileResponse = z.infer<typeof fileResponseSchema>;
 export const writeFileRequestSchema = z.object({
   path: z.string(),
   content: z.string(),
+  create: z.boolean().optional(), // fail with 409 "file-exists" if it exists
 });
 
 export const writeFileResponseSchema = z.object({
   path: z.string(),
   mtimeMs: z.number(),
 });
+
+export const renameFileRequestSchema = z.object({
+  from: z.string(),
+  to: z.string(), // must not exist yet
+});
+
+export const renameFileResponseSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  mtimeMs: z.number(),
+});
+
+// Body of every non-2xx API response.
+export const apiErrorResponseSchema = z.object({
+  error: z.string(),
+  code: z.string().optional(), // one of API_ERROR_CODES, when it matters
+  root: z.string().optional(), // current root, with code "root-changed"
+});
+
+export const API_ERROR_CODES = {
+  // 409: the request's STUDIO_ROOT_HEADER doesn't match the open folder.
+  rootChanged: "root-changed",
+  // 409: creating, importing or renaming onto a file that already exists.
+  fileExists: "file-exists",
+} as const;
 
 export const recentFolderSchema = z.object({
   path: z.string(),
@@ -96,6 +122,26 @@ export type StudioEvent = z.infer<typeof studioEventSchema>;
 // headers cross-origin without a CORS preflight (which we never approve), so
 // this blocks other websites from talking to the local server.
 export const STUDIO_HEADER = "x-squiggle-studio";
+
+// Optional header on file read/write/rename and Hub import requests: the
+// absolute root folder the client believes is open, URI-encoded (header values
+// must be ASCII). If it doesn't match the server's current root, the server
+// responds 409 with code "root-changed", so that a buffer from one folder is
+// never written into another after the root was switched.
+export const STUDIO_ROOT_HEADER = "x-squiggle-studio-root";
+
+export function encodeRootHeader(root: string): string {
+  return encodeURIComponent(root);
+}
+
+// Returns undefined for malformed values.
+export function decodeRootHeader(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
 
 // File extensions shown in the tree.
 export const VISIBLE_EXTENSIONS = [".squiggle", ".json", ".md"];

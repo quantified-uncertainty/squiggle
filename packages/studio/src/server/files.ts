@@ -1,7 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { type TreeNode, VISIBLE_EXTENSIONS } from "../shared/api.js";
+import {
+  API_ERROR_CODES,
+  type TreeNode,
+  VISIBLE_EXTENSIONS,
+} from "../shared/api.js";
 import {
   IGNORED_DIRS,
   PathError,
@@ -64,8 +68,39 @@ export async function listTree(root: string): Promise<TreeNode[]> {
   return walk(path.resolve(root));
 }
 
-export async function readFile(root: string, apiPath: string) {
+// Resolves an API path that must name a visible (.squiggle/.json/.md) file.
+async function resolveVisibleFile(
+  root: string,
+  apiPath: string,
+  verb: string // for the error message, e.g. "read"
+): Promise<string> {
   const abs = await resolveSafePath(root, apiPath);
+  if (!isVisibleFile(path.basename(abs))) {
+    throw new PathError(
+      `Only ${VISIBLE_EXTENSIONS.join(", ")} files can be ${verb}`
+    );
+  }
+  return abs;
+}
+
+function fileExistsError(apiPath: string): PathError {
+  return new PathError(
+    `File already exists: ${apiPath}`,
+    409,
+    API_ERROR_CODES.fileExists
+  );
+}
+
+// lstat, so that a dangling symlink also counts as existing.
+async function lexists(abs: string): Promise<boolean> {
+  return fs
+    .lstat(abs)
+    .then(() => true)
+    .catch(() => false);
+}
+
+export async function readFile(root: string, apiPath: string) {
+  const abs = await resolveVisibleFile(root, apiPath, "read");
   let stat;
   try {
     stat = await fs.stat(abs);
@@ -85,20 +120,9 @@ export async function writeFile(
   content: string,
   options: { overwrite?: boolean } = {}
 ) {
-  const abs = await resolveSafePath(root, apiPath);
-  if (!isVisibleFile(path.basename(abs))) {
-    throw new PathError(
-      `Only ${VISIBLE_EXTENSIONS.join(", ")} files can be written`
-    );
-  }
-  if (options.overwrite === false) {
-    const exists = await fs
-      .stat(abs)
-      .then(() => true)
-      .catch(() => false);
-    if (exists) {
-      throw new PathError(`File already exists: ${apiPath}`, 409);
-    }
+  const abs = await resolveVisibleFile(root, apiPath, "written");
+  if (options.overwrite === false && (await lexists(abs))) {
+    throw fileExistsError(apiPath);
   }
   await fs.mkdir(path.dirname(abs), { recursive: true });
   // Write to a temp file and rename, so that watchers (and agents) never
@@ -108,4 +132,35 @@ export async function writeFile(
   await fs.rename(tmp, abs);
   const stat = await fs.stat(abs);
   return { path: apiPath, mtimeMs: stat.mtimeMs };
+}
+
+// Renames or moves a file inside root. `to` must not exist; its parent
+// directories are created.
+export async function renameFile(root: string, from: string, to: string) {
+  const fromAbs = await resolveVisibleFile(root, from, "renamed");
+  const toAbs = await resolveVisibleFile(root, to, "renamed");
+  let fromStat;
+  try {
+    fromStat = await fs.stat(fromAbs);
+  } catch {
+    throw new PathError(`File not found: ${from}`, 404);
+  }
+  if (!fromStat.isFile()) {
+    throw new PathError(`Not a file: ${from}`);
+  }
+  if (await lexists(toAbs)) {
+    // On case-insensitive filesystems `a.squiggle` -> `A.squiggle` finds the
+    // source itself; that's a valid rename, not a collision.
+    const toStat = await fs.stat(toAbs).catch(() => undefined);
+    const caseOnly =
+      fromAbs !== toAbs &&
+      fromAbs.toLowerCase() === toAbs.toLowerCase() &&
+      toStat?.ino === fromStat.ino &&
+      toStat.dev === fromStat.dev;
+    if (!caseOnly) throw fileExistsError(to);
+  }
+  await fs.mkdir(path.dirname(toAbs), { recursive: true });
+  await fs.rename(fromAbs, toAbs);
+  const stat = await fs.stat(toAbs);
+  return { from, to, mtimeMs: stat.mtimeMs };
 }

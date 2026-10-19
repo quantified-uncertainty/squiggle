@@ -4,7 +4,8 @@ import path from "node:path";
 export class PathError extends Error {
   constructor(
     message: string,
-    public readonly status: number = 400
+    public readonly status: number = 400,
+    public readonly code?: string // see API_ERROR_CODES
   ) {
     super(message);
   }
@@ -28,7 +29,8 @@ function isInside(root: string, target: string): boolean {
 // Resolves an API path (POSIX, relative to `root`) to an absolute filesystem
 // path, guaranteeing that the result stays inside `root`.
 // Throws PathError for anything suspicious: absolute paths, `..` escapes,
-// NUL bytes, ignored directories, or symlinks that point outside the root.
+// NUL bytes, hidden (dot) files and directories such as `.env` or `.git`,
+// ignored directories, or symlinks that point outside the root.
 export async function resolveSafePath(
   root: string,
   relPath: string
@@ -47,6 +49,10 @@ export async function resolveSafePath(
   const segments = normalized.split("/");
   if (segments.some((s) => s === "..")) {
     throw new PathError("Path traversal is not allowed");
+  }
+  // Same rule as isIgnoredPath (files.ts): "." is fine, ".anything" is not.
+  if (segments.some((s) => s.startsWith(".") && s !== ".")) {
+    throw new PathError("Hidden files and folders are not allowed");
   }
   if (segments.some((s) => IGNORED_DIRS.has(s))) {
     throw new PathError("Path is inside an ignored directory");
