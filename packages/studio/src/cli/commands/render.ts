@@ -184,14 +184,12 @@ export function register(program: Command): void {
     .action(async (file, options) => {
       const started = Date.now();
       const state = renderViewState(file, options);
+      const root = options.root ? path.resolve(options.root) : undefined;
       const target = await resolveRunTarget({
         file: state.file,
-        root: options.root,
+        root,
         // A --url file is root-relative; a file argument is cwd-relative.
-        cwd:
-          file === undefined && options.root
-            ? path.resolve(options.root)
-            : undefined,
+        cwd: file === undefined ? root : undefined,
       });
       const out = options.out
         ? path.resolve(options.out)
@@ -203,6 +201,7 @@ export function register(program: Command): void {
       // data-studio-error).
       const checks: string[] = [];
       let errors: ErrorJson[] = [];
+      let timedOut = false;
       try {
         const run = await runStudioFile({
           root: target.root,
@@ -239,7 +238,8 @@ export function register(program: Command): void {
         }
       } catch (e) {
         if (!(e instanceof RunTimeoutError)) throw e;
-        checks.push(e.message);
+        timedOut = true;
+        checks.push(`${e.message} (--timeout)`);
       }
 
       const result = await renderToPng({
@@ -259,16 +259,13 @@ export function register(program: Command): void {
       });
       const studioErrors = [...new Set([...checks, ...result.studioErrors])];
       if (result.timedOut) {
+        timedOut = true;
         studioErrors.push(
           `Studio didn't finish within ${options.timeout} ms (--timeout)`
         );
       }
       const ok = errors.length === 0 && studioErrors.length === 0;
-      const exitCode = result.timedOut
-        ? EXIT.timeout
-        : ok
-          ? EXIT.ok
-          : EXIT.modelError;
+      const exitCode = timedOut ? EXIT.timeout : ok ? EXIT.ok : EXIT.modelError;
 
       if (options.json) {
         const json: RenderJson = {

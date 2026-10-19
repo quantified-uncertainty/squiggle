@@ -235,8 +235,9 @@ describe("render", () => {
       [
         "--url",
         "http://127.0.0.1:4321/?file=relative-values%2Fminimal.squiggle&view=relative-values&tab=plot",
+        // Relative to the current directory, like the file argument.
         "--root",
-        models,
+        "models",
         "-o",
         png,
       ],

@@ -16,7 +16,6 @@ import {
   runStudioFile,
   type StudioRun,
   studioEnvironment,
-  type StudioRunInfo,
   type StudioRunJson,
   studioRunInfo,
   StudioUsageError,
@@ -232,18 +231,6 @@ export function formatRunText(run: StudioRun, only?: string[]): string {
 
 // ── The command ────────────────────────────────────────────────────────────
 
-// What `--json` prints when the run didn't finish (timeout, internal error).
-function failedRunJson(info: StudioRunInfo, error: ErrorJson): StudioRunJson {
-  return {
-    ok: false,
-    result: null,
-    bindings: {},
-    errors: [error],
-    timeMs: 0,
-    studio: info,
-  };
-}
-
 export function register(program: Command): void {
   program
     .command("run")
@@ -299,30 +286,32 @@ export function register(program: Command): void {
         });
       } catch (e) {
         if (!(e instanceof RunTimeoutError)) throw e;
-        const message = `${e.message} (--timeout ${options.timeout} ms)`;
+        const message = `${e.message} (--timeout)`;
         if (options.json) {
-          const info: StudioRunInfo = {
-            root: target.root,
-            file: target.path,
-            codeHash: "",
-            environment: {
-              sampleCount: environment.sampleCount,
-              xyPointLength: environment.xyPointLength,
-              seed: environment.seed,
+          // No output to describe: the studio block has what is known.
+          const json: StudioRunJson = {
+            ok: false,
+            result: null,
+            bindings: {},
+            errors: [{ kind: "other", message }],
+            timeMs: e.timeoutMs,
+            studio: {
+              root: target.root,
+              file: target.path,
+              codeHash: "",
+              environment: {
+                sampleCount: environment.sampleCount,
+                xyPointLength: environment.xyPointLength,
+                seed: environment.seed,
+              },
+              imports: [],
+              warnings: [],
+              views: [],
+              relativeValues: [],
+              hidden: [],
             },
-            imports: [],
-            warnings: [],
-            views: [],
-            relativeValues: [],
-            hidden: [],
           };
-          await writeStdout(
-            JSON.stringify(
-              failedRunJson(info, { kind: "other", message }),
-              null,
-              2
-            ) + "\n"
-          );
+          await writeStdout(JSON.stringify(json, null, 2) + "\n");
         } else {
           await writeStderr(`${target.path}: ${message}\n`);
         }
