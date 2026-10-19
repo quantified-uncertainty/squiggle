@@ -3,6 +3,7 @@ packages:
   - "internal-packages/*"
   - "apps/*"
   - "evaluations"
+  - "packages/relative-values/examples/host-app"
 
 allowBuilds:
   "@prisma/client": true

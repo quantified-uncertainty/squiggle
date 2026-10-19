@@ -1,0 +1,28 @@
+{
+  "name": "@quri/relative-values-host-app-example",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Example: embedding relative values dashboards in a standalone React app",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "bundle": "squiggle-rv bundle models/portfolio.squiggle --precision 4 --out src/data/portfolio.bundle.json",
+    "screenshots": "node scripts/screenshots.mjs"
+  },
+  "dependencies": {
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-relative-values": "workspace:*",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "puppeteer-core": "^24.43.1",
+    "typescript": "5.8.2",
+    "vite": "^6.2.4"
+  }
+}

@@ -1,0 +1,13 @@
+// A synthetic catalog of 120 items (14,400 pairs), to check that the
+// dashboard stays responsive while it computes. Shown at #/large.
+n = 120
+itemId(i) = "item" + String(i)
+dists = Dict.fromList(List.upTo(1, n) -> map({|i| [itemId(i), i to 3 * i]}))
+clusterId(i) = "group" + String(mod(i, 4) + 1)
+makeItem(i) = { id: itemId(i), name: "Item " + String(i), clusterId: clusterId(i) }
+
+largeCatalog = {
+  title: "Large catalog: 120 items",
+  items: List.upTo(1, n) -> map(makeItem),
+  fn: {|a, b| [dists[a], dists[b]]},
+}
