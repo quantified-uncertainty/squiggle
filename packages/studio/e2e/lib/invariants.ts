@@ -49,16 +49,11 @@ async function hiddenInTree(h: HarnessInternal): Promise<string[]> {
   const domPaths = await h.page.evaluate(() =>
     [
       ...document.querySelectorAll(
-        "[data-testid='file-tree-item'][data-path], aside button[title]"
+        "[data-testid='file-tree-item'][data-path], [data-testid='changed-on-disk-item'][data-path]"
       ),
-    ].map(
-      (el) => el.getAttribute("data-path") ?? el.getAttribute("title") ?? ""
-    )
+    ].map((el) => el.getAttribute("data-path") ?? "")
   );
   for (const p of domPaths) {
-    // Tree rows carry root-relative paths; skip other titled buttons
-    // (absolute folder paths, tooltips) in the pre-WP3 sidebar.
-    if (p.startsWith("/") || p.includes(" ")) continue;
     if (HIDDEN_OR_IGNORED.test(p)) found.push(`The Explorer shows ${p}`);
   }
   return found;

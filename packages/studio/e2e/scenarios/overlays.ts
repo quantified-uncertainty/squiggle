@@ -449,13 +449,13 @@ export const scenarios: Scenario[] = [
     viewport,
     state: { file: A },
     steps: async (h) => {
-      const row =
-        (await h.page.$(
-          `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(A)}]`
-        )) !== null
-          ? `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(A)}]`
-          : `aside button[title=${JSON.stringify(A)}]`;
-      await markFocus(h, row);
+      // A click on the row focuses the tree (one tab stop with
+      // aria-activedescendant, §3.9.1).
+      await h.page.click(
+        `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(A)}]`
+      );
+      await h.whenIdle();
+      await markFocus(h, byId(TID.fileTree));
       await h.key("?");
       await h.page.waitForSelector(SHEET);
       expect(
@@ -486,9 +486,7 @@ export const scenarios: Scenario[] = [
       expect(save?.text).toContain("⌘s");
       await h.key("Escape");
       expect(await isPresent(h, SHEET)).toBe(false);
-      expect(await focusIsMarked(h), "focus is back on the tree row").toBe(
-        true
-      );
+      expect(await focusIsMarked(h), "focus is back on the tree").toBe(true);
     },
   },
   {
@@ -521,7 +519,8 @@ export const scenarios: Scenario[] = [
         expect(groups).toContain(g);
       }
       const footer = await h.page.$eval(SHEET, (el) => el.textContent ?? "");
-      expect(footer).toContain("~/.squiggle-studio/settings.json");
+      // The server's settings.json (the harness's state folder here).
+      expect(footer).toMatch(/Settings: \/\S+\/settings\.json\./);
       expect(footer).toContain("In the desktop app also");
       expect(footer).toContain("⌘W");
       // Copy as Markdown puts an agent-readable table on the clipboard

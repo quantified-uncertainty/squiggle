@@ -6,7 +6,6 @@ import type { Page } from "puppeteer-core";
 import { TID } from "../../src/shared/testIds.js";
 import { expect } from "../lib/expect.js";
 import type { Harness, Scenario } from "../lib/harness.js";
-import { isMerged } from "../lib/scenarios.js";
 
 // Workspace model and client sync (WP4, spec §2 and §10.8): autosave, the
 // hash write guard, conflicts, external changes applied in place, Follow,
@@ -530,14 +529,12 @@ export const scenarios: Scenario[] = [
         seen: false,
       });
       expect(w.followNotice?.path).toBe("agent1.squiggle");
-      if (isMerged("WP2")) {
-        const item = await h.byTestId(TID.statusbarItem, {
-          "status-item": "changes",
-        });
-        expect(await item.evaluate((el) => el.textContent)).toContain(
-          "agent1.squiggle"
-        );
-      }
+      const item = await h.byTestId(TID.statusbarItem, {
+        "status-item": "changes",
+      });
+      expect(await item.evaluate((el) => el.textContent)).toContain(
+        "agent1.squiggle"
+      );
     },
   },
   {
@@ -651,7 +648,8 @@ export const scenarios: Scenario[] = [
     tags: ["sync"],
     fixtures: FIXTURES,
     viewport: { width: 800, height: 600 },
-    state: { file: "aa.squiggle" },
+    // `code`: the code pane starts closed in an editor area under 760 px.
+    state: { file: "aa.squiggle", code: true },
     steps: async (h) => {
       await setAutosaveOff(h);
       await typeAtEnd(h, "\nunsavedEdit = 42");

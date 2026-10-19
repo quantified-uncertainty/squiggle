@@ -676,7 +676,8 @@ export const scenarios: Scenario[] = [
         { path: "imports/lib/costs.squiggle" },
         { path: FILE },
       ]);
-      expect(files[0]?.label).toBe("costs.squiggle");
+      // The label, then the folder hint.
+      expect(files[0]?.label).toBe("costs.squiggle · imports/lib");
       expect(files.every((i) => !i.disabled)).toBe(true);
       expect(list.map((i) => i.command)).toContain("squiggle.clearRecent");
     },

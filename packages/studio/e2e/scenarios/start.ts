@@ -17,36 +17,20 @@ const RECENT = [
 ];
 
 // Seeds this folder's recent files with nothing shown, as a previous session
-// that closed its last file would leave them, then reloads. Written both to
-// the server-backed root state (PATCH /api/state, from WP7; `mru` and
-// `activeFile` per §2.2) and to the legacy per-folder localStorage key, which
-// the workspace reads before WP4/WP7 and studioState migrates (§7).
+// that closed its last file would leave them (the root state's `mru` and
+// `activeFile`, ROOT_STATE_KEYS), then reloads.
 async function seedRecentFiles(h: Harness, recent: string[]) {
   const root = (await h.state()).root;
   expect(root, "the page knows its root").toBeTruthy();
   if (!root) return;
-  await h.page.evaluate(
-    (rootPath: string, files: string[]) => {
-      localStorage.setItem(
-        `squiggle-studio:folder:${rootPath}`,
-        JSON.stringify({
-          openFiles: files,
-          activeFile: null,
-          recentFiles: files,
-        })
-      );
-    },
-    root,
-    recent
-  );
-  // Answers 404 until WP7 lands; the localStorage copy covers that.
-  await fetch(`${h.url}/api/state`, {
+  const response = await fetch(`${h.url}/api/state`, {
     method: "PATCH",
     headers: { "content-type": "application/json", "x-squiggle-studio": "1" },
     body: JSON.stringify({
       root: { path: root, patch: { mru: recent, activeFile: null } },
     }),
-  }).catch(() => undefined);
+  });
+  expect(response.status).toBe(200);
   await h.page.reload({ waitUntil: "load" });
   await h.whenIdle();
 }

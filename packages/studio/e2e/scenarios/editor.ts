@@ -12,17 +12,11 @@ const byId = (id: string, attrs = "") => `[data-testid='${id}']${attrs}`;
 const CODE_PANE = byId(TID.codePane);
 const CODE_CONTENT = `${CODE_PANE} .cm-content`;
 
-// Clicks a file in the Explorer: the tree row's test id (WP3), or, until WP3
-// lands, the current tree's file button, whose title is the path.
+// Clicks a file's row in the Explorer.
 async function clickTreeFile(h: Harness, path: string): Promise<void> {
-  const row =
-    (await h.page.$(
-      `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(path)}]`
-    )) ??
-    (await h.page.$(
-      `${byId(TID.explorer)} button[title=${JSON.stringify(path)}]`
-    )) ??
-    (await h.page.$(`aside button[title=${JSON.stringify(path)}]`));
+  const row = await h.page.$(
+    `${byId(TID.fileTreeItem)}[data-path=${JSON.stringify(path)}]`
+  );
   if (!row) throw new Error(`No Explorer row for ${path}`);
   await row.click();
   await h.page.waitForFunction(

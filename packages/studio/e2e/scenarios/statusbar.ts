@@ -103,16 +103,23 @@ export const scenarios: Scenario[] = [
   },
   {
     id: "statusbar/dirty",
-    title: "Typing makes the save item read Unsaved",
+    title:
+      "With autosave on, typing reads Saving… until the autosave lands, then Saved",
     tags: ["statusbar"],
     viewport,
     state: { file: NOTES },
     steps: async (h) => {
       await typeInTextFile(h, "\nA new line");
-      // Read right away: with autosave on, the file is saved within a second.
+      // Read right away: the autosave is pending for about a second (§3.8:
+      // "Unsaved · ⌘S" is for autosave off).
       const save = await statusItem(h, "save");
-      expect(save?.state).toBe("dirty");
-      expect(save?.text).toBe("Unsaved");
+      expect(save?.state).toBe("saving");
+      expect(save?.text).toBe("Saving…");
+      await h.whenIdle();
+    },
+    check: async (h) => {
+      expect(await h.readFile(NOTES)).toContain("A new line");
+      expect((await statusItem(h, "save"))?.state).toBe("saved");
     },
   },
   {

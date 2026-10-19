@@ -345,8 +345,8 @@ export const scenarios: Scenario[] = [
     },
   },
   {
-    // Few navigations per page: background pages keep their event streams
-    // open until WP4 closes them on pagehide (#14), and Chrome allows 6.
+    // Few navigations per page, so the page never nears Chrome's limit of
+    // six connections per origin (#14).
     id: "output/embed-markers",
     title:
       "Embed mode: a file that can't open, a text file and the Playground carry ready/error markers (#25)",

@@ -184,16 +184,8 @@ describe.skipIf(!browserParity)("browser getRunJson() = Node", () => {
         if (!api) throw new Error("window.squiggleStudio is missing");
         const { idle } = await api.whenIdle(timeoutMs);
         if (!idle) throw new Error("Studio didn't go idle");
-        // whenIdle() can answer before the file has loaded until the
-        // workspace reports file loads as busy (WP4); wait up to 3 s more
-        // for the run.
-        const idleAt = Date.now();
-        let json = api.getRunJson();
-        while (!json && Date.now() - idleAt < 3_000) {
-          await new Promise((resolve) => setTimeout(resolve, 25));
-          json = api.getRunJson();
-        }
-        return (json ?? null) as object | null;
+        // Idle covers the file load and its run.
+        return (api.getRunJson() ?? null) as object | null;
       }, IDLE_TIMEOUT_MS);
       expect(fromPage, `getRunJson() for ${file}`).not.toBeNull();
       expect(

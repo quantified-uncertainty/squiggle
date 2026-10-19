@@ -8,7 +8,6 @@ import {
 import { TID } from "../../src/shared/testIds.js";
 import { expect } from "../lib/expect.js";
 import type { Harness, Scenario } from "../lib/harness.js";
-import { isMerged } from "../lib/scenarios.js";
 
 // In-page agent features (WP8, spec §6.5): Run ▸ Copy for Agent and
 // window.squiggleStudio. Selects by test id and command id.
@@ -84,6 +83,16 @@ function comparable(json: object | null): unknown {
 
 const RV_FILE = "rv/minimal.squiggle";
 
+// The address bar without the harness's URL flags (`test=1`), which a
+// copied link leaves out.
+function addressBarLink(h: Harness): Promise<string> {
+  return h.page.evaluate(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("test");
+    return url.toString();
+  });
+}
+
 export const scenarios: Scenario[] = [
   {
     id: "agent/copy-context",
@@ -112,9 +121,12 @@ export const scenarios: Scenario[] = [
         /^Squiggle Studio — rv\/minimal\.squiggle → Relative values/
       );
       expect(lines).toContain(`Root: ${h.root}`);
-      expect(lines).toContain(
-        `Link: ${h.url}/?file=rv%2Fminimal.squiggle&view=relative-values`
-      );
+      // The link is the address bar, which mirrors the shown view (§2.4).
+      const link = lines.find((l) => l.startsWith("Link: "))?.slice(6);
+      expect(link).toBe(await addressBarLink(h));
+      const params = new URL(link ?? "").searchParams;
+      expect(params.get("file")).toBe(RV_FILE);
+      expect(params.get("view")).toBe("relative-values");
       expect(lines).toContain(
         `Run: squiggle-studio run ${abs} --root ${h.root} --json`
       );
@@ -126,11 +138,9 @@ export const scenarios: Scenario[] = [
       );
       const status = lines.find((l) => l.startsWith("Status: "));
       expect(status).toBeDefined();
-      if (isMerged("WP5")) {
-        // The run's status and the spec come from the active-run store.
-        expect(status).toMatch(/^Status: ok \(\d+ ms\), 0 errors$/);
-        expect(lines[0]).toContain("(spec fruit, 3 items)");
-      }
+      // The run's status and the spec come from the active-run store.
+      expect(status).toMatch(/^Status: ok \(\d+ ms\), 0 errors$/);
+      expect(lines[0]).toContain("(spec fruit, 3 items)");
       expect(text).not.toContain("Unsaved edits");
     },
   },
@@ -143,8 +153,11 @@ export const scenarios: Scenario[] = [
     check: async (h) => {
       await grantClipboard(h);
       const abs = `${h.root}/imports/main.squiggle`;
-      expect(await copyWith(h, "squiggle.copyViewLink")).toBe(
-        `${h.url}/?file=imports%2Fmain.squiggle&view=output`
+      // The address bar: the file, its view and the view's in-file state.
+      const link = await copyWith(h, "squiggle.copyViewLink");
+      expect(link).toBe(await addressBarLink(h));
+      expect(link).toBe(
+        `${h.url}/?file=imports%2Fmain.squiggle&view=output&layout=cards&code=1`
       );
       expect(await copyWith(h, "squiggle.agent.copyRunCommand")).toBe(
         `squiggle-studio run ${abs} --root ${h.root} --json`

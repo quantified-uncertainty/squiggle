@@ -230,8 +230,7 @@
     "defaultView": "output",
     "errorCount": 0,
     "cardCount": 11,
-    "rvSpecs": [],
-    "note": "Includes PointSet dists; `squiggle run --json` fails on them at b9591b3a0 (empty XYShape)."
+    "rvSpecs": []
   },
   "values/empty.squiggle": {
     "views": ["output", "split"],

@@ -142,7 +142,7 @@ async function clickModalAction(
   which: "primary" | "cancel"
 ): Promise<void> {
   await h.page.click(
-    `${byId(modal)} [data-modal-actions] button:${which === "primary" ? "last-child" : "first-child"}`
+    `${byId(modal)} ${byId(TID.modalActions)} button:${which === "primary" ? "last-child" : "first-child"}`
   );
 }
 
@@ -896,7 +896,7 @@ export const scenarios: Scenario[] = [
       await h.shot("explorer-open-folder-recent");
     },
     check: async (h) => {
-      const recent = await h.page.$$eval("[data-recent-folder]", (els) =>
+      const recent = await h.page.$$eval(byId(TID.openFolderRecent), (els) =>
         els.map((el) => ({
           path: el.getAttribute("data-recent-folder"),
           title: el.getAttribute("title"),
@@ -1092,7 +1092,7 @@ export const scenarios: Scenario[] = [
       );
       await waitInPage(
         h,
-        `!document.querySelector("${byId(TID.modalHubImport)} [data-modal-actions] button:disabled")`
+        `!document.querySelector("${byId(TID.modalHubImport)} ${byId(TID.modalActions)} button:disabled")`
       );
       expect(h.errors.dialogs.join("\n")).toMatch(
         /already exists\. Overwrite it\?/

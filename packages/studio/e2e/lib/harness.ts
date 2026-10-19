@@ -259,8 +259,8 @@ export async function startFixtureServer(
 
   const hub = opts.hub === "none" ? undefined : await startHubStub();
   const port = await freePort();
-  // The server ignores `stateDir` and `trackRecent` until WP7 (§10.4);
-  // `recentFile` keeps it away from ~/.squiggle-studio meanwhile.
+  // State, settings and recent folders all live in the temporary `stateDir`,
+  // away from ~/.squiggle-studio.
   const serverOptions: StudioServerOptions = {
     root,
     port,
