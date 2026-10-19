@@ -59,12 +59,23 @@ export {
   SqScatterPlot,
 } from "./public/SqValue/SqPlot.js";
 export { SqSpecification } from "./public/SqValue/SqSpecification.js";
+export {
+  sqDistributionSummary,
+  sqValueToJson,
+  type SqValueToJsonOptions,
+} from "./public/SqValue/toJson.js";
 export { SqTableChart } from "./public/SqValue/SqTableChart.js";
 export { SqCalculator } from "./public/SqValue/SqCalculator.js";
 export { SqDict } from "./public/SqValue/SqDict.js";
 export { SqScale } from "./public/SqValue/SqScale.js";
 export { SqValuePath, SqValuePathEdge } from "./public/SqValuePath.js";
 export { parse } from "./public/parse.js";
+export {
+  getCodeWarnings,
+  getErrorHints,
+  type SqCodeWarning,
+  suggestBuiltinNames,
+} from "./public/hints.js";
 export { fmap as resultMap, type result } from "./utility/result.js";
 
 export {
@@ -110,6 +121,11 @@ export { sq } from "./sq.js";
 
 export function getFunctionDocumentation(name: string) {
   return getRegistry().getFunctionDocumentation(name);
+}
+
+// Documentation for all builtin functions, including ones with the same name in different namespaces.
+export function getAllFunctionDocumentation() {
+  return getRegistry().allFunctionDocumentation();
 }
 
 export function getAllFunctionNames() {
