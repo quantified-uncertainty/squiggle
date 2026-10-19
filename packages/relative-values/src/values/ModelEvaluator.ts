@@ -71,6 +71,15 @@ function parseRelativeValue(value: SqValue): RelativeValueResult {
     const field = dict.get(key);
     fields[key] = field?.tag === "Number" ? field.value : undefined;
   }
+  // A point ratio (p5 = p95, e.g. an item worth 0 in terms of any other) has
+  // no spread, but its uncertainty, log10(p95 / p5), is NaN for 0 / 0.
+  if (
+    Number.isNaN(fields["uncertainty"]) &&
+    fields["min"] !== undefined &&
+    fields["min"] === fields["max"]
+  ) {
+    fields["uncertainty"] = 0;
+  }
 
   const parsed = relativeValueSchema.safeParse(fields);
   if (!parsed.success) {
@@ -165,7 +174,10 @@ export class ModelEvaluator {
     // The environment that comparisons run in; undefined for cache-only
     // evaluators.
     readonly environment: Env | undefined,
-    options: ModelEvaluatorOptions
+    options: ModelEvaluatorOptions,
+    // The comparison function itself, `fn(id1, id2) -> [value1, value2]`
+    // (`wrappedFn` summarizes its ratio). Undefined for cache-only evaluators.
+    private pairFn?: SqLambda
   ) {
     this.cache = options.cache ?? new InMemoryRelativeValuesCache();
     this.modelCode = options.modelCode;
@@ -227,7 +239,7 @@ export class ModelEvaluator {
 
     return {
       ok: true,
-      value: new ModelEvaluator(wrapped.value.value, environment, options),
+      value: new ModelEvaluator(wrapped.value.value, environment, options, fn),
     };
   }
 
@@ -350,6 +362,39 @@ export class ModelEvaluator {
       return { ok: false, value: errorToString(result.value) };
     }
     return parseRelativeValue(result.value);
+  }
+
+  /**
+   * The comparison function's own result for a pair: the two values (each a
+   * distribution or a number) before their ratio is summarized. Used for the
+   * pair charts of the list view sidebar. Not cached.
+   */
+  comparePairValues(
+    id1: string,
+    id2: string
+  ): result<[SqValue, SqValue], string> {
+    if (!this.pairFn || !this.environment) {
+      return {
+        ok: false,
+        value: `No comparison function for ${id1} / ${id2}`,
+      };
+    }
+    const result = this.pairFn.call(
+      [SqStringValue.create(id1), SqStringValue.create(id2)],
+      this.environment
+    );
+    if (!result.ok) {
+      return { ok: false, value: errorToString(result.value) };
+    }
+    const pair = result.value;
+    const values = pair.tag === "Array" ? pair.value.getValues() : [];
+    if (values.length !== 2) {
+      return {
+        ok: false,
+        value: `The comparison function must return a list of two values, got ${pair.tag === "Array" ? `a list of ${values.length}` : pair.tag}`,
+      };
+    }
+    return { ok: true, value: [values[0], values[1]] };
   }
 
   compare(id1: string, id2: string): RelativeValueResult {

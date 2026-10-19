@@ -9,8 +9,8 @@ import {
 } from "../values/ModelEvaluator.js";
 
 /**
- * Which pairs a view needs: the list view only compares items within each
- * cluster and with the cluster's unit; other views need all n² pairs.
+ * Which pairs a view needs: the list view only compares each item with its
+ * table's unit (n pairs); other views need all n² pairs.
  */
 export type ComputationScope = "list" | "all";
 
@@ -19,9 +19,8 @@ function allPairs(definition: RelativeValuesDefinition): ItemPair[] {
   return ids.flatMap((id1) => ids.map((id2): ItemPair => [id1, id2]));
 }
 
-// Mirrors what `ListView` compares: pairs within each cluster table (for
-// uncertainty percentiles and sorting) and each item with the table's default
-// unit.
+// Mirrors what `ListView` compares: each item with its cluster table's
+// default unit (the cells, their uncertainty colors and the default sorting).
 function listViewPairs(definition: RelativeValuesDefinition): ItemPair[] {
   const { items, clusters } = definition;
   const clusterIds = new Set(clusters.map((cluster) => cluster.id));
@@ -57,9 +56,6 @@ function listViewPairs(definition: RelativeValuesDefinition): ItemPair[] {
     for (const id1 of ids) {
       if (unit !== undefined) {
         add(id1, unit);
-      }
-      for (const id2 of ids) {
-        add(id1, id2);
       }
     }
   }

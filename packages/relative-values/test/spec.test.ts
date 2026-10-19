@@ -123,8 +123,9 @@ describe("looksLikeRelativeValuesSpec", () => {
   test.each([
     [`spec = { items: [], fn: {|a, b| [1, 2]} }`, true],
     [`spec = { values: { a: 1, b: 2 to 3 } }`, true],
-    [`spec = { values: { a: 1 } }`, false],
-    [`spec = { values: { a: 1, b: "x" } }`, false],
+    // Detection is looser than validation (QA #30; see specDetection.test.ts).
+    [`spec = { values: { a: 1 } }`, true],
+    [`spec = { values: { a: 1, b: "x" } }`, true],
     [`spec = { fn: {|a, b| [1, 2]} }`, false],
     [`spec = 3`, false],
   ])("%s", async (code, expected) => {

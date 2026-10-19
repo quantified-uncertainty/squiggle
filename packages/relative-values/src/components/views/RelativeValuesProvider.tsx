@@ -41,12 +41,11 @@ type ViewContextShape = {
 export type RelativeValuesOptions = {
   // If set, the list view sidebar shows an "Open in Playground" link.
   getPlaygroundUrl?: (code: string) => string;
-  // Resolves imports in the per-pair Squiggle charts of the list view sidebar
-  // (which re-run the model code). Without it, models with imports can't show
-  // these charts.
+  // Deprecated and unused: the list view sidebar's per-pair charts now call
+  // the evaluator's comparison function instead of re-running the model code,
+  // so they need no linker. Kept so that existing callers still compile.
   linker?: SqLinker;
-  // Source id of the model, passed to the linker as the importing module's id
-  // so that relative imports (`import "./other.squiggle"`) resolve.
+  // Deprecated and unused, like `linker`.
   sourceId?: string;
   // Called when an item name is clicked in the list view, the grid headers or
   // the list sidebar, or when an item's dot is clicked in the plots. Without

@@ -279,26 +279,23 @@ export function relativeValuesSpecFromSqValue(
 
 /**
  * Cheap check for whether a value looks like it's intended to be a relative
- * values spec. Doesn't validate it; use `relativeValuesSpecFromSqValue` for that.
+ * values spec. Doesn't validate it; use `relativeValuesSpecFromSqValue` for
+ * that, which explains what's wrong with a candidate.
  *
- * - `{ items: [...], fn: <function> }` qualifies;
- * - `{ values: { ... } }` qualifies if it has at least two values and all of
- *   them are distributions or numbers.
+ * Detection is deliberately looser than validation, so that a spec with a
+ * mistake (a string among its values, a single value while typing, an `fn`
+ * that isn't a function) is still found and its error can be shown:
+ *
+ * - `{ fn, items }` qualifies, whatever the types of `fn` and `items`;
+ * - `{ values: { ... } }` (without `fn`) qualifies, whatever its values are.
  */
 export function looksLikeRelativeValuesSpec(value: SqValue): boolean {
   if (value.tag !== "Dict") {
     return false;
   }
   const dict = value.value;
-  const fn = dict.get("fn");
-  const items = dict.get("items");
-  if (fn?.tag === "Lambda" && items?.tag === "Array") {
-    return true;
+  if (dict.get("fn")) {
+    return dict.get("items") !== undefined;
   }
-  const values = dict.get("values");
-  if (!fn && values?.tag === "Dict") {
-    const entries = values.value.values();
-    return entries.length >= 2 && entries.every(isComparableValue);
-  }
-  return false;
+  return dict.get("values")?.tag === "Dict";
 }
