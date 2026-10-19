@@ -53,6 +53,20 @@ describe("sqModuleOutputToJson", () => {
     expect((json.result as { samples: number[] }).samples).toHaveLength(3);
   });
 
+  // A discrete-only point set's summary throws ("empty XYShape") at the time
+  // of writing; the serializer reports that instead of throwing.
+  test("never throws", async () => {
+    const { output, sources } = await runSources({
+      main: "d = mx(1, 2, 3, [0.2, 0.5, 0.3])",
+    });
+    const json = sqModuleOutputToJson(output, sources);
+    if (!json.ok) {
+      expect(json.errors).toEqual([
+        { kind: "internal", message: expect.any(String) },
+      ]);
+    }
+  });
+
   test("parse error", async () => {
     const json = await runJson({ main: "x = \ny = 2" });
     expect(json.ok).toBe(false);

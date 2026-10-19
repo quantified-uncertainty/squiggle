@@ -142,6 +142,8 @@ function dictToJson(dict: SqDict, samples: number | undefined) {
 
 /**
  * Converts a module output to the JSON that `squiggle run --json` prints: `{ok, result, bindings, exports?, errors, timeMs}`. `result` is `null` for a void result; `exports` is omitted when nothing is exported.
+ *
+ * Never throws: if summarizing a value fails (a bug in squiggle-lang), the JSON reports an "internal" error instead, so callers always get one JSON object.
  */
 export function sqModuleOutputToJson(
   output: SqModuleOutput,
@@ -161,14 +163,24 @@ export function sqModuleOutputToJson(
     };
   }
   const { result, bindings, exports } = output.result.value;
-  return {
-    ok: true,
-    result: sqValueToJson(result, { samples }),
-    bindings: dictToJson(bindings, samples),
-    ...(exports.isEmpty() ? {} : { exports: dictToJson(exports, samples) }),
-    errors: [],
-    timeMs,
-  };
+  try {
+    return {
+      ok: true,
+      result: sqValueToJson(result, { samples }),
+      bindings: dictToJson(bindings, samples),
+      ...(exports.isEmpty() ? {} : { exports: dictToJson(exports, samples) }),
+      errors: [],
+      timeMs,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      result: null,
+      bindings: {},
+      errors: [exceptionToErrorJson(e)],
+      timeMs,
+    };
+  }
 }
 
 /**
