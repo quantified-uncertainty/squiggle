@@ -1,7 +1,14 @@
+import path from "node:path";
+
 import { app, BrowserWindow, dialog, shell, type WebContents } from "electron";
 
-import { startStudioServer, type StudioServer } from "@quri/squiggle-studio";
+import {
+  type MenuState,
+  startStudioServer,
+  type StudioServer,
+} from "@quri/squiggle-studio";
 
+import { runInPage } from "./bridge.js";
 import { log } from "./log.js";
 import type { OpenTarget } from "./target.js";
 import { initialBounds, saveWindowState } from "./windowState.js";
@@ -11,8 +18,14 @@ import { initialBounds, saveWindowState } from "./windowState.js";
 export type StudioWindow = {
   win: BrowserWindow;
   server: StudioServer;
+  origin: string; // the server's origin: the only one this window loads
+  // The native menu's state, as the page last reported it (bridge.ts).
+  menuState?: MenuState;
   open: (target: OpenTarget) => Promise<void>;
 };
+
+// The sandboxed preload that exposes `window.studioHost` (preload.cts).
+const PRELOAD = path.join(import.meta.dirname, "preload.cjs");
 
 const windows = new Set<StudioWindow>();
 
@@ -29,6 +42,12 @@ export function findStudioWindow(
   win: BrowserWindow | null | undefined
 ): StudioWindow | undefined {
   return win ? [...windows].find((w) => w.win === win) : undefined;
+}
+
+export function findStudioWindowByContents(
+  contents: WebContents
+): StudioWindow | undefined {
+  return [...windows].find((w) => w.win.webContents === contents);
 }
 
 function isExternalUrl(url: string): boolean {
@@ -60,23 +79,6 @@ async function loadUrl(win: BrowserWindow, url: string): Promise<void> {
   } catch (e) {
     if (!isAbortError(e)) throw e;
     log(`navigation to ${url} aborted`);
-  }
-}
-
-// Runs a script in the page, giving up after a while: a hung or not-yet-loaded
-// page must not block opening a folder.
-async function runInPage(
-  contents: WebContents,
-  script: string
-): Promise<unknown> {
-  let timer: NodeJS.Timeout | undefined;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error("timed out")), 2000);
-  });
-  try {
-    return await Promise.race([contents.executeJavaScript(script), timeout]);
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -119,6 +121,7 @@ export async function createStudioWindow(
     title: "Squiggle Studio",
     show: false,
     webPreferences: {
+      preload: PRELOAD,
       contextIsolation: true,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
@@ -134,6 +137,7 @@ export async function createStudioWindow(
   const studioWindow: StudioWindow = {
     win,
     server,
+    origin,
     async open(next) {
       // Ask before switching: once the server's root changes, unsaved buffers
       // would belong to the wrong folder, so "Cancel" in the beforeunload

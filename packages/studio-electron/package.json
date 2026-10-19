@@ -15,7 +15,8 @@
     "build:studio": "pnpm --dir ../studio run build",
     "dev": "node ./scripts/ensure-studio.js && tsc -b && electron . ../studio/examples",
     "start": "electron .",
-    "lint": "prettier --check . && tsc -b",
+    "test": "vitest run",
+    "lint": "prettier --check . && tsc -b && tsc -p test/tsconfig.json",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@quri/configs": "workspace:*",
     "@types/node": "^22.14.0",
     "electron": "^44.9.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "vitest": "^3.1.1"
   }
 }
