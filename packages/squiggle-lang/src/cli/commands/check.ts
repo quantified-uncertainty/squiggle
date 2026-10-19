@@ -15,7 +15,7 @@ import {
   warningsForSources,
 } from "../errorReport.js";
 import { EVAL_SOURCE_ID, FileLinker, makeFileLinker } from "../linker.js";
-import { loadSrc, myParseInt } from "../utils.js";
+import { loadSrc, myParsePositiveInt } from "../utils.js";
 import { makeEnvironment } from "./run.js";
 
 export type CheckJsonOutput = {
@@ -167,7 +167,7 @@ export function addCheckCommand(program: Command) {
     .option(
       "-n, --sample-count <n>",
       "number of samples, with --run",
-      myParseInt
+      myParsePositiveInt
     )
     .option("--no-warnings", "don't report lint warnings")
     .addHelpText(

@@ -21,7 +21,7 @@ import {
 } from "../errorReport.js";
 import { EVAL_SOURCE_ID, makeFileLinker } from "../linker.js";
 import { StateGraph } from "../StateGraph.js";
-import { loadSrc, myParseInt } from "../utils.js";
+import { loadSrc, myParseInt, myParsePositiveInt } from "../utils.js";
 import { makeFileWatcher, makeRerunScheduler } from "../watch.js";
 
 type OutputMode =
@@ -281,7 +281,7 @@ export function addRunCommand(program: Command) {
         "number of samples per distribution (default: 1000)"
       )
         .env("SAMPLE_COUNT")
-        .argParser(myParseInt)
+        .argParser(myParsePositiveInt)
     )
     .option(
       "-w, --watch",
