@@ -17,13 +17,29 @@ export {
   CodeEditor,
   type CodeEditorHandle,
   type CodeEditorProps,
+  type EditorStateSnapshot,
 } from "./components/CodeEditor/index.js";
+// The editor-command bridge for apps that embed CodeEditor and must not import
+// @codemirror/* themselves (Squiggle Studio).
+export {
+  type EditorCommand,
+  runEditorCommand,
+} from "./components/CodeEditor/editorCommands.js";
+export {
+  cursorEventExtension,
+  type EditorCursorDetail,
+  SQ_EDITOR_CURSOR_EVENT,
+} from "./components/CodeEditor/cursorEventExtension.js";
 export {
   SquigglePlayground,
   type SquigglePlaygroundProps,
 } from "./components/SquigglePlayground/index.js";
 export { SquiggleViewer } from "./components/SquiggleViewer/index.js";
-export { ViewerWithMenuBar } from "./components/ViewerWithMenuBar/index.js";
+export {
+  ViewerWithMenuBar,
+  type ViewerWithMenuBarHandle,
+} from "./components/ViewerWithMenuBar/index.js";
+export { type ExternalViewerActions } from "./components/SquiggleViewer/ViewerProvider.js";
 export { ProjectContext } from "./components/ProjectProvider.js";
 export { type Simulation, useSimulator } from "./lib/hooks/useSimulator.js";
 export { ToolbarItem as PlaygroundToolbarItem } from "./components/ui/PanelWithToolbar/ToolbarItem.js";
