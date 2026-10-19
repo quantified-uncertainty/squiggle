@@ -3,5 +3,5 @@
   "compilerOptions": {
     "tsBuildInfoFile": "dist/build.tsbuildinfo"
   },
-  "exclude": ["${configDir}/src/**/*.stories.tsx"]
+  "exclude": ["${configDir}/src/stories/**/*"]
 }

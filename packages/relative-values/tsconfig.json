@@ -5,6 +5,6 @@
     "rootDir": ".",
     "tsBuildInfoFile": "dist/check.tsbuildinfo",
   },
-  "include": ["test/**/*", "src/**/*.stories.tsx", "*.ts"],
+  "include": ["test/**/*", "src/stories/**/*", "*.ts"],
   "references": [{ "path": "./tsconfig.build.json" }],
 }

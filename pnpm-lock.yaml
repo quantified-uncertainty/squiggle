@@ -1549,6 +1549,9 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+      rollup-plugin-node-builtins:
+        specifier: ^2.1.2
+        version: 2.1.2
       storybook:
         specifier: 8.6.17
         version: 8.6.17(prettier@3.9.0)
