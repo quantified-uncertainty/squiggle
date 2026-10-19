@@ -46,7 +46,9 @@ import type {
 import {
   dispatchBase,
   type DispatchContext,
+  type DispatchPlace,
   type DispatchSource,
+  type PickKey,
   useIsomorphicLayoutEffect,
   useStateController,
 } from "./useStateController.js";
@@ -74,7 +76,16 @@ export type CoreContextValue = {
   asyncCompute: boolean;
   state: RelativeValuesState<string>;
   isLocked(key: RelativeValuesStateKey): boolean;
-  dispatch(action: RelativeValuesAction, source: DispatchSource): void;
+  // `place`: where in the built-in UI the user made the change.
+  dispatch(
+    action: RelativeValuesAction,
+    source: DispatchSource,
+    place?: DispatchPlace
+  ): void;
+  // Whether the current `unit` or `selectedPair` is one the user set in the
+  // built-in UI (and where), rather than the host (`defaultState`,
+  // controlled state, `actions`, `apiRef`).
+  userPick(key: PickKey): { place: DispatchPlace | undefined } | undefined;
   actions: RelativeValuesActions<string>;
   data: RelativeValuesData;
   // The pipeline for the state with local overrides.
@@ -647,37 +658,62 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
     }
   }, [prepared.warnings]);
 
-  // Picks made in the dashboard (uncontrolled `unit`, `clusterUnits` and
-  // `selectedPair`) whose item is gone from the shown definition, e.g. after
-  // a live reload, are forgotten (QA #28): the list stays on the recommended
-  // unit and the sidebar stays closed when the item comes back. Other keys,
-  // and controlled state, keep their raw ids (see "Unknown or stale ids").
-  const { raw: rawState, forget } = controller;
+  // Picks that the user made in the dashboard's built-in UI (uncontrolled
+  // `unit`, `clusterUnits` entries and `selectedPair`) whose item is gone
+  // from the shown definition, e.g. after a live reload, are forgotten
+  // (QA #28): the list stays on the recommended unit and the sidebar stays
+  // closed when the item comes back. Other keys, controlled and locked keys,
+  // and the host's values (`defaultState`, `actions`, `apiRef`) keep their
+  // raw ids (see "Unknown or stale ids").
+  const {
+    raw: rawState,
+    forget,
+    userPick,
+    isUserClusterUnit,
+    isLocked: isKeyLocked,
+  } = controller;
   useIsomorphicLayoutEffect(() => {
     if (!shown || shown !== current || !prepared.normalize) {
       return;
     }
     const effective = prepared.state;
+    const picked = (key: PickKey) =>
+      !isKeyLocked(key) && userPick(key) !== undefined;
     const patch: Partial<RelativeValuesState<string>> = {};
-    if (rawState.unit !== effective.unit) {
+    if (rawState.unit !== effective.unit && picked("unit")) {
       patch.unit = effective.unit;
     }
-    if (
-      stableStringify(rawState.clusterUnits) !==
-      stableStringify(effective.clusterUnits)
-    ) {
-      patch.clusterUnits = effective.clusterUnits;
+    if (!isKeyLocked("clusterUnits")) {
+      const entries = Object.entries(rawState.clusterUnits);
+      const kept = entries.filter(
+        ([cluster, unit]) =>
+          effective.clusterUnits[cluster] === unit ||
+          !isUserClusterUnit(cluster, unit)
+      );
+      if (kept.length < entries.length) {
+        patch.clusterUnits = Object.fromEntries(kept);
+      }
     }
     if (
-      rawState.selectedPair !== effective.selectedPair &&
-      effective.selectedPair === null
+      rawState.selectedPair !== null &&
+      effective.selectedPair === null &&
+      picked("selectedPair")
     ) {
       patch.selectedPair = null;
     }
     if (Object.keys(patch).length) {
       forget(patch);
     }
-  }, [shown, current, prepared, rawState, forget]);
+  }, [
+    shown,
+    current,
+    prepared,
+    rawState,
+    forget,
+    userPick,
+    isUserClusterUnit,
+    isKeyLocked,
+  ]);
 
   // Compute the pairs that the consumers need: the ranking first (it decides
   // which items are shown), then the visible pairs, then (precompute: true)
@@ -849,6 +885,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       state: prepared.state,
       isLocked,
       dispatch,
+      userPick,
       actions,
       data,
       selectWith,
@@ -869,6 +906,7 @@ export const RelativeValuesCoreProvider: FC<CoreProviderProps> = (props) => {
       prepared.state,
       isLocked,
       dispatch,
+      userPick,
       actions,
       data,
       selectWith,

@@ -49,7 +49,7 @@
      * --squiggle-rv-header-bg, --squiggle-rv-panel-bg, --squiggle-rv-accent,
      * --squiggle-rv-selected-bg, --squiggle-rv-radius,
      * --squiggle-rv-cell-padding, --squiggle-rv-grid-cell-width,
-     * --squiggle-rv-sidebar-width.
+     * --squiggle-rv-sidebar-width, --squiggle-rv-sticky-top.
      *
      * Font sizes and line heights are multiples of --squiggle-rv-font-size
      * (`postcss-scope.cjs` rewrites the rem values of this stylesheet), so

@@ -682,6 +682,103 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "rv/error-pair-sidebar",
+    title:
+      "A failed comparison's drawer shows its error, with a focused close button; Esc closes it (#29)",
+    tags: ["rv", "layout"],
+    viewport: { width: 1024, height: 768 },
+    state: { file: "rv/error-cells.squiggle", tab: "list", code: true },
+    steps: async (h) => {
+      await clickListCell(h, "broken");
+      await h.page.waitForSelector(`${PAIR_SIDEBAR} [data-rv-pair-error]`, {
+        timeout: 5_000,
+      });
+      await h.whenIdle();
+      await h.shot("rv-error-pair-1024");
+      await h.page.keyboard.press("Escape");
+    },
+    check: async (h) => {
+      await clickListCell(h, "broken");
+      const sidebar = await h.page.waitForSelector(PAIR_SIDEBAR, {
+        timeout: 5_000,
+      });
+      expect(
+        await sidebar?.evaluate((el) => el.getAttribute("data-mode"))
+      ).toBe("drawer");
+      const error = await h.page.$eval(
+        `${PAIR_SIDEBAR} [data-rv-pair-error]`,
+        (el) => el.textContent ?? ""
+      );
+      expect(error).toMatch(/No estimate for broken/);
+      const focused = await h.page.evaluate(
+        (sel: string) =>
+          document.activeElement?.closest(sel) !== null &&
+          document.activeElement?.tagName === "BUTTON" &&
+          document.activeElement.hasAttribute("data-rv-close"),
+        PAIR_SIDEBAR
+      );
+      expect(focused, "focus is on the drawer's close button").toBe(true);
+      await h.page.keyboard.press("Escape");
+      expect(await h.page.$(PAIR_SIDEBAR)).toBeNull();
+
+      // Below the short panel, the list takes clicks: the same cell closes it.
+      await clickListCell(h, "broken");
+      await h.page.waitForSelector(PAIR_SIDEBAR, { timeout: 5_000 });
+      await clickListCell(h, "broken");
+      expect(await h.page.$(PAIR_SIDEBAR)).toBeNull();
+    },
+  },
+  {
+    id: "rv/grid-pick-then-list",
+    title:
+      "A Grid cell click doesn't open the List's drawer or move focus; a List click does (#29)",
+    tags: ["rv", "layout"],
+    viewport: { width: 1024, height: 768 },
+    state: { file: "rv/clusters.squiggle", tab: "grid", code: true },
+    check: async (h) => {
+      await (
+        await h.byTestId(TID.rvGridCell, {
+          "data-row": "paper",
+          "data-col": "tool",
+        })
+      ).click();
+      await h.whenIdle();
+      expect(await h.page.$(`${RV_VIEW} [data-rv-selected]`)).not.toBeNull();
+      await clickTab(h, "list");
+      expect(
+        await h.page.$eval("[data-rv-list]", (el) =>
+          el.getAttribute("data-rv-sidebar-mode")
+        )
+      ).toBe("drawer");
+      expect(await h.page.$(PAIR_SIDEBAR)).toBeNull();
+      expect(
+        await h.page.evaluate(
+          () => !!document.activeElement?.closest("[data-rv-list]")
+        ),
+        "focus stays outside the list"
+      ).toBe(false);
+
+      // The List's own pair for that row (in its table's unit), with focus.
+      await clickListCell(h, "paper");
+      const sidebar = await h.page.waitForSelector(PAIR_SIDEBAR, {
+        timeout: 5_000,
+      });
+      expect(
+        await sidebar?.evaluate((el) => [
+          el.getAttribute("data-mode"),
+          el
+            .querySelector("[data-rv-part='sidebar']")
+            ?.getAttribute("data-rv-pair-denominator"),
+        ])
+      ).toEqual(["drawer", "essay"]);
+      expect(
+        await h.page.evaluate(
+          () => document.activeElement?.hasAttribute("data-rv-close") ?? false
+        )
+      ).toBe(true);
+    },
+  },
+  {
     id: "rv/error-cells",
     title: "Failed comparisons are short error cells",
     tags: ["rv"],

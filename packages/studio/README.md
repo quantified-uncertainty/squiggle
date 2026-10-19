@@ -107,7 +107,7 @@ fruit = { values: { apple: 1, banana: 0.5 to 2, mango: 2 to 6 } }
 - The variable doesn't need to be exported. With several specs, a picker in the toolbar chooses one.
 - The spec and tab are remembered per file. While you type, the dashboard keeps its results and swaps them 600 ms after the last run (or on save); edits to comments and whitespace recompute nothing.
 - A spec with a mistake keeps the view and shows what's wrong; failed comparisons show as error cells.
-- Clicking a value in the List view opens a sidebar with charts for that pair (a drawer below 900 px).
+- Clicking a value in the List view opens a sidebar with charts for that pair (a drawer below 900 px; Esc or its × closes it). A failed comparison shows its error there. Clicking a Grid cell highlights it; a wide List then shows that pair in its sidebar too.
 - Run ▸ Copy for Agent ▸ Relative Values as CSV copies the matrix; `squiggle-studio rv` prints it without a browser.
 
 Examples are in [`examples/relative-values/`](./examples/relative-values).

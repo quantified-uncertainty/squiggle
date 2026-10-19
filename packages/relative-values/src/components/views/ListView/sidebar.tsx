@@ -203,6 +203,56 @@ const PairCharts: FC<{
   return <PairChartsProgram code={charts.code.value} />;
 };
 
+// Closes the sidebar; focused when it opens as a drawer over the list.
+const CloseButton: FC<{ close: () => void }> = ({ close }) => {
+  const { labels } = usePresentation();
+  return (
+    <button
+      type="button"
+      aria-label={labels["sidebar.close"]}
+      title={`${labels["sidebar.close"]} (Esc)`}
+      data-rv-close=""
+      className="absolute right-0 top-0 z-10 rounded px-1.5 text-lg leading-none text-[color:var(--squiggle-rv-muted,#64748b)] hover:bg-slate-200 hover:text-slate-800"
+      onClick={close}
+    >
+      ×
+    </button>
+  );
+};
+
+// "value ( numerator / denominator )"
+const PairHeading: FC<{ numerator: Item; denominator: Item }> = ({
+  numerator,
+  denominator,
+}) => {
+  const { labels } = usePresentation();
+  return (
+    <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1 pr-6">
+      <span className="mr-1 whitespace-nowrap text-[color:var(--squiggle-rv-muted,#64748b)]">
+        {labels["sidebar.value"]}
+      </span>
+      <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+        (
+      </span>
+      <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
+        <ItemName item={numerator} />
+      </span>
+      <span className="whitespace-nowrap px-1 text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+        /
+      </span>
+
+      <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
+        <span className="inline-block">
+          <ItemName item={denominator} />
+        </span>
+      </span>
+      <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
+        )
+      </span>
+    </div>
+  );
+};
+
 /** The built-in pair details (the `Default` of the `PairDetails` slot). */
 export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
   numerator: numeratorItem,
@@ -212,9 +262,31 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
 }) => {
   const { options, labels, format } = usePresentation();
   const { getPlaygroundUrl } = options;
-  const evaluator = useCore().snapshot?.evaluator;
+  const core = useCore();
+  const evaluator = core.snapshot?.evaluator;
+  // A locked pair can't be closed (Esc and cell clicks are ignored too).
+  const closeButton = core.isLocked("selectedPair") ? null : (
+    <CloseButton close={close} />
+  );
   if (!result.ok || !evaluator) {
-    return <div>{labels["sidebar.notFound"]}</div>;
+    // A failed comparison: what went wrong, as in its cell.
+    return (
+      <div className="relative">
+        {closeButton}
+        <PairHeading numerator={numeratorItem} denominator={denominatorItem} />
+        <div className="text-sm text-[color:var(--squiggle-rv-text,#475569)]">
+          {labels["sidebar.notFound"]}
+        </div>
+        {!result.ok && (
+          <div
+            className="mt-2 whitespace-pre-wrap break-words text-xs text-red-700"
+            data-rv-pair-error=""
+          >
+            {result.value}
+          </div>
+        )}
+      </div>
+    );
   }
   const item = result.value;
   const squiggleCode =
@@ -229,40 +301,8 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
 
   return (
     <div className="relative">
-      <button
-        type="button"
-        aria-label={labels["sidebar.close"]}
-        title={`${labels["sidebar.close"]} (Esc)`}
-        // Focused when the sidebar opens as a drawer over the list.
-        data-rv-close=""
-        className="absolute right-0 top-0 z-10 rounded px-1.5 text-lg leading-none text-[color:var(--squiggle-rv-muted,#64748b)] hover:bg-slate-200 hover:text-slate-800"
-        onClick={close}
-      >
-        ×
-      </button>
-      <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1 pr-6">
-        <span className="mr-1 whitespace-nowrap text-[color:var(--squiggle-rv-muted,#64748b)]">
-          {labels["sidebar.value"]}
-        </span>
-        <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
-          (
-        </span>
-        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
-          <ItemName item={numeratorItem} />
-        </span>
-        <span className="whitespace-nowrap px-1 text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
-          /
-        </span>
-
-        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
-          <span className="inline-block">
-            <ItemName item={denominatorItem} />
-          </span>
-        </span>
-        <span className="whitespace-nowrap text-xl text-[color:var(--squiggle-rv-muted,#64748b)]">
-          )
-        </span>
-      </div>
+      {closeButton}
+      <PairHeading numerator={numeratorItem} denominator={denominatorItem} />
 
       <div className="xs mb-4 text-[color:var(--squiggle-rv-muted,#64748b)]">
         {labels["sidebar.summary"](

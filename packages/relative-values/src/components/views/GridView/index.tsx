@@ -388,7 +388,8 @@ const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
                                   ? null
                                   : [rowItem.id, columnItem.id],
                               },
-                              "user"
+                              "user",
+                              "grid"
                             );
                           }
                         }}

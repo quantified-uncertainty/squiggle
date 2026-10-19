@@ -56,6 +56,10 @@ type TableProps = {
   // Picks the unit of this table; undefined if the unit can't be changed.
   setUnit: ((item: Item) => void) | undefined;
   showDescriptions: boolean;
+  // Whether the list shows the sidebar of `state.selectedPair`.
+  sidebarShown: boolean;
+  // A value cell was clicked to show its pair.
+  onPairPicked: (pair: readonly [string, string]) => void;
 };
 
 const ListViewTable: FC<TableProps> = ({
@@ -65,6 +69,8 @@ const ListViewTable: FC<TableProps> = ({
   cluster,
   setUnit,
   showDescriptions,
+  sidebarShown,
+  onPairPicked,
 }) => {
   const core = useCore();
   const { display, labels, options } = usePresentation();
@@ -240,15 +246,16 @@ const ListViewTable: FC<TableProps> = ({
                   if (pairLocked) {
                     return;
                   }
+                  // A second click on the row closes its sidebar.
                   const open =
-                    selectedPair !== null && selectedPair[0] === item.id;
-                  core.dispatch(
-                    {
-                      type: "selectPair",
-                      pair: open ? null : [item.id, unit.id],
-                    },
-                    "user"
-                  );
+                    sidebarShown &&
+                    selectedPair !== null &&
+                    selectedPair[0] === item.id;
+                  const pair = open ? null : ([item.id, unit.id] as const);
+                  if (pair) {
+                    onPairPicked(pair);
+                  }
+                  core.dispatch({ type: "selectPair", pair }, "user", "list");
                 }}
               >
                 <RelativeCell
@@ -327,6 +334,11 @@ function useScrollViewportHeight(
 // The sidebar's width: the compact default doesn't override a host's value.
 const SIDEBAR_WIDTH =
   "var(--squiggle-rv-sidebar-width, var(--squiggle-rv-compact-sidebar-width, 500px))";
+// Where the sidebar sticks: below a host's own sticky header, if it sets one.
+const STICKY_TOP = "var(--squiggle-rv-sticky-top, 0px)";
+
+const pairKeyOf = (pair: readonly [string, string] | null) =>
+  pair ? `${pair[0]}\0${pair[1]}` : "";
 
 const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const core = useCore();
@@ -408,28 +420,50 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   // The pair sidebar (`state.selectedPair`, ids resolved against the current
   // definition, so it closes when an item disappears). With
   // `sidebarPosition: "side"`, it's a column next to the tables, or an
-  // overlay drawer over their right side when the list is narrower than
-  // LIST_SIDEBAR_DRAWER_BELOW_PX (QA #29); Esc and its close button close it.
+  // overlay drawer over their right side (below the toolbar) when the list
+  // is narrower than LIST_SIDEBAR_DRAWER_BELOW_PX (QA #29); Esc and its close
+  // button close it. A locked pair can't be closed, so it never covers the
+  // values: in a narrow list it goes below the tables instead.
   const rootRef = useRef<HTMLDivElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const width = useWidth(rootRef);
-  const below = display.list.sidebarPosition === "below";
-  const drawer =
-    !below && width !== undefined && width < LIST_SIDEBAR_DRAWER_BELOW_PX;
-  const sidebarOpen = controls.list.sidebar && state.selectedPair !== null;
-  const drawerOpen = drawer && sidebarOpen;
-  const viewportHeight = useScrollViewportHeight(rootRef, drawerOpen);
+  const narrow = width !== undefined && width < LIST_SIDEBAR_DRAWER_BELOW_PX;
   const pairLocked = core.isLocked("selectedPair");
+  const below =
+    display.list.sidebarPosition === "below" || (narrow && pairLocked);
+  const drawer = !below && narrow;
+  // The drawer covers the list, so it opens for pairs picked in the list or
+  // set by the host, not for a pair the user picked in another view (a grid
+  // cell): the list only highlights that pair's cell, if it shows one.
+  const pick = core.userPick("selectedPair");
+  const pickedElsewhere = pick !== undefined && pick.place !== "list";
+  const sidebarOpen =
+    controls.list.sidebar &&
+    state.selectedPair !== null &&
+    !(drawer && pickedElsewhere);
+  const drawerOpen = drawer && sidebarOpen && items.length > 0;
+  const viewportHeight = useScrollViewportHeight(rootRef, drawerOpen);
 
-  // The drawer covers part of the table: put focus in it (on its close
-  // button), so that Esc closes it right away.
+  // The drawer covers part of the table: when a click in the list opens it
+  // (or shows another pair in it), focus goes to its close button, so that
+  // Esc closes it right away. Not when the host opens it (on mount, from a
+  // URL or `apiRef`): that would take the focus from the host's page.
+  const pairKey = pairKeyOf(state.selectedPair);
+  const focusFor = useRef<string | undefined>(undefined);
   useEffect(() => {
+    if (focusFor.current === undefined || focusFor.current !== pairKey) {
+      return;
+    }
+    focusFor.current = undefined;
     if (!drawerOpen) return;
     const panel = drawerRef.current;
     const target =
       panel?.querySelector<HTMLElement>("[data-rv-close]") ?? panel;
     target?.focus({ preventScroll: true });
-  }, [drawerOpen]);
+  }, [drawerOpen, pairKey]);
+  const onPairPicked = (pair: readonly [string, string]) => {
+    focusFor.current = pairKeyOf(pair);
+  };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape" && sidebarOpen && !pairLocked) {
@@ -446,9 +480,11 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
     ) : null;
 
   return (
+    // `isolate`: the drawer's z-index stays inside the list, below the host
+    // page's own sticky headers and overlays.
     <div
       ref={rootRef}
-      className="relative"
+      className="relative isolate"
       onKeyDown={onKeyDown}
       data-rv-part="list"
       data-rv-provider={core.id}
@@ -477,7 +513,7 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
       {items.length === 0 ? (
         <ViewEmpty controller={rv} view="list" />
       ) : (
-        <div className={clsx(below ? "flex flex-col" : "flex")}>
+        <div className={clsx("relative", below ? "flex flex-col" : "flex")}>
           <div className="min-w-0 flex-1">
             {tables.map((table) => (
               <Fragment key={table.key}>
@@ -487,6 +523,8 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
                   unit={table.unit}
                   cluster={table.cluster}
                   showDescriptions={showDescriptions}
+                  sidebarShown={sidebarOpen}
+                  onPairPicked={onPairPicked}
                   setUnit={
                     canPickUnit
                       ? (item) =>
@@ -522,28 +560,36 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
                 data-testid="rv-pair-sidebar"
                 data-mode="column"
               >
-                {sidebar(clsx(panelClassName, "sticky top-4 ml-4"))}
+                {sidebar(clsx(panelClassName, "sticky ml-4"), {
+                  top: `calc(${STICKY_TOP} + 1rem)`,
+                })}
               </div>
             ))}
-        </div>
-      )}
 
-      {sidebarOpen && drawer && items.length > 0 && (
-        <div
-          ref={drawerRef}
-          className="absolute inset-y-0 right-0 z-30 w-full outline-none"
-          style={{ maxWidth: SIDEBAR_WIDTH }}
-          tabIndex={-1}
-          data-testid="rv-pair-sidebar"
-          data-mode="drawer"
-          role="dialog"
-          aria-label={labels["sidebar.dialog"]}
-        >
-          {sidebar(
-            "sticky top-0 overflow-auto border-l border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-[var(--squiggle-rv-panel-bg,#f8fafc)] px-3 py-4 shadow-xl",
-            viewportHeight === undefined
-              ? undefined
-              : { maxHeight: viewportHeight }
+          {drawerOpen && (
+            // Over the tables, not the toolbar. Clicks outside the panel
+            // (below a short one) reach the list.
+            <div
+              ref={drawerRef}
+              className="pointer-events-none absolute inset-y-0 right-0 z-30 w-full outline-none"
+              style={{ maxWidth: SIDEBAR_WIDTH }}
+              tabIndex={-1}
+              data-testid="rv-pair-sidebar"
+              data-mode="drawer"
+              role="dialog"
+              aria-label={labels["sidebar.dialog"]}
+            >
+              {sidebar(
+                "pointer-events-auto sticky overflow-auto border-l border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-[var(--squiggle-rv-panel-bg,#f8fafc)] px-3 py-4 shadow-xl",
+                {
+                  top: STICKY_TOP,
+                  maxHeight:
+                    viewportHeight === undefined
+                      ? undefined
+                      : `calc(${viewportHeight}px - ${STICKY_TOP})`,
+                }
+              )}
+            </div>
           )}
         </div>
       )}
