@@ -13,6 +13,7 @@ import { CoreCommands } from "./commands/CoreCommands.js";
 import { EditorCommands } from "./commands/EditorCommands.js";
 import { ExplorerCommands } from "./commands/ExplorerCommands.js";
 import { OverlayHost } from "./commands/OverlayHost.js";
+import { startCommandLog } from "./commands/registry.js";
 import { ShellCommands } from "./commands/ShellCommands.js";
 import { WorkspaceCommands } from "./commands/WorkspaceCommands.js";
 import { AppHeader } from "./components/AppHeader.js";
@@ -42,6 +43,7 @@ const embed = flags.embed === "1";
 if (embed) document.documentElement.classList.add("studio-embed");
 // Deterministic screenshots: no transitions or animations; the command log.
 if (flags.test === "1") document.documentElement.classList.add("studio-test");
+startCommandLog();
 installIdleTracking();
 
 // Unsaved edits block closing the tab, and window.squiggleStudio reports them

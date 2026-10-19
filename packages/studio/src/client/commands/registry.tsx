@@ -125,6 +125,15 @@ function log(entry: CommandLogEntry) {
   if (entries.length > 500) entries.splice(0, entries.length - 500);
 }
 
+// Creates the (empty) command log when logging is on, so that a page that has
+// run no command yet reports [] rather than no log. App calls it after setting
+// html.studio-test.
+export function startCommandLog(): void {
+  if (typeof window !== "undefined" && logEnabled()) {
+    window.__studioCommandLog ??= [];
+  }
+}
+
 // ── Registration ───────────────────────────────────────────────────────────
 
 // Low-level registration (React components use useCommand). The most recently

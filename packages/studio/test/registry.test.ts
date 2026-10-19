@@ -18,6 +18,7 @@ import {
   resetRegistryForTests,
   runCommand,
   runCommandAsync,
+  startCommandLog,
   useCommand,
 } from "../src/client/commands/registry.js";
 import { overrideHost } from "../src/client/lib/host.js";
@@ -253,5 +254,15 @@ describe("Electron double-fire backstop", () => {
     expect(window.__studioCommandLog?.map((e) => [e.id, e.source])).toEqual([
       ["squiggle.help.docs", "button"],
     ]);
+  });
+
+  test("startCommandLog creates an empty log and keeps an existing one", () => {
+    delete window.__studioCommandLog;
+    startCommandLog();
+    expect(window.__studioCommandLog).toEqual([]);
+    registerCommand("squiggle.help.docs", () => undefined);
+    runCommand("squiggle.help.docs", undefined, "button");
+    startCommandLog();
+    expect(window.__studioCommandLog).toHaveLength(1);
   });
 });
