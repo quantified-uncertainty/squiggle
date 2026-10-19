@@ -22,6 +22,7 @@ import {
 import { EVAL_SOURCE_ID, makeFileLinker } from "../linker.js";
 import { StateGraph } from "../StateGraph.js";
 import { loadSrc, myParseInt } from "../utils.js";
+import { makeFileWatcher, makeRerunScheduler } from "../watch.js";
 
 type OutputMode =
   | "NONE"
@@ -29,7 +30,9 @@ type OutputMode =
   | "RESULT_AND_BINDINGS"
   | "JSON";
 
-type RunArgs = {
+const WATCH_DEBOUNCE_MS = 100;
+
+export type RunArgs = {
   src: string;
   filename?: string;
   output: OutputMode;
@@ -213,18 +216,13 @@ async function run(args: RunArgs): Promise<string[]> {
   return [...sources.keys()];
 }
 
-// Re-runs the code whenever the root file or any of its (transitive) imports change.
-async function watch(args: RunArgs, filename: string) {
-  let watchers: fs.FSWatcher[] = [];
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  let running = false;
+// Re-runs the code whenever the root file or any of its (transitive) imports
+// change. Keeps watching while the code runs: changes made during a run
+// trigger another run once it finishes. Returns a handle to stop watching.
+export async function watch(args: RunArgs, filename: string) {
+  const watcher = makeFileWatcher(() => scheduler.trigger());
 
-  const rerun = async () => {
-    if (running) return;
-    running = true;
-    watchers.forEach((w) => w.close());
-    watchers = [];
-
+  const scheduler = makeRerunScheduler(async () => {
     let files = [filename];
     try {
       const src = fs.readFileSync(filename, "utf-8");
@@ -238,23 +236,23 @@ async function watch(args: RunArgs, filename: string) {
         console.error(e instanceof Error ? e.message : String(e));
       }
     }
+    // Imports might have changed.
+    watcher.setFiles([filename, ...files]);
     if (args.output !== "JSON") {
-      console.error(`\nWatching ${files.length} file(s) for changes...`);
+      console.error(`\nWatching ${watcher.size()} file(s) for changes...`);
     }
+  }, WATCH_DEBOUNCE_MS);
 
-    for (const file of new Set([filename, ...files])) {
-      if (file === EVAL_SOURCE_ID || !fs.existsSync(file)) continue;
-      watchers.push(
-        fs.watch(file, () => {
-          clearTimeout(timer);
-          timer = setTimeout(() => void rerun(), 100);
-        })
-      );
-    }
-    running = false;
+  // Watch the root file during the first run, too.
+  watcher.setFiles([filename]);
+  await scheduler.run();
+
+  return {
+    close() {
+      scheduler.cancel();
+      watcher.close();
+    },
   };
-
-  await rerun();
 }
 
 export function addRunCommand(program: Command) {
