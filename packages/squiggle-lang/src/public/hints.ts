@@ -127,7 +127,7 @@ export function getErrorHints({
       );
     } else if (name === "Date.now") {
       hints.push("Use Danger.now() for the current time.");
-    } else if (TYPE_NAMES.has(name) && /\w+\s*:\s*[A-Z]/.test(code)) {
+    } else if (TYPE_NAMES.has(name) && /\w\s*:\s*[A-Z]/.test(code)) {
       hints.push(
         `Type annotations like 'x: ${name}' are not supported. Omit the annotation, or use a domain such as 'x: [0, 100]' or 'd: [Date(2020), Date(2030)]'.`
       );
