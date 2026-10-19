@@ -87,7 +87,7 @@ const ListViewTable: FC<TableProps> = ({
 
   const headerRow = (name: string) => (
     <CellBox header>
-      <div className="p-1 pt-2 text-sm font-semibold text-slate-600">
+      <div className="p-1 pt-2 text-sm font-semibold text-[color:var(--squiggle-rv-text,#475569)]">
         {name}
       </div>
     </CellBox>
@@ -138,7 +138,7 @@ const ListViewTable: FC<TableProps> = ({
               >
                 <div
                   className={clsx(
-                    "flex justify-end text-sm font-bold text-slate-700",
+                    "flex justify-end text-sm font-bold text-[color:var(--squiggle-rv-text,#334155)]",
                     compact ? "px-2 py-1" : "p-2",
                     namesSetUnit && "cursor-pointer"
                   )}
@@ -182,7 +182,7 @@ const ListViewTable: FC<TableProps> = ({
                         <div className="flex-none opacity-50">
                           <ClusterIcon cluster={itemCluster} selected={true} />
                         </div>
-                        <div className="text-xs font-medium text-slate-400">
+                        <div className="text-xs font-medium text-[color:var(--squiggle-rv-muted,#94a3b8)]">
                           {itemCluster.name || itemCluster.id}
                         </div>
                       </div>
@@ -190,7 +190,7 @@ const ListViewTable: FC<TableProps> = ({
                       ""
                     )}
                     {display.list.itemIds && (
-                      <div className="px-3 font-mono text-xs text-slate-400">
+                      <div className="px-3 font-mono text-xs text-[color:var(--squiggle-rv-muted,#94a3b8)]">
                         {item.id}
                       </div>
                     )}
@@ -201,7 +201,7 @@ const ListViewTable: FC<TableProps> = ({
                 <CellBox>
                   <div
                     className={clsx(
-                      "text-sm text-slate-500",
+                      "text-sm text-[color:var(--squiggle-rv-muted,#64748b)]",
                       compact ? "p-1.5" : "p-3"
                     )}
                   >

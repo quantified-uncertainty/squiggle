@@ -14,7 +14,7 @@ export const Header: FC<{
   customName?: boolean;
 }> = ({ item, cluster, customName = false }) => {
   return (
-    <div className="flex p-1 text-sm font-semibold text-slate-800">
+    <div className="flex p-1 text-sm font-semibold text-[color:var(--squiggle-rv-text,#1e293b)]">
       {cluster ? (
         <div className="float-left px-0.5 pr-2 pt-1.5">
           <ClusterIcon cluster={cluster} />

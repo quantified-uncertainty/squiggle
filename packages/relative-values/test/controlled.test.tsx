@@ -455,6 +455,62 @@ describe("headless hook and legacy hooks", () => {
     cleanup();
   });
 
+  test("stale while recomputing: a new evaluator shows the previous one until computed", async () => {
+    const make = async (b: string) => {
+      const result = await ModelEvaluator.create(
+        `spec = { values: { a: 1, b: ${b}, c: 5 } }`,
+        "spec"
+      );
+      if (!result.ok) throw new Error(result.value);
+      return result.value;
+    };
+    const first = await make("2");
+    const second = await make("20");
+    await first.computeAll(["a", "b", "c"]);
+    const definition = {
+      title: "Live",
+      items: ["a", "b", "c"].map((id) => ({
+        id,
+        name: id,
+        clusterId: null,
+        description: "",
+      })),
+      clusters: [],
+      recommendedUnit: "a",
+    };
+    const Probe: FC = () => {
+      const rv = useRelativeValues({ requires: "items" });
+      return (
+        <p data-stale={String(rv.isStale)} data-status={rv.status}>
+          {rv.rows.map((row) => row.value?.median).join(",")}
+        </p>
+      );
+    };
+    const tree = (evaluator: ModelEvaluator) => (
+      <RelativeValuesProvider
+        definition={definition}
+        evaluator={evaluator}
+        precompute
+        defaultState={{ search: "" }}
+      >
+        <Probe />
+      </RelativeValuesProvider>
+    );
+    const { container, rerender } = render(tree(first));
+    const probe = () => container.querySelector("p");
+    expect(probe()?.getAttribute("data-status")).toBe("ready");
+    expect(probe()?.textContent).toBe("1,2,5");
+    rerender(tree(second));
+    // Still the first evaluator's values, marked stale.
+    expect(probe()?.getAttribute("data-stale")).toBe("true");
+    expect(probe()?.textContent).toBe("1,2,5");
+    await waitFor(() =>
+      expect(probe()?.getAttribute("data-stale")).toBe("false")
+    );
+    expect(probe()?.textContent).toBe("1,20,5");
+    cleanup();
+  });
+
   test("legacy context and dispatch keep their shape", () => {
     let legacy: ReturnType<typeof useRelativeValuesContext> | undefined;
     const Legacy: FC = () => {

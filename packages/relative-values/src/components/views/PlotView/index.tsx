@@ -19,7 +19,9 @@ const Section: FC<
 > = ({ title, border, children }) => (
   <div className="flex flex-col gap-2">
     {title !== undefined && (
-      <header className="text-center font-bold text-slate-800">{title}</header>
+      <header className="text-center font-bold text-[color:var(--squiggle-rv-text,#1e293b)]">
+        {title}
+      </header>
     )}
     <div className={clsx(border && "border border-slate-100 p-1")}>
       {children}

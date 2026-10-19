@@ -58,7 +58,7 @@ export const ColumnHeader: FC<{
   const { labels } = usePresentation();
   const content = (
     <CellBox header clickable={!!onSelect}>
-      <div className="pl-1 pt-1 text-sm text-slate-600">
+      <div className="pl-1 pt-1 text-sm text-[color:var(--squiggle-rv-text,#475569)]">
         {labels["list.valueInTermsOf"]}
       </div>
       <Header item={selectedItem} cluster={cluster} />

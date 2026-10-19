@@ -114,7 +114,7 @@ export const ValueCell: FC<{
           {showMedian && (
             <span
               className={clsx(
-                "font-semibold text-slate-700",
+                "font-semibold text-[color:var(--squiggle-rv-text,#334155)]",
                 compact ? "text-base" : "text-lg"
               )}
             >
@@ -162,7 +162,7 @@ export const ValueCell: FC<{
         {display === "full" && (
           <div
             style={{ fontSize: "0.7em" }}
-            className="font-light text-gray-400"
+            className="font-light text-[color:var(--squiggle-rv-muted,#9ca3af)]"
           >
             {value.min < 0 && value.max < 0 ? (
               <span>

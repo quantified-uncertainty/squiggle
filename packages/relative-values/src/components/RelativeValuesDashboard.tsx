@@ -225,7 +225,9 @@ const DashboardFrame: FC<
 
   const headerContent = !controls.header ? null : header === undefined ? (
     title ? (
-      <div className="font-semibold text-gray-700">{title}</div>
+      <div className="font-semibold text-[color:var(--squiggle-rv-text,#374151)]">
+        {title}
+      </div>
     ) : null
   ) : (
     header
