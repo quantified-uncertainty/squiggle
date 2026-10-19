@@ -3,6 +3,7 @@ import {
   FC,
   Fragment,
   KeyboardEvent as ReactKeyboardEvent,
+  memo,
   useCallback,
   useEffect,
   useId,
@@ -418,97 +419,44 @@ export const FileTree: FC<Props> = ({ treeState, blocked }) => {
 
   // ── Render ────────────────────────────────────────────────────────────
 
-  const renderRow = (row: TreeRow) => {
-    const isCursor = row.path === cursor;
-    const isShown = row.path === activePath;
-    const dirty = row.kind === "file" && dirtyPaths.has(row.path);
-    const changed =
-      row.kind === "file"
-        ? unseenChanges.has(row.path)
-        : !row.expanded && foldersWithChanges.has(row.path);
-    return (
-      <div
-        key={row.path}
-        id={rowId(row.path)}
-        role="treeitem"
-        aria-level={row.depth + 1}
-        aria-expanded={row.kind === "dir" ? row.expanded : undefined}
-        aria-selected={isShown}
-        data-testid={TID.fileTreeItem}
-        data-path={row.path}
-        data-kind={row.kind}
-        data-dirty={dirty ? "1" : "0"}
-        data-changed={changed ? "1" : "0"}
-        data-cursor={isCursor ? "1" : undefined}
-        title={
-          row.kind === "file" && renameKey
-            ? `${row.path} — ${renameKey} to rename`
-            : row.path
-        }
-        className={clsx(
-          "flex cursor-pointer select-none items-center gap-1 pr-2 text-[13px]",
-          isShown
-            ? "bg-slate-200 font-medium text-slate-900"
-            : "text-slate-700 hover:bg-slate-200/60",
-          // The cursor ring shows while the tree has focus.
-          isCursor &&
-            "group-focus/tree:ring-2 group-focus/tree:ring-inset group-focus/tree:ring-orange-300"
-        )}
-        style={{ ...indent(row.depth), height: ROW_HEIGHT }}
-        onMouseDown={(e) => {
-          // No text selection on double-click.
-          if (e.detail > 1) e.preventDefault();
-        }}
-        onClick={() => {
-          setCursor(row.path);
-          if (row.kind === "dir") {
-            cancelArrowOpen();
-            toggle(row);
-          } else {
-            open(row.path, "keep");
-          }
-          treeRef.current?.focus();
-        }}
-        onDoubleClick={() => {
-          if (row.kind === "file") open(row.path, "main");
-        }}
-      >
-        {row.kind === "dir" ? (
-          <ChevronRightIcon
-            size={12}
-            className={clsx(
-              "shrink-0 text-slate-500",
-              row.expanded && "rotate-90"
-            )}
-          />
-        ) : (
-          <span className="w-3 shrink-0" />
-        )}
-        {row.kind === "dir" ? (
-          <FolderIcon size={14} className="shrink-0 text-slate-500" />
-        ) : row.name.endsWith(".squiggle") ? (
-          <SquiggleIcon size={14} className="shrink-0 text-orange-500" />
-        ) : (
-          <FileIcon size={14} className="shrink-0 text-slate-500" />
-        )}
-        <span className="min-w-0 flex-1 truncate">{row.name}</span>
-        {changed && (
-          <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
-            aria-hidden
-          />
-        )}
-        {changed && <span className="sr-only">, changed on disk</span>}
-        {dirty && (
-          <span
-            className="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-600"
-            aria-hidden
-          />
-        )}
-        {dirty && <span className="sr-only">, unsaved</span>}
-      </div>
-    );
-  };
+  // Stable handlers, so unchanged rows don't re-render while typing.
+  const actions = useRef({ open, toggle });
+  actions.current = { open, toggle };
+  const onRowClick = useCallback(
+    (row: TreeRow) => {
+      setCursor(row.path);
+      if (row.kind === "dir") {
+        cancelArrowOpen();
+        actions.current.toggle(row);
+      } else {
+        actions.current.open(row.path, "keep");
+      }
+      treeRef.current?.focus();
+    },
+    [cancelArrowOpen]
+  );
+  const onRowDoubleClick = useCallback((row: TreeRow) => {
+    if (row.kind === "file") actions.current.open(row.path, "main");
+  }, []);
+
+  const renderRow = (row: TreeRow) => (
+    <TreeItem
+      key={row.path}
+      row={row}
+      domId={rowId(row.path)}
+      isCursor={row.path === cursor}
+      isShown={row.path === activePath}
+      dirty={row.kind === "file" && dirtyPaths.has(row.path)}
+      changed={
+        row.kind === "file"
+          ? unseenChanges.has(row.path)
+          : !row.expanded && foldersWithChanges.has(row.path)
+      }
+      renameKey={renameKey}
+      onClick={onRowClick}
+      onDoubleClick={onRowDoubleClick}
+    />
+  );
 
   return (
     <div
@@ -566,3 +514,100 @@ export const FileTree: FC<Props> = ({ treeState, blocked }) => {
     </div>
   );
 };
+
+type TreeItemProps = {
+  row: TreeRow;
+  domId: string;
+  isCursor: boolean;
+  isShown: boolean;
+  dirty: boolean;
+  changed: boolean; // an unseen change here, or in a collapsed folder
+  renameKey: string | undefined;
+  onClick: (row: TreeRow) => void;
+  onDoubleClick: (row: TreeRow) => void;
+};
+
+// One row (`role="treeitem"`); not focusable itself (the tree is the one tab
+// stop and points at the cursor's row with aria-activedescendant).
+const TreeItem: FC<TreeItemProps> = memo(function TreeItem({
+  row,
+  domId,
+  isCursor,
+  isShown,
+  dirty,
+  changed,
+  renameKey,
+  onClick,
+  onDoubleClick,
+}) {
+  return (
+    <div
+      id={domId}
+      role="treeitem"
+      aria-level={row.depth + 1}
+      aria-expanded={row.kind === "dir" ? row.expanded : undefined}
+      aria-selected={isShown}
+      data-testid={TID.fileTreeItem}
+      data-path={row.path}
+      data-kind={row.kind}
+      data-dirty={dirty ? "1" : "0"}
+      data-changed={changed ? "1" : "0"}
+      data-cursor={isCursor ? "1" : undefined}
+      title={
+        row.kind === "file" && renameKey
+          ? `${row.path} — ${renameKey} to rename`
+          : row.path
+      }
+      className={clsx(
+        "flex cursor-pointer select-none items-center gap-1 pr-2 text-[13px]",
+        isShown
+          ? "bg-slate-200 font-medium text-slate-900"
+          : "text-slate-700 hover:bg-slate-200/60",
+        // The cursor ring shows while the tree has focus.
+        isCursor &&
+          "group-focus/tree:ring-2 group-focus/tree:ring-inset group-focus/tree:ring-orange-300"
+      )}
+      style={{ ...indent(row.depth), height: ROW_HEIGHT }}
+      onMouseDown={(e) => {
+        // No text selection on double-click.
+        if (e.detail > 1) e.preventDefault();
+      }}
+      onClick={() => onClick(row)}
+      onDoubleClick={() => onDoubleClick(row)}
+    >
+      {row.kind === "dir" ? (
+        <ChevronRightIcon
+          size={12}
+          className={clsx(
+            "shrink-0 text-slate-500",
+            row.expanded && "rotate-90"
+          )}
+        />
+      ) : (
+        <span className="w-3 shrink-0" />
+      )}
+      {row.kind === "dir" ? (
+        <FolderIcon size={14} className="shrink-0 text-slate-500" />
+      ) : row.name.endsWith(".squiggle") ? (
+        <SquiggleIcon size={14} className="shrink-0 text-orange-500" />
+      ) : (
+        <FileIcon size={14} className="shrink-0 text-slate-500" />
+      )}
+      <span className="min-w-0 flex-1 truncate">{row.name}</span>
+      {changed && (
+        <span
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
+          aria-hidden
+        />
+      )}
+      {changed && <span className="sr-only">, changed on disk</span>}
+      {dirty && (
+        <span
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-600"
+          aria-hidden
+        />
+      )}
+      {dirty && <span className="sr-only">, unsaved</span>}
+    </div>
+  );
+});
