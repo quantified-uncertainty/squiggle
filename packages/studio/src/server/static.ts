@@ -23,7 +23,20 @@ export async function serveStatic(
   pathname: string,
   res: ServerResponse
 ): Promise<void> {
-  const decoded = decodeURIComponent(pathname);
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    // A malformed escape such as "/%E0%A4%A" (#3).
+    res.writeHead(400, { "content-type": "text/plain" });
+    res.end("Bad request: malformed URL");
+    return;
+  }
+  if (decoded.includes("\0")) {
+    res.writeHead(400, { "content-type": "text/plain" });
+    res.end("Bad request: malformed URL");
+    return;
+  }
   const target = path.resolve(clientDir, "." + path.posix.normalize(decoded));
   const insideClient =
     target === clientDir || target.startsWith(clientDir + path.sep);

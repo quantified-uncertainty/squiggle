@@ -1,4 +1,3 @@
-import fs from "node:fs/promises";
 import http, { type IncomingMessage, type ServerResponse } from "node:http";
 import net, { type AddressInfo } from "node:net";
 import os from "node:os";
@@ -10,15 +9,27 @@ import { z } from "zod";
 import {
   API_ERROR_CODES,
   decodeRootHeader,
+  hashesRequestSchema,
+  hubImportRequestSchema,
   legacyHubImportRequestSchema,
   openFolderRequestSchema,
+  patchStateRequestSchema,
+  putSettingsRequestSchema,
   renameFileRequestSchema,
+  type RootInfo,
   STUDIO_HEADER,
   STUDIO_ROOT_HEADER,
-  type StudioEventInput,
+  type StudioEvent,
   writeFileRequestSchema,
 } from "../shared/api.js";
-import { listTree, readFile, renameFile, writeFile } from "./files.js";
+import {
+  hashPaths,
+  listTree,
+  readFile,
+  renameFile,
+  writeFile,
+} from "./files.js";
+import { assertDirectory, browseFolder, resolveUserFolder } from "./folders.js";
 import { HubError, makeHubClient } from "./hub.js";
 import { PathError } from "./paths.js";
 import {
@@ -27,6 +38,7 @@ import {
   loadRecentFolders,
 } from "./recent.js";
 import { serveStatic } from "./static.js";
+import { createUserState } from "./userState.js";
 import { type FolderWatcher, watchFolder } from "./watcher.js";
 
 export type StudioServerOptions = {
@@ -35,7 +47,7 @@ export type StudioServerOptions = {
   host?: string; // default 127.0.0.1; non-loopback hosts need allowNetwork
   // Allow binding a non-loopback host (e.g. 0.0.0.0). Anyone who can reach
   // the port can then read and write files in the open folder, so this also
-  // disables allowOpenFolder.
+  // disables allowOpenFolder, /api/recent and the state and settings routes.
   allowNetwork?: boolean;
   strictPort?: boolean; // if false (default), try the next ports when busy
   dev?: boolean; // serve the client through Vite middleware (requires vite)
@@ -44,10 +56,10 @@ export type StudioServerOptions = {
   hubUrl?: string; // defaults to https://squigglehub.org
   allowOpenFolder?: boolean; // allow the client to switch root folders; default true (false with a non-loopback host)
   // Directory of state.json and settings.json; defaults to the directory of
-  // `recentFile` (~/.squiggle-studio). Accepted and ignored until WP7.
+  // `recentFile` (~/.squiggle-studio).
   stateDir?: string;
   // Record opened folders in `recentFile`; default true. `render` and the e2e
-  // harness pass false (#48). Accepted and ignored until WP7.
+  // harness pass false (#48).
   trackRecent?: boolean;
 };
 
@@ -61,16 +73,8 @@ export type StudioServer = {
 
 const MAX_BODY_BYTES = 10 * 1024 * 1024;
 
-class HttpError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-    public readonly code?: string, // see API_ERROR_CODES
-    public readonly root?: string // sent along with code "root-changed"
-  ) {
-    super(message);
-  }
-}
+// An API error with a status; answered as `{error, code, ...details}`.
+class HttpError extends PathError {}
 
 function sendJson(res: ServerResponse, status: number, body: unknown) {
   const data = JSON.stringify(body);
@@ -79,6 +83,11 @@ function sendJson(res: ServerResponse, status: number, body: unknown) {
     "cache-control": "no-store",
   });
   res.end(data);
+}
+
+function sendText(res: ServerResponse, status: number, text: string) {
+  res.writeHead(status, { "content-type": "text/plain; charset=utf-8" });
+  res.end(text);
 }
 
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
@@ -97,7 +106,10 @@ async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   }
 }
 
-function parseBody<T>(schema: z.ZodType<T>, body: unknown): T {
+function parseBody<T>(
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+  body: unknown
+): T {
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     throw new HttpError(`Invalid request: ${parsed.error.message}`, 400);
@@ -142,18 +154,23 @@ function isAllowedHost(
   );
 }
 
+// The request target as a URL, or undefined when it isn't an origin-form
+// path ("/x?y"). Absolute and protocol-relative targets (`//x:99999/`,
+// `http://[`) are refused instead of reaching `new URL` (#3).
+export function parseRequestTarget(
+  target: string | undefined
+): URL | undefined {
+  if (!target || !/^\/(?![/\\])/.test(target)) return undefined;
+  try {
+    return new URL(target, "http://localhost");
+  } catch {
+    return undefined;
+  }
+}
+
 function packageDir(): string {
   // dist/server/server.js or src/server/server.ts -> package root
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-}
-
-async function assertDirectory(folder: string): Promise<string> {
-  const abs = path.resolve(folder);
-  const stat = await fs.stat(abs).catch(() => undefined);
-  if (!stat?.isDirectory()) {
-    throw new HttpError(`Not a directory: ${abs}`, 400);
-  }
-  return abs;
 }
 
 async function listen(
@@ -188,6 +205,8 @@ async function listen(
   throw new Error("Unreachable");
 }
 
+const HUB_ID = /^(?:hub:)?([\w-]+)\/([\w-]+)$/;
+
 export async function startStudioServer(
   options: StudioServerOptions
 ): Promise<StudioServer> {
@@ -200,6 +219,10 @@ export async function startStudioServer(
     );
   }
   const recentFile = options.recentFile ?? defaultRecentFile();
+  const trackRecent = options.trackRecent ?? true;
+  const userState = createUserState(
+    options.stateDir ?? path.dirname(recentFile)
+  );
   const hub = makeHubClient(options.hubUrl);
   // Never let network clients switch the root to, say, the home folder.
   const allowOpenFolder = !network && (options.allowOpenFolder ?? true);
@@ -208,7 +231,7 @@ export async function startStudioServer(
   let watcher: FolderWatcher | undefined;
   const sseClients = new Set<ServerResponse>();
 
-  const broadcast = (event: StudioEventInput) => {
+  const broadcast = (event: StudioEvent) => {
     const data = `data: ${JSON.stringify(event)}\n\n`;
     for (const client of sseClients) client.write(data);
   };
@@ -218,15 +241,23 @@ export async function startStudioServer(
     watcher = watchFolder(root, broadcast);
   };
 
+  const rememberFolder = async (folder: string) => {
+    if (!trackRecent) return;
+    await addRecentFolder(recentFile, folder).catch(() => undefined);
+  };
+
   const openFolder = async (folder: string) => {
     root = await assertDirectory(folder);
     startWatcher();
-    await addRecentFolder(recentFile, root).catch(() => undefined);
+    await rememberFolder(root);
     broadcast({ type: "root-changed", root });
   };
 
-  startWatcher();
-  await addRecentFolder(recentFile, root).catch(() => undefined);
+  const rootInfo = (): RootInfo => ({
+    root,
+    name: path.basename(root),
+    allowOpenFolder,
+  });
 
   type Vite = import("vite").ViteDevServer;
   let vite: Vite | undefined;
@@ -285,14 +316,30 @@ export async function startStudioServer(
           `The open folder changed to ${root}`,
           409,
           API_ERROR_CODES.rootChanged,
-          root
+          { root }
         );
       }
     };
 
+    const assertLocalOnly = (what: string) => {
+      if (network) {
+        throw new HttpError(
+          `${what} isn't available with --allow-network`,
+          403
+        );
+      }
+    };
+
+    // Set when the client goes away before we answered (a cancelled Hub
+    // import, #49).
+    const aborted = new AbortController();
+    res.on("close", () => {
+      if (!res.writableFinished) aborted.abort();
+    });
+
     switch (route) {
       case "GET /api/root":
-        return sendJson(res, 200, { root, name: path.basename(root) });
+        return sendJson(res, 200, rootInfo());
       case "POST /api/root": {
         if (!allowOpenFolder) {
           throw new HttpError("Opening other folders is disabled", 403);
@@ -301,14 +348,12 @@ export async function startStudioServer(
           openFolderRequestSchema,
           await readJsonBody(req)
         );
-        const folder = body.path.startsWith("~")
-          ? path.join(os.homedir(), body.path.slice(1))
-          : body.path;
-        await openFolder(folder);
-        return sendJson(res, 200, { root, name: path.basename(root) });
+        await openFolder(resolveUserFolder(body.path));
+        return sendJson(res, 200, rootInfo());
       }
       case "GET /api/tree":
-        return sendJson(res, 200, { root, tree: await listTree(root) });
+        assertExpectedRoot();
+        return sendJson(res, 200, { root, ...(await listTree(root)) });
       case "GET /api/file": {
         assertExpectedRoot();
         const p = url.searchParams.get("path") ?? "";
@@ -323,6 +368,7 @@ export async function startStudioServer(
           200,
           await writeFile(root, body.path, body.content, {
             overwrite: !body.create,
+            baseHash: body.baseHash,
           })
         );
       }
@@ -334,25 +380,26 @@ export async function startStudioServer(
         assertExpectedRoot();
         return sendJson(res, 200, await renameFile(root, body.from, body.to));
       }
+      case "POST /api/hashes": {
+        const body = parseBody(hashesRequestSchema, await readJsonBody(req));
+        assertExpectedRoot();
+        return sendJson(res, 200, {
+          hashes: await hashPaths(root, body.paths),
+        });
+      }
       case "GET /api/recent":
-        return sendJson(res, 200, await loadRecentFolders(recentFile));
+        // Recent folders reveal other paths on this machine (#31).
+        return sendJson(
+          res,
+          200,
+          allowOpenFolder ? await loadRecentFolders(recentFile) : []
+        );
       case "GET /api/browse": {
         if (!allowOpenFolder) {
           throw new HttpError("Opening other folders is disabled", 403);
         }
-        const requested = url.searchParams.get("path") || os.homedir();
-        const dir = await assertDirectory(requested);
-        const entries = await fs.readdir(dir, { withFileTypes: true });
-        const dirs = entries
-          .filter((e) => e.isDirectory() && !e.name.startsWith("."))
-          .map((e) => e.name)
-          .sort((a, b) => a.localeCompare(b));
-        const parent = path.dirname(dir);
-        return sendJson(res, 200, {
-          path: dir,
-          parent: parent === dir ? null : parent,
-          dirs,
-        });
+        const requested = url.searchParams.get("path");
+        return sendJson(res, 200, await browseFolder(requested ?? undefined));
       }
       case "GET /api/hub/source": {
         const owner = url.searchParams.get("owner") ?? "";
@@ -360,53 +407,107 @@ export async function startStudioServer(
         if (!/^[\w-]+$/.test(owner) || !/^[\w-]+$/.test(slug)) {
           throw new HttpError("Invalid owner or slug", 400);
         }
-        const code = await hub.getSource(owner, slug);
+        const code = await hub.getSource(owner, slug, aborted.signal);
         return sendJson(res, 200, { owner, slug, code });
       }
       case "POST /api/hub/import": {
-        const body = parseBody(
-          legacyHubImportRequestSchema,
-          await readJsonBody(req)
-        );
+        const raw = await readJsonBody(req);
+        // TRANSITIONAL: the pre-WP7 body {owner, slug, path} is still
+        // accepted until the client moves to {id}; integration removes it.
+        const legacy = legacyHubImportRequestSchema.safeParse(raw);
+        const body = legacy.success
+          ? {
+              owner: legacy.data.owner,
+              slug: legacy.data.slug,
+              path: legacy.data.path,
+              overwrite: legacy.data.overwrite,
+            }
+          : (() => {
+              const parsed = parseBody(hubImportRequestSchema, raw);
+              const id = HUB_ID.exec(parsed.id.trim());
+              if (!id?.[1] || !id[2]) {
+                throw new HttpError(
+                  `Invalid Hub id "${parsed.id}", expected owner/slug`,
+                  400
+                );
+              }
+              return {
+                owner: id[1],
+                slug: id[2],
+                path: parsed.path ?? `hub/${id[2]}.squiggle`,
+                overwrite: parsed.overwrite,
+              };
+            })();
         if (!/^[\w-]+$/.test(body.owner) || !/^[\w-]+$/.test(body.slug)) {
           throw new HttpError("Invalid owner or slug", 400);
         }
         assertExpectedRoot(); // fail fast, before the Hub request
-        const code = await hub.getSource(body.owner, body.slug);
+        const code = await hub.getSource(body.owner, body.slug, aborted.signal);
         const header = `// Imported from ${hub.hubUrl}/models/${body.owner}/${body.slug} on ${new Date().toISOString().slice(0, 10)}\n\n`;
         assertExpectedRoot(); // and again: the Hub request takes a while
+        // Nothing is written once the client has gone away (#49); the write
+        // checks again right before its rename.
+        aborted.signal.throwIfAborted();
         const result = await writeFile(root, body.path, header + code, {
           overwrite: body.overwrite ?? false,
+          signal: aborted.signal,
         });
-        return sendJson(res, 200, result);
+        return sendJson(res, 200, { path: result.path, hash: result.hash });
+      }
+      case "GET /api/state": {
+        assertLocalOnly("UI state");
+        const forRoot = url.searchParams.get("root") ?? "";
+        return sendJson(res, 200, await userState.getState(forRoot));
+      }
+      case "PATCH /api/state": {
+        assertLocalOnly("UI state");
+        const body = parseBody(
+          patchStateRequestSchema,
+          await readJsonBody(req)
+        );
+        await userState.patchState(body);
+        return sendJson(res, 200, { ok: true });
+      }
+      case "GET /api/settings":
+        assertLocalOnly("Settings");
+        return sendJson(res, 200, await userState.getSettings());
+      case "PUT /api/settings": {
+        assertLocalOnly("Settings");
+        const body = parseBody(
+          putSettingsRequestSchema,
+          await readJsonBody(req)
+        );
+        return sendJson(res, 200, await userState.putSettings(body.patch));
       }
       default:
         throw new HttpError(`Not found: ${route}`, 404);
     }
   };
 
-  const server = http.createServer((req, res) => {
+  const sendApiError = (res: ServerResponse, e: unknown) => {
+    const known = e instanceof PathError || e instanceof HubError;
+    const status = known ? e.status : 500;
+    const message = e instanceof Error ? e.message : String(e);
+    const code = e instanceof PathError ? e.code : undefined;
+    const details = e instanceof PathError ? e.details : {};
+    if (code === API_ERROR_CODES.rootMissing) watcher?.checkRoot();
+    if (!res.headersSent && !res.destroyed) {
+      sendJson(res, status, { error: message, code, ...details });
+    } else res.end();
+  };
+
+  const handleRequest = (req: IncomingMessage, res: ServerResponse) => {
     if (!isAllowedHost(req, host, network)) {
-      res.writeHead(403).end("Forbidden host");
+      sendText(res, 403, "Forbidden host");
       return;
     }
-    const url = new URL(req.url ?? "/", "http://localhost");
+    const url = parseRequestTarget(req.url);
+    if (!url) {
+      sendText(res, 400, "Bad request target");
+      return;
+    }
     if (url.pathname.startsWith("/api/")) {
-      handleApi(req, res, url).catch((e: unknown) => {
-        const status =
-          e instanceof HttpError ||
-          e instanceof PathError ||
-          e instanceof HubError
-            ? e.status
-            : 500;
-        const message = e instanceof Error ? e.message : String(e);
-        const code =
-          e instanceof HttpError || e instanceof PathError ? e.code : undefined;
-        const errorRoot = e instanceof HttpError ? e.root : undefined;
-        if (!res.headersSent) {
-          sendJson(res, status, { error: message, code, root: errorRoot });
-        } else res.end();
-      });
+      handleApi(req, res, url).catch((e: unknown) => sendApiError(res, e));
       return;
     }
     if (vite) {
@@ -414,16 +515,46 @@ export async function startStudioServer(
       return;
     }
     serveStatic(clientDir, url.pathname, res).catch((e: unknown) => {
-      res.writeHead(500).end(e instanceof Error ? e.message : String(e));
+      if (!res.headersSent) {
+        sendText(res, 500, e instanceof Error ? e.message : String(e));
+      } else res.end();
     });
+  };
+
+  // Nothing a client sends may take the process down (#3).
+  const server = http.createServer((req, res) => {
+    try {
+      handleRequest(req, res);
+    } catch (e) {
+      console.error("Squiggle Studio: request failed:", e);
+      if (!res.headersSent) sendText(res, 500, "Internal error");
+      else res.end();
+    }
   });
 
-  const port = await listen(
-    server,
-    options.port ?? 4321,
-    host,
-    options.strictPort ?? false
-  );
+  let stopWatchingSettings: (() => void) | undefined;
+  let port: number;
+  try {
+    startWatcher();
+    port = await listen(
+      server,
+      options.port ?? 4321,
+      host,
+      options.strictPort ?? false
+    );
+  } catch (e) {
+    // Don't leave the folder watcher (or Vite) running for a server that
+    // never listened.
+    watcher?.close();
+    await vite?.close();
+    throw e;
+  }
+  await rememberFolder(root);
+  if (!network) {
+    stopWatchingSettings = userState.watchSettings(() =>
+      broadcast({ type: "settings-changed" })
+    );
+  }
   const displayHost = host === "0.0.0.0" || host === "::" ? "localhost" : host;
 
   return {
@@ -433,6 +564,7 @@ export async function startStudioServer(
     openFolder,
     async close() {
       watcher?.close();
+      stopWatchingSettings?.();
       for (const client of sseClients) client.end();
       sseClients.clear();
       await vite?.close();
