@@ -11,6 +11,7 @@ import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
 import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
+import { ItemName } from "../ItemName.js";
 import { useRelativeValuesOptions } from "../RelativeValuesProvider.js";
 
 interface TableRowProps {
@@ -162,14 +163,16 @@ export const ItemSideBar: FC<Props> = ({
           <span className="mr-1 whitespace-nowrap text-slate-500">value</span>
           <span className="whitespace-nowrap text-xl text-slate-300">(</span>
           <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
-            {numeratorItem.name}
+            <ItemName item={numeratorItem} />
           </span>
           <span className="whitespace-nowrap px-1 text-xl text-slate-300">
             /
           </span>
 
           <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
-            <span className="inline-block">{denominatorItem.name}</span>
+            <span className="inline-block">
+              <ItemName item={denominatorItem} />
+            </span>
           </span>
           <span className="whitespace-nowrap text-xl text-slate-300">)</span>
         </div>
@@ -187,6 +190,12 @@ export const ItemSideBar: FC<Props> = ({
 
         {squiggleCode !== undefined && (
           <PairChart code={squiggleCode} linker={linker} sourceId={sourceId} />
+        )}
+        {!model.canCompute && (
+          // Precomputed values (e.g. a bundle) don't include distributions.
+          <div className="text-xs text-slate-400">
+            Distribution charts aren&apos;t available for precomputed values.
+          </div>
         )}
 
         <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">

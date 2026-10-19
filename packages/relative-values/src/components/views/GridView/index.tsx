@@ -231,13 +231,13 @@ export const GridView: FC = () => {
         <div className="sticky left-0 top-0 z-20 bg-white" />
         {columnItems.map((item) => (
           <CellBox header key={item.id}>
-            <Header item={item} />
+            <Header item={item} customName />
           </CellBox>
         ))}
         {rowItems.map((rowItem) => (
           <Fragment key={rowItem.id}>
             <CellBox header>
-              <Header key={0} item={rowItem} />
+              <Header key={0} item={rowItem} customName />
             </CellBox>
             {columnItems.map((columnItem) =>
               isHiddenPair(rowItem, columnItem) ? (

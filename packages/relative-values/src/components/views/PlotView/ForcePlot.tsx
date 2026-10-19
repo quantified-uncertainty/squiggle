@@ -16,6 +16,7 @@ import {
   useDefinition,
   useDefinitionClusters,
   useRelativeValuesContext,
+  useRelativeValuesOptions,
 } from "../RelativeValuesProvider.js";
 import { ItemTooltip } from "./ItemTooltip.js";
 
@@ -41,6 +42,7 @@ export const ForcePlot: FC<{
   } = useRelativeValuesContext();
 
   const filteredItems = useFilteredItems({ items, config: rows });
+  const { onItemClick } = useRelativeValuesOptions();
 
   const [hoveredId, setHoveredId] = useState<number | undefined>(undefined);
 
@@ -202,7 +204,15 @@ export const ForcePlot: FC<{
 
   return (
     <MouseTooltip isOpen={hoveredId !== undefined} render={renderTooltip}>
-      <canvas ref={ref} className="w-full" />
+      <canvas
+        ref={ref}
+        className="w-full"
+        onClick={() => {
+          if (hoveredItem && onItemClick) {
+            onItemClick(hoveredItem);
+          }
+        }}
+      />
     </MouseTooltip>
   );
 };

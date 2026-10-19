@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 
 import { Env, result } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
@@ -11,6 +11,7 @@ import {
   RelativeValuesDashboard,
   RelativeValuesDashboardProps,
 } from "./RelativeValuesDashboard.js";
+import { RelativeValuesRoot } from "./RelativeValuesRoot.js";
 
 export function useRelativeValuesEvaluator(
   spec: RelativeValuesSpec,
@@ -48,38 +49,51 @@ export function useRelativeValuesEvaluator(
   return evaluator;
 }
 
-export type RelativeValuesSpecDashboardProps = Omit<
-  RelativeValuesDashboardProps,
-  "definition" | "evaluator"
-> & {
-  spec: RelativeValuesSpec;
-  // Defaults to a fresh in-memory cache for each spec.
-  cache?: RelativeValuesCache;
-  // Squiggle source that defines the spec; enables per-pair Squiggle charts in
-  // the list view sidebar (requires `spec.variableName`).
-  modelCode?: string;
-  environment?: Env;
-};
+export type RelativeValuesSpecDashboardProps<TabId extends string = never> =
+  Omit<RelativeValuesDashboardProps<TabId>, "definition" | "evaluator"> & {
+    spec: RelativeValuesSpec;
+    // Defaults to a fresh in-memory cache for each spec.
+    cache?: RelativeValuesCache;
+    // Squiggle source that defines the spec; enables per-pair Squiggle charts in
+    // the list view sidebar (requires `spec.variableName`).
+    modelCode?: string;
+    environment?: Env;
+  };
 
 /**
  * Dashboard for a spec parsed with `relativeValuesSpecFromSqValue` or found
  * with `findRelativeValuesExports`.
  */
-export const RelativeValuesSpecDashboard: FC<
-  RelativeValuesSpecDashboardProps
-> = ({ spec, cache, modelCode, environment, ...dashboardProps }) => {
+export function RelativeValuesSpecDashboard<TabId extends string = never>({
+  spec,
+  cache,
+  modelCode,
+  environment,
+  ...dashboardProps
+}: RelativeValuesSpecDashboardProps<TabId>): ReactElement {
   const evaluator = useRelativeValuesEvaluator(spec, {
     cache,
     modelCode,
     environment,
   });
 
-  if (!evaluator) {
-    return <RefreshIcon className="animate-spin text-gray-400" />;
-  }
-
-  if (!evaluator.ok) {
-    return <div className="text-sm text-red-700">{evaluator.value}</div>;
+  if (!evaluator || !evaluator.ok) {
+    return (
+      <RelativeValuesRoot
+        className={dashboardProps.className}
+        style={
+          dashboardProps.height === undefined
+            ? undefined
+            : { height: dashboardProps.height }
+        }
+      >
+        {evaluator ? (
+          <div className="text-sm text-red-700">{evaluator.value}</div>
+        ) : (
+          <RefreshIcon className="animate-spin text-gray-400" />
+        )}
+      </RelativeValuesRoot>
+    );
   }
 
   return (
@@ -89,4 +103,4 @@ export const RelativeValuesSpecDashboard: FC<
       evaluator={evaluator.value}
     />
   );
-};
+}

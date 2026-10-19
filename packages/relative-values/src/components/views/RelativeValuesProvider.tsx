@@ -4,6 +4,7 @@ import {
   createContext,
   FC,
   PropsWithChildren,
+  ReactNode,
   Reducer,
   useContext,
   useMemo,
@@ -12,7 +13,7 @@ import {
 import { SqLinker } from "@quri/squiggle-lang";
 import { generateProvider } from "@quri/ui";
 
-import { Clusters, RelativeValuesDefinition } from "../../types.js";
+import { Clusters, Item, RelativeValuesDefinition } from "../../types.js";
 import { ModelEvaluator } from "../../values/ModelEvaluator.js";
 import { Filter } from "./types.js";
 
@@ -47,6 +48,13 @@ export type RelativeValuesOptions = {
   // Source id of the model, passed to the linker as the importing module's id
   // so that relative imports (`import "./other.squiggle"`) resolve.
   sourceId?: string;
+  // Called when an item name is clicked in the list view, the grid headers or
+  // the list sidebar, or when an item's dot is clicked in the plots. Without
+  // it, clicking a name in the list view makes it the unit of comparison.
+  onItemClick?: (item: Item) => void;
+  // Custom rendering of item names, e.g. a link to the item's page in your app.
+  // Defaults to `item.name`.
+  renderItemName?: (item: Item) => ReactNode;
 };
 
 type DataContextShape = {
@@ -195,15 +203,31 @@ export const RelativeValuesProvider: FC<RelativeValuesProviderProps> = ({
   getPlaygroundUrl,
   linker,
   sourceId,
+  onItemClick,
+  renderItemName,
   children,
 }) => {
   const data = useMemo(
     () => ({
       evaluator,
       definition,
-      options: { getPlaygroundUrl, linker, sourceId },
+      options: {
+        getPlaygroundUrl,
+        linker,
+        sourceId,
+        onItemClick,
+        renderItemName,
+      },
     }),
-    [evaluator, definition, getPlaygroundUrl, linker, sourceId]
+    [
+      evaluator,
+      definition,
+      getPlaygroundUrl,
+      linker,
+      sourceId,
+      onItemClick,
+      renderItemName,
+    ]
   );
 
   // Reset filters when the set of clusters changes.
