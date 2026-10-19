@@ -39,11 +39,11 @@ function numberToColor(
     case 2:
       return "text-gray-700";
     case 3:
-      return "text-yellow-700 opacity-90";
+      return "text-yellow-800";
     case 4:
-      return "text-orange-700 opacity-70";
+      return "text-orange-800";
     case 5:
-      return "text-red-700 opacity-60";
+      return "text-red-800";
   }
 }
 
@@ -100,7 +100,7 @@ export const RelativeValueCell: FC<{
                 {" "}
                 <span
                   style={{ fontSize: "0.7em" }}
-                  className="font-light text-gray-400"
+                  className="font-light text-gray-600"
                 >
                   ±
                 </span>{" "}
@@ -135,7 +135,7 @@ export const RelativeValueCell: FC<{
         {showRange && (
           <div
             style={{ fontSize: "0.7em" }}
-            className="font-light text-gray-400"
+            className="font-light text-gray-600"
           >
             {item.min < 0 && item.max < 0 ? (
               <span>

@@ -43,6 +43,7 @@ const ModalHeader: FC<PropsWithChildren> = ({ children }) => {
       <button
         className="cursor-pointer bg-transparent text-slate-300 hover:text-slate-500"
         type="button"
+        aria-label="Close"
         onClick={close}
       >
         <XIcon size={16} className="m-1" />

@@ -13,17 +13,33 @@ export type EditorCursorDetail = {
   line: number; // 1-based line of the main selection's head
   column: number; // 1-based column (UTF-16 code units from the line start)
   selected: number; // selected characters over all ranges; 0 for a plain cursor
+  // The main selection's first and last line (1-based); a selection that
+  // ends at the start of a line doesn't count that line.
+  fromLine: number;
+  toLine: number;
 };
 
 export function editorCursorDetail(view: EditorView): EditorCursorDetail {
   const { selection, doc } = view.state;
-  const head = selection.main.head;
+  const { head, from, to } = selection.main;
   const line = doc.lineAt(head);
   const selected = selection.ranges.reduce(
     (sum, range) => sum + (range.to - range.from),
     0
   );
-  return { line: line.number, column: head - line.from + 1, selected };
+  const fromLine = doc.lineAt(from).number;
+  const end = doc.lineAt(to);
+  const toLine =
+    to > from && to === end.from
+      ? Math.max(fromLine, end.number - 1)
+      : end.number;
+  return {
+    line: line.number,
+    column: head - line.from + 1,
+    selected,
+    fromLine,
+    toLine,
+  };
 }
 
 const schedule: (fn: () => void) => () => void =

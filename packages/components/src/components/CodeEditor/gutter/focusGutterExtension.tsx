@@ -58,12 +58,12 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
   nextStatement: for (const statement of ast.statements) {
     for (const decorator of statement.decorators) {
       if (decorator.name.value === "hide") {
-        break nextStatement;
+        continue nextStatement;
       }
     }
     const name = statement.variable.value;
     if (ast.symbols[name] !== statement) {
-      break; // skip, probably redefined later
+      continue; // skip, probably redefined later
     }
     const path = new SqValuePath({
       root: "bindings",
@@ -71,7 +71,6 @@ function* getMarkerData(ast: ASTNode): Generator<MarkerDatum, void> {
     });
     yield { ast: statement.variable, path };
     yield* getMarkerSubData(statement.value, path);
-    break;
   }
 
   // end expression

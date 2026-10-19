@@ -223,7 +223,13 @@ describe("cursorEventExtension", () => {
       const { view } = await renderEditor({});
       // The initial position.
       await waitFor(() => expect(details.length).toBeGreaterThan(0));
-      expect(details.at(-1)).toEqual({ line: 1, column: 1, selected: 0 });
+      expect(details.at(-1)).toEqual({
+        line: 1,
+        column: 1,
+        selected: 0,
+        fromLine: 1,
+        toLine: 1,
+      });
 
       // Line 2, column 3, with 2 characters selected.
       const from = CODE.indexOf("b = 2") + 2;
@@ -231,7 +237,23 @@ describe("cursorEventExtension", () => {
         view.dispatch({ selection: { anchor: from - 2, head: from } });
       });
       await waitFor(() =>
-        expect(details.at(-1)).toEqual({ line: 2, column: 3, selected: 2 })
+        expect(details.at(-1)).toEqual({
+          line: 2,
+          column: 3,
+          selected: 2,
+          fromLine: 2,
+          toLine: 2,
+        })
+      );
+
+      // Lines 1 to 2: a selection ending at the start of line 3 doesn't
+      // count line 3.
+      const line3 = CODE.split("\n").slice(0, 2).join("\n").length + 1;
+      act(() => {
+        view.dispatch({ selection: { anchor: 0, head: line3 } });
+      });
+      await waitFor(() =>
+        expect(details.at(-1)).toMatchObject({ fromLine: 1, toLine: 2 })
       );
     } finally {
       document.removeEventListener(SQ_EDITOR_CURSOR_EVENT, listener);

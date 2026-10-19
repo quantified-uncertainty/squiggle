@@ -58,7 +58,7 @@ const StackTraceFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
   const name = frame.name();
   return (
     <>
-      <div className="truncate font-mono font-medium text-gray-500">{name}</div>
+      <div className="truncate font-mono font-medium text-gray-600">{name}</div>
       <div>{location && <LocationLine location={location} />}</div>
     </>
   );
@@ -71,7 +71,7 @@ const ImportChainFrame: FC<{ frame: SqFrame }> = ({ frame }) => {
     <>
       <div className="font-mono">
         import{" "}
-        <span className="truncate font-medium text-gray-500">{name}</span>
+        <span className="truncate font-medium text-gray-600">{name}</span>
       </div>
       <div>{location && <LocationLine location={location} />}</div>
     </>
