@@ -62,7 +62,7 @@ Rules:
 - `recommendedUnit` (both top-level and per-cluster) must be an item id.
 - The variable doesn't need to be `export`ed: all top-level bindings are checked.
 
-Detection (`findRelativeValuesExports`, `looksLikeRelativeValuesSpec`) treats a dict as a spec if it has `fn` (a function) and `items` (a list), or if it has `values` (and no `fn`) with at least two entries that are all distributions or numbers. Detected dicts that fail validation are still returned, with an error message, so that the UI can explain what's wrong.
+Detection (`findRelativeValuesExports`, `looksLikeRelativeValuesSpec`) is deliberately looser than validation: a dict is a candidate if it has `fn` and `items` (whatever their types), or if it has a `values` dict and no `fn` (whatever its values). Detected dicts that fail validation are still returned, with an error message such as `values.kiwi must be a distribution or a number, got String`, so that the UI can explain what's wrong instead of silently ignoring the spec.
 
 See [`examples/`](./examples) for complete models:
 
@@ -131,7 +131,7 @@ export function Portfolio() {
       <RelativeValuesSpecDashboard
         key={name}
         spec={spec.value}
-        modelCode={modelCode} // optional: per-pair charts in the list sidebar
+        modelCode={modelCode} // optional: the sidebar's "Open in Playground" link
       />
     ) : (
       <div key={name}>{spec.value}</div>
@@ -142,7 +142,7 @@ export function Portfolio() {
 
 Pairs are computed without blocking the page: the dashboard computes the pairs that the current view needs in chunks (yielding to the event loop between them), with a progress bar, and then the pairs for the other views in the background. In the example app, a model with 120 items (14,400 pairs) computes in about 3.5 seconds, and the page is never unresponsive for more than ~75ms (computing synchronously freezes it for 750ms for the list view alone). Pass `precompute={false}` to compute synchronously while rendering, as before.
 
-Models with imports need a linker, both for `run` and, for the per-pair charts, for the dashboard (`linker` and `sourceId` props). Bundle mode avoids this.
+Models with imports need a linker for `run`. The list sidebar's per-pair charts (ratio distribution, scatter plot, both distributions) don't re-run the model: they call the evaluator's comparison function and a fixed chart helper (`relativeValuesPairCharts`), so they also work for models with imports, numbers as values or a trailing result expression.
 
 ### Bundle mode
 
@@ -190,6 +190,27 @@ The bundle format (`RelativeValuesBundle`, validated by `relativeValuesBundleSch
 
 Non-finite numbers are stored as the strings `"Infinity"`, `"-Infinity"` and `"NaN"`.
 
+#### CSV
+
+`relativeValuesBundleToCsv(bundle, options?)` (from either entry point) writes a bundle's pairs as CSV, for spreadsheets, pandas or an agent:
+
+- **Wide** (default): the header row is an empty cell followed by the item ids; each following row starts with an item id and holds the `metric` of that item in terms of each column's item. `metric` is `"median"` (default), `"mean"`, `"min"` (p5), `"max"` (p95) or `"uncertainty"`. Failed comparisons are `ERR`.
+- **Long** (`{ long: true }`): tidy rows `row,col,median,mean,min,max,uncertainty,error`, one per pair; a failed comparison has empty numbers and its error message.
+
+```ts
+import { relativeValuesBundleToCsv } from "@quri/squiggle-relative-values/core";
+
+relativeValuesBundleToCsv(bundle);
+// ,apple,banana,mango
+// apple,1,0.98,0.29
+// banana,1.02,1,0.29
+// mango,3.46,3.39,1
+relativeValuesBundleToCsv(bundle, { metric: "uncertainty" });
+relativeValuesBundleToCsv(bundle, { long: true });
+```
+
+Items are in definition order; numbers are written as stored in the bundle (rounded if the bundle was created with `precision`). Squiggle Studio's `squiggle-studio rv <file> --format csv` prints the same CSV.
+
 Without a dashboard, use the core API (also available from the React-free `@quri/squiggle-relative-values/core` entry point):
 
 ```ts
@@ -231,7 +252,7 @@ All dashboards (`RelativeValuesDashboard`, `RelativeValuesSpecDashboard`, `Relat
 | `height`                                 | E.g. `640`, or `"100%"` to fill a parent with a definite height; the content scrolls inside. By default, the dashboard grows with its content.                                                 |
 | `clusterOverrides`                       | `{ [clusterId]: { name?, color? } }`, applied on top of the clusters from the spec or bundle. (In Squiggle, set them in the spec's `clusters`.)                                                |
 | `precompute`                             | See [Live mode](#live-mode); defaults to `true`.                                                                                                                                               |
-| `getPlaygroundUrl`, `linker`, `sourceId` | Live mode only: "Open in Playground" link and imports for the per-pair charts.                                                                                                                 |
+| `getPlaygroundUrl`, `linker`, `sourceId` | Live mode only: "Open in Playground" link (with `modelCode`). `linker` and `sourceId` are deprecated and unused.                                                                               |
 
 A custom tab gets a `RelativeValuesTabContext`: `{ definition, evaluator, items, clusters }`, where `items` are filtered by the cluster filter and sorted by the sort settings (the grid's row settings; render `<ClusterFilter axis="rows" />` in your tab to let users change the filter), and `clusters` are keyed by id. All pairs are computed by the time a custom tab renders, so `evaluator.compare(id1, id2)` is cheap.
 

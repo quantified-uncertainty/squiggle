@@ -21,6 +21,8 @@ const ClusterItem: React.FC<{
     <div
       className="flex cursor-pointer select-none items-center gap-1"
       onClick={toggle}
+      data-rv-cluster={cluster.id}
+      data-selected={selected ? "" : undefined}
     >
       <div className="flex-none">
         <ClusterIcon cluster={cluster} selected={selected} />
@@ -28,7 +30,7 @@ const ClusterItem: React.FC<{
       <div
         className={clsx(
           "text-sm font-medium hover:text-black",
-          selected ? "text-gray-600" : "text-gray-400"
+          selected ? "text-gray-700" : "text-gray-500"
         )}
       >
         {cluster.name || cluster.id}

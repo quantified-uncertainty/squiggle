@@ -26,6 +26,8 @@ export const PlotView: FC = () => {
   return (
     <div
       className="grid gap-2"
+      // Squiggle Studio's test id for the plot view.
+      data-testid="rv-plot"
       style={{
         gridTemplateColumns: "1fr minmax(120px, max-content)",
       }}

@@ -52,6 +52,18 @@ export {
   relativeValuesCacheFromBundle,
   stringifyRelativeValuesBundle,
 } from "./values/bundle.js";
+export {
+  RELATIVE_VALUES_CSV_ERROR,
+  RELATIVE_VALUES_CSV_METRICS,
+  relativeValuesBundleToCsv,
+  type RelativeValuesCsvMetric,
+  type RelativeValuesCsvOptions,
+} from "./values/csv.js";
+export {
+  PAIR_CHARTS_SOURCE_ID,
+  pairChartsCode,
+  relativeValuesPairCharts,
+} from "./values/pairCharts.js";
 export { hasInvalid } from "./values/value.js";
 export { cartesianProduct, yieldToEventLoop } from "./lib/utils.js";
 

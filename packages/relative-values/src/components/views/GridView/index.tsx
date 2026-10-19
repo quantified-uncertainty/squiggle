@@ -243,14 +243,22 @@ export const GridView: FC = () => {
               isHiddenPair(rowItem, columnItem) ? (
                 <div key={columnItem.id} className="bg-gray-200" />
               ) : (
-                <RelativeCell
+                // `rv-grid-cell` is Squiggle Studio's test id for grid cells.
+                <div
                   key={columnItem.id}
-                  id1={rowItem.id}
-                  id2={columnItem.id}
-                  model={model}
-                  uncertaintyPercentiles={uncertaintyPercentiles}
-                  showRange={false}
-                />
+                  className="contents"
+                  data-testid="rv-grid-cell"
+                  data-row={rowItem.id}
+                  data-col={columnItem.id}
+                >
+                  <RelativeCell
+                    id1={rowItem.id}
+                    id2={columnItem.id}
+                    model={model}
+                    uncertaintyPercentiles={uncertaintyPercentiles}
+                    showRange={false}
+                  />
+                </div>
               )
             )}
           </Fragment>

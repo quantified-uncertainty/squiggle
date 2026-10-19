@@ -1,16 +1,20 @@
 "use client";
-import { FC, Fragment } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 
 import {
   NumberShower,
+  SquiggleViewer,
   useSimulator,
-  ViewerWithMenuBar,
 } from "@quri/squiggle-components";
-import { SqLinker } from "@quri/squiggle-lang";
+import { result } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
 import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
+import {
+  PAIR_CHARTS_SOURCE_ID,
+  relativeValuesPairCharts,
+} from "../../../values/pairCharts.js";
 import { ItemName } from "../ItemName.js";
 import { useRelativeValuesOptions } from "../RelativeValuesProvider.js";
 
@@ -21,7 +25,7 @@ interface TableRowProps {
 
 const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
   <Fragment key={label}>
-    <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-400">
+    <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-500">
       {label}
     </div>
     <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
@@ -30,6 +34,9 @@ const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
   </Fragment>
 );
 
+// Self-contained code for the "Open in Playground" link: the model followed by
+// the pair's charts. (The sidebar's own charts don't re-run the model, see
+// PairCharts.)
 const buildSquiggleCode = ({
   modelCode,
   fnExpression,
@@ -58,8 +65,8 @@ tickFormatObj = {tickFormat: tickFormat}
 @name("Normalized Scatter Plot")
 scatter = Plot.scatter(
   {
-    xDist: SampleSet(dists[1] / medianDenominator),
-    yDist: SampleSet(dists[0] / medianDenominator),
+    xDist: SampleSet(value_${denominatorItemName} / medianDenominator),
+    yDist: SampleSet(value_${numeratorItemName} / medianDenominator),
     xScale: Scale.symlog(
       { tickFormatObj, title: ${JSON.stringify(denominatorItem.name)} }
     ),
@@ -75,11 +82,11 @@ debug = [
   Tag.name(
     [
       Tag.name(
-        Plot.dist(dists[0], { xScale: Scale.symlog() }),
+        Plot.dist(value_${numeratorItemName}, { xScale: Scale.symlog() }),
         ${JSON.stringify(numeratorItem.name)}
       ),
       Tag.name(
-        Plot.dist(dists[1], { xScale: Scale.symlog() }),
+        Plot.dist(value_${denominatorItemName}, { xScale: Scale.symlog() }),
         ${JSON.stringify(denominatorItem.name)}
       ),
     ],
@@ -101,33 +108,86 @@ ratio
 `;
 };
 
-// Like `SquiggleChart`, but supports a linker and a source id, so that models
-// with imports work.
-const PairChart: FC<{ code: string; linker?: SqLinker; sourceId?: string }> = ({
-  code,
-  linker,
-  sourceId,
-}) => {
+// Runs the pair's chart program (see `relativeValuesPairCharts`) and shows
+// its result, a dict of the charts.
+const PairChartsProgram: FC<{ code: string }> = ({ code }) => {
   const { simulation } = useSimulator({
     code,
-    sourceId,
-    setup: linker
-      ? { type: "projectFromLinker", linker }
-      : { type: "standalone" },
+    sourceId: PAIR_CHARTS_SOURCE_ID,
+    setup: { type: "standalone" },
   });
 
   if (!simulation) {
-    return <RefreshIcon className="animate-spin" />;
+    return <RefreshIcon className="animate-spin text-slate-400" />;
   }
+  const result = simulation.output.result;
+  if (!result.ok) {
+    return (
+      <div className="text-xs text-red-700" data-rv-chart-error="">
+        Chart helper: {result.value.errors.map((e) => e.toString()).join("\n")}
+      </div>
+    );
+  }
+  return <SquiggleViewer value={result.value.result} />;
+};
 
-  return (
-    <ViewerWithMenuBar
-      simulation={simulation}
-      playgroundSettings={{}}
-      showMenu
-      randomizeSeed={undefined}
-    />
-  );
+// The pair's charts, from the evaluator's own comparison function: the model
+// isn't re-run, so models with numbers as values, with a trailing result
+// expression or with imports all work.
+const PairCharts: FC<{
+  model: ModelEvaluator;
+  numeratorItem: Item;
+  denominatorItem: Item;
+}> = ({ model, numeratorItem, denominatorItem }) => {
+  const key = JSON.stringify([
+    numeratorItem.id,
+    numeratorItem.name,
+    denominatorItem.id,
+    denominatorItem.name,
+  ]);
+  const [charts, setCharts] = useState<{
+    key: string;
+    model: ModelEvaluator;
+    code: result<string, string>;
+  }>();
+
+  useEffect(() => {
+    let cancelled = false;
+    relativeValuesPairCharts(model, numeratorItem, denominatorItem).then(
+      (code) => {
+        if (!cancelled) setCharts({ key, model, code });
+      },
+      (e: unknown) => {
+        if (!cancelled) {
+          setCharts({
+            key,
+            model,
+            code: {
+              ok: false,
+              value: e instanceof Error ? e.message : String(e),
+            },
+          });
+        }
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+    // `key` covers the items.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model, key]);
+
+  if (!charts || charts.key !== key || charts.model !== model) {
+    return <RefreshIcon className="animate-spin text-slate-400" />;
+  }
+  if (!charts.code.ok) {
+    return (
+      <div className="text-xs text-red-700" data-rv-chart-error="">
+        {charts.code.value}
+      </div>
+    );
+  }
+  return <PairChartsProgram code={charts.code.value} />;
 };
 
 type Props = {
@@ -141,7 +201,7 @@ export const ItemSideBar: FC<Props> = ({
   numeratorItem,
   denominatorItem,
 }) => {
-  const { getPlaygroundUrl, linker, sourceId } = useRelativeValuesOptions();
+  const { getPlaygroundUrl } = useRelativeValuesOptions();
   const result = model.compare(numeratorItem.id, denominatorItem.id);
   if (!result.ok) {
     return <div>Result not found</div>;
@@ -161,11 +221,11 @@ export const ItemSideBar: FC<Props> = ({
       <div>
         <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1">
           <span className="mr-1 whitespace-nowrap text-slate-500">value</span>
-          <span className="whitespace-nowrap text-xl text-slate-300">(</span>
+          <span className="whitespace-nowrap text-xl text-slate-500">(</span>
           <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
             <ItemName item={numeratorItem} />
           </span>
-          <span className="whitespace-nowrap px-1 text-xl text-slate-300">
+          <span className="whitespace-nowrap px-1 text-xl text-slate-500">
             /
           </span>
 
@@ -174,7 +234,7 @@ export const ItemSideBar: FC<Props> = ({
               <ItemName item={denominatorItem} />
             </span>
           </span>
-          <span className="whitespace-nowrap text-xl text-slate-300">)</span>
+          <span className="whitespace-nowrap text-xl text-slate-500">)</span>
         </div>
 
         <div className="xs mb-4 text-slate-500">
@@ -188,12 +248,15 @@ export const ItemSideBar: FC<Props> = ({
           </span>
         </div>
 
-        {squiggleCode !== undefined && (
-          <PairChart code={squiggleCode} linker={linker} sourceId={sourceId} />
-        )}
-        {!model.canCompute && (
+        {model.canCompute ? (
+          <PairCharts
+            model={model}
+            numeratorItem={numeratorItem}
+            denominatorItem={denominatorItem}
+          />
+        ) : (
           // Precomputed values (e.g. a bundle) don't include distributions.
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-slate-500">
             Distribution charts aren&apos;t available for precomputed values.
           </div>
         )}
@@ -209,7 +272,7 @@ export const ItemSideBar: FC<Props> = ({
         {squiggleCode !== undefined && getPlaygroundUrl && (
           <a
             href={getPlaygroundUrl(squiggleCode)}
-            className="text-slate-400 underline"
+            className="text-slate-500 underline"
             target="_blank"
             rel="noreferrer"
           >
