@@ -1,0 +1,10 @@
+// Looks like a spec, but one value is a string, so validation fails with a
+// message (values.kiwi must be a distribution or a number).
+
+fruit = {
+  values: {
+    apple: 1,
+    banana: 0.5 to 2,
+    kiwi: "green",
+  },
+}

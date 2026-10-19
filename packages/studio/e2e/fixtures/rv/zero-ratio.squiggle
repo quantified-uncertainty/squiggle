@@ -1,0 +1,10 @@
+// "nothing" is worth 0, so its ratios are 0 (p5 = p95) and have no spread.
+
+values = {
+  values: {
+    nothing: 0,
+    one: 1,
+    some: 2 to 3,
+  },
+  recommendedUnit: "one",
+}

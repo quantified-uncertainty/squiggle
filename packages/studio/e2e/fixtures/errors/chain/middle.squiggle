@@ -1,0 +1,5 @@
+// Imported by ../import-chain.squiggle; imports ./bottom.squiggle.
+
+import "./bottom.squiggle" as bottom
+
+export doubled = bottom.base * 2

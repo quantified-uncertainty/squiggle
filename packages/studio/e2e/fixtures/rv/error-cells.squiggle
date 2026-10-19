@@ -1,0 +1,18 @@
+// Comparisons with the "broken" item throw, so its row and column are errors.
+
+dists = {
+  alpha: 1,
+  beta: 2 to 5,
+  gamma: 10 to 40,
+  broken: 1,
+}
+
+@name("With error cells")
+withErrors = {
+  items: ["alpha", "beta", "gamma", "broken"],
+  fn: {|a, b|
+    if a == "broken" || b == "broken" then throw("No estimate for broken") else [
+      dists[a],
+      dists[b],
+    ]},
+}

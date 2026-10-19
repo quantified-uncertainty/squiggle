@@ -1,0 +1,10 @@
+// Shared assumptions, imported by ../main.squiggle.
+
+@name("Hourly rate ($)")
+export hourlyRate = 60 to 150
+
+@name("Hours per week")
+export hoursPerWeek = 3 to 10
+
+@name("Weekly cost ($)")
+export weeklyCost = hourlyRate * hoursPerWeek

@@ -1,0 +1,22 @@
+// Strings, dates, durations, booleans and hidden values.
+
+@hide
+helper = 10 to 20
+
+@name("Shown, built from a hidden helper")
+shown = helper * 2
+
+@name("A string")
+greeting = "Hello, Squiggle"
+
+@name("A date")
+launch = Date(2025, 3, 14)
+
+@name("A duration")
+timeToShip = 3 * Duration.fromDays(7)
+
+@name("A boolean")
+isReady = true
+
+@hide
+alsoHidden = 5

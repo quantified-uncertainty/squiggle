@@ -1,0 +1,4 @@
+// A parse error on line 4: the expression is never closed.
+
+ok = 1 to 3
+broken = (ok * 2

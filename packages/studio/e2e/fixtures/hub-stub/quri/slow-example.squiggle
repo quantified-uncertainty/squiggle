@@ -1,0 +1,4 @@
+// stub-delay-ms: 2000
+// Served by the Hub stub after a 2 s delay (for cancel tests).
+
+export slow = 1 to 2

@@ -1,0 +1,6 @@
+// The error is two imports away: import-chain -> chain/middle -> chain/bottom.
+
+import "./chain/middle.squiggle" as middle
+
+@name("Top")
+top = middle.doubled + 1
