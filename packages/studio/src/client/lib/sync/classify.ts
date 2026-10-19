@@ -13,10 +13,10 @@ import type { OpenFile } from "../workspaceTypes.js";
 
 // ── Hashes ───────────────────────────────────────────────────────────────
 
-// TRANSITIONAL (until WP7): the server at M2 sends no hashes, so the client
-// fingerprints content itself. Local fingerprints are only ever compared with
-// other local fingerprints; they are never sent as a `baseHash` and never
-// shown as `data-studio-disk-hash`.
+// Files over 5 MB have no server hash (""), so the client fingerprints their
+// content itself. Local fingerprints are only ever compared with other local
+// fingerprints; they are never sent as a `baseHash` and never shown as
+// `data-studio-disk-hash`.
 const LOCAL_PREFIX = "local:";
 
 // cyrb53: a fast 53-bit string hash (not cryptographic; equality checks only).
@@ -70,7 +70,7 @@ export type EventClass =
   // New content: the working set reads and reconciles it; for other files it
   // is recorded as a change.
   | { kind: "changed" }
-  // No hash in the event (a pre-WP7 server): read the file, then classify
+  // No hash in the event (a file over 5 MB): read the file, then classify
   // again with its hash.
   | { kind: "unknown" };
 

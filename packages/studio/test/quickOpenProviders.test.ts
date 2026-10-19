@@ -42,6 +42,7 @@ const files = (overrides: Partial<Parameters<typeof quickOpenRows>[0]> = {}) =>
     activePath: null,
     externalChanges: {},
     dirtyPaths: new Set(),
+    treeTruncated: false,
     ...overrides,
   });
 
@@ -141,10 +142,13 @@ describe("Quick Open: query", () => {
     expect(empty.rows).toHaveLength(MAX_QUICK_OPEN_ROWS);
   });
 
-  test("a tree at the server's cap is reported as truncated", () => {
+  test("a tree the server truncated is reported as truncated", () => {
     const capped = Array.from({ length: TREE_FILE_CAP }, (_, i) => `f${i}.md`);
-    expect(files({ query: "f1", paths: capped }).truncated).toBe(true);
-    expect(files().truncated).toBe(false);
+    expect(
+      files({ query: "f1", paths: capped, treeTruncated: true }).truncated
+    ).toBe(true);
+    // A folder with exactly 5000 files isn't truncated.
+    expect(files({ query: "f1", paths: capped }).truncated).toBe(false);
   });
 });
 

@@ -471,6 +471,7 @@ export const QuickOpen: FC<QuickOpenProps> = ({
             activePath: workspace.activePath,
             externalChanges: workspace.externalChanges,
             dirtyPaths,
+            treeTruncated: workspace.treeTruncated,
           })
         : undefined,
     [
@@ -481,6 +482,7 @@ export const QuickOpen: FC<QuickOpenProps> = ({
       workspace.activePath,
       workspace.externalChanges,
       dirtyPaths,
+      workspace.treeTruncated,
     ]
   );
 

@@ -311,6 +311,25 @@ const ChangedOnDisk: FC = () => {
   );
 };
 
+// The folder or its tree failed to load (the server is down, the folder is
+// unreadable): the reason and a retry, instead of "Loading files…" forever.
+const TreeErrorNotice: FC<{ error: string }> = ({ error }) => (
+  <div
+    role="alert"
+    className="flex items-start gap-1 px-3 py-2 text-xs text-red-700"
+  >
+    <span className="min-w-0 flex-1 break-words">
+      Couldn't load the folder: {error}
+    </span>
+    <CommandButton
+      command="squiggle.refreshTree"
+      icon={<RefreshIcon size={14} />}
+      label="Retry"
+      placement="right"
+    />
+  </div>
+);
+
 // "1 folder couldn't be read", with the paths in its tooltip (#4).
 const SkippedFooter: FC<{ skipped: string[] }> = ({ skipped }) => (
   <div
@@ -331,7 +350,10 @@ export const Explorer: FC = () => {
   // dimmed and not interactive (#56).
   const blocked =
     workspace.rootChangedTo !== undefined || workspace.rootMissing;
-  const empty = workspace.treeLoaded && workspace.tree.length === 0;
+  const empty =
+    workspace.treeLoaded &&
+    workspace.tree.length === 0 &&
+    workspace.treeError === undefined;
 
   return (
     <div className="flex h-full shrink-0" style={{ width }}>
@@ -351,10 +373,14 @@ export const Explorer: FC = () => {
           aria-disabled={blocked || undefined}
         >
           <ChangedOnDisk />
-          {!workspace.treeLoaded && (
-            <div className="px-3 py-2 text-xs text-slate-500">
-              Loading files…
-            </div>
+          {workspace.treeError !== undefined && workspace.tree.length === 0 ? (
+            <TreeErrorNotice error={workspace.treeError} />
+          ) : (
+            !workspace.treeLoaded && (
+              <div className="px-3 py-2 text-xs text-slate-600">
+                Loading files…
+              </div>
+            )
           )}
           {empty && (
             <div className="px-3 py-2 text-xs text-slate-600">

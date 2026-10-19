@@ -49,6 +49,7 @@ function fakeWorkspace(overrides: Partial<Workspace> = {}): Workspace {
     tree: [file("a.squiggle"), file("b.squiggle"), file("lib/c.squiggle")],
     treeLoaded: true,
     treeSkipped: [],
+    treeTruncated: false,
     recentFolders: [],
     files: {},
     activePath: "a.squiggle",

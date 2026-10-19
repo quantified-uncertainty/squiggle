@@ -397,7 +397,6 @@ describe("root guard", () => {
     for (const [pathname, body] of [
       ["/api/file", { path: "stale.squiggle", content: "" }],
       ["/api/file/rename", { from: "main.squiggle", to: "stale.squiggle" }],
-      ["/api/hub/import", { owner: "o", slug: "s", path: "stale.squiggle" }],
       ["/api/hub/import", { id: "o/s", path: "stale.squiggle" }],
     ] as const) {
       const { status, json } = await api(pathname, {
@@ -802,14 +801,13 @@ describe("Hub import (#49)", () => {
     expect(forced.status).toBe(200);
   });
 
-  test("still accepts the legacy body", async () => {
+  test("refuses the old body {owner, slug, path}", async () => {
     const response = await importHub({
       owner: "quri",
       slug: "legacy",
       path: "legacy.squiggle",
     });
-    expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ path: "legacy.squiggle" });
+    expect(response.status).toBe(400);
   });
 
   test("rejects invalid ids and non-canonical paths", async () => {

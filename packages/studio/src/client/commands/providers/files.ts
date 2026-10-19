@@ -7,7 +7,8 @@ import { rankFiles } from "../../lib/fuzzy.js";
 import type { ChangeEntry } from "../../lib/workspaceTypes.js";
 
 export const MAX_QUICK_OPEN_ROWS = 50;
-// The server's tree cap (MAX_TREE_ENTRIES in src/server/files.ts).
+// The server's tree cap (MAX_TREE_ENTRIES in src/server/files.ts), for the
+// "Showing first 5000 files" notice.
 export const TREE_FILE_CAP = 5000;
 
 export const RECENT_GROUP = "Recently opened";
@@ -31,6 +32,7 @@ export type FileRowsInput = {
   activePath: string | null;
   externalChanges: Record<string, ChangeEntry>;
   dirtyPaths: ReadonlySet<string>;
+  treeTruncated: boolean; // the server's tree cap was hit
 };
 
 export type FileRows = {
@@ -69,7 +71,7 @@ export function quickOpenRows(input: FileRowsInput): FileRows {
     };
   };
   const base = {
-    truncated: paths.length >= TREE_FILE_CAP,
+    truncated: input.treeTruncated,
     emptyFolder: paths.length === 0,
   };
 

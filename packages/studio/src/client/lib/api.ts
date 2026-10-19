@@ -158,7 +158,7 @@ export const api = {
       body: { from, to },
       guardRoot: true,
     }),
-  // Current hashes of up to 200 paths (null: missing). 404 until WP7.
+  // Current hashes of up to 200 paths (null: missing, "": over 5 MB).
   hashes: (paths: string[]) =>
     request(hashesResponseSchema, "/api/hashes", {
       method: "POST",
@@ -171,8 +171,7 @@ export const api = {
   getHubSource: (owner: string, slug: string) =>
     request(hubSourceResponseSchema, `/api/hub/source?${q({ owner, slug })}`),
   // `id`: "hub:owner/slug" or "owner/slug". Abort with `signal`; the server
-  // writes nothing for an aborted request (#49). The server at HEAD only
-  // accepts importFromHubLegacy's body (until WP7).
+  // writes nothing for an aborted request (#49).
   importFromHub: (params: {
     id: string;
     path?: string;
@@ -185,27 +184,8 @@ export const api = {
       guardRoot: true,
       signal: params.signal,
     }),
-  // TRANSITIONAL: the HEAD server's body. Deleted at integration.
-  importFromHubLegacy: (params: {
-    owner: string;
-    slug: string;
-    path: string;
-    overwrite?: boolean;
-    signal?: AbortSignal;
-  }) =>
-    request(hubImportResponseSchema, "/api/hub/import", {
-      method: "POST",
-      body: {
-        owner: params.owner,
-        slug: params.slug,
-        path: params.path,
-        overwrite: params.overwrite,
-      },
-      guardRoot: true,
-      signal: params.signal,
-    }),
-  // UI state in ~/.squiggle-studio/state.json (403 in network mode; 404
-  // until WP7, and studioState then uses localStorage).
+  // UI state in ~/.squiggle-studio/state.json (403 in network mode, and
+  // studioState then uses localStorage).
   getState: (root: string) =>
     request(stateResponseSchema, `/api/state?${q({ root })}`),
   patchState: (patch: PatchStateRequest, opts: { keepalive?: boolean } = {}) =>
@@ -214,7 +194,7 @@ export const api = {
       body: patch,
       keepalive: opts.keepalive,
     }),
-  // ~/.squiggle-studio/settings.json (403 in network mode; 404 until WP7).
+  // ~/.squiggle-studio/settings.json (403 in network mode).
   getSettings: () => request(settingsResponseSchema, "/api/settings"),
   // 409 "settings-invalid" when the file on disk doesn't parse.
   putSettings: (patch: Record<string, unknown>) =>

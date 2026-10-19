@@ -19,13 +19,12 @@
 // - On reconnect, window focus and pageshow the workspace resyncs: the root,
 //   the tree and the hash of every buffer (#2).
 //
-// TRANSITIONAL (until WP7 lands): the M2 server sends no hashes, no `root` on
-// events and has no /api/hashes. The model then fingerprints content
-// locally (classify.ts: localHash), reads files to classify events, resyncs
-// by reading every buffer, and drops root-less events while another window's
-// folder is open. These fallbacks are marked "pre-WP7".
+// Files over 5 MB have no server hash (""): the model then fingerprints
+// their content locally (classify.ts: localHash) and reads them to classify
+// their events.
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { z } from "zod";
 
 import type {
   RecentFolder,
@@ -61,11 +60,13 @@ import {
   renameInHistory,
   subscribeHistory,
 } from "./navigation.js";
-import { loadFolderState, loadViewIds } from "./storage.js";
 import {
+  getRootState,
   getSettings,
   handleSettingsChanged,
+  isRootStateLoaded,
   loadRootState,
+  ROOT_STATE_KEYS,
   setRootState,
   subscribeStudioState,
   updateSettings,
@@ -149,6 +150,8 @@ type State = {
   tree: TreeNode[];
   treeLoaded: boolean;
   treeSkipped: string[];
+  treeTruncated: boolean;
+  treeError?: string;
   recentFolders: RecentFolder[];
   files: Record<string, OpenFile>;
   activePath: string | null;
@@ -188,13 +191,18 @@ const isEmbed = () =>
   typeof window !== "undefined" &&
   new URLSearchParams(window.location.search).get("embed") === "1";
 
-// A 400 from the pre-WP7 server's Hub import route, which only accepts the
-// legacy body {owner, slug, path}.
-const isLegacyImportRejection = (e: unknown) =>
-  e instanceof ApiError &&
-  e.status === 400 &&
-  e.code === undefined &&
-  e.message.startsWith("Invalid request");
+const perFileRecordSchema = z.record(z.string(), z.unknown());
+
+const sameList = (a: readonly string[] | undefined, b: readonly string[]) =>
+  a !== undefined && a.length === b.length && a.every((x, i) => x === b[i]);
+
+const sameRecord = (
+  a: Record<string, string> | undefined,
+  b: Record<string, string>
+) =>
+  a !== undefined &&
+  Object.keys(a).length === Object.keys(b).length &&
+  Object.entries(b).every(([k, v]) => a[k] === v);
 
 export type WorkspaceModelOptions = {
   onError: (message: string) => void;
@@ -206,6 +214,7 @@ export class WorkspaceModel {
     tree: [],
     treeLoaded: false,
     treeSkipped: [],
+    treeTruncated: false,
     recentFolders: [],
     files: {},
     activePath: null,
@@ -323,6 +332,8 @@ export class WorkspaceModel {
       tree: s.tree,
       treeLoaded: s.treeLoaded,
       treeSkipped: s.treeSkipped,
+      treeTruncated: s.treeTruncated,
+      treeError: s.treeError,
       recentFolders:
         s.rootInfo?.allowOpenFolder === false ? [] : s.recentFolders,
       files: s.files,
@@ -483,6 +494,7 @@ export class WorkspaceModel {
         const info = await api.getRoot();
         await this.resetForRoot(info);
       } catch (e) {
+        this.set({ treeError: errorMessage(e) });
         this.onError(errorMessage(e));
       } finally {
         reportBusy("workspace:boot", false);
@@ -529,6 +541,8 @@ export class WorkspaceModel {
       tree: [],
       treeLoaded: false,
       treeSkipped: [],
+      treeTruncated: false,
+      treeError: undefined,
       files: {},
       activePath: null,
       mru: [],
@@ -547,27 +561,18 @@ export class WorkspaceModel {
     ]);
     if (gen !== this.generation) return;
     if (treeResult.status === "rejected") {
+      this.set({ treeError: errorMessage(treeResult.reason) });
       this.onError(errorMessage(treeResult.reason));
       if (!this.state.treeLoaded) this.set({ treeLoaded: true });
     }
     const treeOk = treeResult.status === "fulfilled" && this.treeKnown;
+    // (studioState migrated the legacy per-origin keys on the first load.)
     const slice =
       stateResult.status === "fulfilled" ? stateResult.value : undefined;
-    // TRANSITIONAL: until WP7's one-time migration, a root without state
-    // falls back to the legacy per-origin keys (read only).
-    const legacy =
-      slice && ("mru" in slice || "activeFile" in slice)
-        ? undefined
-        : loadFolderState(info.root);
-    const activeFile = legacy
-      ? legacy.activeFile
-      : (rootStateSchemas.activeFile(slice?.["activeFile"]) ?? null);
-    const savedMru = legacy
-      ? legacy.recentFiles
-      : (rootStateSchemas.mru(slice?.["mru"]) ?? []);
-    const viewIds =
-      (slice && rootStateSchemas.viewIds(slice["viewIds"])) ??
-      loadViewIds(info.root);
+    const activeFile =
+      rootStateSchemas.activeFile(slice?.["activeFile"]) ?? null;
+    const savedMru = rootStateSchemas.mru(slice?.["mru"]) ?? [];
+    const viewIds = rootStateSchemas.viewIds(slice?.["viewIds"]) ?? {};
     const exists = (p: string) => !treeOk || this.treePaths.has(p);
     const mru = savedMru.filter(exists).slice(0, MAX_MRU);
     if (stateResult.status === "fulfilled") {
@@ -663,6 +668,7 @@ export class WorkspaceModel {
           this.setRootMissing();
           return;
         }
+        if (gen === this.generation) this.set({ treeError: errorMessage(e) });
         throw e;
       }
       if (gen !== this.generation) return;
@@ -673,6 +679,8 @@ export class WorkspaceModel {
       this.set({
         tree: response.tree,
         treeSkipped: response.skipped,
+        treeTruncated: response.truncated,
+        treeError: undefined,
         treeLoaded: true,
         rootMissing: false,
       });
@@ -684,10 +692,9 @@ export class WorkspaceModel {
     }
   }
 
-  // A folder renamed or deleted on disk emits no per-file events from a
-  // pre-WP7 server (#12): buffers missing from the tree are confirmed with a
-  // read and marked deleted; importers of files that vanished or appeared
-  // re-run.
+  // Besides the server's per-file events for a renamed or deleted folder
+  // (#12), buffers missing from a new tree are confirmed with a read and
+  // marked deleted; importers of files that vanished or appeared re-run.
   private afterTreeChange(previous: Set<string>, next: Set<string>) {
     for (const file of Object.values(this.state.files)) {
       if (
@@ -785,19 +792,9 @@ export class WorkspaceModel {
     if (!paths.size) return;
     const list = [...paths];
     let hashes: Record<string, string | null> = {};
-    try {
-      for (let i = 0; i < list.length; i += MAX_HASH_PATHS) {
-        const chunk = await api.hashes(list.slice(i, i + MAX_HASH_PATHS));
-        hashes = { ...hashes, ...chunk.hashes };
-      }
-    } catch (e) {
-      if (!(e instanceof ApiError && e.status === 404)) throw e;
-      // pre-WP7: no /api/hashes; read every file instead.
-      hashes = {};
-      for (const path of list) {
-        const read = await this.readForSync(path).catch(() => undefined);
-        if (read !== undefined) hashes[path] = read === null ? null : read.hash;
-      }
+    for (let i = 0; i < list.length; i += MAX_HASH_PATHS) {
+      const chunk = await api.hashes(list.slice(i, i + MAX_HASH_PATHS));
+      hashes = { ...hashes, ...chunk.hashes };
     }
     if (gen !== this.generation) return;
     await Promise.all(
@@ -813,10 +810,9 @@ export class WorkspaceModel {
   // ── Events ─────────────────────────────────────────────────────────────
 
   // Events carry the server's root; events for another root are dropped
-  // (#13). pre-WP7 events have no root (""): they are dropped while another
-  // window's folder is open.
+  // (#13).
   private isOurs(root: string): boolean {
-    return root ? root === this.root : this.state.rootChangedTo === undefined;
+    return root === this.root;
   }
 
   private handleEvent(event: StudioEvent) {
@@ -878,7 +874,7 @@ export class WorkspaceModel {
     let cls = this.classify(path, event);
     let read: DiskContent | null | undefined;
     if (cls.kind === "unknown") {
-      // pre-WP7: no hash in the event.
+      // No hash in the event (a file over 5 MB).
       const wanted =
         path in this.state.files ||
         this.ownWrites.has(path) ||
@@ -1483,8 +1479,8 @@ export class WorkspaceModel {
 
   // ── Creating, renaming, importing ──────────────────────────────────────
 
-  // The hash of what Studio just wrote at `path`: the server's, or (pre-WP7)
-  // a fingerprint of the content, read back when it isn't known.
+  // The hash of what Studio just wrote at `path`: the server's, or (a file
+  // over 5 MB) a fingerprint of the content, read back when it isn't known.
   private async writtenHash(
     path: string,
     serverHash: string,
@@ -1587,6 +1583,7 @@ export class WorkspaceModel {
       followNotice: notice?.path === from ? { ...notice, path: dest } : notice,
     });
     renameInHistory(from, dest);
+    this.renameRootStateEntries(from, dest);
     if (fromHash !== undefined) this.noteHash(from, null); // importers of `from` re-run
     // Edits typed while the rename was in flight are saved under `dest`.
     this.autosave.cancel(from);
@@ -1609,24 +1606,12 @@ export class WorkspaceModel {
     if (!normalized.ok) throw new Error(normalized.error);
     const path = normalized.path;
     const work = (async () => {
-      let result;
-      try {
-        result = await api.importFromHub({
-          id: `hub:${parsed.owner}/${parsed.slug}`,
-          path,
-          overwrite: opts.overwrite,
-          signal: opts.signal,
-        });
-      } catch (e) {
-        // pre-WP7: the server only accepts the legacy body.
-        if (!isLegacyImportRejection(e)) throw e;
-        result = await api.importFromHubLegacy({
-          ...parsed,
-          path,
-          overwrite: opts.overwrite,
-          signal: opts.signal,
-        });
-      }
+      const result = await api.importFromHub({
+        id: `hub:${parsed.owner}/${parsed.slug}`,
+        path,
+        overwrite: opts.overwrite,
+        signal: opts.signal,
+      });
       // Recorded as Studio's own write, so it never shows as changed on
       // disk (#49).
       const hash = await this.writtenHash(result.path, result.hash);
@@ -1740,20 +1725,34 @@ export class WorkspaceModel {
 
   // ── Persistence (§2.2: per-root state in ~/.squiggle-studio) ───────────
 
+  // Per-file root state kept outside the model (the relative values view's
+  // spec and tab) follows a rename.
+  private renameRootStateEntries(from: string, to: string) {
+    const root = this.root;
+    if (!root || !isRootStateLoaded(root)) return;
+    const key = ROOT_STATE_KEYS.relativeValues;
+    const entries = getRootState(root, key, perFileRecordSchema, {});
+    if (!(from in entries) && !(to in entries)) return;
+    setRootState(root, key, renameKey(entries, from, to));
+  }
+
   private persist() {
     const root = this.root;
     // Never before the root's state has loaded (#4).
     if (!root || this.rootStateLoadedFor !== root) return;
     const { activePath, mru, viewIds } = this.state;
+    // Compared by content: loading a root re-creates the lists, and an
+    // unchanged list must not be written back (a pending write would
+    // overwrite what another window saved meanwhile).
     if (this.persisted.activeFile !== activePath) {
       this.persisted.activeFile = activePath;
       setRootState(root, "activeFile", activePath);
     }
-    if (this.persisted.mru !== mru) {
+    if (!sameList(this.persisted.mru, mru)) {
       this.persisted.mru = mru;
       setRootState(root, "mru", mru);
     }
-    if (this.persisted.viewIds !== viewIds) {
+    if (!sameRecord(this.persisted.viewIds, viewIds)) {
       this.persisted.viewIds = viewIds;
       setRootState(root, "viewIds", viewIds);
     }

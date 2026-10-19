@@ -34,14 +34,6 @@ export function readStorageRecord(key: string): Record<string, unknown> {
   return readStorage(key, recordSchema) ?? {};
 }
 
-export function removeStorage(key: string): void {
-  try {
-    window.localStorage.removeItem(key);
-  } catch {
-    // ignore
-  }
-}
-
 // Every stored key starting with `prefix`.
 export function storageKeys(prefix: string): string[] {
   try {
@@ -56,70 +48,35 @@ export function storageKeys(prefix: string): string[] {
   }
 }
 
-// ── Legacy per-origin state (until integration; see studioState) ──────────
+// ── Legacy per-origin keys, read once by studioState's migration (§7) ──────
 
 const folderStateSchema = z.object({
   openFiles: z.array(z.string()),
   activeFile: z.string().nullable(),
   recentFiles: z.array(z.string()),
 });
-export type FolderState = z.infer<typeof folderStateSchema>;
-
-export const LEGACY_FOLDER_PREFIX = "squiggle-studio:folder:";
-const folderKey = (root: string) => `${LEGACY_FOLDER_PREFIX}${root}`;
+type FolderState = z.infer<typeof folderStateSchema>;
 
 export function readLegacyFolderState(root: string): FolderState | undefined {
-  return readStorage(folderKey(root), folderStateSchema);
-}
-
-export function loadFolderState(root: string): FolderState {
-  return (
-    readLegacyFolderState(root) ?? {
-      openFiles: [],
-      activeFile: null,
-      recentFiles: [],
-    }
-  );
-}
-
-export function saveFolderState(root: string, state: FolderState): void {
-  writeStorage(folderKey(root), state);
+  return readStorage(`squiggle-studio:folder:${root}`, folderStateSchema);
 }
 
 // The view (Output, Relative values, Playground) last chosen per file.
-const viewsKey = (root: string) => `squiggle-studio:views:${root}`;
-const viewsSchema = z.record(z.string(), z.string());
-
 export function readLegacyViewIds(
   root: string
 ): Record<string, string> | undefined {
-  return readStorage(viewsKey(root), viewsSchema);
+  return readStorage(
+    `squiggle-studio:views:${root}`,
+    z.record(z.string(), z.string())
+  );
 }
-
-export function loadViewIds(root: string): Record<string, string> {
-  return readLegacyViewIds(root) ?? {};
-}
-
-export function saveViewIds(root: string, views: Record<string, string>) {
-  writeStorage(viewsKey(root), views);
-}
-
-const followKey = "squiggle-studio:follow-changes";
 
 export function readLegacyFollowChanges(): boolean | undefined {
-  return readStorage(followKey, z.boolean());
-}
-
-export function loadFollowChanges(): boolean {
-  return readLegacyFollowChanges() ?? false;
-}
-
-export function saveFollowChanges(follow: boolean): void {
-  writeStorage(followKey, follow);
+  return readStorage("squiggle-studio:follow-changes", z.boolean());
 }
 
 // Keys of other legacy per-origin state, written by CodePane, Explorer,
-// OutputView and RelativeValuesView at HEAD (read by the migration).
+// OutputView and RelativeValuesView before v2.
 export const LEGACY_KEYS = {
   codePane: "squiggle-studio:code-pane", // {open, fraction}
   sidebarWidth: "squiggle-studio:sidebar-width", // number

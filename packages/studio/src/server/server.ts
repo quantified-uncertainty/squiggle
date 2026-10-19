@@ -11,7 +11,6 @@ import {
   decodeRootHeader,
   hashesRequestSchema,
   hubImportRequestSchema,
-  legacyHubImportRequestSchema,
   openFolderRequestSchema,
   patchStateRequestSchema,
   putSettingsRequestSchema,
@@ -411,33 +410,23 @@ export async function startStudioServer(
         return sendJson(res, 200, { owner, slug, code });
       }
       case "POST /api/hub/import": {
-        const raw = await readJsonBody(req);
-        // TRANSITIONAL: the pre-WP7 body {owner, slug, path} is still
-        // accepted until the client moves to {id}; integration removes it.
-        const legacy = legacyHubImportRequestSchema.safeParse(raw);
-        const body = legacy.success
-          ? {
-              owner: legacy.data.owner,
-              slug: legacy.data.slug,
-              path: legacy.data.path,
-              overwrite: legacy.data.overwrite,
-            }
-          : (() => {
-              const parsed = parseBody(hubImportRequestSchema, raw);
-              const id = HUB_ID.exec(parsed.id.trim());
-              if (!id?.[1] || !id[2]) {
-                throw new HttpError(
-                  `Invalid Hub id "${parsed.id}", expected owner/slug`,
-                  400
-                );
-              }
-              return {
-                owner: id[1],
-                slug: id[2],
-                path: parsed.path ?? `hub/${id[2]}.squiggle`,
-                overwrite: parsed.overwrite,
-              };
-            })();
+        const parsed = parseBody(
+          hubImportRequestSchema,
+          await readJsonBody(req)
+        );
+        const id = HUB_ID.exec(parsed.id.trim());
+        if (!id?.[1] || !id[2]) {
+          throw new HttpError(
+            `Invalid Hub id "${parsed.id}", expected owner/slug`,
+            400
+          );
+        }
+        const body = {
+          owner: id[1],
+          slug: id[2],
+          path: parsed.path ?? `hub/${id[2]}.squiggle`,
+          overwrite: parsed.overwrite,
+        };
         if (!/^[\w-]+$/.test(body.owner) || !/^[\w-]+$/.test(body.slug)) {
           throw new HttpError("Invalid owner or slug", 400);
         }

@@ -1,12 +1,8 @@
 // Types and schemas shared by the Studio server and client: the HTTP
 // contract of §10.4 (Studio v2 spec). Paths exchanged over the API are always
 // POSIX-style, canonical (see normalizeRelPath in paths.ts) and relative to
-// the currently open root folder (e.g. "models/main.squiggle").
-//
-// TRANSITIONAL: fields marked "(pre-WP7 default)" are required by the
-// contract, but the server at HEAD doesn't send them yet; the schema fills a
-// sentinel so the client keeps working until WP7 lands. Integration removes
-// these defaults. A "" hash means "unknown".
+// the currently open root folder (e.g. "models/main.squiggle"). A "" hash
+// means "unknown" (files over 5 MB aren't hashed).
 import { z } from "zod";
 
 export type TreeNode =
@@ -34,18 +30,18 @@ export const rootInfoSchema = z.object({
   root: z.string(), // absolute path of the open folder
   name: z.string(), // basename of the open folder
   // false in network mode: Open Folder, Open Recent folders and the Explorer
-  // header's folder switcher are disabled (#31). (pre-WP7 default)
-  allowOpenFolder: z.boolean().default(true),
+  // header's folder switcher are disabled (#31).
+  allowOpenFolder: z.boolean(),
 });
 export type RootInfo = z.infer<typeof rootInfoSchema>;
 
 // GET /api/tree. The expected-root header is enforced (409 root-changed).
 export const treeResponseSchema = z.object({
   tree: z.array(treeNodeSchema),
-  // The 5000-file cap was hit. (pre-WP7 default)
-  truncated: z.boolean().default(false),
-  // Root-relative folders that couldn't be read (#4). (pre-WP7 default)
-  skipped: z.array(z.string()).default([]),
+  // The 5000-file or 2000-folder cap was hit.
+  truncated: z.boolean(),
+  // Root-relative folders that couldn't be read (#4).
+  skipped: z.array(z.string()),
 });
 export type TreeResponse = z.infer<typeof treeResponseSchema>;
 
@@ -54,7 +50,7 @@ export const fileResponseSchema = z.object({
   path: z.string(),
   content: z.string(),
   mtimeMs: z.number(),
-  hash: z.string().default(""), // (pre-WP7 default)
+  hash: z.string(), // "" for files over 5 MB
 });
 export type FileResponse = z.infer<typeof fileResponseSchema>;
 
@@ -72,7 +68,7 @@ export type WriteFileRequest = z.infer<typeof writeFileRequestSchema>;
 export const writeFileResponseSchema = z.object({
   path: z.string(), // canonical
   mtimeMs: z.number(),
-  hash: z.string().default(""), // (pre-WP7 default)
+  hash: z.string(), // "" for files over 5 MB
 });
 export type WriteFileResponse = z.infer<typeof writeFileResponseSchema>;
 
@@ -93,7 +89,7 @@ export const renameFileRequestSchema = z.object({
 export const renameFileResponseSchema = z.object({
   from: z.string(),
   to: z.string(), // canonical
-  hash: z.string().default(""), // (pre-WP7 default)
+  hash: z.string(), // "" for files over 5 MB
 });
 export type RenameFileResponse = z.infer<typeof renameFileResponseSchema>;
 
@@ -175,7 +171,9 @@ export type RecentFolder = z.infer<typeof recentFolderSchema>;
 
 export const recentFoldersSchema = z.array(recentFolderSchema);
 
-export const openFolderRequestSchema = z.object({ path: z.string() });
+export const openFolderRequestSchema = z.object({
+  path: z.string().trim().min(1), // a typed or pasted path (#19)
+});
 
 export const browseResponseSchema = z.object({
   path: z.string(),
@@ -200,23 +198,14 @@ export const hubImportRequestSchema = z.object({
 });
 export const hubImportResponseSchema = z.object({
   path: z.string(), // canonical
-  hash: z.string().default(""), // (pre-WP7 default)
+  hash: z.string(),
 });
 export type HubImportResponse = z.infer<typeof hubImportResponseSchema>;
 
-// TRANSITIONAL: the request body the server at HEAD accepts. WP7 switches the
-// route to hubImportRequestSchema; integration deletes this.
-export const legacyHubImportRequestSchema = z.object({
-  owner: z.string(),
-  slug: z.string(),
-  path: z.string(), // destination, relative to root
-  overwrite: z.boolean().optional(),
-});
-
 // Events pushed over Server-Sent Events at /api/events. Every event carries
 // the server's `root`; clients drop events for a root other than their own
-// (#13). "" only comes from a pre-WP7 server and means "unknown".
-const eventRoot = z.string().default(""); // (pre-WP7 default)
+// (#13).
+const eventRoot = z.string();
 export const studioEventSchema = z.discriminatedUnion("type", [
   // A file was created, changed or deleted. `exists` is false on deletion;
   // `hash` is the new content's hash (absent for deletions and big files).
@@ -237,8 +226,6 @@ export const studioEventSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("settings-changed") }),
 ]);
 export type StudioEvent = z.output<typeof studioEventSchema>;
-// What the server constructs (the pre-WP7 server omits `root`).
-export type StudioEventInput = z.input<typeof studioEventSchema>;
 
 // Custom header required on every API request. Browsers can't send custom
 // headers cross-origin without a CORS preflight (which we never approve), so

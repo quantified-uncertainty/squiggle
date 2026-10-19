@@ -48,6 +48,8 @@ export interface Workspace {
   tree: TreeNode[];
   treeLoaded: boolean;
   treeSkipped: string[];
+  treeTruncated: boolean; // the server's file or folder cap was hit
+  treeError?: string; // the folder or its tree couldn't be loaded (retried on resync)
   recentFolders: RecentFolder[]; // GET /api/recent; [] without allowOpenFolder
   files: Record<string, OpenFile>; // the working set (§2.3)
   activePath: string | null;
