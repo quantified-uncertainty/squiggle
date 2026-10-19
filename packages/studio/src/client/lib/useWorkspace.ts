@@ -1588,6 +1588,8 @@ export class WorkspaceModel {
     });
     renameInHistory(from, dest);
     if (fromHash !== undefined) this.noteHash(from, null); // importers of `from` re-run
+    // Edits typed while the rename was in flight are saved under `dest`.
+    this.autosave.cancel(from);
     if (moving && isDirty(files[dest])) this.autosave.edited(dest);
     await this.refreshTreeNodes();
     return dest;
