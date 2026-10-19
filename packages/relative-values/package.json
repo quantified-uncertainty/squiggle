@@ -1,0 +1,87 @@
+{
+  "name": "@quri/squiggle-relative-values",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quantified-uncertainty/squiggle.git",
+    "directory": "packages/relative-values"
+  },
+  "author": "Quantified Uncertainty Research Institute",
+  "description": "Relative values dashboards (List, Grid, Plot) for Squiggle models",
+  "dependencies": {
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "d3": "^7.9.0",
+    "immutable": "^5.1.1",
+    "lodash": "^4.17.21",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.27.0",
+    "@jest/globals": "^29.7.0",
+    "@quri/configs": "workspace:*",
+    "@storybook/addon-essentials": "8.6.12",
+    "@storybook/react": "8.6.12",
+    "@storybook/react-vite": "8.6.12",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/d3": "^7.4.3",
+    "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "autoprefixer": "^10.4.21",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "prettier": "^3.5.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "storybook": "8.6.17",
+    "tailwindcss": "^3.4.3",
+    "typescript": "5.8.2",
+    "vite": "^6.2.4"
+  },
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  },
+  "scripts": {
+    "dev": "storybook dev -p 6008 --no-version-updates",
+    "clean": "rm -rf dist",
+    "build:ts": "tsc -b",
+    "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
+    "build": "pnpm run build:ts && pnpm run build:css",
+    "build:storybook": "storybook build",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "files": [
+    "dist",
+    "src",
+    "examples",
+    "!**/*.tsbuildinfo"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./full.css": {
+      "default": "./dist/full.css"
+    }
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "source": "./src/index.ts"
+}

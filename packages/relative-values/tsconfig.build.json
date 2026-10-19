@@ -1,0 +1,7 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "dist/build.tsbuildinfo"
+  },
+  "exclude": ["${configDir}/src/**/*.stories.tsx"]
+}

@@ -1,0 +1,10 @@
+/*
+ * Standalone stylesheet for consumers who don't use Tailwind.
+ * Includes Tailwind utilities used by this package, @quri/ui and
+ * @quri/squiggle-components.
+ *
+ * You should also import "@quri/squiggle-components/common.css".
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
