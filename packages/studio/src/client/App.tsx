@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useRef } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 
 import { useToast } from "@quri/ui";
 
@@ -87,6 +87,28 @@ function useUnloadGuardAndAgentHooks(workspace: Workspace) {
   );
 }
 
+// Outside embed mode the URL's view becomes the ?file= file's chosen view
+// once, and the rest of its initial state (tab, spec, layout, …) is passed to
+// that file's workspace until the user moves to another file. Returns true
+// from then on.
+function useInitialViewOnce(workspace: Workspace): boolean {
+  const [done, setDone] = useState(embed || initialView.file === undefined);
+  const shownRef = useRef(false);
+  const { activePath, selectView } = workspace;
+  useEffect(() => {
+    if (done) return;
+    if (activePath === initialView.file) {
+      if (!shownRef.current && initialView.file && initialView.view) {
+        selectView(initialView.file, initialView.view);
+      }
+      shownRef.current = true;
+    } else if (activePath !== null && shownRef.current) {
+      setDone(true);
+    }
+  }, [activePath, done, selectView]);
+  return done && !embed;
+}
+
 export const App: FC = () => {
   const toast = useToast();
   const onError = useCallback(
@@ -97,6 +119,7 @@ export const App: FC = () => {
   const [sidebarVisible] = useLayout("sidebarVisible");
   const [statusBarVisible] = useLayout("statusBarVisible");
   useUnloadGuardAndAgentHooks(workspace);
+  const initialDone = useInitialViewOnce(workspace);
 
   const activeFile = workspace.activePath
     ? workspace.files[workspace.activePath]
@@ -126,7 +149,9 @@ export const App: FC = () => {
       workspace={workspace}
       views={getStudioViews()}
       embed={embed}
-      initial={initialStateFor(activeFile.path, initialView)}
+      initial={
+        initialDone ? undefined : initialStateFor(activeFile.path, initialView)
+      }
       banner={
         embed ? undefined : (
           <FileBanner

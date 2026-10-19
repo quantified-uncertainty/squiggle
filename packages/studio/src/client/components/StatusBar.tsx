@@ -6,6 +6,7 @@ import { runCommand } from "../commands/registry.js";
 import { useSetting } from "../lib/studioState.js";
 import { useWorkspaceContext } from "../lib/workspaceTypes.js";
 import { EyeIcon } from "./icons.js";
+import { primaryKeyLabel } from "./Kbd.js";
 
 const Item: FC<{
   id: string;
@@ -94,7 +95,7 @@ export const StatusBar: FC = () => {
             id="save"
             state={save}
             command="workbench.action.files.save"
-            title="Save (autosave arrives with the workspace package)"
+            title={`Save (${primaryKeyLabel("workbench.action.files.save")})`}
           >
             {SAVE_TEXT[save]}
           </Item>

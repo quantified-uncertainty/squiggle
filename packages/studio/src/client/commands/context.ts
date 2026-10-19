@@ -64,13 +64,17 @@ export function publishContextKeys(
   return existing?.token ?? layers[layers.length - 1].token;
 }
 
-// Updates some keys of an existing publisher, keeping the others.
+// Updates some keys of a publisher, keeping the others. A module-level
+// publisher whose layer was removed (resetContextForTests) gets a new one.
 export function patchContextKeys(
   token: number,
   patch: Record<string, unknown>
 ): void {
-  const layer = layers.find((l) => l.token === token);
-  if (!layer) throw new Error(`Unknown context publisher ${token}`);
+  let layer = layers.find((l) => l.token === token);
+  if (!layer) {
+    layer = { token, keys: {} };
+    layers.push(layer);
+  }
   const next = { ...layer.keys, ...patch };
   if (shallowEqual(layer.keys, next)) return;
   layer.keys = next;

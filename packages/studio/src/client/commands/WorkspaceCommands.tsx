@@ -1,13 +1,14 @@
 import { FC } from "react";
 
 import { useHtmlState } from "../lib/idle.js";
+import { useSetting } from "../lib/studioState.js";
 import { isDirty, useWorkspaceContext } from "../lib/workspaceTypes.js";
 import { useContextKeys } from "./context.js";
 import { useCommand } from "./registry.js";
 
 // Workspace commands (workspace.ts) and the workspace context keys (§4.4).
-// WP0 stub (owned by WP4): Save, the context keys and the <html> state
-// attributes for the shown file.
+// WP0 stub (owned by WP4): Save, Follow (its Explorer checkbox is gone),
+// the context keys and the <html> state attributes for the shown file.
 export const WorkspaceCommands: FC = () => {
   const workspace = useWorkspaceContext();
   const active = workspace.activePath
@@ -44,6 +45,11 @@ export const WorkspaceCommands: FC = () => {
   useCommand("workbench.action.files.save", async () => {
     if (workspace.activePath) await workspace.saveFile(workspace.activePath);
   });
+
+  const follow = useSetting("squiggle.followChanges");
+  useCommand("squiggle.toggleFollowChanges", () =>
+    workspace.setFollowChanges(!follow)
+  );
 
   return null;
 };
