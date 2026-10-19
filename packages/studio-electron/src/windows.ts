@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, shell } from "electron";
+import { app, BrowserWindow, dialog, shell, type WebContents } from "electron";
 
 import { startStudioServer, type StudioServer } from "@quri/squiggle-studio";
 
@@ -48,6 +48,54 @@ function appUrl(server: StudioServer, file: string | undefined): string {
   return url.toString();
 }
 
+// loadURL rejects with ERR_ABORTED when the navigation is cancelled, e.g. by
+// "Cancel" in the unsaved-changes prompt below, or superseded by another one.
+function isAbortError(e: unknown): boolean {
+  return e instanceof Error && "code" in e && e.code === "ERR_ABORTED";
+}
+
+async function loadUrl(win: BrowserWindow, url: string): Promise<void> {
+  try {
+    await win.loadURL(url);
+  } catch (e) {
+    if (!isAbortError(e)) throw e;
+    log(`navigation to ${url} aborted`);
+  }
+}
+
+// Runs a script in the page, giving up after a while: a hung or not-yet-loaded
+// page must not block opening a folder.
+async function runInPage(
+  contents: WebContents,
+  script: string
+): Promise<unknown> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("timed out")), 2000);
+  });
+  try {
+    return await Promise.race([contents.executeJavaScript(script), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// The client exposes `window.squiggleStudio.hasUnsavedChanges()`. If the
+// page can't answer (not loaded, older client), assume nothing is unsaved;
+// the beforeunload prompt is still there as a fallback.
+async function hasUnsavedChanges(contents: WebContents): Promise<boolean> {
+  try {
+    const dirty = await runInPage(
+      contents,
+      "window.squiggleStudio?.hasUnsavedChanges?.() ?? false"
+    );
+    return dirty === true;
+  } catch (e) {
+    log(`couldn't check for unsaved changes: ${String(e)}`);
+    return false;
+  }
+}
+
 export async function createStudioWindow(
   target: OpenTarget
 ): Promise<StudioWindow> {
@@ -87,13 +135,32 @@ export async function createStudioWindow(
     win,
     server,
     async open(next) {
-      if (next.folder !== server.getRoot()) {
+      // Ask before switching: once the server's root changes, unsaved buffers
+      // would belong to the wrong folder, so "Cancel" in the beforeunload
+      // prompt (triggered by the reload below) would come too late.
+      const switching = next.folder !== server.getRoot();
+      if (await hasUnsavedChanges(win.webContents)) {
+        const { response } = await dialog.showMessageBox(win, {
+          type: "question",
+          buttons: ["Discard changes", "Cancel"],
+          defaultId: 1,
+          cancelId: 1,
+          message: "You have unsaved changes.",
+          detail: `Discard them and open ${switching ? next.folder : (next.file ?? "the folder again")}?`,
+        });
+        if (response !== 0) return;
+        // So that the reload doesn't prompt again.
+        await runInPage(
+          win.webContents,
+          "window.squiggleStudio?.discardChanges?.()"
+        ).catch((e: unknown) => log(`discardChanges failed: ${String(e)}`));
+      }
+      if (switching) {
         await server.openFolder(next.folder);
         app.addRecentDocument(next.folder);
       }
-      // Reloading with ?file= selects the file. If there are unsaved edits,
-      // the page's beforeunload handler triggers the prompt below.
-      await win.loadURL(appUrl(server, next.file));
+      // Reloading with ?file= selects the file.
+      await loadUrl(win, appUrl(server, next.file));
     },
   };
   windows.add(studioWindow);
@@ -156,6 +223,6 @@ export async function createStudioWindow(
   });
 
   app.addRecentDocument(server.getRoot());
-  await win.loadURL(appUrl(server, target.file));
+  await loadUrl(win, appUrl(server, target.file));
   return studioWindow;
 }

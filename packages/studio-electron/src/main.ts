@@ -54,7 +54,14 @@ const actions: MenuActions = {
     const focused =
       findStudioWindow(BrowserWindow.getFocusedWindow()) ?? studioWindows()[0];
     if (!focused) return openInNewWindow(target);
-    await focused.open(target);
+    try {
+      await focused.open(target);
+    } catch (e) {
+      dialog.showErrorBox(
+        "Could not open folder",
+        e instanceof Error ? e.message : String(e)
+      );
+    }
     focused.win.focus();
   },
   async newWindow() {

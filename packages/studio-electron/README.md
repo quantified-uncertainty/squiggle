@@ -24,7 +24,7 @@ Set `SQUIGGLE_STUDIO_DEBUG=1` to log server URLs, page loads, renderer console m
 - **File → Open Folder…** (Cmd/Ctrl+O), **Open File…** (Cmd/Ctrl+Shift+O; opens the containing folder and selects the file via the client's `?file=` parameter), **Open Recent** (from `~/.squiggle-studio/recent.json`, shared with the CLI), **New Window** (Cmd/Ctrl+Shift+N).
 - Standard Edit / View / Window menus; links to the docs and Squiggle Hub under Help.
 - Window bounds are remembered (`<userData>/window-state.json`).
-- Unsaved edits trigger a "Discard changes?" prompt when closing or switching.
+- Unsaved edits trigger a "Discard changes?" prompt when closing or switching. Before opening another folder or file in a window, the main process asks the page (`window.squiggleStudio.hasUnsavedChanges()`), so "Cancel" leaves the current folder open; if the page can't answer, the page's `beforeunload` prompt is the fallback.
 
 ## Security
 
