@@ -1,97 +1,128 @@
-import { clsx } from "clsx";
 import {
   FC,
   PointerEvent as ReactPointerEvent,
   ReactNode,
+  RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
 } from "react";
-import { z } from "zod";
 
-import { CodeEditor, type Simulation } from "@quri/squiggle-components";
-import type { SqProject } from "@quri/squiggle-lang";
-import { CodeBracketIcon, TextTooltip } from "@quri/ui";
+import {
+  CodeEditor,
+  type CodeEditorHandle,
+  type Simulation,
+} from "@quri/squiggle-components";
+import type { SqProject, SqValuePath } from "@quri/squiggle-lang";
 
-import { readStorage, writeStorage } from "../lib/storage.js";
+import { TID } from "../../shared/testIds.js";
+import { useFocuser } from "../commands/focus.js";
+import { loadEditorState, saveEditorState } from "../lib/editorStateCache.js";
+import type { OpenFile } from "../lib/workspaceTypes.js";
 
-const stateKey = "squiggle-studio:code-pane";
-const stateSchema = z.object({ open: z.boolean(), fraction: z.number() });
-type CodePaneState = z.infer<typeof stateSchema>;
+// Code pane width, as a fraction of the editor area, and the view's minimum
+// width in pixels (#21): the view keeps at least 360 px however the pane is
+// dragged, and the pane starts closed in an editor area under 760 px.
+export const MIN_FRACTION = 0.2;
+export const MAX_FRACTION = 0.7;
+export const MIN_VIEW_PX = 360;
+export const NARROW_EDITOR_AREA_PX = 760;
+const SEPARATOR_PX = 4; // the resize handle (w-1)
 
-const MIN_FRACTION = 0.2;
-const MAX_FRACTION = 0.7;
-const clampFraction = (f: number) =>
+export const clampFraction = (f: number) =>
   Math.min(MAX_FRACTION, Math.max(MIN_FRACTION, f));
 
-// Whether the code pane is shown next to Output-style views, and how wide it is
-// (as a fraction of the workspace width). Shared by all files.
-export function useCodePaneState() {
-  const [state, setState] = useState<CodePaneState>(
-    () => readStorage(stateKey, stateSchema) ?? { open: true, fraction: 0.42 }
+// The editor column's width in pixels for a container `width` px wide.
+export function codePaneWidth(fraction: number, width: number): number {
+  return Math.max(
+    0,
+    Math.min(
+      clampFraction(fraction) * width,
+      width - SEPARATOR_PX - MIN_VIEW_PX
+    )
   );
-  const update = (patch: Partial<CodePaneState>) => {
-    setState((prev) => {
-      const next = { ...prev, ...patch };
-      writeStorage(stateKey, next);
-      return next;
-    });
-  };
-  return [state, update] as const;
 }
 
-export const CodeToggle: FC<{ open: boolean; onToggle: () => void }> = ({
-  open,
-  onToggle,
-}) => (
-  <TextTooltip text={open ? "Hide code" : "Show code"} placement="bottom">
-    <button
-      type="button"
-      aria-pressed={open}
-      aria-label={open ? "Hide code" : "Show code"}
-      className={clsx(
-        "rounded p-1",
-        open
-          ? "bg-slate-200 text-slate-900"
-          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-      )}
-      onClick={onToggle}
-    >
-      <CodeBracketIcon size={16} />
-    </button>
-  </TextTooltip>
-);
-
-// Code editor on the left, `children` (the active view) on the right. The
-// editor shares the workspace's simulation, so the file only runs once.
-export const CodePane: FC<{
-  editorKey: string;
-  code: string;
-  setCode: (code: string) => void;
-  sourceId: string;
-  project: SqProject;
-  simulation: Simulation | undefined;
+type Props = {
+  file: OpenFile;
+  open: boolean; // the editor column is shown
+  // Mount the editor (false while the view has its own editor: the
+  // Playground edits the buffer meanwhile, so the editor remounts from it).
+  mountEditor: boolean;
   fraction: number;
   onResize: (fraction: number) => void;
-  children: ReactNode;
-}> = ({
-  editorKey,
-  code,
-  setCode,
-  sourceId,
-  project,
-  simulation,
+  // The container's width when it is first laid out (the narrow-start rule).
+  onFirstLayout?: (width: number) => void;
+  editorRef: RefObject<CodeEditorHandle | null>;
+  setCode: (code: string) => void;
+  onSubmit: () => void;
+  onFocusByPath: (path: SqValuePath) => void;
+  project: SqProject;
+  simulation: Simulation | undefined;
+  // The view's column is the view switcher's tab panel.
+  viewPanel: { id: string; label: string };
+  children: ReactNode; // the active view
+};
+
+// The code editor next to the active view. Always the wrapper of the view,
+// also while the code is hidden: hiding collapses the editor column instead of
+// changing the React tree, so the view never remounts (#44).
+//
+// The editor is uncontrolled. It remounts only for a hard replacement of the
+// buffer (`editorEpoch`: initial load, Reload from disk); code another program
+// wrote into a clean buffer (`externalRevision`) is applied in place, keeping
+// the cursor, scroll, focus and the user's undo history (#42). Its state (undo
+// history, selection, scroll) is cached when it unmounts and restored when the
+// file is shown again (#41).
+export const CodePane: FC<Props> = ({
+  file,
+  open,
+  mountEditor,
   fraction,
   onResize,
+  onFirstLayout,
+  editorRef,
+  setCode,
+  onSubmit,
+  onFocusByPath,
+  project,
+  simulation,
+  viewPanel,
   children,
 }) => {
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number | undefined>(undefined);
   const [dragFraction, setDragFraction] = useState<number | undefined>();
-  const shown = clampFraction(dragFraction ?? fraction);
+
+  const onFirstLayoutRef = useRef(onFirstLayout);
+  onFirstLayoutRef.current = onFirstLayout;
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const first = el.getBoundingClientRect().width;
+    setWidth(first);
+    onFirstLayoutRef.current?.(first);
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const shownFraction = dragFraction ?? fraction;
+  const editorStyle =
+    width === undefined
+      ? { width: `${clampFraction(shownFraction) * 100}%` }
+      : { width: `${codePaneWidth(shownFraction, width)}px` };
 
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
     if (!container) return;
     e.preventDefault();
     const rect = container.getBoundingClientRect();
-    let latest = shown;
+    let latest = clampFraction(shownFraction);
     const onMove = (ev: PointerEvent) => {
       latest = clampFraction((ev.clientX - rect.left) / rect.width);
       setDragFraction(latest);
@@ -108,36 +139,136 @@ export const CodePane: FC<{
     window.addEventListener("pointerup", onUp);
   };
 
+  // The editor focuser (F6, ⌘1, focusMain): only while the column is shown.
+  const openRef = useRef(open);
+  openRef.current = open;
+  useFocuser(
+    "editor",
+    useCallback(() => {
+      const handle = editorRef.current;
+      if (!openRef.current || !handle) return false;
+      handle.focus();
+      return true;
+    }, [editorRef])
+  );
+
   return (
-    <div ref={setContainer} className="flex h-full min-h-0">
+    <div ref={containerRef} className="flex h-full min-h-0">
       <div
         className="min-w-0 shrink-0 overflow-hidden"
-        style={{ width: `${shown * 100}%` }}
-        data-testid="code-pane"
+        style={editorStyle}
+        data-testid={TID.codePane}
         data-studio-region="editor"
+        hidden={!open}
       >
-        <CodeEditor
-          // Uncontrolled: remount when the code is replaced from outside.
-          key={editorKey}
-          defaultValue={code}
-          onChange={setCode}
-          sourceId={sourceId}
-          project={project}
-          simulation={simulation}
-          height="100%"
-          showGutter
-        />
+        {mountEditor && (
+          <PaneEditor
+            // Hard replacement only (initial load, Reload from disk).
+            key={`${file.path}:${file.editorEpoch}`}
+            file={file}
+            editorRef={editorRef}
+            setCode={setCode}
+            onSubmit={onSubmit}
+            onFocusByPath={onFocusByPath}
+            project={project}
+            simulation={simulation}
+          />
+        )}
       </div>
       <div
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize code pane"
+        hidden={!open}
         className="w-1 shrink-0 cursor-col-resize border-l border-slate-200 bg-white hover:bg-orange-200"
         onPointerDown={onPointerDown}
       />
-      <div className="min-w-0 flex-1" data-studio-region="view">
+      <div
+        id={viewPanel.id}
+        role="tabpanel"
+        aria-label={viewPanel.label}
+        className="h-full min-h-0 min-w-0 flex-1"
+        data-studio-region="view"
+      >
         {children}
       </div>
     </div>
+  );
+};
+
+const PaneEditor: FC<{
+  file: OpenFile;
+  editorRef: RefObject<CodeEditorHandle | null>;
+  setCode: (code: string) => void;
+  onSubmit: () => void;
+  onFocusByPath: (path: SqValuePath) => void;
+  project: SqProject;
+  simulation: Simulation | undefined;
+}> = ({
+  file,
+  editorRef,
+  setCode,
+  onSubmit,
+  onFocusByPath,
+  project,
+  simulation,
+}) => {
+  const { path, editorEpoch } = file;
+  // Read once, on mount.
+  const [initialState] = useState(() => loadEditorState(path, editorEpoch));
+  const handleRef = useRef<CodeEditorHandle | null>(null);
+
+  // Keeps the last handle after React clears the ref, for the unmount save.
+  const setHandle = useCallback(
+    (handle: CodeEditorHandle | null) => {
+      if (handle) handleRef.current = handle;
+      editorRef.current = handle;
+    },
+    [editorRef]
+  );
+
+  // Saved when the editor unmounts (another file shown, the Playground
+  // selected). Layout cleanups run while the DOM is still attached, so the
+  // scroll position is still there.
+  useLayoutEffect(
+    () => () => {
+      const snapshot = handleRef.current?.getState();
+      if (snapshot) saveEditorState(path, editorEpoch, snapshot);
+    },
+    [path, editorEpoch]
+  );
+
+  // Code another program wrote while the buffer was clean: in place.
+  const appliedRevision = useRef(file.externalRevision);
+  useEffect(() => {
+    if (file.externalRevision === appliedRevision.current) return;
+    appliedRevision.current = file.externalRevision;
+    handleRef.current?.applyExternalChange(file.buffer);
+  }, [file.externalRevision, file.buffer]);
+
+  // The editor reports the remote change as an edit; the buffer already has it.
+  const bufferRef = useRef(file.buffer);
+  bufferRef.current = file.buffer;
+  const onChange = useCallback(
+    (code: string) => {
+      if (code !== bufferRef.current) setCode(code);
+    },
+    [setCode]
+  );
+
+  return (
+    <CodeEditor
+      ref={setHandle}
+      defaultValue={file.buffer}
+      initialState={initialState}
+      onChange={onChange}
+      onSubmit={onSubmit}
+      onFocusByPath={onFocusByPath}
+      sourceId={path}
+      project={project}
+      simulation={simulation}
+      height="100%"
+      showGutter
+    />
   );
 };
