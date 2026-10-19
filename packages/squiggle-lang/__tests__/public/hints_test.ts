@@ -89,7 +89,7 @@ describe("getErrorHints: bare expressions", () => {
   test("only the final statement may be a bare expression", () => {
     const hints = getErrorHints({
       message: 'Expected "->", assignment, or end of input but "y" found.',
-      code: "x\ny = 1",
+      line: "y = 1",
     });
     expect(hints.join("\n")).toMatch(/Only the final statement/);
   });
