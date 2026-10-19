@@ -227,6 +227,9 @@ importers:
       '@quri/squiggle-lang':
         specifier: workspace:*
         version: link:../../packages/squiggle-lang
+      '@quri/squiggle-relative-values':
+        specifier: workspace:*
+        version: link:../../packages/relative-values
       '@quri/ui':
         specifier: workspace:*
         version: link:../../packages/ui

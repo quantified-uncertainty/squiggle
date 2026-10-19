@@ -2,9 +2,9 @@
 import { useEffect, useRef } from "react";
 import { FieldPathByValue, useFormContext, useWatch } from "react-hook-form";
 
+import { ClusterInfo } from "@quri/squiggle-relative-values";
 import { SelectFormField } from "@quri/ui";
 
-import { ClusterInfo } from "../common/ClusterInfo";
 import { FormShape } from "./FormShape";
 
 type SelectClusterOption = Readonly<{
