@@ -634,6 +634,51 @@ export const scenarios: Scenario[] = [
     },
   },
   {
+    id: "rv/error-cells",
+    title: "Failed comparisons are short error cells",
+    tags: ["rv"],
+    state: { file: "rv/error-cells.squiggle", tab: "grid" },
+    steps: async (h) => {
+      await h.shot("rv-error-cells");
+    },
+    check: async (h) => {
+      const errors = await h.page.$$eval("[data-rv-error-cell]", (els) =>
+        els.map((el) => (el.textContent ?? "").trim())
+      );
+      // The broken row and column: 4 + 4 - 1 cells.
+      expect(errors).toHaveLength(7);
+      for (const error of errors) {
+        expect(error).toMatch(/No estimate for broken/);
+        expect(error.length).toBeLessThan(200);
+      }
+      expect(await h.page.$("[data-studio-error]")).toBeNull();
+    },
+  },
+  {
+    id: "rv/computing",
+    title: "A large catalog shows its computing progress, then the Plot",
+    tags: ["rv"],
+    state: { file: "rv/minimal.squiggle" },
+    steps: async (h) => {
+      // A fresh page: no pairs cached yet.
+      await h.page.goto(
+        // Plot needs all 14,400 pairs (and draws them cheaply on canvases).
+        `${h.url}/?file=rv%2Flarge-120.squiggle&view=relative-values&tab=plot&test=1`,
+        { waitUntil: "load" }
+      );
+      await h.page.waitForSelector(
+        "[data-rv-computing]:not(.invisible)[aria-valuenow]",
+        { timeout: 10_000 }
+      );
+      await h.shot("rv-computing");
+      await h.whenIdle();
+    },
+    check: async (h) => {
+      expect(await h.page.$("[data-rv-computing]")).toBeNull();
+      expect((await snapshot(h)).plot).toBe(true);
+    },
+  },
+  {
     id: "rv/invalid-spec-keeps-tab",
     title:
       "An invalid spec keeps the view and shows its validation message (#30)",
