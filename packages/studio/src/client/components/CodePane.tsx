@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import {
   FC,
   PointerEvent as ReactPointerEvent,
@@ -24,20 +25,28 @@ import type { OpenFile } from "../lib/workspaceTypes.js";
 
 // Code pane width, as a fraction of the editor area, and the view's minimum
 // width in pixels (#21): the view keeps at least 360 px however the pane is
-// dragged, and the pane starts closed in an editor area under 760 px.
+// dragged, and the pane starts closed in an editor area under 760 px. An area
+// too narrow for both a 240 px editor and a 360 px view beside it stacks
+// them instead: the code on top, the view below, both full width.
 export const MIN_FRACTION = 0.2;
 export const MAX_FRACTION = 0.7;
 export const MIN_VIEW_PX = 360;
+export const MIN_CODE_PX = 240;
 export const NARROW_EDITOR_AREA_PX = 760;
-const SEPARATOR_PX = 4; // the resize handle (w-1)
+const SEPARATOR_PX = 4; // the resize handle (w-1 / h-1)
+export const STACK_BELOW_PX = MIN_CODE_PX + SEPARATOR_PX + MIN_VIEW_PX;
 
 export const clampFraction = (f: number) =>
   Math.min(MAX_FRACTION, Math.max(MIN_FRACTION, f));
 
-// The editor column's width in pixels for a container `width` px wide.
+// Whether an editor area `width` px wide stacks the code above the view.
+export const isStacked = (width: number) => width < STACK_BELOW_PX;
+
+// The editor column's width in pixels for a container `width` px wide (side
+// by side): at least 240 px, and the view keeps at least 360 px.
 export function codePaneWidth(fraction: number, width: number): number {
   return Math.max(
-    0,
+    MIN_CODE_PX,
     Math.min(
       clampFraction(fraction) * width,
       width - SEPARATOR_PX - MIN_VIEW_PX
@@ -111,9 +120,11 @@ export const CodePane: FC<Props> = ({
     return () => observer.disconnect();
   }, []);
 
+  const stacked = width !== undefined && isStacked(width);
   const shownFraction = dragFraction ?? fraction;
-  const editorStyle =
-    width === undefined
+  const editorStyle = stacked
+    ? { height: `${clampFraction(shownFraction) * 100}%` }
+    : width === undefined
       ? { width: `${clampFraction(shownFraction) * 100}%` }
       : { width: `${codePaneWidth(shownFraction, width)}px` };
 
@@ -124,9 +135,14 @@ export const CodePane: FC<Props> = ({
     const rect = container.getBoundingClientRect();
     let latest = clampFraction(shownFraction);
     const onMove = (ev: PointerEvent) => {
-      latest = clampFraction((ev.clientX - rect.left) / rect.width);
+      latest = clampFraction(
+        stacked
+          ? (ev.clientY - rect.top) / rect.height
+          : (ev.clientX - rect.left) / rect.width
+      );
       setDragFraction(latest);
     };
+    const cursor = stacked ? "row-resize" : "col-resize";
     const onUp = () => {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
@@ -134,7 +150,7 @@ export const CodePane: FC<Props> = ({
       setDragFraction(undefined);
       onResize(latest);
     };
-    document.body.style.cursor = "col-resize";
+    document.body.style.cursor = cursor;
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
   };
@@ -153,9 +169,16 @@ export const CodePane: FC<Props> = ({
   );
 
   return (
-    <div ref={containerRef} className="flex h-full min-h-0">
+    <div
+      ref={containerRef}
+      className={clsx("flex h-full min-h-0", stacked && "flex-col")}
+      data-stacked={stacked ? "" : undefined}
+    >
       <div
-        className="min-w-0 shrink-0 overflow-hidden"
+        className={clsx(
+          "min-w-0 shrink-0 overflow-hidden",
+          stacked && "min-h-0 w-full"
+        )}
         style={editorStyle}
         data-testid={TID.codePane}
         data-studio-region="editor"
@@ -177,17 +200,25 @@ export const CodePane: FC<Props> = ({
       </div>
       <div
         role="separator"
-        aria-orientation="vertical"
+        aria-orientation={stacked ? "horizontal" : "vertical"}
         aria-label="Resize code pane"
         hidden={!open}
-        className="w-1 shrink-0 cursor-col-resize border-l border-slate-200 bg-white hover:bg-orange-200"
+        className={clsx(
+          "shrink-0 border-slate-200 bg-white hover:bg-orange-200",
+          stacked
+            ? "h-1 w-full cursor-row-resize border-t"
+            : "w-1 cursor-col-resize border-l"
+        )}
         onPointerDown={onPointerDown}
       />
       <div
         id={viewPanel.id}
         role="tabpanel"
         aria-label={viewPanel.label}
-        className="h-full min-h-0 min-w-0 flex-1"
+        className={clsx(
+          "min-h-0 min-w-0 flex-1",
+          stacked ? "w-full" : "h-full"
+        )}
         data-studio-region="view"
       >
         {children}

@@ -154,12 +154,40 @@ export const scenarios: Scenario[] = [
       };
       await fits();
 
-      // Open the code pane: the view keeps at least 360 px.
+      // Open the code pane: too narrow for a 240 px editor beside a 360 px
+      // view, so the code sits above the view, both full width.
       await h.command("squiggle.toggleCodePane");
       await h.whenIdle();
       const view = await fits();
-      expect((view?.right ?? 0) - (view?.left ?? 0)).toBeGreaterThanOrEqual(
-        359
+      const code = await box(h, CODE_PANE);
+      const width = (b: Box | null) => (b?.right ?? 0) - (b?.left ?? 0);
+      expect(width(code), "a usable editor").toBeGreaterThanOrEqual(400);
+      expect(width(view)).toBeGreaterThanOrEqual(400);
+      expect(
+        view?.top ?? 0,
+        "the view is below the code"
+      ).toBeGreaterThanOrEqual((code?.bottom ?? 0) - 1);
+      expect((code?.bottom ?? 0) - (code?.top ?? 0)).toBeGreaterThan(200);
+    },
+  },
+  {
+    id: "output/narrow-900",
+    title:
+      "At 900 px the code pane sits beside the view: the editor keeps 240 px and the view 360 px (#21)",
+    tags: ["output", "layout"],
+    viewport: { width: 900, height: 800 },
+    state: { file: "values/numbers.squiggle", view: "output", code: true },
+    steps: async (h) => {
+      await h.shot("output-narrow-900");
+    },
+    check: async (h) => {
+      const code = await box(h, CODE_PANE);
+      const view = await box(h, OUTPUT);
+      const width = (b: Box | null) => (b?.right ?? 0) - (b?.left ?? 0);
+      expect(width(code)).toBeGreaterThanOrEqual(239);
+      expect(width(view)).toBeGreaterThanOrEqual(359);
+      expect(view?.left ?? 0, "side by side").toBeGreaterThanOrEqual(
+        (code?.right ?? 0) - 1
       );
     },
   },
