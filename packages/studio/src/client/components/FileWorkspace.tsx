@@ -28,7 +28,13 @@ import { RefreshIcon } from "@quri/ui";
 import { TID } from "../../shared/testIds.js";
 import type { ViewState } from "../../shared/viewState.js";
 import { useContextKeys } from "../commands/context.js";
-import { focusMain, focusRegion, getFocusRegion } from "../commands/focus.js";
+import {
+  focusMain,
+  focusMainAfterRender,
+  focusRegion,
+  getFocusRegion,
+  mainFocusTarget,
+} from "../commands/focus.js";
 import { runCommand, useCommand } from "../commands/registry.js";
 import { pruneEditorStates } from "../lib/editorStateCache.js";
 import { useHtmlState, useReportBusy } from "../lib/idle.js";
@@ -364,7 +370,11 @@ const SquiggleFileWorkspace: FC<FileWorkspaceProps> = ({
   // ── Commands ───────────────────────────────────────────────────────────
   const selectViewById = (id: string) => {
     if (!availableIds.includes(id)) return false;
+    // Focus in the main area stays there: the Playground has no code pane,
+    // so from the code editor it goes to the Playground's editor (§4.5).
+    const refocus = id === activeView?.id ? undefined : mainFocusTarget();
     selectView(path, id);
+    if (refocus) focusMainAfterRender(refocus);
     return true;
   };
   useCommand("squiggle.view.select", (args) => {

@@ -10,7 +10,7 @@ import {
 import { ShortcutSheet } from "../components/ShortcutSheet.js";
 import { onQuickPickRequest, type QuickPickRequest } from "../lib/quickPick.js";
 import { useWorkspaceContext } from "../lib/workspaceTypes.js";
-import { captureFocus, focusMain } from "./focus.js";
+import { captureFocus } from "./focus.js";
 import type { CommandRow } from "./providers/commands.js";
 import { runCommand, useCommand } from "./registry.js";
 
@@ -87,10 +87,10 @@ export const OverlayHost: FC = () => {
 
   switch (overlay.kind) {
     case "quick-open": {
+      // The file's editor or view gets focus once it renders (openFile).
       const openFile = (path: string) => {
         close();
         workspace.openFile(path, { reason: "quick-open", focus: "main" });
-        void focusMain();
       };
       const runRow = (row: CommandRow) => {
         close();

@@ -6,12 +6,14 @@ import {
   resetContextForTests,
 } from "../src/client/commands/context.js";
 import {
+  captureFocus,
   focusMain,
   focusNextPart,
   focusRegion,
   getFocusRegion,
   installFocusTracking,
   isRegionAvailable,
+  mainFocusTarget,
   registerFocuser,
   resetFocusForTests,
   useOverlay,
@@ -148,6 +150,122 @@ describe("focusRegion", () => {
     (document.querySelector("aside") as HTMLElement).focus();
     expect(await focusMain()).toBe(true);
     expect(getFocusRegion()).toBe("view");
+  });
+});
+
+describe("focusMain after a file or view switch (§4.5)", () => {
+  test("falls back to the view when the new content has no code editor (the Playground)", async () => {
+    const { editor } = buildShell();
+    (document.getElementById("code") as HTMLElement).focus();
+    editor.hidden = true; // the Playground collapses the code pane
+    expect(await focusMain({ prefer: "editor" })).toBe(true);
+    expect(active()?.id).toBe("card");
+  });
+
+  test("falls back to the editor when there is no view (a text file)", async () => {
+    const { view } = buildShell();
+    view.remove();
+    expect(await focusMain({ prefer: "view" })).toBe(true);
+    expect(active()?.id).toBe("code");
+  });
+
+  test("waits for the preferred region while it mounts instead of taking the other one", async () => {
+    buildShell();
+    let ready = false;
+    registerFocuser("editor", () => {
+      if (!ready) return false; // CodeMirror isn't there yet
+      document.getElementById("code")?.focus();
+      return true;
+    });
+    setTimeout(() => (ready = true), 40);
+    expect(await focusMain({ prefer: "editor", retryMs: 500 })).toBe(true);
+    expect(active()?.id).toBe("code");
+  });
+
+  test("waits for both regions while neither is mounted (the file is loading)", async () => {
+    const pending = focusMain({ prefer: "view", retryMs: 500 });
+    setTimeout(() => {
+      region("editor", `<textarea id="later-code"></textarea>`);
+      region("view", `<button id="later-card">card</button>`);
+    }, 40);
+    expect(await pending).toBe(true);
+    expect(active()?.id).toBe("later-card");
+  });
+
+  test("a focuser that leaves focus on <body> is retried (Output's spinner can't take focus)", async () => {
+    buildShell();
+    let ready = false;
+    const spinner = document.createElement("div"); // no tabindex
+    document.body.appendChild(spinner);
+    registerFocuser("view", () => {
+      if (ready) document.getElementById("card")?.focus();
+      else spinner.focus();
+      return true;
+    });
+    setTimeout(() => (ready = true), 40);
+    expect(await focusMain({ prefer: "view", retryMs: 500 })).toBe(true);
+    expect(active()?.id).toBe("card");
+  });
+
+  test("a newer request replaces a pending one", async () => {
+    const first = focusMain({ prefer: "view", retryMs: 500 });
+    const second = focusMain({ prefer: "editor", retryMs: 500 });
+    setTimeout(() => buildShell(), 40);
+    expect(await first).toBe(false);
+    expect(await second).toBe(true);
+    expect(active()?.id).toBe("code");
+  });
+
+  test("user input while waiting ends the request", async () => {
+    const pending = focusMain({ retryMs: 500 });
+    setTimeout(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+      buildShell();
+    }, 20);
+    expect(await pending).toBe(false);
+    expect(active()).toBe(document.body);
+  });
+
+  test("a focused element that is removed hands focus to the same kind of region of the new content", async () => {
+    const { editor, view } = buildShell();
+    const code = document.getElementById("code") as HTMLElement;
+    code.focus();
+    expect(getFocusRegion()).toBe("editor");
+    // The file switch: the old content goes (jsdom doesn't fire focusout on
+    // removal the way Chrome does, so dispatch it), the new content comes.
+    code.dispatchEvent(new FocusEvent("focusout", { relatedTarget: null }));
+    editor.remove();
+    view.remove();
+    document.body.focus();
+    setTimeout(() => {
+      region("view", `<button id="new-card">card</button>`);
+      region("editor", `<textarea id="new-code"></textarea>`);
+    }, 30);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(active()?.id).toBe("new-code");
+  });
+
+  test("mainFocusTarget: the region type to keep across a switch", () => {
+    const { tree } = buildShell();
+    expect(mainFocusTarget()).toBe("editor"); // nothing focused yet
+    (document.getElementById("card") as HTMLElement).focus();
+    expect(mainFocusTarget()).toBe("view");
+    const cm = region(
+      "view",
+      `<div class="cm-editor"><div class="cm-content" tabindex="0" id="pg"></div></div>`
+    );
+    (cm.querySelector("#pg") as HTMLElement).focus();
+    expect(mainFocusTarget()).toBe("editor"); // the Playground's editor
+    tree.focus();
+    expect(mainFocusTarget()).toBeUndefined(); // focus stays in the Explorer
+  });
+
+  test("captureFocus with nothing focused restores to the main area", async () => {
+    buildShell();
+    const restore = captureFocus(); // <body>
+    restore();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(getFocusRegion()).toBe("editor");
   });
 });
 

@@ -12,6 +12,7 @@
 
 import { useLayoutEffect } from "react";
 
+import { TID } from "../../shared/testIds.js";
 import { createContextPublisher, patchContextKeys } from "./context.js";
 
 export type FocusRegion =
@@ -111,14 +112,26 @@ function recordFocus(target: Element | null) {
 }
 
 // Re-focus a region of the same type when the focused element was removed
-// (switching files remounts the workspace), so focus never stays on <body>.
+// (switching files remounts the workspace, switching views unmounts the code
+// editor or the Playground), so focus never stays on <body>. For the main
+// area that is the same kind of region of the new content, or the other main
+// region when the new content has none (the Playground has no code pane, a
+// text file no view).
 function rescueFocus(previous: HTMLElement, region: FocusRegion | undefined) {
+  const prefer = mainRegionOf(previous) ?? region;
   setTimeout(() => {
     if (document.activeElement && document.activeElement !== document.body)
       return;
     if (previous.isConnected) return;
-    if (!region || region === "overlay" || region === "menubar") return;
-    void focusRegion(region);
+    if (!prefer || prefer === "overlay" || prefer === "menubar") return;
+    if (prefer === "editor" || prefer === "view") {
+      // An explicit request (after a file or view switch) already handles it.
+      if (mainRequest === undefined) {
+        void focusMain({ prefer, retryMs: SWITCH_RETRY_MS, whileLost: true });
+      }
+      return;
+    }
+    void focusRegion(prefer);
   }, 0);
 }
 
@@ -200,7 +213,10 @@ function tryFocus(region: FocusRegion): boolean {
   if (focuser) {
     const result = focuser();
     if (result === false) return false;
-    if (result === true || focusIsIn(region)) return true;
+    // A focuser may focus something outside its region (the relative values
+    // view focuses its toolbar in the editor header), but focus must have
+    // landed somewhere: an element that can't take focus leaves it on <body>.
+    if (focusIsIn(region) || (result === true && focusLanded())) return true;
   }
   // Fallbacks: the last focused element still in the region, then the
   // region root itself if it is focusable, then its first focusable element.
@@ -251,21 +267,137 @@ export function focusRegion(
   });
 }
 
-// Focuses the editor or view, whichever had focus last (the editor if
-// neither did). Resolves to false when there's no main area (no file).
-export async function focusMain(
-  opts: { retryMs?: number } = {}
-): Promise<boolean> {
-  const first = lastMainRegion ?? "editor";
-  const second = first === "editor" ? "view" : "editor";
-  if (isRegionAvailable(first) && (await focusRegion(first, opts))) return true;
-  if (
-    isRegionAvailable(second) &&
-    (await focusRegion(second, { retryMs: 0 }))
-  ) {
-    return true;
+// How long focus waits for the new content after a file or view switch
+// (the file may still be loading, its first run computing, the Playground's
+// editor mounting). Any key or pointer input ends the wait.
+export const SWITCH_RETRY_MS = 3000;
+
+export type MainRegion = "editor" | "view";
+
+// The pending focusMain() request: a newer one replaces it.
+let mainRequest: symbol | undefined;
+
+function focusLanded(): boolean {
+  const active = document.activeElement;
+  return active !== null && active !== document.body;
+}
+
+// The main region an element counts as: an editor (the code pane's, the
+// Playground's or the text file's) is "editor", the rest of a view is "view".
+function mainRegionOf(el: Element | null): MainRegion | undefined {
+  const region = regionOf(el);
+  if (region !== "editor" && region !== "view") return undefined;
+  return el?.closest(".cm-editor") ? "editor" : region;
+}
+
+// One attempt at the main area: the preferred region while it is shown (it
+// may still be mounting, so this waits for it rather than taking the other
+// one), else the other region.
+function tryFocusMain(order: readonly MainRegion[]): "done" | "wait" {
+  for (const region of order) {
+    if (!isRegionAvailable(region)) continue;
+    return tryFocus(region) ? "done" : "wait";
   }
-  return focusRegion(first, opts);
+  return "wait";
+}
+
+// Focuses the main area: `prefer` (default: the editor or view, whichever
+// had focus last; the editor if neither did), or the other one when the
+// shown content has no such region (the Playground has no code pane, a text
+// file no view). Retries each animation frame for `retryMs`, because the
+// content may still be mounting; a newer request or any key or pointer input
+// meanwhile ends it, and so does focus landing anywhere with `whileLost`
+// (a rescue of focus that fell to <body>). Resolves to false when there's no
+// main area (no file).
+export function focusMain(
+  opts: { retryMs?: number; prefer?: MainRegion; whileLost?: boolean } = {}
+): Promise<boolean> {
+  const retryMs = opts.retryMs ?? 300;
+  const first: MainRegion = opts.prefer ?? lastMainRegion ?? "editor";
+  const order: MainRegion[] =
+    first === "editor" ? ["editor", "view"] : ["view", "editor"];
+  const token = Symbol("focusMain");
+  mainRequest = token;
+  const start = Date.now();
+  const inputBefore = lastInputAt;
+  return new Promise((resolve) => {
+    const finish = (ok: boolean) => {
+      if (mainRequest === token) mainRequest = undefined;
+      resolve(ok);
+    };
+    const attempt = () => {
+      if (
+        mainRequest !== token ||
+        lastInputAt > inputBefore ||
+        (opts.whileLost && focusLanded())
+      ) {
+        finish(false); // replaced, or the user (or Studio) has moved on
+        return;
+      }
+      if (tryFocusMain(order) === "done") {
+        finish(true);
+        return;
+      }
+      if (Date.now() - start >= retryMs) {
+        // Out of time: whichever main region takes focus now.
+        finish(order.some((r) => isRegionAvailable(r) && tryFocus(r)));
+        return;
+      }
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(attempt);
+      } else {
+        setTimeout(attempt, 16);
+      }
+    };
+    attempt();
+  });
+}
+
+// Before an action that replaces the main area's content (another file,
+// another view): the main region that should have focus afterwards, so that
+// switching keeps the region type (§4.5). An editor (also the Playground's)
+// gives "editor", the rest of a view "view", <body> the last main region;
+// focus anywhere else (the Explorer, the status bar, an overlay) stays where
+// it is (undefined).
+export function mainFocusTarget(): MainRegion | undefined {
+  if (typeof document === "undefined") return undefined;
+  const active = document.activeElement;
+  if (
+    !active ||
+    active === document.body ||
+    // The start page is what the main area shows without a file.
+    active.closest(`[data-testid="${TID.startPage}"]`)
+  ) {
+    return lastMainRegion ?? "editor";
+  }
+  return mainRegionOf(active);
+}
+
+// The main area now shows the start page (no file): its first button gets
+// focus once it renders, unless focus has landed somewhere meanwhile.
+export function focusStartPageAfterRender(): void {
+  if (typeof requestAnimationFrame !== "function") return;
+  requestAnimationFrame(() => {
+    if (focusLanded()) return;
+    document
+      .querySelector<HTMLElement>(
+        `[data-testid="${TID.startPage}"] button:not([disabled])`
+      )
+      ?.focus();
+  });
+}
+
+// After such an action: focuses `prefer` (or the other main region) of the
+// new content once React has rendered it.
+export function focusMainAfterRender(prefer: MainRegion | undefined): void {
+  if (typeof requestAnimationFrame !== "function") return;
+  // Claims the request now, so a rescue of the removed element waits for it.
+  const token = Symbol("pending");
+  mainRequest = token;
+  requestAnimationFrame(() => {
+    if (mainRequest !== token) return;
+    void focusMain({ prefer, retryMs: SWITCH_RETRY_MS });
+  });
 }
 
 export function getFocusRegion(): FocusRegionKey {
@@ -320,10 +452,16 @@ export function useOverlay(open: boolean): void {
 
 // Remembers the focused element and returns a function that restores it
 // (overlays and menus call it when they close).
+// When that element is gone, or was <body> (nothing had focus), focus goes to
+// the main area instead (§4.5).
 export function captureFocus(): () => void {
   const previous = document.activeElement;
   return () => {
-    if (previous instanceof HTMLElement && previous.isConnected) {
+    if (
+      previous instanceof HTMLElement &&
+      previous !== document.body &&
+      previous.isConnected
+    ) {
       previous.focus();
     } else {
       void focusMain();
@@ -340,4 +478,5 @@ export function resetFocusForTests(): void {
   overlayCount = 0;
   lastInputAt = 0;
   publisher = undefined;
+  mainRequest = undefined;
 }

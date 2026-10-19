@@ -39,7 +39,12 @@ import {
 } from "../../shared/api.js";
 import { basename, normalizeRelPath } from "../../shared/paths.js";
 import { getContext } from "../commands/context.js";
-import { focusMain, lastUserInputAt } from "../commands/focus.js";
+import {
+  focusMainAfterRender,
+  focusStartPageAfterRender,
+  lastUserInputAt,
+  mainFocusTarget,
+} from "../commands/focus.js";
 import {
   api,
   ApiError,
@@ -581,11 +586,15 @@ export class WorkspaceModel {
     }
     this.set({ mru, viewIds });
 
+    // Opening the file also focuses its editor (nothing has focus yet); the
+    // start page focuses its first button instead (§4.5).
     const initialFile = this.initialFile;
     this.initialFile = undefined;
     if (initialFile) this.openFile(initialFile, { reason: "url" });
     else if (activeFile && exists(activeFile)) {
       this.openFile(activeFile, { reason: "start" });
+    } else if (!isEmbed() && mainFocusTarget() !== undefined) {
+      focusStartPageAfterRender();
     }
   }
 
@@ -1071,6 +1080,13 @@ export class WorkspaceModel {
       // The previous file is flushed (autosave).
       this.autosave.flush([prev]);
     }
+    // Switching files keeps the region type (§4.5): focus in the main area
+    // (or nowhere) moves to the new file's editor or view once it renders;
+    // focus elsewhere (the Explorer, an overlay) stays.
+    const refocus =
+      !isEmbed() && (opts.focus === "main" || prev !== path)
+        ? mainFocusTarget()
+        : undefined;
     let { files, viewIds, externalChanges, followNotice, mru } = this.state;
     const existing = files[path];
     if (!existing) files = { ...files, [path]: emptyFile(path) };
@@ -1113,7 +1129,9 @@ export class WorkspaceModel {
     if (!this.loads.has(path) && this.state.files[path]?.status === "loading") {
       void this.loadFile(path);
     }
-    if (opts.focus === "main") void focusMain();
+    if ((opts.focus === "main" && !isEmbed()) || refocus !== undefined) {
+      focusMainAfterRender(refocus);
+    }
   };
 
   private loadFile(path: string, opts: { hard?: boolean } = {}): Promise<void> {
@@ -1168,7 +1186,9 @@ export class WorkspaceModel {
       if (this.state.activePath !== null) {
         const prev = this.state.activePath;
         this.autosave.flush([prev]);
+        const refocus = mainFocusTarget() !== undefined;
         this.set({ activePath: null });
+        if (refocus) focusStartPageAfterRender();
       }
       return;
     }
@@ -1206,8 +1226,10 @@ export class WorkspaceModel {
     const next = mru.find((p) => this.knownToExist(p));
     if (next) this.openFile(next, { reason: "api" });
     else {
+      const refocus = mainFocusTarget() !== undefined;
       this.set({ activePath: null });
       clearViewState();
+      if (refocus) focusStartPageAfterRender();
     }
   };
 

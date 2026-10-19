@@ -175,7 +175,6 @@ export const ExplorerCommands: FC = () => {
         reason: "quick-open",
         focus: "main",
       });
-      await focusMain();
     }
   };
   useCommand("workbench.action.openRecent", () => {
@@ -230,7 +229,6 @@ export const ExplorerCommands: FC = () => {
             reason: "api",
             focus: "main",
           });
-          void focusMain({ retryMs: 1500 });
         }}
         close={closeExplorerModal}
       />

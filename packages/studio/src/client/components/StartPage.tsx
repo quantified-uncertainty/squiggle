@@ -190,7 +190,10 @@ export const StartPage: FC = () => {
                       title={path}
                       className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-orange-300"
                       onClick={() =>
-                        workspace.openFile(path, { reason: "start" })
+                        workspace.openFile(path, {
+                          reason: "start",
+                          focus: "main",
+                        })
                       }
                     >
                       <Icon

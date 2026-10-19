@@ -383,7 +383,9 @@ function useOutputFocuser(rootRef: RefObject<HTMLDivElement | null>) {
         root.querySelector<HTMLElement>('header[tabindex="0"]') ??
         root;
       target.focus();
-      return true;
+      // Not yet while the first run is computing (the spinner can't take
+      // focus): focusRegion retries.
+      return root.contains(document.activeElement);
     }, [rootRef])
   );
 }
