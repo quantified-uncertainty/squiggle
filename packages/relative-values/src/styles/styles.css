@@ -38,9 +38,20 @@
 
 @layer base {
   .squiggle-rv {
-    /* Override with `--squiggle-rv-font-family` on a parent element. */
+    /*
+     * Theming: set these CSS variables on a parent element (or with the
+     * `themeClassName` prop, which also reaches dropdown and tooltip
+     * portals). Custom properties aren't reset by `all: initial`, so they
+     * inherit. Each has today's look as its fallback:
+     *
+     * --squiggle-rv-font-family, --squiggle-rv-font-size, --squiggle-rv-text,
+     * --squiggle-rv-muted, --squiggle-rv-bg, --squiggle-rv-border,
+     * --squiggle-rv-header-bg, --squiggle-rv-accent, --squiggle-rv-selected-bg,
+     * --squiggle-rv-radius, --squiggle-rv-cell-padding,
+     * --squiggle-rv-grid-cell-width, --squiggle-rv-sidebar-width.
+     */
     font-family: var(--squiggle-rv-font-family, theme(fontFamily.sans));
-    font-size: 1rem;
+    font-size: var(--squiggle-rv-font-size, 1rem);
     font-weight: 400;
     font-style: normal;
     line-height: 1.5;
@@ -51,6 +62,16 @@
     text-transform: none;
     text-shadow: none;
     white-space: normal;
-    color: #000;
+    color: var(--squiggle-rv-text, #000);
+    background-color: var(--squiggle-rv-bg, transparent);
   }
+}
+
+/*
+ * Compact density (`display.density: "compact"`). Zero specificity, so that
+ * variables set by the host (e.g. with `themeClassName`) win.
+ */
+:where(.squiggle-rv.squiggle-rv-compact) {
+  --squiggle-rv-grid-cell-width: 112px;
+  --squiggle-rv-sidebar-width: 380px;
 }

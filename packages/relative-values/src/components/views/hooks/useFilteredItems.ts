@@ -2,7 +2,6 @@
 import { useMemo } from "react";
 
 import { Item } from "../../../types.js";
-
 import { AxisConfig } from "../RelativeValuesProvider.js";
 
 export const useFilteredItems = ({

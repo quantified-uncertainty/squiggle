@@ -141,6 +141,13 @@ export type ComputeOptions = {
 
 export type ItemPair = readonly [string, string];
 
+// `signal.throwIfAborted()`, which older environments (e.g. jsdom) lack.
+function throwIfAborted(signal: AbortSignal | undefined) {
+  if (signal?.aborted) {
+    throw signal.reason;
+  }
+}
+
 export type CreateModelEvaluatorOptions = Omit<
   ModelEvaluatorOptions,
   "modelCode" | "fnExpression"
@@ -404,7 +411,7 @@ export class ModelEvaluator {
     options: ComputeOptions = {}
   ): Promise<RelativeValueResult[]> {
     const { signal, onProgress, sliceMs = 12 } = options;
-    signal?.throwIfAborted();
+    throwIfAborted(signal);
 
     const total = pairs.length;
     const results: RelativeValueResult[] = [];
@@ -418,7 +425,7 @@ export class ModelEvaluator {
       if (performance.now() - sliceStart >= sliceMs) {
         onProgress?.({ done: results.length, total });
         await yieldToEventLoop();
-        signal?.throwIfAborted();
+        throwIfAborted(signal);
         sliceStart = performance.now();
       }
       results.push(this.compare(id1, id2));

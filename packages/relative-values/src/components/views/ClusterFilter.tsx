@@ -1,16 +1,12 @@
 "use client";
 import clsx from "clsx";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 
+import type { Axis } from "../../state/types.js";
+import { clustersIn } from "../../state/universe.js";
 import { Cluster } from "../../types.js";
-
 import { ClusterIcon } from "../common/ClusterIcon.js";
-import {
-  Axis,
-  useDefinitionClusters,
-  useRelativeValuesContext,
-  useRelativeValuesDispatch,
-} from "./RelativeValuesProvider.js";
+import { useCore } from "../host/core.js";
 
 const ClusterItem: React.FC<{
   cluster: Omit<Cluster, "recommendedUnit">; // this component is also used in a form where data doesn't come from GraphQL backend
@@ -20,6 +16,7 @@ const ClusterItem: React.FC<{
   return (
     <div
       className="flex cursor-pointer select-none items-center gap-1"
+      data-rv-cluster={cluster.id}
       onClick={toggle}
     >
       <div className="flex-none">
@@ -37,31 +34,38 @@ const ClusterItem: React.FC<{
   );
 };
 
+/**
+ * Toggles the clusters of an axis (the clusters with items in scope). Hidden
+ * while the axis' clusters are locked.
+ */
 export const ClusterFilter: FC<{ axis: Axis }> = ({ axis }) => {
-  const clusters = useDefinitionClusters();
-  const {
-    axisConfig: {
-      [axis]: { filter },
-    },
-  } = useRelativeValuesContext();
-  const dispatch = useRelativeValuesDispatch();
+  const core = useCore();
+  const { snapshot, state, data } = core;
+  const clusters = useMemo(
+    () => (snapshot ? clustersIn(snapshot.definition, data.universe) : []),
+    [snapshot, data.universe]
+  );
+  if (core.isLocked(axis === "rows" ? "clusters" : "columns")) {
+    return null;
+  }
+  const selected =
+    axis === "rows" || state.columns === "rows"
+      ? state.clusters
+      : state.columns.clusters;
 
   return (
-    <div className="flex flex-col gap-2">
-      {Object.keys(clusters).map((id) => (
+    <div className="flex flex-col gap-2" data-rv-part="cluster-filter">
+      {clusters.map((cluster) => (
         <ClusterItem
-          key={id}
-          cluster={clusters[id]}
-          selected={filter.selectedClusters.has(id)}
-          toggle={() => {
-            dispatch({
-              type: "toggleCluster",
-              payload: {
-                id,
-                axis,
-              },
-            });
-          }}
+          key={cluster.id}
+          cluster={cluster}
+          selected={selected === null || selected.includes(cluster.id)}
+          toggle={() =>
+            core.dispatch(
+              { type: "toggleCluster", cluster: cluster.id, axis },
+              "user"
+            )
+          }
         />
       ))}
     </div>

@@ -1,44 +1,156 @@
 "use client";
 import clsx from "clsx";
-import { FC, PropsWithChildren } from "react";
+import { FC, PropsWithChildren, useCallback, useMemo } from "react";
 
+import { autoPlotReference } from "../../../state/pairs.js";
+import type { Item } from "../../../types.js";
+import { useCore } from "../../host/core.js";
+import { usePresentation } from "../../host/presentation.js";
+import type { ConsumerRequirement } from "../../host/requirements.js";
+import type { RelativeValuesReadyController } from "../../host/types.js";
+import { useRelativeValuesConsumer } from "../../useRelativeValues.js";
 import { ClusterFilter } from "../ClusterFilter.js";
-import { useRelativeValuesContext } from "../RelativeValuesProvider.js";
+import { SearchChip, ViewEmpty, ViewStatus } from "../ViewStatus.js";
 import { ForcePlot } from "./ForcePlot.js";
 import { ValueAndUncertaintyPlot } from "./ValueAndUncertaintyPlot.js";
 
-const Section: FC<PropsWithChildren<{ title: string; border?: boolean }>> = ({
-  title,
-  border,
-  children,
-}) => (
+const Section: FC<
+  PropsWithChildren<{ title: string | undefined; border?: boolean }>
+> = ({ title, border, children }) => (
   <div className="flex flex-col gap-2">
-    <header className="text-center font-bold text-slate-800">{title}</header>
+    {title !== undefined && (
+      <header className="text-center font-bold text-slate-800">{title}</header>
+    )}
     <div className={clsx(border && "border border-slate-100 p-1")}>
       {children}
     </div>
   </div>
 );
 
-export const PlotView: FC = () => {
-  const { evaluator: model } = useRelativeValuesContext();
+const PlotViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
+  const core = useCore();
+  const { controls, display, labels, options } = usePresentation();
+  const { plots, height, titles, valueUncertainty } = display.plot;
+  const { onItemClick } = options;
+
+  const reference = useMemo((): Item[] => {
+    switch (valueUncertainty.reference) {
+      case "unit":
+        return rv.unit ? [rv.unit] : [];
+      case "average":
+        return rv.universe;
+      case "auto":
+        return autoPlotReference(rv);
+    }
+  }, [valueUncertainty.reference, rv]);
+
+  const selectLocked = core.isLocked("selectedItem");
+  const selectedItem = rv.state.selectedItem;
+  const clickItem = useCallback(
+    (item: Item) => {
+      onItemClick?.(item);
+      if (!selectLocked) {
+        core.dispatch(
+          {
+            type: "selectItem",
+            id: selectedItem === item.id ? null : item.id,
+          },
+          "user"
+        );
+      }
+    },
+    [onItemClick, selectLocked, core, selectedItem]
+  );
+
+  const showClusters =
+    controls.plot.clusterFilter && !core.isLocked("clusters");
+  const showSimilarity = plots.includes("similarity");
+  const showValueUncertainty = plots.includes("valueUncertainty");
 
   return (
     <div
-      className="grid gap-2"
-      style={{
-        gridTemplateColumns: "1fr minmax(120px, max-content)",
-      }}
+      data-rv-part="plot"
+      data-rv-provider={core.id}
+      data-rv-count={rv.items.length}
     >
-      <Section title="Similarity Cluster Map" border>
-        <ForcePlot model={model} />
-      </Section>
-      <Section title="Clusters">
-        <ClusterFilter axis="rows" />
-      </Section>
-      <Section title="Value and Uncertainty" border>
-        <ValueAndUncertaintyPlot model={model} />
-      </Section>
+      <div className="mb-2 empty:hidden">
+        <SearchChip />
+      </div>
+      {rv.items.length === 0 ? (
+        <ViewEmpty controller={rv} view="plot" />
+      ) : (
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: showClusters
+              ? "1fr minmax(120px, max-content)"
+              : "1fr",
+          }}
+        >
+          {showSimilarity && (
+            <Section
+              title={titles ? labels["plot.similarity"] : undefined}
+              border
+            >
+              <ForcePlot
+                items={rv.items}
+                clusters={rv.clusters}
+                compare={rv.compare}
+                height={height}
+                selectedItem={selectedItem}
+                onItemClick={clickItem}
+              />
+            </Section>
+          )}
+          {showClusters && (
+            <div className={clsx(!showSimilarity && "col-start-2 row-start-1")}>
+              <Section title={titles ? labels["plot.clusters"] : undefined}>
+                <ClusterFilter axis="rows" />
+              </Section>
+            </div>
+          )}
+          {showValueUncertainty && (
+            <div className={clsx(!showSimilarity && "col-start-1 row-start-1")}>
+              <Section
+                title={titles ? labels["plot.valueUncertainty"] : undefined}
+                border
+              >
+                <ValueAndUncertaintyPlot
+                  items={rv.items}
+                  reference={reference}
+                  clusters={rv.clusters}
+                  compare={rv.compare}
+                  height={height}
+                  xScale={valueUncertainty.xScale}
+                  yScale={valueUncertainty.yScale}
+                  labels={labels}
+                  selectedItem={selectedItem}
+                  onItemClick={clickItem}
+                />
+              </Section>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
+};
+
+/** The similarity map and the value / uncertainty plot. */
+export const PlotView: FC = () => {
+  const { display } = usePresentation();
+  const { plots, valueUncertainty } = display.plot;
+  const similarity = plots.includes("similarity");
+  const reference = plots.includes("valueUncertainty")
+    ? valueUncertainty.reference
+    : null;
+  const requirement = useMemo(
+    (): ConsumerRequirement => ({ kind: "plot", similarity, reference }),
+    [similarity, reference]
+  );
+  const rv = useRelativeValuesConsumer(requirement);
+  if (rv.status !== "ready") {
+    return <ViewStatus controller={rv} />;
+  }
+  return <PlotViewContent rv={rv} />;
 };

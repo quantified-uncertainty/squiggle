@@ -11,7 +11,7 @@
  *   in custom tabs) loaded after this stylesheet still win;
  * - `html`, `:root` and `:host` become `.squiggle-rv` (so Tailwind's preflight
  *   styles the wrapper instead of the page), and `body` rules are dropped;
- * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv)`
+ * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv`
  *   are kept;
  * - keyframes are renamed to `squiggle-rv-<name>`, so that they don't clash
  *   with the host page's keyframes.
@@ -21,10 +21,14 @@
 const plugin = ({ scope }) => {
   const prefix = `.${scope}`;
 
+  // `.squiggle-rv...` or `:where(.squiggle-rv...)` (e.g. a modifier class:
+  // `:where(.squiggle-rv.squiggle-rv-compact)`).
   const isScoped = (selector) =>
-    selector.startsWith(`:where(${prefix})`) ||
-    (selector.startsWith(prefix) &&
-      /^($|[\s.:#>+~[])/.test(selector.slice(prefix.length)));
+    [prefix, `:where(${prefix}`].some(
+      (start) =>
+        selector.startsWith(start) &&
+        /^($|[\s.:#>+~[)])/.test(selector.slice(start.length))
+    );
 
   const scopeSelector = (selector) => {
     if (isScoped(selector)) {

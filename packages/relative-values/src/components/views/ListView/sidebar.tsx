@@ -1,34 +1,42 @@
 "use client";
 import { FC, Fragment } from "react";
 
-import {
-  NumberShower,
-  useSimulator,
-  ViewerWithMenuBar,
-} from "@quri/squiggle-components";
+import { useSimulator, ViewerWithMenuBar } from "@quri/squiggle-components";
 import { SqLinker } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
-import { ModelEvaluator } from "../../../values/ModelEvaluator.js";
+import { useCore } from "../../host/core.js";
+import { FormattedNumber } from "../../host/format.js";
+import { usePresentation } from "../../host/presentation.js";
+import type {
+  RelativeValuesNumberKind,
+  RelativeValuesPairDetailsProps,
+} from "../../host/types.js";
 import { ItemName } from "../ItemName.js";
-import { useRelativeValuesOptions } from "../RelativeValuesProvider.js";
 
-interface TableRowProps {
+const TableRow: FC<{
   label: string;
   number: number;
-}
-
-const TableRow: React.FC<TableRowProps> = ({ label, number }) => (
-  <Fragment key={label}>
-    <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-400">
-      {label}
-    </div>
-    <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
-      <NumberShower number={number} precision={2} />
-    </div>
-  </Fragment>
-);
+  kind: RelativeValuesNumberKind;
+}> = ({ label, number, kind }) => {
+  const { format } = usePresentation();
+  return (
+    <Fragment key={label}>
+      <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-400">
+        {label}
+      </div>
+      <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
+        <FormattedNumber
+          format={format}
+          value={number}
+          kind={kind}
+          place="sidebar"
+        />
+      </div>
+    </Fragment>
+  );
+};
 
 const buildSquiggleCode = ({
   modelCode,
@@ -130,93 +138,109 @@ const PairChart: FC<{ code: string; linker?: SqLinker; sourceId?: string }> = ({
   );
 };
 
-type Props = {
-  model: ModelEvaluator;
-  numeratorItem: Item;
-  denominatorItem: Item;
-};
-
-export const ItemSideBar: FC<Props> = ({
-  model,
-  numeratorItem,
-  denominatorItem,
+/** The built-in pair details (the `Default` of the `PairDetails` slot). */
+export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
+  numerator: numeratorItem,
+  denominator: denominatorItem,
+  result,
+  close,
 }) => {
-  const { getPlaygroundUrl, linker, sourceId } = useRelativeValuesOptions();
-  const result = model.compare(numeratorItem.id, denominatorItem.id);
-  if (!result.ok) {
-    return <div>Result not found</div>;
-  } else {
-    const item = result.value;
-    const squiggleCode =
-      model.modelCode !== undefined && model.fnExpression !== undefined
-        ? buildSquiggleCode({
-            modelCode: model.modelCode,
-            fnExpression: model.fnExpression,
-            numeratorItem,
-            denominatorItem,
-          })
-        : undefined;
+  const { options, labels } = usePresentation();
+  const { getPlaygroundUrl, linker, sourceId } = options;
+  const evaluator = useCore().snapshot?.evaluator;
+  if (!result.ok || !evaluator) {
+    return <div>{labels["sidebar.notFound"]}</div>;
+  }
+  const item = result.value;
+  const squiggleCode =
+    evaluator.modelCode !== undefined && evaluator.fnExpression !== undefined
+      ? buildSquiggleCode({
+          modelCode: evaluator.modelCode,
+          fnExpression: evaluator.fnExpression,
+          numeratorItem,
+          denominatorItem,
+        })
+      : undefined;
 
-    return (
-      <div>
-        <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1">
-          <span className="mr-1 whitespace-nowrap text-slate-500">value</span>
-          <span className="whitespace-nowrap text-xl text-slate-300">(</span>
-          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
-            <ItemName item={numeratorItem} />
-          </span>
-          <span className="whitespace-nowrap px-1 text-xl text-slate-300">
-            /
-          </span>
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Close"
+        className="absolute right-0 top-0 rounded px-1.5 text-lg leading-none text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+        onClick={close}
+      >
+        ×
+      </button>
+      <div className="mb-6 mt-2 flex items-center overflow-x-auto p-1 pr-6">
+        <span className="mr-1 whitespace-nowrap text-slate-500">
+          {labels["sidebar.value"]}
+        </span>
+        <span className="whitespace-nowrap text-xl text-slate-300">(</span>
+        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 bg-opacity-80 px-1 text-center text-sm font-semibold text-slate-900">
+          <ItemName item={numeratorItem} />
+        </span>
+        <span className="whitespace-nowrap px-1 text-xl text-slate-300">/</span>
 
-          <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
-            <span className="inline-block">
-              <ItemName item={denominatorItem} />
-            </span>
+        <span className="ml-2 mr-2 whitespace-pre-wrap rounded-sm bg-slate-200 px-1 text-center text-sm font-semibold text-slate-900">
+          <span className="inline-block">
+            <ItemName item={denominatorItem} />
           </span>
-          <span className="whitespace-nowrap text-xl text-slate-300">)</span>
-        </div>
+        </span>
+        <span className="whitespace-nowrap text-xl text-slate-300">)</span>
+      </div>
 
-        <div className="xs mb-4 text-slate-500">
-          An estimate of the value of{" "}
+      <div className="xs mb-4 text-slate-500">
+        {labels["sidebar.summary"](
           <span className="font-semibold text-slate-700">
             {numeratorItem.name}
-          </span>{" "}
-          in terms of{" "}
+          </span>,
           <span className="font-semibold text-slate-700">
             {denominatorItem.name}
           </span>
-        </div>
-
-        {squiggleCode !== undefined && (
-          <PairChart code={squiggleCode} linker={linker} sourceId={sourceId} />
-        )}
-        {!model.canCompute && (
-          // Precomputed values (e.g. a bundle) don't include distributions.
-          <div className="text-xs text-slate-400">
-            Distribution charts aren&apos;t available for precomputed values.
-          </div>
-        )}
-
-        <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
-          <TableRow label="median" number={item.median} />
-          <TableRow label="mean" number={item.mean} />
-          <TableRow label="p5" number={item.min} />
-          <TableRow label="p95" number={item.max} />
-          <TableRow label="uncertainty" number={item.uncertainty} />
-        </div>
-
-        {squiggleCode !== undefined && getPlaygroundUrl && (
-          <a
-            href={getPlaygroundUrl(squiggleCode)}
-            className="text-slate-400 underline"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Open in Playground
-          </a>
         )}
       </div>
-    );
-  }
+
+      {squiggleCode !== undefined && (
+        <PairChart code={squiggleCode} linker={linker} sourceId={sourceId} />
+      )}
+      {!evaluator.canCompute && (
+        // Precomputed values (e.g. a bundle) don't include distributions.
+        <div className="text-xs text-slate-400">
+          {labels["sidebar.noCharts"]}
+        </div>
+      )}
+
+      <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
+        <TableRow
+          label={labels["sidebar.median"]}
+          number={item.median}
+          kind="median"
+        />
+        <TableRow
+          label={labels["sidebar.mean"]}
+          number={item.mean}
+          kind="mean"
+        />
+        <TableRow label={labels["sidebar.p5"]} number={item.min} kind="p5" />
+        <TableRow label={labels["sidebar.p95"]} number={item.max} kind="p95" />
+        <TableRow
+          label={labels["sidebar.uncertainty"]}
+          number={item.uncertainty}
+          kind="uncertainty"
+        />
+      </div>
+
+      {squiggleCode !== undefined && getPlaygroundUrl && (
+        <a
+          href={getPlaygroundUrl(squiggleCode)}
+          className="text-slate-400 underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {labels["sidebar.openInPlayground"]}
+        </a>
+      )}
+    </div>
+  );
 };

@@ -2,15 +2,14 @@
 import { FC } from "react";
 
 import { Item } from "../../types.js";
-
-import { useRelativeValuesOptions } from "./RelativeValuesProvider.js";
+import { usePresentation } from "../host/presentation.js";
 
 /**
  * Item name, rendered with the `renderItemName` option and clickable with the
  * `onItemClick` option.
  */
 export const ItemName: FC<{ item: Item }> = ({ item }) => {
-  const { renderItemName, onItemClick } = useRelativeValuesOptions();
+  const { renderItemName, onItemClick } = usePresentation().options;
   const content = renderItemName ? renderItemName(item) : item.name;
 
   if (!onItemClick) {
