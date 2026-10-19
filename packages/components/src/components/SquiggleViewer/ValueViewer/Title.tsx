@@ -67,7 +67,7 @@ const getStandardProps = (props: TitleProps): StandardProps => {
     },
     parentValue?.tag === "Array" &&
       !taggedName && {
-        color: "text-stone-400",
+        color: "text-stone-500",
       },
     taggedName && {
       title: taggedName,
@@ -84,7 +84,7 @@ const getStandardProps = (props: TitleProps): StandardProps => {
   return standardProps.reduce((acc, prop) => ({ ...acc, ...prop }), {});
 };
 export const Title: FC<TitleProps> = (props) => {
-  const { valuePath, zoomIn } = props;
+  const { valuePath, zoomIn, headerVisibility } = props;
   const standards = useMemo(() => getStandardProps(props), [props]);
 
   const {
@@ -100,23 +100,29 @@ export const Title: FC<TitleProps> = (props) => {
   return (
     <div
       className={clsx(
-        "flex flex-row items-center leading-3",
+        "flex min-w-0 flex-row items-center",
+        // A long @name in the large (zoomed-in) header used to overlap
+        // itself with `leading-3`.
+        headerVisibility === "large" ? "leading-tight" : "leading-3",
         showColon && "mr-3"
       )}
     >
       {icon}
       <div
         className={clsx(
+          "min-w-0 truncate",
           color,
           textSize,
           font,
           isFocusEnabled && "cursor-pointer hover:underline"
         )}
+        // Long names are truncated; the tooltip shows all of it.
+        title={title}
         onClick={() => isFocusEnabled && zoomIn(valuePath)}
       >
         {title}
       </div>
-      {showColon && <div className="font-mono text-slate-300">:</div>}
+      {showColon && <div className="font-mono text-slate-500">:</div>}
     </div>
   );
 };

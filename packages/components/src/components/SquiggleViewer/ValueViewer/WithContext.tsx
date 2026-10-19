@@ -184,6 +184,9 @@ export const ValueWithContextViewer: FC<Props> = ({
               headerRef.current = el;
             }}
             tabIndex={viewerType === "tooltip" ? undefined : 0}
+            // Lets an app that renders several viewers (Squiggle Studio's
+            // output cards) find and focus the header of a value by its path.
+            data-value-path={valuePath.uid()}
             className={clsx(
               "group flex justify-between rounded-sm pr-0.5 hover:bg-stone-100 focus-visible:outline-none",
               isZoomedIn
@@ -201,7 +204,7 @@ export const ValueWithContextViewer: FC<Props> = ({
               }
             }}
           >
-            <div className="inline-flex items-center space-x-2">
+            <div className="inline-flex min-w-0 items-center space-x-2">
               {collapsible && triangleToggle()}
               <Title
                 {...{

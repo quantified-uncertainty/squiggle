@@ -1,0 +1,10 @@
+// A runtime error on line 7 (for Show First Problem).
+
+@name("Fine")
+fine = 1 to 10
+
+@name("Broken")
+broken = fine * missingName
+
+@name("After")
+after = 3

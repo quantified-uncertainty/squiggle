@@ -1,0 +1,8 @@
+// Long titles and identifiers (QA #53).
+
+@name("Expected annual cost of running the community outreach program in the northern district ($)")
+cost = 10k to 200k
+
+aVeryLongVariableNameThatSomeoneMightActuallyWriteInTheirModelForClarity = 5 to 10
+
+short = 3
