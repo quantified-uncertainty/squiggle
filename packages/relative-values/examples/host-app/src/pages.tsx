@@ -12,7 +12,7 @@ import {
 import largeCatalogCode from "../models/large-catalog.squiggle?raw";
 import roadmapCode from "../models/roadmap.squiggle?raw";
 import { portfolioBundle, portfolioEvaluator } from "./portfolio.js";
-import { RankingTab } from "./RankingTab.js";
+import { RankingTable } from "./RankingTab.js";
 
 // Host UI outside of the dashboards, styled only by host.css.
 const SampleControls: FC = () => (
@@ -35,7 +35,9 @@ const SampleControls: FC = () => (
 
 // Runs Squiggle code in the browser and returns the first relative values
 // spec in it.
-function useSpec(code: string): RelativeValuesExport["spec"] | undefined {
+export function useSpec(
+  code: string
+): RelativeValuesExport["spec"] | undefined {
   const [found, setFound] = useState<RelativeValuesExport[] | undefined>();
   useEffect(() => {
     run(code).then((output) => setFound(findRelativeValuesExports(output)));
@@ -117,7 +119,16 @@ export const BundlePage: FC = () => {
             {
               id: "ranking",
               label: "Ranking",
-              render: (context) => <RankingTab context={context} />,
+              // Only needs each item's value in units of the unit.
+              requires: "unit",
+              render: (context) => (
+                <RankingTable
+                  rows={[...context.rows].sort(
+                    (a, b) => (b.value?.median ?? 0) - (a.value?.median ?? 0)
+                  )}
+                  unitName={context.unit?.name}
+                />
+              ),
             },
             "grid",
             "plot",
