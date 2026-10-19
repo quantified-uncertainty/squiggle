@@ -158,7 +158,9 @@ const CONTENT_SECURITY_POLICY = [
 ].join("; ");
 
 // Folders/files passed on this process's command line.
-const argvTargets = targetsFromArgv(process.argv, app.isPackaged);
+const argvTargets = targetsFromArgv(process.argv, app.isPackaged, {
+  appPath: app.getAppPath(),
+});
 
 // Sent from a second launch to the running instance. (Its raw argv is not
 // reliable: Chromium inserts its own switches.)

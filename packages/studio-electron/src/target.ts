@@ -25,14 +25,23 @@ export function resolveTarget(
 
 // Extracts folder/file paths from a command line, skipping Chromium/Electron
 // flags (`--foo`, macOS `-psn_...`) and, in development, the app path itself.
+//
+// Packaged: [app, ...args]. Development: [electron, ...switches, appPath,
+// ...args]: Chromium switches may come before the app path (`electron
+// --inspect=5456 . models/`), so the app is the first positional argument,
+// not argv[1]. Any other argument that resolves to `appPath` (app.getAppPath())
+// is the app too, never a folder to open.
 export function targetsFromArgv(
   argv: string[],
-  isPackaged: boolean
+  isPackaged: boolean,
+  opts: { appPath?: string; cwd?: string } = {}
 ): OpenTarget[] {
-  // Packaged: [app, ...args]. Development: [electron, appPath, ...args].
-  const args = argv.slice(isPackaged ? 1 : 2);
+  const cwd = opts.cwd ?? process.cwd();
+  const positional = argv.slice(1).filter((arg) => !arg.startsWith("-"));
+  const args = isPackaged ? positional : positional.slice(1);
+  const appPath = opts.appPath && path.resolve(opts.appPath);
   return args
-    .filter((arg) => !arg.startsWith("-"))
-    .map((arg) => resolveTarget(arg))
+    .filter((arg) => !appPath || path.resolve(cwd, arg) !== appPath)
+    .map((arg) => resolveTarget(arg, cwd))
     .filter((t): t is OpenTarget => t !== undefined);
 }
