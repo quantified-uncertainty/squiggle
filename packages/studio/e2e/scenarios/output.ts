@@ -194,7 +194,7 @@ export const scenarios: Scenario[] = [
   {
     id: "output/function-cards",
     title:
-      "Function cards show the whole name, fn(…) and Show/Hide plot only for one parameter (#26)",
+      "Function cards show the whole name, fn(…) and Show/Hide plot only for functions the viewer can plot (#26)",
     tags: ["output", "layout"],
     viewport: { width: 1024, height: 768 },
     state: { file: functionsFile, view: "output" },
@@ -230,6 +230,13 @@ export const scenarios: Scenario[] = [
         signature: "fn(a, b)",
         buttons: [],
       });
+      // One parameter, but the viewer can't plot them: no "Show plot" that
+      // would only show "Function Display Failed".
+      expect(byName.get("scaleDist")).toMatchObject({
+        signature: "fn(d)",
+        buttons: [],
+      });
+      expect(byName.get("pair")?.buttons).toEqual([]);
       expect(byName.get("toMonthly")?.nameTruncated).toBe(false);
 
       // Show plot, then Hide plot.

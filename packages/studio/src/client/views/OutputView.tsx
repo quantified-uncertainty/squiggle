@@ -138,7 +138,12 @@ const FunctionCard: FC<{
   setExpanded: (expanded: boolean) => void;
 }> = ({ runOutput, card, actions, expanded, setExpanded }) => {
   const value = card.value;
-  const plottable = isPlottableFunction(value);
+  const environment = runOutput.output.environment;
+  // Calls the function (twice at most) to see whether it can be plotted.
+  const plottable = useMemo(
+    () => isPlottableFunction(value, environment),
+    [value, environment]
+  );
   const defaultTab = useCardTab(card);
   if (expanded && plottable) {
     return (

@@ -117,6 +117,24 @@ describe("isPlottableFunction (#26)", () => {
     expect(isPlottableFunction(await valueOf(code, "none"))).toBe(false);
     expect(isPlottableFunction(await valueOf(code, "n"))).toBe(false);
   });
+
+  test("only functions the viewer can chart: numbers or distributions over its x range", async () => {
+    const code = [
+      "dist(x) = normal(x, 1)",
+      "ranged(x: [1, 10]) = x ^ 2",
+      "positive(x) = x > 0 ? x : throw('needs x > 0')",
+      "scaleDist(d) = SampleSet.fromDist(d) * 2",
+      "pair(x) = {a: x, b: x * 2}",
+    ].join("\n");
+    expect(isPlottableFunction(await valueOf(code, "dist"))).toBe(true);
+    expect(isPlottableFunction(await valueOf(code, "ranged"))).toBe(true);
+    // Fails at 0, works at 10: the viewer plots it.
+    expect(isPlottableFunction(await valueOf(code, "positive"))).toBe(true);
+    // Takes a distribution: every call with a number fails.
+    expect(isPlottableFunction(await valueOf(code, "scaleDist"))).toBe(false);
+    // Returns a record: the viewer has no chart for it.
+    expect(isPlottableFunction(await valueOf(code, "pair"))).toBe(false);
+  });
 });
 
 describe("cardKeyForPath", () => {

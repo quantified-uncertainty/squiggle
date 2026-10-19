@@ -14,3 +14,9 @@ toMonthly(x) = x / 12
 @name("Expected cost of a very long-named intervention over the years")
 @doc("A function with a long @name.")
 longNamedCost(years) = years * (1k to 2k)
+
+@doc("Takes a distribution, so the viewer can't plot it over numbers.")
+scaleDist(d) = SampleSet.fromDist(d) * 2
+
+@doc("Returns a record, which has no chart.")
+pair(x) = { low: x, high: x * 2 }

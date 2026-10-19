@@ -5,7 +5,14 @@
 // by run: a rerun updates each card in place, so calculator inputs, expanded
 // plots and expanded items survive an agent's edit (#22).
 
-import type { SqValue, SqValuePath } from "@quri/squiggle-lang";
+import {
+  defaultEnvironment,
+  type Env,
+  SqDateRangeDomain,
+  SqNumericRangeDomain,
+  type SqValue,
+  type SqValuePath,
+} from "@quri/squiggle-lang";
 
 export const RESULT_CARD_KEY = "result";
 
@@ -64,10 +71,35 @@ export function functionSignature(parameterString: string): string {
   return `fn(${params.join(", ")})`;
 }
 
-// Only one-parameter functions can be plotted ("Show plot").
-export function isPlottableFunction(value: SqValue): boolean {
+// The x range the viewer plots a function over when its parameter has no
+// range of its own (components' functionChartDefaults).
+const PLOT_X_RANGE = { min: 0, max: 10 };
+
+// "Show plot" only for functions the viewer can plot (#26): one parameter,
+// and a call at either end of the plotted range returns a number or a
+// distribution, as the viewer's own first two calls must. A function of a
+// distribution (`scaleDist(d) = SampleSet.fromDist(d) * 2`) fails both calls,
+// and one that returns a record has no chart, so neither is offered.
+export function isPlottableFunction(
+  value: SqValue,
+  environment: Env = defaultEnvironment
+): boolean {
   if (value.tag !== "Lambda") return false;
-  return value.value.parameterCounts().includes(1);
+  const fn = value.value;
+  if (!fn.parameterCounts().includes(1)) return false;
+  const domain = fn.signatures().find((s) => s.length === 1)?.[0]?.domain;
+  const range =
+    domain instanceof SqNumericRangeDomain ||
+    domain instanceof SqDateRangeDomain
+      ? domain
+      : SqNumericRangeDomain.fromMinMax(PLOT_X_RANGE.min, PLOT_X_RANGE.max);
+  for (const x of [range.minValue, range.maxValue]) {
+    const result = fn.call([x], environment);
+    if (result.ok) {
+      return result.value.tag === "Number" || result.value.tag === "Dist";
+    }
+  }
+  return false;
 }
 
 // The card that shows a value path: its binding, or the result card.
