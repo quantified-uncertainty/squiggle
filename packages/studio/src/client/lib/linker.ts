@@ -12,44 +12,30 @@ import { dirname, joinPath } from "./paths.js";
 //
 // `onLoad` is called with every source id that gets loaded, so that callers can
 // track dependencies (e.g. to re-run when an imported file changes on disk).
-const INVALID_PREFIX = "invalid:";
-
-function invalidImport(reason: string): string {
-  return INVALID_PREFIX + reason;
-}
-
+//
+// Invalid imports make `resolve` throw; squiggle-lang reports that as an import
+// error at the import statement.
 export function makeStudioLinker(
   onLoad?: (sourceId: string) => void
 ): SqLinker {
   return {
-    // `resolve` must not throw: squiggle-lang calls it synchronously while
-    // building the import graph, where an exception escapes the project's error
-    // handling and the run never finishes. Invalid imports resolve to an
-    // `invalid:` id instead, and `loadModule` rejects with the reason, which is
-    // reported as a normal import error.
     resolve(name, fromId) {
       if (name.startsWith("hub:")) {
-        return parseHubImport(name)
-          ? name
-          : invalidImport(
-              `Invalid Hub import "${name}", expected "hub:owner/slug"`
-            );
+        if (!parseHubImport(name)) {
+          throw new Error(
+            `Invalid Hub import "${name}", expected "hub:owner/slug"`
+          );
+        }
+        return name;
       }
       if (name.startsWith("./") || name.startsWith("../")) {
-        try {
-          return joinPath(dirname(fromId), name);
-        } catch (e) {
-          return invalidImport(e instanceof Error ? e.message : String(e));
-        }
+        return joinPath(dirname(fromId), name);
       }
-      return invalidImport(
+      throw new Error(
         `Unsupported import "${name}". Use a relative path ("./other.squiggle") or a Hub id ("hub:owner/slug").`
       );
     },
     async loadModule(sourceId, hash) {
-      if (sourceId.startsWith(INVALID_PREFIX)) {
-        throw new Error(sourceId.slice(INVALID_PREFIX.length));
-      }
       if (hash) {
         throw new Error("Pinned import hashes are not supported in Studio");
       }
