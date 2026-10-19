@@ -1,0 +1,17 @@
+{
+  "ok": false,
+  "result": null,
+  "bindings": {},
+  "errors": [
+    {
+      "kind": "other",
+      "message": "Error: File not found: errors/does-not-exist.squiggle",
+      "location": {
+        "file": "errors/missing-import.squiggle",
+        "start": { "line": 3, "column": 8 },
+        "end": { "line": 3, "column": 35 }
+      },
+      "importChain": ["errors/does-not-exist.squiggle"]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "ok": false,
+  "result": null,
+  "bindings": {},
+  "errors": [
+    {
+      "kind": "internal",
+      "message": "Tried to perform an operation on an empty XYShape."
+    }
+  ]
+}

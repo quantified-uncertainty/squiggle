@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "values": {
+      "values": {
+        "nothing": 0,
+        "one": 1,
+        "some": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 2.472632755,
+          "stdev": 0.300295511,
+          "p5": 1.984818843,
+          "p25": 2.266628666,
+          "p50": 2.457652234,
+          "p75": 2.67369123,
+          "p95": 2.968185506,
+          "min": 1.699502244,
+          "max": 3.643515978,
+          "sampleCount": 1000
+        }
+      },
+      "recommendedUnit": "one"
+    }
+  },
+  "errors": []
+}

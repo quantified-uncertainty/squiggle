@@ -3,8 +3,9 @@ import fs from "node:fs";
 // Finding and loading a headless browser, shared by `squiggle-studio render`
 // and the e2e harness (e2e/lib/harness.ts).
 
-// The tiny subset of the puppeteer-core API that `render` uses. puppeteer-core
-// is an optional dependency, so we don't depend on its types at build time.
+// The subset of the puppeteer-core API that `render` uses. puppeteer-core is
+// an optional dependency, so we don't depend on its types at build time.
+export type PuppeteerConsoleMessage = { type(): string; text(): string };
 export type PuppeteerPage = {
   setViewport(v: {
     width: number;
@@ -15,16 +16,13 @@ export type PuppeteerPage = {
     url: string,
     opts: { waitUntil: string; timeout: number }
   ): Promise<unknown>;
-  waitForSelector(
-    selector: string,
-    opts: { timeout: number }
-  ): Promise<unknown>;
-  waitForFunction(
-    expression: string,
-    opts: { timeout: number }
-  ): Promise<unknown>;
   evaluate<T>(expression: string): Promise<T>;
   screenshot(opts: { path: string; fullPage: boolean }): Promise<unknown>;
+  on(event: "console", cb: (message: PuppeteerConsoleMessage) => void): void;
+  on(event: "pageerror", cb: (error: unknown) => void): void;
+  emulateMediaFeatures(
+    features: Array<{ name: string; value: string }>
+  ): Promise<void>;
 };
 export type PuppeteerBrowser = {
   newPage(): Promise<PuppeteerPage>;

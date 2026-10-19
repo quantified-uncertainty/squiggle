@@ -1,21 +1,16 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import {
-  type Command,
-  InvalidArgumentError,
-} from "@commander-js/extra-typings";
+import type { Command } from "@commander-js/extra-typings";
 
 import { isLoopbackHost, startStudioServer } from "../../server/server.js";
+import { StudioUsageError } from "../../server/runner.js";
+import { viewStateToSearch } from "../../shared/viewState.js";
+import { parsePort } from "../args.js";
 
-export function parsePort(value: string): number {
-  const port = Number(value);
-  if (!Number.isInteger(port) || port < 0 || port > 65535) {
-    throw new InvalidArgumentError("Port must be an integer from 0 to 65535.");
-  }
-  return port;
-}
+export { parsePort };
 
 function openBrowser(url: string) {
   const [cmd, args] =
@@ -41,12 +36,37 @@ function networkUrls(host: string, port: number): string[] {
     .map((i) => `http://${i.address}:${port}`);
 }
 
+export type ServeTarget = {
+  root: string; // absolute folder to open
+  file?: string; // root-relative file to show (a file argument)
+};
+
+// `squiggle-studio <dir|file>`: a folder opens as is; a file opens its folder
+// with the file shown (#50), as in the desktop app.
+export function resolveServeTarget(
+  arg: string,
+  cwd: string = process.cwd()
+): ServeTarget {
+  const abs = path.resolve(cwd, arg);
+  const stat = fs.statSync(abs, { throwIfNoEntry: false });
+  if (!stat) throw new StudioUsageError(`No such file or folder: ${arg}`);
+  if (stat.isDirectory()) return { root: abs };
+  return { root: path.dirname(abs), file: path.basename(abs) };
+}
+
+// The address to print and open: the server's URL, plus `?file=` for a file.
+export function serveUrl(serverUrl: string, target: ServeTarget): string {
+  return target.file
+    ? `${serverUrl}/${viewStateToSearch({ file: target.file })}`
+    : serverUrl;
+}
+
 // `squiggle-studio [dir]`: serve a folder and open it in the browser. This is
 // the default command, so it is defined on the program itself rather than as a
 // subcommand.
 export function register(program: Command): void {
   program
-    .argument("[dir]", "folder to open", ".")
+    .argument("[dir]", "folder to open, or a file to show in its folder", ".")
     .option("-p, --port <port>", "port to listen on", parsePort, 4321)
     .option("--host <host>", "host to bind to", "127.0.0.1")
     .option(
@@ -59,26 +79,28 @@ export function register(program: Command): void {
       "serve the client with Vite (for developing Studio itself)"
     )
     .action(async (dir, options) => {
+      const target = resolveServeTarget(dir);
       // startStudioServer refuses non-loopback hosts without allowNetwork.
       const server = await startStudioServer({
-        root: path.resolve(dir),
+        root: target.root,
         port: options.port,
         host: options.host,
         allowNetwork: options.allowNetwork ?? false,
         dev: options.dev ?? false,
       });
+      const url = serveUrl(server.url, target);
       process.stdout.write(
-        `Squiggle Studio is running at ${server.url}\nServing ${server.getRoot()}\n`
+        `Squiggle Studio is running at ${url}\nServing ${server.getRoot()}\n`
       );
       if (!isLoopbackHost(options.host)) {
-        for (const url of networkUrls(options.host, server.port)) {
-          process.stdout.write(`On your network: ${url}\n`);
+        for (const networkUrl of networkUrls(options.host, server.port)) {
+          process.stdout.write(`On your network: ${networkUrl}\n`);
         }
         process.stderr.write(
           `\nWARNING: listening on ${options.host} (--allow-network). Anyone who can reach port ${server.port} can read and write files in ${server.getRoot()}; there is no authentication. Opening other folders is disabled.\n\n`
         );
       }
-      if (options.open) openBrowser(server.url);
+      if (options.open) openBrowser(url);
 
       const shutdown = () => {
         void server.close().then(() => process.exit(0));

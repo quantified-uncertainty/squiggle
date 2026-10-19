@@ -1,0 +1,27 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "fruit": {
+      "values": {
+        "apple": 1,
+        "banana": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 1.096714003,
+          "stdev": 0.4668960023,
+          "p5": 0.4871425297,
+          "p25": 0.7670002612,
+          "p50": 1.011439449,
+          "p75": 1.349101649,
+          "p95": 1.928409709,
+          "min": 0.2865608715,
+          "max": 3.886811967,
+          "sampleCount": 1000
+        },
+        "kiwi": "green"
+      }
+    }
+  },
+  "errors": []
+}

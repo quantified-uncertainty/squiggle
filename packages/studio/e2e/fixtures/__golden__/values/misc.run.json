@@ -1,0 +1,51 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "helper": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 14.49967584,
+      "stdev": 3.016985428,
+      "p5": 9.870587893,
+      "p25": 12.38547419,
+      "p50": 14.22279389,
+      "p75": 16.42620852,
+      "p95": 19.63878472,
+      "min": 7.570480454,
+      "max": 27.88121937,
+      "sampleCount": 1000
+    },
+    "shown": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 28.99935168,
+      "stdev": 6.033970856,
+      "p5": 19.74117579,
+      "p25": 24.77094837,
+      "p50": 28.44558778,
+      "p75": 32.85241705,
+      "p95": 39.27756943,
+      "min": 15.14096091,
+      "max": 55.76243873,
+      "sampleCount": 1000,
+      "name": "Shown, built from a hidden helper"
+    },
+    "greeting": "Hello, Squiggle",
+    "launch": {
+      "type": "Date",
+      "iso": "2025-03-14T07:00:00.000Z",
+      "ms": 1741935600000,
+      "name": "A date"
+    },
+    "timeToShip": {
+      "type": "Duration",
+      "ms": 1814400000,
+      "display": "21.0 days",
+      "name": "A duration"
+    },
+    "isReady": true,
+    "alsoHidden": 5
+  },
+  "errors": []
+}

@@ -1,0 +1,128 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "dists": {
+      "essay": 1,
+      "paper": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 12.12108821,
+        "stdev": 9.202921681,
+        "p5": 2.872957386,
+        "p25": 6.106203133,
+        "p50": 9.667770741,
+        "p75": 15.59986331,
+        "p95": 28.23756502,
+        "min": 1.190085112,
+        "max": 90.45132072,
+        "sampleCount": 1000
+      },
+      "bigPaper": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 82.24573717,
+        "stdev": 62.07664607,
+        "p5": 19.94168051,
+        "p25": 41.14423224,
+        "p50": 65.17246121,
+        "p75": 104.6640017,
+        "p95": 201.8514984,
+        "min": 4.983385774,
+        "max": 650.2684051,
+        "sampleCount": 1000
+      },
+      "tool": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 117.5453898,
+        "stdev": 217.9873389,
+        "p5": 9.926459086,
+        "p25": 29.69323652,
+        "p50": 63.21296377,
+        "p75": 136.4018538,
+        "p95": 362.5714774,
+        "min": 2.611856713,
+        "max": 5327.644576,
+        "sampleCount": 1000
+      },
+      "website": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 16.62546643,
+        "stdev": 20.01177047,
+        "p5": 2.238354202,
+        "p25": 5.410379522,
+        "p50": 10.2131208,
+        "p75": 19.61436765,
+        "p95": 52.36080083,
+        "min": 0.6156755553,
+        "max": 194.9764853,
+        "sampleCount": 1000
+      },
+      "library": {
+        "type": "Dist",
+        "subtype": "SampleSet",
+        "mean": 275.8253938,
+        "stdev": 400.244435,
+        "p5": 29.3927317,
+        "p25": 76.55402381,
+        "p50": 152.6177748,
+        "p75": 325.9401866,
+        "p95": 941.5582176,
+        "min": 5.969432543,
+        "max": 7387.601171,
+        "sampleCount": 1000
+      }
+    },
+    "writing": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(id,name)",
+      "parameters": [[{ "name": "id" }, { "name": "name" }]]
+    },
+    "software": {
+      "type": "Lambda",
+      "kind": "UserDefinedLambda",
+      "signature": "(id,name)",
+      "parameters": [[{ "name": "id" }, { "name": "name" }]]
+    },
+    "projects": {
+      "title": "Projects by cluster",
+      "items": [
+        { "id": "essay", "name": "Short essay", "clusterId": "writing" },
+        { "id": "paper", "name": "Paper", "clusterId": "writing" },
+        { "id": "bigPaper", "name": "Long paper", "clusterId": "writing" },
+        { "id": "tool", "name": "Internal tool", "clusterId": "software" },
+        { "id": "website", "name": "Website", "clusterId": "software" },
+        {
+          "id": "library",
+          "name": "Open-source library",
+          "clusterId": "software"
+        }
+      ],
+      "clusters": [
+        {
+          "id": "writing",
+          "name": "Writing",
+          "color": "#DB828C",
+          "recommendedUnit": "essay"
+        },
+        {
+          "id": "software",
+          "name": "Software",
+          "color": "#5D8CD3",
+          "recommendedUnit": "tool"
+        }
+      ],
+      "recommendedUnit": "essay",
+      "fn": {
+        "type": "Lambda",
+        "kind": "UserDefinedLambda",
+        "signature": "(a,b)",
+        "parameters": [[{ "name": "a" }, { "name": "b" }]]
+      }
+    }
+  },
+  "errors": []
+}

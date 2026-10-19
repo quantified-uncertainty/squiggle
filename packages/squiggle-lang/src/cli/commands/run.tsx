@@ -2,23 +2,18 @@ import { type Command, Option } from "@commander-js/extra-typings";
 import fs from "fs";
 import { render } from "ink";
 
-import { type JsonValue } from "@quri/serializer";
-
 import { defaultEnv, Env } from "../../dists/env.js";
 import { SqProject } from "../../public/SqProject/index.js";
 import { SqModule } from "../../public/SqProject/SqModule.js";
-import { SqModuleOutput } from "../../public/SqProject/SqModuleOutput.js";
-import { SqDict } from "../../public/SqValue/SqDict.js";
-import { sqValueToJson } from "../../public/SqValue/toJson.js";
+import {
+  exceptionToErrorJson,
+  type RunJson,
+  sqModuleOutputToJson,
+} from "../../public/json.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold } from "../colors.js";
-import {
-  ErrorJson,
-  exceptionToErrorJson,
-  errorToJson,
-  printErrors,
-} from "../errorReport.js";
+import { printErrors } from "../errorReport.js";
 import { EVAL_SOURCE_ID, makeFileLinker } from "../linker.js";
 import { StateGraph } from "../StateGraph.js";
 import { loadSrc, myParseInt, myParsePositiveInt } from "../utils.js";
@@ -45,15 +40,6 @@ export type RunArgs = {
   runnerThreads?: number;
   showProjectState?: boolean;
   logProjectActions?: boolean;
-};
-
-export type RunJsonOutput = {
-  ok: boolean;
-  result: JsonValue;
-  bindings: { [name: string]: JsonValue };
-  exports?: { [name: string]: JsonValue };
-  errors: ErrorJson[];
-  timeMs: number;
 };
 
 export function makeEnvironment({
@@ -108,39 +94,7 @@ async function evaluate(args: RunArgs & { environment: Env }) {
   return { output, sources: linker.sources };
 }
 
-function dictToJson(dict: SqDict, samples: number | undefined) {
-  return Object.fromEntries(
-    dict.entries().map(([k, v]) => [k, sqValueToJson(v, { samples })])
-  );
-}
-
-export function outputToJson(
-  output: SqModuleOutput,
-  sources: ReadonlyMap<string, string>,
-  samples?: number
-): RunJsonOutput {
-  const timeMs = output.executionTime;
-  if (!output.result.ok) {
-    return {
-      ok: false,
-      result: null,
-      bindings: {},
-      errors: output.result.value.errors.map((e) => errorToJson(e, sources)),
-      timeMs,
-    };
-  }
-  const { result, bindings, exports } = output.result.value;
-  return {
-    ok: true,
-    result: sqValueToJson(result, { samples }),
-    bindings: dictToJson(bindings, samples),
-    ...(exports.isEmpty() ? {} : { exports: dictToJson(exports, samples) }),
-    errors: [],
-    timeMs,
-  };
-}
-
-function exceptionToJson(e: unknown): RunJsonOutput {
+function exceptionToJson(e: unknown): RunJson {
   return {
     ok: false,
     result: null,
@@ -150,7 +104,7 @@ function exceptionToJson(e: unknown): RunJsonOutput {
   };
 }
 
-function printJson(json: RunJsonOutput) {
+function printJson(json: RunJson) {
   if (!json.ok) {
     process.exitCode = 1;
   }
@@ -159,11 +113,11 @@ function printJson(json: RunJsonOutput) {
 
 // `--json` promises a single JSON object on stdout, so unexpected exceptions are reported in it too.
 async function runJson(args: RunArgs & { environment: Env }) {
-  let json: RunJsonOutput;
+  let json: RunJson;
   let files: string[] = [];
   try {
     const { output, sources } = await evaluate(args);
-    json = outputToJson(output, sources, args.samples);
+    json = sqModuleOutputToJson(output, sources, { samples: args.samples });
     files = [...sources.keys()];
   } catch (e) {
     json = exceptionToJson(e);

@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "scaledCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 1789.594759,
+      "stdev": 1102.272049,
+      "p5": 555.4550992,
+      "p25": 1013.654945,
+      "p50": 1510.254576,
+      "p75": 2294.779934,
+      "p95": 3810.387634,
+      "min": 205.1908631,
+      "max": 7448.679766,
+      "sampleCount": 1000,
+      "name": "Scaled weekly cost ($)"
+    }
+  },
+  "errors": []
+}
