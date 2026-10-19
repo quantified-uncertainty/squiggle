@@ -1,6 +1,6 @@
 import { redo, selectAll, toggleComment, undo } from "@codemirror/commands";
 import { openSearchPanel } from "@codemirror/search";
-import { Transaction } from "@codemirror/state";
+import { EditorState, Transaction } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 
 import { formatSquiggle } from "./formatSquiggleExtension.js";
@@ -66,6 +66,79 @@ export function runEditorCommand(target: Element, cmd: EditorCommand): boolean {
     default:
       throw new Error(`Unknown editor command: ${cmd satisfies never}`);
   }
+}
+
+// Edit ▸ Cut, Copy and Paste from an app's own menu. Browsers can't run
+// `document.execCommand("cut" | "paste" | "insertText")` on CodeMirror (in
+// Chrome it edits through the EditContext API, so the content isn't
+// contenteditable), so apps use the async clipboard API and these functions
+// for the editor's side.
+
+type CopiedRanges = {
+  text: string;
+  ranges: { from: number; to: number }[];
+};
+
+// What Copy and Cut take, as CodeMirror's own copy does: the selected ranges
+// or, with nothing selected, the whole lines under the cursors.
+function copiedRanges(state: EditorState): CopiedRanges {
+  const content: string[] = [];
+  const ranges: { from: number; to: number }[] = [];
+  for (const range of state.selection.ranges) {
+    if (range.empty) continue;
+    content.push(state.sliceDoc(range.from, range.to));
+    ranges.push(range);
+  }
+  if (!content.length) {
+    let upto = -1;
+    for (const { from } of state.selection.ranges) {
+      const line = state.doc.lineAt(from);
+      if (line.number > upto) {
+        content.push(line.text + state.lineBreak);
+        ranges.push({
+          from: line.from,
+          to: Math.min(state.doc.length, line.to + 1),
+        });
+      }
+      upto = line.number;
+    }
+    return { text: content.join(""), ranges };
+  }
+  return { text: content.join(state.lineBreak), ranges };
+}
+
+// The text Edit ▸ Copy or Cut puts on the clipboard for the editor `target`
+// belongs to; undefined when there is no editor there.
+export function editorClipboardText(target: Element): string | undefined {
+  const view = findEditorView(target);
+  return view ? copiedRanges(view.state).text : undefined;
+}
+
+// The second half of Edit ▸ Cut, once the text is on the clipboard: deletes
+// what editorClipboardText() returned, as one undoable "delete.cut" edit.
+export function deleteEditorClipboardRanges(target: Element): boolean {
+  const view = findEditorView(target);
+  if (!view) return false;
+  const { ranges } = copiedRanges(view.state);
+  if (!ranges.some((r) => r.to > r.from)) return false;
+  view.dispatch({
+    changes: ranges,
+    scrollIntoView: true,
+    userEvent: "delete.cut",
+  });
+  return true;
+}
+
+// Edit ▸ Paste: inserts `text` at (replacing) the selection, as one undoable
+// "input.paste" edit, like a ⌘V paste.
+export function pasteIntoEditor(target: Element, text: string): boolean {
+  const view = findEditorView(target);
+  if (!view) return false;
+  view.dispatch(view.state.replaceSelection(text), {
+    scrollIntoView: true,
+    userEvent: "input.paste",
+  });
+  return true;
 }
 
 // The smallest single change that turns `doc` into `code`, from their common

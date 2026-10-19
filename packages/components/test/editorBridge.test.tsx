@@ -9,8 +9,11 @@ import { SqProject } from "@quri/squiggle-lang";
 import {
   CodeEditor,
   type CodeEditorHandle,
+  deleteEditorClipboardRanges,
+  editorClipboardText,
   type EditorCursorDetail,
   type EditorStateSnapshot,
+  pasteIntoEditor,
   runEditorCommand,
   SQ_EDITOR_CURSOR_EVENT,
 } from "../src/index.js";
@@ -210,6 +213,61 @@ describe("runEditorCommand", () => {
     });
     expect(doc(view)).toBe(CODE);
     expect(runEditorCommand(document.body, "undo")).toBe(false);
+  });
+});
+
+// Edit ▸ Cut, Copy and Paste from an app's menu (execCommand can't edit
+// CodeMirror; the app moves the text through the async clipboard API).
+describe("clipboard bridge", () => {
+  test("Copy and Cut take the selection; Cut deletes it as one undoable edit", async () => {
+    const { view, dom } = await renderEditor({});
+    const from = CODE.indexOf("b = 2");
+    act(() => {
+      view.dispatch({ selection: { anchor: from, head: from + 5 } });
+    });
+    expect(editorClipboardText(dom)).toBe("b = 2");
+    act(() => {
+      expect(deleteEditorClipboardRanges(dom)).toBe(true);
+    });
+    expect(doc(view)).toBe("a = 1\n\nc = 3\n");
+    act(() => {
+      runEditorCommand(dom, "undo");
+    });
+    expect(doc(view)).toBe(CODE);
+  });
+
+  test("with nothing selected they take the whole line, like CodeMirror's own copy", async () => {
+    const { view, dom } = await renderEditor({});
+    act(() => {
+      view.dispatch({ selection: { anchor: CODE.indexOf("b = 2") + 2 } });
+    });
+    expect(editorClipboardText(dom)).toBe("b = 2\n");
+    act(() => {
+      deleteEditorClipboardRanges(dom);
+    });
+    expect(doc(view)).toBe("a = 1\nc = 3\n");
+  });
+
+  test("Paste replaces the selection as one undoable edit", async () => {
+    const { view, dom } = await renderEditor({});
+    act(() => {
+      view.dispatch({ selection: { anchor: 0, head: CODE.length } });
+    });
+    act(() => {
+      expect(pasteIntoEditor(dom, "pasted = 1\nmore = 2")).toBe(true);
+    });
+    expect(doc(view)).toBe("pasted = 1\nmore = 2");
+    expect(view.state.selection.main.head).toBe("pasted = 1\nmore = 2".length);
+    act(() => {
+      runEditorCommand(dom, "undo");
+    });
+    expect(doc(view)).toBe(CODE);
+  });
+
+  test("nothing outside an editor", () => {
+    expect(editorClipboardText(document.body)).toBeUndefined();
+    expect(deleteEditorClipboardRanges(document.body)).toBe(false);
+    expect(pasteIntoEditor(document.body, "x")).toBe(false);
   });
 });
 

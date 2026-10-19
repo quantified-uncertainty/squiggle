@@ -1,3 +1,5 @@
+import type { Permission } from "puppeteer-core";
+
 import { TID } from "../../src/shared/testIds.js";
 import { expect } from "../lib/expect.js";
 import type { Harness, Scenario } from "../lib/harness.js";
@@ -9,6 +11,11 @@ import type { Harness, Scenario } from "../lib/harness.js";
 // code pane toggle that keeps the view (#44) and the long-name header (#32).
 
 const byId = (id: string, attrs = "") => `[data-testid='${id}']${attrs}`;
+const CLIPBOARD: Permission[] = [
+  "clipboard-read",
+  "clipboard-write",
+  "clipboard-sanitized-write",
+];
 const CODE_PANE = byId(TID.codePane);
 const CODE_CONTENT = `${CODE_PANE} .cm-content`;
 
@@ -495,6 +502,77 @@ export const scenarios: Scenario[] = [
           () => (document.activeElement as HTMLInputElement | null)?.name ?? ""
         )
       ).toBe("replace");
+    },
+  },
+  {
+    id: "editor/menu-cut-paste",
+    title:
+      "Edit ▸ Cut and Edit ▸ Paste from the menubar edit the code editor through the clipboard",
+    tags: ["editor", "menus"],
+    state: { file: "values/numbers.squiggle", view: "output" },
+    check: async (h) => {
+      await h.page.browserContext().overridePermissions(h.url, CLIPBOARD);
+      const original = (await editorInfo(h)).doc;
+      const clipboard = () =>
+        h.page.evaluate(() => navigator.clipboard.readText());
+      // Through the menubar with the mouse, as a user would.
+      const menu = async (command: string) => {
+        await h.page.click(`${byId(TID.menubarTrigger)}[data-menu='edit']`);
+        await h.page.click(
+          `${byId(TID.menuitem)}[data-command=${JSON.stringify(command)}]`
+        );
+      };
+      const doc = async (want: string, what: string) => {
+        await h.page
+          .waitForFunction(
+            (selector: string, text: string) => {
+              const content = document.querySelector(selector) as
+                | (HTMLElement & {
+                    cmView?: {
+                      view?: { state: { doc: { toString(): string } } };
+                    };
+                  })
+                | null;
+              return content?.cmView?.view?.state.doc.toString() === text;
+            },
+            { timeout: 5_000 },
+            CODE_CONTENT,
+            want
+          )
+          .catch(() => undefined);
+        expect((await editorInfo(h)).doc, what).toBe(want);
+      };
+
+      await placeCursor(h, "end");
+      await h.key("Meta+A");
+      await menu("editor.action.clipboardCutAction");
+      await doc("", "Edit ▸ Cut removes the selection");
+      expect(await clipboard(), "Cut puts it on the clipboard").toBe(original);
+
+      await menu("editor.action.clipboardPasteAction");
+      await doc(original, "Edit ▸ Paste inserts it again");
+
+      await h.page.evaluate(() =>
+        navigator.clipboard.writeText("pasted = 1\n")
+      );
+      await placeCursor(h, { line: 1 });
+      await h.command("editor.action.clipboardPasteAction");
+      await doc(`pasted = 1\n${original}`, "commands.run pastes too");
+      expect((await editorInfo(h)).focused, "the editor keeps focus").toBe(
+        true
+      );
+
+      await placeCursor(h, { line: 1 });
+      await menu("editor.action.clipboardCopyAction");
+      await h.page.waitForFunction(
+        () =>
+          navigator.clipboard
+            .readText()
+            .then((text) => text === "pasted = 1\n"),
+        { timeout: 5_000 }
+      );
+      // No "your browser blocks…" toast for any of it.
+      expect(await h.page.$(byId(TID.toast))).toBeNull();
     },
   },
   {

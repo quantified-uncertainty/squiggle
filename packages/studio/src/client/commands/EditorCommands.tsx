@@ -1,7 +1,10 @@
 import { FC } from "react";
 
 import {
+  deleteEditorClipboardRanges,
+  editorClipboardText,
   type EditorCommand,
+  pasteIntoEditor,
   runEditorCommand,
 } from "@quri/squiggle-components";
 import { useToast } from "@quri/ui";
@@ -114,30 +117,74 @@ export const EditorCommands: FC = () => {
     document.execCommand("selectAll");
   });
 
-  // Inside the click's user activation (menus run on the next frame), so the
-  // browser allows them.
-  const clipboard = (action: "cut" | "copy") => {
+  // "press ⌘X" for when the browser refuses (no clipboard API, permission
+  // denied).
+  const pressInstead = (
+    verb: string,
+    command:
+      | "editor.action.clipboardCutAction"
+      | "editor.action.clipboardCopyAction"
+      | "editor.action.clipboardPasteAction",
+    fallback: string
+  ) =>
+    toast(
+      `Your browser blocks ${verb} from menus; press ${primaryKeyLabel(command) ?? fallback}`,
+      "error"
+    );
+
+  // Cut and Copy. A focused input or textarea uses the browser's own
+  // commands (inside the click's user activation: menus run on the next
+  // frame). CodeMirror can't (in Chrome it edits through EditContext, which
+  // execCommand doesn't reach), so its text goes through the async clipboard
+  // API and the components' bridge (§4.7) edits the document.
+  const clipboard = async (action: "cut" | "copy") => {
     focusForEditing(getEditorTarget());
-    document.execCommand(action);
+    const code = document.activeElement?.closest(".cm-editor");
+    if (!code) {
+      document.execCommand(action);
+      return;
+    }
+    const text = editorClipboardText(code);
+    if (text === undefined) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Copy can still go through the copy event CodeMirror handles.
+      if (action === "copy" && document.execCommand("copy")) return;
+      pressInstead(
+        action === "cut" ? "cutting" : "copying",
+        action === "cut"
+          ? "editor.action.clipboardCutAction"
+          : "editor.action.clipboardCopyAction",
+        action === "cut" ? "⌘X" : "⌘C"
+      );
+      return;
+    }
+    if (action === "cut") deleteEditorClipboardRanges(code);
   };
   useCommand("editor.action.clipboardCutAction", () => clipboard("cut"));
   useCommand("editor.action.clipboardCopyAction", () => clipboard("copy"));
+
+  // Paste: navigator.clipboard.readText(), inserted at the selection (§3.4);
+  // the "blocked" toast only when the browser refuses to read.
   useCommand("editor.action.clipboardPasteAction", async () => {
-    const blocked = () =>
-      toast(
-        `Your browser blocks pasting from menus; press ${primaryKeyLabel("editor.action.clipboardPasteAction") ?? "⌘V"}`,
-        "error"
-      );
     let text: string;
     try {
       text = await navigator.clipboard.readText();
     } catch {
-      blocked();
+      pressInstead("pasting", "editor.action.clipboardPasteAction", "⌘V");
       return;
     }
     if (!focusForEditing(getEditorTarget())) return;
-    // CodeMirror and textareas both take inserted text as typing (undoable).
-    if (!document.execCommand("insertText", false, text)) blocked();
+    const code = document.activeElement?.closest(".cm-editor");
+    if (code) {
+      pasteIntoEditor(code, text);
+      return;
+    }
+    // Inputs and the text-file textarea take it as typing (undoable).
+    if (!document.execCommand("insertText", false, text)) {
+      toast("Couldn't paste here", "error");
+    }
   });
 
   useCommand("actions.find", () => {

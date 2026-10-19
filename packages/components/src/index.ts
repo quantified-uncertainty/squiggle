@@ -22,7 +22,10 @@ export {
 // The editor-command bridge for apps that embed CodeEditor and must not import
 // @codemirror/* themselves (Squiggle Studio).
 export {
+  deleteEditorClipboardRanges,
+  editorClipboardText,
   type EditorCommand,
+  pasteIntoEditor,
   runEditorCommand,
 } from "./components/CodeEditor/editorCommands.js";
 export {
