@@ -1,0 +1,2 @@
+import "hub:quri/x" as x
+export x = 1

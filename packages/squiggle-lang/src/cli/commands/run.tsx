@@ -13,7 +13,12 @@ import { sqValueToJson } from "../../public/SqValue/toJson.js";
 import { allRunnerNames, runnerByName } from "../../runners/index.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { bold } from "../colors.js";
-import { ErrorJson, errorToJson, printErrors } from "../errorReport.js";
+import {
+  ErrorJson,
+  exceptionToErrorJson,
+  errorToJson,
+  printErrors,
+} from "../errorReport.js";
 import { EVAL_SOURCE_ID, makeFileLinker } from "../linker.js";
 import { StateGraph } from "../StateGraph.js";
 import { loadSrc, myParseInt } from "../utils.js";
@@ -132,20 +137,49 @@ export function outputToJson(
   };
 }
 
+function exceptionToJson(e: unknown): RunJsonOutput {
+  return {
+    ok: false,
+    result: null,
+    bindings: {},
+    errors: [exceptionToErrorJson(e)],
+    timeMs: 0,
+  };
+}
+
+function printJson(json: RunJsonOutput) {
+  if (!json.ok) {
+    process.exitCode = 1;
+  }
+  console.log(JSON.stringify(json, null, 2));
+}
+
+// `--json` promises a single JSON object on stdout, so unexpected exceptions are reported in it too.
+async function runJson(args: RunArgs & { environment: Env }) {
+  let json: RunJsonOutput;
+  let files: string[] = [];
+  try {
+    const { output, sources } = await evaluate(args);
+    json = outputToJson(output, sources, args.samples);
+    files = [...sources.keys()];
+  } catch (e) {
+    json = exceptionToJson(e);
+  }
+  printJson(json);
+  return files;
+}
+
 // Runs the code once and prints the output. Returns the files that were loaded, for `--watch`.
 async function run(args: RunArgs): Promise<string[]> {
   const environment = makeEnvironment(args);
+  if (args.output === "JSON") {
+    return runJson({ ...args, environment });
+  }
+
   const { output, sources } = await evaluate({ ...args, environment });
 
   if (!output.result.ok) {
     process.exitCode = 1;
-  }
-
-  if (args.output === "JSON") {
-    console.log(
-      JSON.stringify(outputToJson(output, sources, args.samples), null, 2)
-    );
-    return [...sources.keys()];
   }
 
   const printer = new CliPrinter();
@@ -198,7 +232,11 @@ async function watch(args: RunArgs, filename: string) {
       process.exitCode = undefined;
       files = await run({ ...args, src });
     } catch (e) {
-      console.error(e instanceof Error ? e.message : String(e));
+      if (args.output === "JSON") {
+        printJson(exceptionToJson(e));
+      } else {
+        console.error(e instanceof Error ? e.message : String(e));
+      }
     }
     if (args.output !== "JSON") {
       console.error(`\nWatching ${files.length} file(s) for changes...`);
