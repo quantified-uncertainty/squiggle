@@ -87,6 +87,7 @@ export async function checkInvariants(
       `Contrast below 4.5:1: ${formatContrastViolation(v)}`
     );
   }
+  warnings.push(...h.idleWarnings);
   for (const message of h.errors.console) {
     warnings.push(`Console error: ${message}`);
   }

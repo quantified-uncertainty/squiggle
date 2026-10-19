@@ -196,4 +196,88 @@ describe.skipIf(only.length > 0)("harness", () => {
   test("packages detected as merged", () => {
     expect(merged.has("WP0-H")).toBe(true);
   });
+
+  // The harness's use of WP0's window.squiggleStudio and command log, against
+  // stand-ins injected into a real Studio page.
+  test("whenIdle, command, state and key use window.squiggleStudio", async () => {
+    const h = await startHarnessInternal(
+      { viewport: { width: 800, height: 600 } },
+      { dir: path.join(OUT_DIR, "test"), prefix: "selftest-agent-hooks" }
+    );
+    try {
+      await h.open({});
+      await h.page.evaluate(() => {
+        const marker = document.createElement("div");
+        marker.id = "selftest-marker";
+        marker.setAttribute("data-studio-ready", "0");
+        document.body.append(marker);
+        const log: Array<{ id: string; source: string; at: number }> = [];
+        const run = (id: string) => {
+          log.push({ id, source: "api", at: performance.now() });
+        };
+        Object.assign(window, {
+          __studioCommandLog: log,
+          squiggleStudio: {
+            // Claims idle right away, although the marker says "0".
+            whenIdle: async () => ({
+              idle: true,
+              timedOut: false,
+              waitedMs: 0,
+            }),
+            getState: () => ({
+              file: "from/getState.squiggle",
+              view: "output",
+            }),
+            commands: {
+              run: async (id: string) => {
+                if (id === "bad") return { ok: false, error: "disabled" };
+                run(id);
+                return { ok: true };
+              },
+            },
+          },
+        });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "F7") run("one");
+          if (e.key === "F8") {
+            run("first");
+            run("second");
+          }
+        });
+        setTimeout(() => marker.setAttribute("data-studio-ready", "1"), 300);
+      });
+
+      await h.whenIdle(5_000);
+      expect(h.idleResults.at(-1)?.earlyApi).toBe(true);
+      expect(h.idleWarnings).toHaveLength(1);
+      expect(
+        await h.page.$eval("#selftest-marker", (el) =>
+          el.getAttribute("data-studio-ready")
+        )
+      ).toBe("1");
+
+      await h.page.$eval("#selftest-marker", (el) =>
+        el.setAttribute("data-studio-ready", "0")
+      );
+      await expect(h.whenIdle(300)).rejects.toThrow(/didn't go idle/);
+      h.idleTimeouts.length = 0;
+      await h.page.$eval("#selftest-marker", (el) => el.remove());
+
+      expect(await h.state()).toEqual({
+        file: "from/getState.squiggle",
+        view: "output",
+      });
+      await h.command("fine");
+      await expect(h.command("bad")).rejects.toThrow(/disabled/);
+
+      await h.key("F7");
+      expect(h.keypressViolations).toEqual([]);
+      await h.key("F8");
+      expect(h.keypressViolations).toEqual([
+        "F8 ran 2 commands: first, second",
+      ]);
+    } finally {
+      await h.stop();
+    }
+  });
 });

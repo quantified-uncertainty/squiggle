@@ -345,9 +345,12 @@ type IdleResult = {
   timedOut: boolean;
   waitedMs: number;
   via: "api" | "fallback";
+  // window.squiggleStudio.whenIdle() resolved while the shown file's view
+  // wasn't ready yet (its [data-studio-ready] marker missing or "0").
+  earlyApi?: boolean;
 };
 type CommandResult = { ok: true } | { ok: false; error: string };
-type CommandLogEntry = { id: string; source?: string; time?: number };
+type CommandLogEntry = { id: string; source?: string; at?: number };
 type StudioWindow = Window & {
   squiggleStudio?: {
     whenIdle?: (
@@ -361,22 +364,62 @@ type StudioWindow = Window & {
   __studioCommandLog?: CommandLogEntry[];
 };
 
-// Runs in the page. Uses window.squiggleStudio.whenIdle() (WP0) when present.
-// Fallback for older clients: the DOM is quiet for 200 ms, no relative values
-// dashboard is computing, and when a .squiggle file is shown (per
-// <html data-studio-active-file>, the window title "file — folder — …", or
-// while nothing is shown yet, ?file=), every [data-studio-ready] marker is "1"
-// or there is a [data-studio-error]. Then fonts and two animation frames.
+// Runs in the page. Waits for window.squiggleStudio.whenIdle() (WP0) when it
+// exists; in both cases the shown view must also have settled: when a
+// .squiggle file is shown (per <html data-studio-active-file>, the window title
+// "file — folder — …", or while nothing is shown yet, ?file=) outside the
+// Playground, every [data-studio-ready] marker is "1" or there is a
+// [data-studio-error], and no relative values dashboard is computing.
+// Without the API (older clients), the DOM must also be quiet for 200 ms.
+// Then fonts and two animation frames.
 async function idleInPage(timeoutMs: number): Promise<IdleResult> {
   const w = window as StudioWindow;
   const start = performance.now();
+  const elapsed = () => performance.now() - start;
+  const frame = () =>
+    new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  const settled = (): boolean => {
+    const html = document.documentElement;
+    const params = new URLSearchParams(location.search);
+    const titleParts = document.title.split(" — ");
+    const activeFile =
+      html.dataset["studioActiveFile"] ??
+      (titleParts.length === 3 ? titleParts[0] : undefined) ??
+      params.get("file") ??
+      "";
+    const view = html.dataset["studioView"] ?? params.get("view") ?? "";
+    if (document.querySelector("[data-rv-computing]")) return false;
+    if (document.querySelector("[data-studio-error]")) return true;
+    const markers = [...document.querySelectorAll("[data-studio-ready]")];
+    if (markers.some((m) => m.getAttribute("data-studio-ready") !== "1")) {
+      return false;
+    }
+    const needsRun = activeFile.endsWith(".squiggle") && view !== "split";
+    return !needsRun || markers.length > 0;
+  };
+
   const api = w.squiggleStudio?.whenIdle;
   if (typeof api === "function") {
     const result = await api(timeoutMs);
-    return { ...result, via: "api" };
+    if (!result.idle || settled()) return { ...result, via: "api" };
+    while (elapsed() < timeoutMs && !settled()) {
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    const idle = settled();
+    if (idle) {
+      await document.fonts.ready;
+      await frame();
+      await frame();
+    }
+    return {
+      idle,
+      timedOut: !idle,
+      waitedMs: elapsed(),
+      via: "api",
+      earlyApi: true,
+    };
   }
-  const frame = () =>
-    new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
   let quietSince = performance.now();
   const observer = new MutationObserver(() => {
     quietSince = performance.now();
@@ -388,30 +431,13 @@ async function idleInPage(timeoutMs: number): Promise<IdleResult> {
     characterData: true,
   });
   try {
-    while (performance.now() - start < timeoutMs) {
-      const html = document.documentElement;
-      const titleParts = document.title.split(" — ");
-      // The shown file, or (while the workspace is still loading) the one the
-      // URL asks for.
-      const activeFile =
-        html.dataset["studioActiveFile"] ??
-        (titleParts.length === 3 ? titleParts[0] : undefined) ??
-        new URLSearchParams(location.search).get("file") ??
-        "";
-      const markers = [...document.querySelectorAll("[data-studio-ready]")];
-      const ready =
-        markers.length > 0 &&
-        markers.every((m) => m.getAttribute("data-studio-ready") === "1");
-      const errored = document.querySelector("[data-studio-error]") !== null;
-      const computing = document.querySelector("[data-rv-computing]") !== null;
-      const needsRun = activeFile.endsWith(".squiggle") || markers.length > 0;
+    while (elapsed() < timeoutMs) {
       const rendered =
         (document.getElementById("root")?.childElementCount ?? 0) > 0;
       if (
         document.readyState === "complete" &&
         rendered &&
-        !computing &&
-        (!needsRun || ready || errored) &&
+        settled() &&
         performance.now() - quietSince >= 200
       ) {
         await document.fonts.ready;
@@ -420,7 +446,7 @@ async function idleInPage(timeoutMs: number): Promise<IdleResult> {
         return {
           idle: true,
           timedOut: false,
-          waitedMs: performance.now() - start,
+          waitedMs: elapsed(),
           via: "fallback",
         };
       }
@@ -429,7 +455,7 @@ async function idleInPage(timeoutMs: number): Promise<IdleResult> {
     return {
       idle: false,
       timedOut: true,
-      waitedMs: performance.now() - start,
+      waitedMs: elapsed(),
       via: "fallback",
     };
   } finally {
@@ -493,6 +519,7 @@ export type HarnessInternal = Harness & {
   context: BrowserContext;
   idleResults: IdleResult[]; // every whenIdle(), in order
   idleTimeouts: string[];
+  idleWarnings: string[]; // whenIdle() API answers the markers contradicted
   keypressViolations: string[]; // keys that ran more than one command
   shots: string[]; // PNG paths, in order
   lastOpenMs?: number; // navigation start to idle, for the latest open()
@@ -624,6 +651,7 @@ function createHarness(
     context,
     idleResults: [],
     idleTimeouts: [],
+    idleWarnings: [],
     keypressViolations: [],
     shots: [],
     commandLog,
@@ -642,6 +670,11 @@ function createHarness(
     async whenIdle(timeoutMs = IDLE_TIMEOUT_MS) {
       const result = await page.evaluate(idleInPage, timeoutMs);
       h.idleResults.push(result);
+      if (result.earlyApi) {
+        h.idleWarnings.push(
+          `window.squiggleStudio.whenIdle() resolved before the shown view was ready (at ${page.url()})`
+        );
+      }
       if (!result.idle) {
         const message = `Studio didn't go idle within ${timeoutMs} ms (${result.via === "api" ? "window.squiggleStudio.whenIdle" : "fallback idle check"}) at ${page.url()}`;
         h.idleTimeouts.push(message);
@@ -707,11 +740,18 @@ function createHarness(
           )
       );
       const after = await commandLog();
-      if (before && after && after.length - before.length > 1) {
-        const ran = after.slice(before.length).map((e) => e.id);
-        h.keypressViolations.push(
-          `${combo} ran ${ran.length} commands: ${ran.join(", ")}`
-        );
+      if (after) {
+        // The log is capped, so find where the old entries end.
+        const last = before?.at(-1);
+        const from = last
+          ? after.findLastIndex((e) => e.id === last.id && e.at === last.at) + 1
+          : 0;
+        const ran = after.slice(from).map((e) => e.id);
+        if (ran.length > 1) {
+          h.keypressViolations.push(
+            `${combo} ran ${ran.length} commands: ${ran.join(", ")}`
+          );
+        }
       }
     },
 
