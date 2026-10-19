@@ -120,13 +120,7 @@ describe("parse command error handling", () => {
   });
 
   test("typed mode error exits with code 1", async () => {
-    const result = await runCLI([
-      "parse",
-      "--eval",
-      "2+",
-      "--mode",
-      "typed",
-    ]);
+    const result = await runCLI(["parse", "--eval", "2+", "--mode", "typed"]);
     expect(result.exitCode).toBe(1);
     expect(result.stderr).not.toBe("");
   });

@@ -1,4 +1,4 @@
-import { bold, red } from "./colors.js";
+import { bold, red, yellow } from "./colors.js";
 
 export class CliPrinter {
   isFirstSection = true;
@@ -13,12 +13,16 @@ export class CliPrinter {
   }
 
   // Prints an error section to stderr with a colored header.
-  printError(header: string, details: string) {
+  printError(header: string, details: string, color = red) {
     if (!this.isFirstSection) {
       console.error();
     }
     this.isFirstSection = false;
-    console.error(red(bold(header + ":")));
+    console.error(color(bold(header + ":")));
     console.error(details);
+  }
+
+  printWarning(header: string, details: string) {
+    this.printError(header, details, yellow);
   }
 }
