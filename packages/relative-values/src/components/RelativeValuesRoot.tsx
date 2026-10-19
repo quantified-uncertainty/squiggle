@@ -23,10 +23,18 @@ export const RELATIVE_VALUES_CSS_SCOPE = "squiggle-rv";
 // Class of the root (and portals) in compact density.
 export const RELATIVE_VALUES_COMPACT_CLASS = "squiggle-rv-compact";
 
-const RootContext = createContext(false);
+type Density = "comfortable" | "compact";
+
+// The density of the enclosing root; undefined outside of one.
+const RootContext = createContext<Density | undefined>(undefined);
 
 /** Whether this is inside a `RelativeValuesRoot`. */
 export function useIsInsideRelativeValuesRoot(): boolean {
+  return useContext(RootContext) !== undefined;
+}
+
+/** The density of the enclosing `RelativeValuesRoot`, if any. */
+export function useRelativeValuesRootDensity(): Density | undefined {
   return useContext(RootContext);
 }
 
@@ -51,12 +59,13 @@ export const RelativeValuesRoot: FC<
     // CSS variables.
     themeClassName?: string;
     // Defaults to `display.density` of the enclosing provider.
-    density?: "comfortable" | "compact";
+    density?: Density;
   }>
 > = ({ className, style, themeClassName, density, children }) => {
   const core = useOptionalCore();
   const presentation = usePresentation();
-  const compact = (density ?? presentation.display.density) === "compact";
+  const resolvedDensity = density ?? presentation.display.density;
+  const compact = resolvedDensity === "compact";
   const selector = clsx(
     RELATIVE_VALUES_CSS_SCOPE,
     themeClassName,
@@ -65,7 +74,7 @@ export const RelativeValuesRoot: FC<
   const tailwindContextValue = useMemo(() => ({ selector }), [selector]);
   return (
     <TailwindContext.Provider value={tailwindContextValue}>
-      <RootContext.Provider value={true}>
+      <RootContext.Provider value={resolvedDensity}>
         <div
           className={clsx(selector, className)}
           style={style}

@@ -6,6 +6,7 @@ import {
   FC,
   PropsWithChildren,
   ReactElement,
+  ReactNode,
   useEffect,
   useState,
 } from "react";
@@ -22,6 +23,62 @@ import type {
   RelativeValuesToolbarProps,
 } from "./types.js";
 
+// Ids of slot function sources (see `slotKey`).
+const sourceIds = new Map<string, number>();
+const functionIds = new WeakMap<object, number>();
+let nextId = 0;
+
+// Function components that can be called directly (not classes).
+function isPlainFunctionComponent<P>(
+  component: ComponentType<P>
+): component is (props: P) => ReactNode {
+  return (
+    typeof component === "function" &&
+    !(component.prototype as { isReactComponent?: unknown } | undefined)
+      ?.isReactComponent
+  );
+}
+
+// The same key for functions with the same code, e.g. a slot written inline
+// in the host's JSX, which is a new function on every host render.
+function slotKey(component: object): string {
+  if (typeof component === "function") {
+    const source = Function.prototype.toString.call(component);
+    // Bound and native functions all look alike.
+    if (!source.includes("[native code]")) {
+      let id = sourceIds.get(source);
+      if (id === undefined) {
+        id = nextId++;
+        sourceIds.set(source, id);
+      }
+      return `slot:${id}`;
+    }
+  }
+  let id = functionIds.get(component);
+  if (id === undefined) {
+    id = nextId++;
+    functionIds.set(component, id);
+  }
+  return `slot:${id}`;
+}
+
+// Renders a host slot. Its type is stable, and the host's function is called
+// from here, so a new function with the same code (an inline slot) re-renders
+// the slot instead of remounting it, with everything inside it (e.g. the
+// built-in toolbar's search box, which would lose focus, or the live
+// sidebar's charts, which would re-run). Different code remounts (`key`).
+function SlotRenderer<P extends object>({
+  slot,
+  props,
+}: {
+  slot: RelativeValuesSlot<P>;
+  props: P & { Default: ComponentType<P> };
+}): ReactNode {
+  return isPlainFunctionComponent(slot)
+    ? slot(props)
+    : createElement(slot, props);
+}
+
 /** Renders a slot (with `Default`), or the default implementation. */
 export function renderSlot<P extends object>(
   slot: RelativeValuesSlot<P> | undefined,
@@ -29,7 +86,11 @@ export function renderSlot<P extends object>(
   props: P
 ): ReactElement {
   return slot
-    ? createElement(slot, { ...props, Default })
+    ? createElement(SlotRenderer<P>, {
+        key: slotKey(slot),
+        slot,
+        props: { ...props, Default },
+      })
     : createElement(Default, props);
 }
 

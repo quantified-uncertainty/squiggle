@@ -89,7 +89,7 @@ function clusterRuns(
 
 const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const core = useCore();
-  const { controls, display, labels, options } = usePresentation();
+  const { controls, display, labels, options, components } = usePresentation();
   const { state, definition } = rv;
   const lookup: Lookup = rv.compare;
   const mirrored = state.columns === "rows";
@@ -201,16 +201,19 @@ const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
     !core.isLocked("columns");
   const showModeControls =
     controls.grid.modeControls && !core.isLocked("gridMode");
+  // A Toolbar slot is rendered even when no built-in control is left in it.
   const showToolbar =
     controls.grid.toolbar &&
     (showRowSettings ||
       showColumnSettings ||
       showClusterDiagram ||
-      showModeControls);
+      showModeControls ||
+      !!components.Toolbar);
 
   const cellWidth =
     display.grid.cellWidth === 140
-      ? "var(--squiggle-rv-grid-cell-width, 140px)"
+      ? // The compact default doesn't override a host's value.
+        "var(--squiggle-rv-grid-cell-width, var(--squiggle-rv-compact-grid-cell-width, 140px))"
       : typeof display.grid.cellWidth === "number"
         ? `${display.grid.cellWidth}px`
         : display.grid.cellWidth;
@@ -226,7 +229,7 @@ const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
 
   const band = (cluster: Cluster | undefined) => (
     <div
-      className="flex items-center gap-1.5 border-t border-[color:var(--squiggle-rv-border,#e5e7eb)] px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-slate-500"
+      className="flex items-center gap-1.5 border-t border-[color:var(--squiggle-rv-border,#e5e7eb)] px-1 py-0.5 text-xs font-semibold uppercase tracking-wide text-[color:var(--squiggle-rv-muted,#64748b)]"
       data-rv-part="grid-band"
       style={{
         boxShadow: cluster ? `inset 3px 0 0 ${cluster.color}` : undefined,
@@ -294,7 +297,7 @@ const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
               ))}
             </>
           )}
-          <div className="sticky left-0 top-0 z-20 bg-white" />
+          <div className="sticky left-0 top-0 z-20 bg-[var(--squiggle-rv-bg,#fff)]" />
           {columns.map((item) => (
             <CellBox
               header
@@ -340,7 +343,7 @@ const GridViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
                       return (
                         <div
                           key={columnItem.id}
-                          className="bg-gray-200"
+                          className="bg-[var(--squiggle-rv-border,#e5e7eb)]"
                           data-rv-part="grid-cell"
                           data-rv-hidden=""
                           data-rv-row={rowItem.id}

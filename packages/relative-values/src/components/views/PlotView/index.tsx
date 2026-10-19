@@ -7,6 +7,7 @@ import type { Item } from "../../../types.js";
 import { useCore } from "../../host/core.js";
 import { usePresentation } from "../../host/presentation.js";
 import type { ConsumerRequirement } from "../../host/requirements.js";
+import { ViewToolbar } from "../../host/slots.js";
 import type { RelativeValuesReadyController } from "../../host/types.js";
 import { useRelativeValuesConsumer } from "../../useRelativeValues.js";
 import { ClusterFilter } from "../ClusterFilter.js";
@@ -23,7 +24,11 @@ const Section: FC<
         {title}
       </header>
     )}
-    <div className={clsx(border && "border border-slate-100 p-1")}>
+    <div
+      className={clsx(
+        border && "border border-[color:var(--squiggle-rv-border,#f1f5f9)] p-1"
+      )}
+    >
       {children}
     </div>
   </div>
@@ -31,7 +36,8 @@ const Section: FC<
 
 const PlotViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const core = useCore();
-  const { controls, display, labels, options } = usePresentation();
+  const { controls, display, labels, options, components, format } =
+    usePresentation();
   const { plots, height, titles, valueUncertainty } = display.plot;
   const { onItemClick } = options;
 
@@ -64,10 +70,61 @@ const PlotViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
     [onItemClick, selectLocked, core, selectedItem]
   );
 
+  // The plots in the order of `display.plot.plots`; the Clusters panel is
+  // next to the first one (and hidden without plots).
+  const shownPlots = plots.filter(
+    (plot, i) =>
+      (plot === "similarity" || plot === "valueUncertainty") &&
+      plots.indexOf(plot) === i
+  );
   const showClusters =
-    controls.plot.clusterFilter && !core.isLocked("clusters");
-  const showSimilarity = plots.includes("similarity");
-  const showValueUncertainty = plots.includes("valueUncertainty");
+    shownPlots.length > 0 &&
+    controls.plot.clusterFilter &&
+    !core.isLocked("clusters");
+  // The toolbar has no built-in controls: it's for a Toolbar slot.
+  const showToolbar = controls.plot.toolbar && !!components.Toolbar;
+
+  const renderPlot = (plot: (typeof shownPlots)[number]) => {
+    switch (plot) {
+      case "similarity":
+        return (
+          <Section
+            title={titles ? labels["plot.similarity"] : undefined}
+            border
+          >
+            <ForcePlot
+              items={rv.items}
+              clusters={rv.clusters}
+              compare={rv.compare}
+              height={height}
+              selectedItem={selectedItem}
+              onItemClick={clickItem}
+            />
+          </Section>
+        );
+      case "valueUncertainty":
+        return (
+          <Section
+            title={titles ? labels["plot.valueUncertainty"] : undefined}
+            border
+          >
+            <ValueAndUncertaintyPlot
+              items={rv.items}
+              reference={reference}
+              clusters={rv.clusters}
+              compare={rv.compare}
+              height={height}
+              xScale={valueUncertainty.xScale}
+              yScale={valueUncertainty.yScale}
+              labels={labels}
+              format={format}
+              selectedItem={selectedItem}
+              onItemClick={clickItem}
+            />
+          </Section>
+        );
+    }
+  };
 
   return (
     <div
@@ -75,12 +132,15 @@ const PlotViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
       data-rv-provider={core.id}
       data-rv-count={rv.items.length}
     >
+      {showToolbar && (
+        <ViewToolbar view="plot" className="mb-2 flex items-center gap-2" />
+      )}
       <div className="mb-2 empty:hidden">
         <SearchChip />
       </div>
       {rv.items.length === 0 ? (
         <ViewEmpty controller={rv} view="plot" />
-      ) : (
+      ) : shownPlots.length === 0 ? null : (
         <div
           className="grid gap-2"
           style={{
@@ -89,46 +149,19 @@ const PlotViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
               : "1fr",
           }}
         >
-          {showSimilarity && (
-            <Section
-              title={titles ? labels["plot.similarity"] : undefined}
-              border
+          {shownPlots.map((plot, i) => (
+            <div
+              key={plot}
+              data-rv-plot-section={plot}
+              style={{ gridColumn: 1, gridRow: i + 1 }}
             >
-              <ForcePlot
-                items={rv.items}
-                clusters={rv.clusters}
-                compare={rv.compare}
-                height={height}
-                selectedItem={selectedItem}
-                onItemClick={clickItem}
-              />
-            </Section>
-          )}
+              {renderPlot(plot)}
+            </div>
+          ))}
           {showClusters && (
-            <div className={clsx(!showSimilarity && "col-start-2 row-start-1")}>
+            <div style={{ gridColumn: 2, gridRow: 1 }}>
               <Section title={titles ? labels["plot.clusters"] : undefined}>
                 <ClusterFilter axis="rows" />
-              </Section>
-            </div>
-          )}
-          {showValueUncertainty && (
-            <div className={clsx(!showSimilarity && "col-start-1 row-start-1")}>
-              <Section
-                title={titles ? labels["plot.valueUncertainty"] : undefined}
-                border
-              >
-                <ValueAndUncertaintyPlot
-                  items={rv.items}
-                  reference={reference}
-                  clusters={rv.clusters}
-                  compare={rv.compare}
-                  height={height}
-                  xScale={valueUncertainty.xScale}
-                  yScale={valueUncertainty.yScale}
-                  labels={labels}
-                  selectedItem={selectedItem}
-                  onItemClick={clickItem}
-                />
               </Section>
             </div>
           )}

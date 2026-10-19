@@ -51,6 +51,7 @@ export const defaultRelativeValuesLabels: RelativeValuesLabels = {
     "Distribution charts aren't available for precomputed values.",
   "sidebar.openInPlayground": "Open in Playground",
   "sidebar.notFound": "Result not found",
+  "sidebar.close": "Close",
   "cell.error": "Error",
   "cell.uncertaintyUnit": "om",
   "cell.rangeSeparator": "to",

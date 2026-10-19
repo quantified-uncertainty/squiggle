@@ -89,7 +89,12 @@ export type RelativeValuesControls = {
     clusterDiagram?: boolean;
     modeControls?: boolean;
   };
-  plot?: { clusterFilter?: boolean }; // the "Clusters" panel
+  plot?: {
+    // The plot's toolbar row: empty by default; shown when there's a
+    // `Toolbar` slot (e.g. for an Export button).
+    toolbar?: boolean;
+    clusterFilter?: boolean; // the "Clusters" panel
+  };
   sortMenu?: {
     clusters?: boolean; // "Clusters" section of Table/Row/Column Settings
     sort?: boolean; // "Sort by" section
@@ -219,6 +224,7 @@ export type RelativeValuesLabels = {
   "sidebar.noCharts": string;
   "sidebar.openInPlayground": string;
   "sidebar.notFound": string;
+  "sidebar.close": string; // aria-label of the close button
   "cell.error": string;
   "cell.uncertaintyUnit": string; // "om"
   "cell.rangeSeparator": string; // "to"
@@ -242,7 +248,9 @@ export type RelativeValuesTabBarProps = {
 };
 export type RelativeValuesToolbarProps = {
   view: RelativeValuesTab;
-  children: ReactNode; // the built-in toolbar
+  // The built-in toolbar (empty in the plot view, and when every built-in
+  // control of the view is hidden).
+  children: ReactNode;
 };
 export type RelativeValuesProgressProps = {
   progress: RelativeValuesProgress | undefined;

@@ -253,7 +253,7 @@ const ListViewTable: FC<TableProps> = ({
 
 const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const core = useCore();
-  const { controls, display, labels } = usePresentation();
+  const { controls, display, labels, components } = usePresentation();
   const { definition, state, items } = rv;
   const clusters = useMemo(() => clusterMap(definition), [definition]);
 
@@ -267,7 +267,12 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const menuSections = useAxisMenuSections("rows");
   const showSettings = controls.list.settings && menuSections.length > 0;
   const showSearch = controls.list.search && !core.isLocked("search");
-  const showToolbar = controls.list.toolbar && (showSettings || showSearch);
+  // A Toolbar slot is rendered even when no built-in control is left in it.
+  const showToolbar =
+    controls.list.toolbar &&
+    (showSettings || showSearch || !!components.Toolbar);
+  // Without a search box, an active search shows as a chip.
+  const searchBoxShown = showToolbar && showSearch;
 
   // Value sorts are measured against each table's unit (as the table shows
   // it); other sorts keep the pipeline's order.
@@ -326,11 +331,12 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
   const sidebar =
     controls.list.sidebar && state.selectedPair ? (
       <RelativeValuesPairDetails
-        className={
+        className={clsx(
+          "rounded-[var(--squiggle-rv-radius,0.125rem)] border border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-[var(--squiggle-rv-panel-bg,#f8fafc)] px-2 py-4",
           display.list.sidebarPosition === "below"
-            ? "mt-4 rounded-[var(--squiggle-rv-radius,0.125rem)] border border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-slate-50 px-2 py-4"
-            : "sticky top-4 ml-4 rounded-[var(--squiggle-rv-radius,0.125rem)] border border-[color:var(--squiggle-rv-border,#e5e7eb)] bg-slate-50 px-2 py-4"
-        }
+            ? "mt-4"
+            : "sticky top-4 ml-4"
+        )}
       />
     ) : null;
 
@@ -352,7 +358,7 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
           {showSearch && <RelativeValuesSearchBox className="mb-4" />}
         </ViewToolbar>
       )}
-      {!showSearch && (
+      {!searchBoxShown && (
         <div className="mb-2 empty:hidden">
           <SearchChip />
         </div>
@@ -399,7 +405,14 @@ const ListViewContent: FC<{ rv: RelativeValuesReadyController }> = ({ rv }) => {
             (display.list.sidebarPosition === "below" ? (
               sidebar
             ) : (
-              <div className="relative w-[var(--squiggle-rv-sidebar-width,500px)] flex-none">
+              <div
+                className="relative flex-none"
+                style={{
+                  // The compact default doesn't override a host's value.
+                  width:
+                    "var(--squiggle-rv-sidebar-width, var(--squiggle-rv-compact-sidebar-width, 500px))",
+                }}
+              >
                 {sidebar}
               </div>
             ))}

@@ -38,19 +38,43 @@ export function axisSort(
     : state.columns.sort;
 }
 
-/** The sections of an axis menu that are shown (not hidden or locked). */
+/**
+ * The sort modes offered in "Sort by": `sortOptions`, else
+ * `controls.sortMenu.sortOptions`, else the built-in modes and the
+ * host-registered sorts.
+ */
+export function useSortOptions(
+  sortOptions?: readonly RelativeValuesSortMode[]
+): readonly RelativeValuesSortMode[] {
+  const core = useCore();
+  const { controls } = usePresentation();
+  return (
+    sortOptions ??
+    controls.sortMenu.sortOptions ?? [
+      ...defaultSortOptions,
+      ...Object.keys(core.sorts ?? {}),
+    ]
+  );
+}
+
+/**
+ * The sections of an axis menu that are shown (not hidden or locked; "Sort
+ * by" is hidden when no sort mode is offered).
+ */
 export function useAxisMenuSections(
   axis: Axis,
-  sections: readonly AxisMenuSection[] = ["clusters", "sort"]
+  sections: readonly AxisMenuSection[] = ["clusters", "sort"],
+  sortOptions?: readonly RelativeValuesSortMode[]
 ): AxisMenuSection[] {
   const core = useCore();
   const { controls } = usePresentation();
+  const options = useSortOptions(sortOptions);
   const clustersKey = axis === "rows" ? "clusters" : "columns";
   const sortKey = axis === "rows" ? "sort" : "columns";
   return sections.filter((section) =>
     section === "clusters"
       ? controls.sortMenu.clusters && !core.isLocked(clustersKey)
-      : controls.sortMenu.sort && !core.isLocked(sortKey)
+      : controls.sortMenu.sort && !core.isLocked(sortKey) && options.length > 0
   );
 }
 
@@ -142,15 +166,11 @@ export const AxisMenu: FC<{
   sortOptions?: readonly RelativeValuesSortMode[];
 }> = ({ axis, sortByAverage = true, sections, sortOptions }) => {
   const core = useCore();
-  const { controls, labels } = usePresentation();
-  const visible = useAxisMenuSections(axis, sections);
+  const { labels } = usePresentation();
+  const visible = useAxisMenuSections(axis, sections, sortOptions);
   const sort = axisSort(core.state, axis);
   const sorts = core.sorts ?? {};
-  const options = sortOptions ??
-    controls.sortMenu.sortOptions ?? [
-      ...defaultSortOptions,
-      ...Object.keys(sorts),
-    ];
+  const options = useSortOptions(sortOptions);
 
   return (
     <div className="flex min-w-[16em] flex-col gap-6 px-6 py-6">

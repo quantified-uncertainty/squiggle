@@ -66,7 +66,7 @@ export const SearchChip: FC = () => {
   return (
     <div
       data-rv-part="search-chip"
-      className="inline-flex items-center gap-1 rounded-full bg-slate-100 py-0.5 pl-2.5 pr-1 text-xs text-slate-600"
+      className="inline-flex items-center gap-1 rounded-full bg-[var(--squiggle-rv-panel-bg,#f1f5f9)] py-0.5 pl-2.5 pr-1 text-xs text-[color:var(--squiggle-rv-text,#475569)]"
     >
       <span>{labels["search.chip"](search)}</span>
       <button

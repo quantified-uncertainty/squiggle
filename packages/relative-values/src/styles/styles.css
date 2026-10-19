@@ -46,9 +46,14 @@
      *
      * --squiggle-rv-font-family, --squiggle-rv-font-size, --squiggle-rv-text,
      * --squiggle-rv-muted, --squiggle-rv-bg, --squiggle-rv-border,
-     * --squiggle-rv-header-bg, --squiggle-rv-accent, --squiggle-rv-selected-bg,
-     * --squiggle-rv-radius, --squiggle-rv-cell-padding,
-     * --squiggle-rv-grid-cell-width, --squiggle-rv-sidebar-width.
+     * --squiggle-rv-header-bg, --squiggle-rv-panel-bg, --squiggle-rv-accent,
+     * --squiggle-rv-selected-bg, --squiggle-rv-radius,
+     * --squiggle-rv-cell-padding, --squiggle-rv-grid-cell-width,
+     * --squiggle-rv-sidebar-width.
+     *
+     * Font sizes and line heights are multiples of --squiggle-rv-font-size
+     * (`postcss-scope.cjs` rewrites the rem values of this stylesheet), so
+     * it scales all text. Use an absolute value (px or rem).
      */
     font-family: var(--squiggle-rv-font-family, theme(fontFamily.sans));
     font-size: var(--squiggle-rv-font-size, 1rem);
@@ -68,10 +73,12 @@
 }
 
 /*
- * Compact density (`display.density: "compact"`). Zero specificity, so that
- * variables set by the host (e.g. with `themeClassName`) win.
+ * Compact density (`display.density: "compact"`). Private defaults: the
+ * components use `var(--squiggle-rv-grid-cell-width, var(--squiggle-rv-compact-grid-cell-width, 140px))`,
+ * so the public variables win wherever the host sets them (on an ancestor
+ * or with `themeClassName`).
  */
 :where(.squiggle-rv.squiggle-rv-compact) {
-  --squiggle-rv-grid-cell-width: 112px;
-  --squiggle-rv-sidebar-width: 380px;
+  --squiggle-rv-compact-grid-cell-width: 112px;
+  --squiggle-rv-compact-sidebar-width: 380px;
 }

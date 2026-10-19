@@ -1,4 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
+import { FC, ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import {
@@ -240,5 +241,80 @@ describe("host control (SSR)", () => {
     );
     expect(sync).not.toContain("data-rv-computing");
     expect(count(sync, 'data-rv-part="grid-cell"')).toBe(9);
+  });
+});
+
+// Moved here: the plots need a canvas, which jsdom lacks.
+describe("host control: plot and toolbar (SSR)", () => {
+  test("the Toolbar slot is rendered in every view, also without built-in controls", () => {
+    const Toolbar: FC<{ view: string; children: ReactNode }> = ({
+      view,
+      children,
+    }) => (
+      <div data-host-toolbar={view}>
+        {children}
+        <button type="button">Export</button>
+      </div>
+    );
+    for (const view of ["list", "grid", "plot"] as const) {
+      const html = renderToStaticMarkup(
+        <RelativeValuesSingleView
+          bundle={bundle}
+          view={view}
+          components={{ Toolbar }}
+          controls={{
+            list: { settings: false, search: false },
+            grid: {
+              rowSettings: false,
+              columnSettings: false,
+              clusterDiagram: false,
+              modeControls: false,
+            },
+          }}
+        />
+      );
+      expect(html).toContain(`data-host-toolbar="${view}"`);
+    }
+    // No slot: the plot has no toolbar; controls={false}: no slot either.
+    expect(
+      renderToStaticMarkup(
+        <RelativeValuesSingleView bundle={bundle} view="plot" />
+      )
+    ).not.toContain('data-rv-part="toolbar"');
+    expect(
+      renderToStaticMarkup(
+        <RelativeValuesSingleView
+          bundle={bundle}
+          view="plot"
+          controls={false}
+          components={{ Toolbar }}
+        />
+      )
+    ).not.toContain("data-host-toolbar");
+  });
+  const sections = (html: string) =>
+    [...html.matchAll(/data-rv-plot-section="(\w+)"/g)].map((m) => m[1]);
+
+  test("display.plot.plots sets the order; [] shows no plot and no panel", () => {
+    const html = (plots: ("similarity" | "valueUncertainty")[]) =>
+      renderToStaticMarkup(
+        <RelativeValuesSingleView
+          bundle={bundle}
+          view="plot"
+          display={{ plot: { plots } }}
+        />
+      );
+    expect(sections(html(["valueUncertainty", "similarity"]))).toEqual([
+      "valueUncertainty",
+      "similarity",
+    ]);
+    expect(sections(html(["similarity", "valueUncertainty"]))).toEqual([
+      "similarity",
+      "valueUncertainty",
+    ]);
+    const empty = html([]);
+    expect(sections(empty)).toEqual([]);
+    expect(empty).not.toContain('data-rv-part="cluster-filter"');
+    expect(empty).not.toContain("<canvas");
   });
 });

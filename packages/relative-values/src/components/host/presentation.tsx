@@ -47,7 +47,7 @@ export type ResolvedControls = {
     clusterDiagram: boolean;
     modeControls: boolean;
   };
-  plot: { clusterFilter: boolean };
+  plot: { toolbar: boolean; clusterFilter: boolean };
   sortMenu: {
     clusters: boolean;
     sort: boolean;
@@ -74,7 +74,7 @@ const controlsWith = (on: boolean): ResolvedControls => ({
     clusterDiagram: on,
     modeControls: on,
   },
-  plot: { clusterFilter: on },
+  plot: { toolbar: on, clusterFilter: on },
   sortMenu: { clusters: on, sort: on, sortOptions: undefined },
 });
 

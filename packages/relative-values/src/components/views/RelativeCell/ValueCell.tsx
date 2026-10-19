@@ -32,12 +32,14 @@ function numberToTier(
   }
 }
 
+// Tiers 1 and 2 follow the theme's text color (e.g. a dark theme); the
+// warmer tiers are fixed tints.
 function uncertaintyTextColor(tier: number) {
   switch (tier) {
     case 1:
-      return "text-gray-900";
+      return "text-[color:var(--squiggle-rv-text,#111827)]";
     case 2:
-      return "text-gray-700";
+      return "text-[color:var(--squiggle-rv-text,#374151)]";
     case 3:
       return "text-yellow-700 opacity-90";
     case 4:
@@ -50,7 +52,7 @@ function uncertaintyTextColor(tier: number) {
 function heatmapBackground(tier: number) {
   switch (tier) {
     case 1:
-      return "hover:bg-gray-100";
+      return "hover:bg-[var(--squiggle-rv-selected-bg,#f3f4f6)]";
     case 2:
       return "bg-yellow-300 bg-opacity-5 hover:bg-opacity-30";
     case 3:
@@ -101,7 +103,9 @@ export const ValueCell: FC<{
     <div
       className={clsx(
         "relative h-full min-h-[2em] pt-[1px]",
-        heatmap ? heatmapBackground(tier) : "hover:bg-gray-100"
+        heatmap
+          ? heatmapBackground(tier)
+          : "hover:bg-[var(--squiggle-rv-selected-bg,#f3f4f6)]"
       )}
     >
       <div
@@ -139,7 +143,12 @@ export const ValueCell: FC<{
                   </span>{" "}
                 </span>
               )}
-              <span className={uncertaintyColor}>
+              <span
+                className={uncertaintyColor}
+                // Stable hooks: e.g. a dark theme recolors the warm tiers.
+                data-rv-uncertainty=""
+                data-rv-tier={tier}
+              >
                 <FormattedNumber
                   format={format}
                   value={uncertaintyNumber(format, value)}
@@ -151,6 +160,7 @@ export const ValueCell: FC<{
                 <span
                   style={{ fontSize: "0.6em" }}
                   className={clsx(uncertaintyColor, "font-light")}
+                  data-rv-tier={tier}
                 >
                   {labels["cell.uncertaintyUnit"]}
                 </span>

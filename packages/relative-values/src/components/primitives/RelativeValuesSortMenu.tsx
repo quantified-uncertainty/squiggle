@@ -24,7 +24,7 @@ export const RelativeValuesSortMenu: FC<{
   label?: string;
 }> = ({ className, axis = "rows", sections, sortOptions, label }) => {
   const { labels } = usePresentation();
-  const visible = useAxisMenuSections(axis, sections);
+  const visible = useAxisMenuSections(axis, sections, sortOptions);
   if (visible.length === 0) {
     return null;
   }

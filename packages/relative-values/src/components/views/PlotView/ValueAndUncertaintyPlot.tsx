@@ -15,7 +15,15 @@ import type { Clusters, Item } from "../../../types.js";
 import { extractOkValues } from "../../../values/ModelEvaluator.js";
 import type { RelativeValueResult } from "../../../values/types.js";
 import { hasInvalid } from "../../../values/value.js";
-import type { RelativeValuesLabels } from "../../host/types.js";
+import {
+  formatNumberString,
+  kindPrecision,
+  type ResolvedFormat,
+} from "../../host/format.js";
+import type {
+  RelativeValuesLabels,
+  RelativeValuesNumberKind,
+} from "../../host/types.js";
 import { cssVariable } from "./canvasColors.js";
 import { distance } from "./ForcePlot.js";
 import { ItemTooltip } from "./ItemTooltip.js";
@@ -46,6 +54,30 @@ function average(
   };
 }
 
+type ChartScale = ReturnType<typeof d3Extended.scaleLinear>;
+
+// Tick labels through `format.formatNumber` (place "plot"), when it returns
+// a string; drawAxes asks the scale for its tick format.
+function withTickFormat(
+  scale: ChartScale,
+  format: ResolvedFormat,
+  kind: RelativeValuesNumberKind
+): ChartScale {
+  const formatNumber = format.formatNumber;
+  if (!formatNumber) {
+    return scale;
+  }
+  const builtin = scale.tickFormat.bind(scale);
+  const precision = kindPrecision(format, kind, "plot");
+  scale.tickFormat = (count?: number, specifier?: string) => {
+    const fallback = builtin(count, specifier);
+    return (value: d3.NumberValue) =>
+      formatNumber(Number(value), { kind, place: "plot", precision }) ??
+      fallback(value);
+  };
+  return scale;
+}
+
 /** Items by value (x) and uncertainty (y), against a reference. */
 export const ValueAndUncertaintyPlot: FC<{
   items: readonly Item[];
@@ -57,6 +89,7 @@ export const ValueAndUncertaintyPlot: FC<{
   xScale: "log" | "linear";
   yScale: "linear" | "log";
   labels: RelativeValuesLabels;
+  format: ResolvedFormat;
   selectedItem: string | null;
   onItemClick: (item: Item) => void;
 }> = ({
@@ -68,6 +101,7 @@ export const ValueAndUncertaintyPlot: FC<{
   xScale: xScaleType,
   yScale: yScaleType,
   labels,
+  format,
   selectedItem,
   onItemClick,
 }) => {
@@ -79,12 +113,18 @@ export const ValueAndUncertaintyPlot: FC<{
     const data: Datum[] = [];
     for (const item of items) {
       const value = average(item, reference, compare);
-      if (value) {
+      // A log scale can't show zero (e.g. the unit against itself has no
+      // uncertainty) or, for values, a zero median.
+      if (
+        value &&
+        (yScaleType !== "log" || value.uncertainty > 0) &&
+        (xScaleType !== "log" || Math.abs(value.median) > 0)
+      ) {
         data.push({ item, ...value });
       }
     }
     return data;
-  }, [items, reference, compare]);
+  }, [items, reference, compare, xScaleType, yScaleType]);
 
   const draw = useCallback(
     ({ context, width }: DrawContext) => {
@@ -95,11 +135,19 @@ export const ValueAndUncertaintyPlot: FC<{
       const xValue = (d: Datum) =>
         xScaleType === "log" ? Math.abs(d.median) : d.median;
       const yValue = (d: Datum) => d.uncertainty;
-      const xScale = makeScale(xScaleType).domain(
-        d3.extent(data, xValue) as [number, number]
+      const xScale = withTickFormat(
+        makeScale(xScaleType).domain(
+          d3.extent(data, xValue) as [number, number]
+        ),
+        format,
+        "median"
       );
-      const yScale = makeScale(yScaleType).domain(
-        d3.extent(data, yValue) as [number, number]
+      const yScale = withTickFormat(
+        makeScale(yScaleType).domain(
+          d3.extent(data, yValue) as [number, number]
+        ),
+        format,
+        "uncertainty"
       );
 
       const { padding, frame } = drawAxes({
@@ -197,6 +245,7 @@ export const ValueAndUncertaintyPlot: FC<{
       xScaleType,
       yScaleType,
       labels,
+      format,
       selectedItem,
     ]
   );

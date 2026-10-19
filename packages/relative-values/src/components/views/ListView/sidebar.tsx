@@ -7,7 +7,7 @@ import { RefreshIcon } from "@quri/ui";
 
 import { Item } from "../../../types.js";
 import { useCore } from "../../host/core.js";
-import { FormattedNumber } from "../../host/format.js";
+import { FormattedNumber, uncertaintyNumber } from "../../host/format.js";
 import { usePresentation } from "../../host/presentation.js";
 import type {
   RelativeValuesNumberKind,
@@ -19,20 +19,24 @@ const TableRow: FC<{
   label: string;
   number: number;
   kind: RelativeValuesNumberKind;
-}> = ({ label, number, kind }) => {
+  prefix?: string;
+  suffix?: string;
+}> = ({ label, number, kind, prefix, suffix }) => {
   const { format } = usePresentation();
   return (
     <Fragment key={label}>
-      <div className="col-span-1 mt-1 py-1 text-left text-xs font-normal text-slate-400">
+      <div className="mt-1 min-w-0 break-words py-1 text-left text-xs font-normal text-[color:var(--squiggle-rv-muted,#94a3b8)]">
         {label}
       </div>
-      <div className="col-span-2 py-1 pl-2 text-left text-slate-600">
+      <div className="min-w-0 py-1 text-left text-[color:var(--squiggle-rv-text,#475569)]">
+        {prefix !== undefined && <span>{prefix} </span>}
         <FormattedNumber
           format={format}
           value={number}
           kind={kind}
           place="sidebar"
         />
+        {suffix !== undefined && <span className="text-xs"> {suffix}</span>}
       </div>
     </Fragment>
   );
@@ -145,7 +149,7 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
   result,
   close,
 }) => {
-  const { options, labels } = usePresentation();
+  const { options, labels, format } = usePresentation();
   const { getPlaygroundUrl, linker, sourceId } = options;
   const evaluator = useCore().snapshot?.evaluator;
   if (!result.ok || !evaluator) {
@@ -166,7 +170,7 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
     <div className="relative">
       <button
         type="button"
-        aria-label="Close"
+        aria-label={labels["sidebar.close"]}
         className="absolute right-0 top-0 rounded px-1.5 text-lg leading-none text-slate-400 hover:bg-slate-200 hover:text-slate-700"
         onClick={close}
       >
@@ -190,12 +194,12 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
         <span className="whitespace-nowrap text-xl text-slate-300">)</span>
       </div>
 
-      <div className="xs mb-4 text-slate-500">
+      <div className="xs mb-4 text-[color:var(--squiggle-rv-muted,#64748b)]">
         {labels["sidebar.summary"](
-          <span className="font-semibold text-slate-700">
+          <span className="font-semibold text-[color:var(--squiggle-rv-text,#334155)]">
             {numeratorItem.name}
           </span>,
-          <span className="font-semibold text-slate-700">
+          <span className="font-semibold text-[color:var(--squiggle-rv-text,#334155)]">
             {denominatorItem.name}
           </span>
         )}
@@ -211,7 +215,9 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
         </div>
       )}
 
-      <div className="mb-10 mt-10 grid w-full grid-cols-6 gap-1">
+      {/* Label, value, label, value: label columns fit their (translated)
+          labels. */}
+      <div className="mb-10 mt-10 grid w-full grid-cols-[auto_1fr_auto_1fr] gap-x-2 gap-y-1">
         <TableRow
           label={labels["sidebar.median"]}
           number={item.median}
@@ -224,11 +230,21 @@ export const DefaultPairDetails: FC<RelativeValuesPairDetailsProps> = ({
         />
         <TableRow label={labels["sidebar.p5"]} number={item.min} kind="p5" />
         <TableRow label={labels["sidebar.p95"]} number={item.max} kind="p95" />
-        <TableRow
-          label={labels["sidebar.uncertainty"]}
-          number={item.uncertainty}
-          kind="uncertainty"
-        />
+        {format.uncertainty !== "hidden" && (
+          // As in the cells: half the 90% interval, in orders of magnitude,
+          // or as a factor.
+          <TableRow
+            label={labels["sidebar.uncertainty"]}
+            number={uncertaintyNumber(format, item)}
+            kind="uncertainty"
+            prefix={format.uncertainty === "factor" ? "×/÷" : "±"}
+            suffix={
+              format.uncertainty === "om"
+                ? labels["cell.uncertaintyUnit"]
+                : undefined
+            }
+          />
+        )}
       </div>
 
       {squiggleCode !== undefined && getPlaygroundUrl && (

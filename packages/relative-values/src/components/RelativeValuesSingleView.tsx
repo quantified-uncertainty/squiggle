@@ -6,7 +6,7 @@ import {
   type CoreProviderProps,
   RelativeValuesCoreProvider,
 } from "./host/core.js";
-import { PresentationProvider } from "./host/presentation.js";
+import { PresentationProvider, usePresentation } from "./host/presentation.js";
 import type {
   RelativeValuesCustomTab,
   RelativeValuesFrameProps,
@@ -20,7 +20,7 @@ import {
 } from "./RelativeValuesDashboard.js";
 import {
   RelativeValuesRoot,
-  useIsInsideRelativeValuesRoot,
+  useRelativeValuesRootDensity,
 } from "./RelativeValuesRoot.js";
 import { ViewFallbackProvider } from "./views/ViewStatus.js";
 
@@ -53,7 +53,8 @@ const SingleViewFrame = ({
   SingleViewBase<string>,
   "view" | "fallback" | "className" | "height" | "themeClassName"
 >): ReactElement => {
-  const insideRoot = useIsInsideRelativeValuesRoot();
+  const rootDensity = useRelativeValuesRootDensity();
+  const { display } = usePresentation();
   const content = (
     <ViewFallbackProvider value={fallback}>
       {typeof view === "string" ? (
@@ -63,8 +64,11 @@ const SingleViewFrame = ({
       )}
     </ViewFallbackProvider>
   );
+  // Inside a root, a root of its own only for other frame props or another
+  // density (whose class carries the compact CSS variables, also to
+  // portals).
   if (
-    insideRoot &&
+    rootDensity === display.density &&
     className === undefined &&
     height === undefined &&
     themeClassName === undefined

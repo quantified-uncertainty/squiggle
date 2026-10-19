@@ -14,7 +14,12 @@
  * - selectors that already start with `.squiggle-rv` or `:where(.squiggle-rv`
  *   are kept;
  * - keyframes are renamed to `squiggle-rv-<name>`, so that they don't clash
- *   with the host page's keyframes.
+ *   with the host page's keyframes;
+ * - rem values of `font-size` and `line-height` become multiples of
+ *   `--squiggle-rv-font-size` (default 1rem, so nothing changes without
+ *   it): `0.875rem` becomes `calc(0.875 * var(--squiggle-rv-font-size, 1rem))`.
+ *   rem is relative to the page's root, not to the dashboard, and em would
+ *   compound in nested text.
  *
  * Used at build time only.
  */
@@ -89,6 +94,16 @@ const plugin = ({ scope }) => {
           rule.remove();
         } else {
           rule.selectors = selectors;
+        }
+      });
+
+      root.walkDecls(/^(font-size|line-height)$/i, (decl) => {
+        if (!decl.value.includes("var(")) {
+          decl.value = decl.value.replace(
+            /(^|[\s(,])(-?(?:\d+\.?\d*|\.\d+))rem\b/g,
+            (_match, before, number) =>
+              `${before}calc(${number} * var(--${scope}-font-size, 1rem))`
+          );
         }
       });
 
