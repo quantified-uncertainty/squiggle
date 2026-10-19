@@ -1,0 +1,21 @@
+// Two specs in one file: the spec picker chooses between them.
+
+@name("Fruit")
+fruit = {
+  values: {
+    apple: 1,
+    banana: 0.5 to 2,
+    mango: 2 to 6,
+  },
+}
+
+@name("Vegetables")
+veg = {
+  values: {
+    carrot: 1,
+    leek: 1 to 3,
+    pumpkin: 4 to 12,
+    kale: 0.5 to 1.5,
+  },
+  recommendedUnit: "carrot",
+}

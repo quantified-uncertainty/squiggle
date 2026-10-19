@@ -1,0 +1,5 @@
+// Stub of https://squigglehub.org/models/quri/exports-example
+
+export a = 2 to 5
+
+export b = [1, 2, 3, 4]

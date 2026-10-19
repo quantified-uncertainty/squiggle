@@ -1,0 +1,4 @@
+// A very long file name.
+
+@name("A value with a very long name, to test truncation in cards and headers")
+aValueWithAVeryLongIdentifierThatKeepsGoingAndGoingToTestClippingAndEllipsis = 1 to 10

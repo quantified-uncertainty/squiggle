@@ -1,0 +1,27 @@
+// Numbers with and without @format.
+
+@name("Plain number")
+plain = 42
+
+@name("Price ($)")
+@format("$,.2f")
+price = 1234.5678
+
+@name("Share")
+@format(".1%")
+share = 0.4231
+
+@name("Population")
+@format(",.0f")
+population = 8.1e9
+
+@name("Small number")
+small = 0.000123
+
+@name("Negative")
+@format("+.2f")
+negative = -3.75
+
+@name("Uncertain cost ($)")
+@format("$,.0f")
+uncertainCost = 2k to 18k

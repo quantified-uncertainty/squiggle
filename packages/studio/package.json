@@ -31,14 +31,15 @@
     "build:server": "tsc -b",
     "build:client": "vite build",
     "typecheck:client": "tsc -p tsconfig.client.json",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json",
     "start": "node ./bin/squiggle-studio.js examples",
     "test": "vitest run",
-    "lint": "prettier --check . && pnpm run typecheck:client",
-    "format": "prettier --write .",
-    "e2e": "vite build && vitest run --config vitest.e2e.config.ts",
+    "e2e": "vite build && tsx e2e/run.ts",
     "e2e:shoot": "vite build && tsx e2e/shoot.ts",
     "e2e:serve": "vite build && tsx e2e/serve.ts",
-    "e2e:golden": "vite build && vitest run --config vitest.e2e.config.ts --update parity"
+    "e2e:golden": "vite build && tsx e2e/run.ts --update parity",
+    "lint": "prettier --check . && pnpm run typecheck:client && pnpm run typecheck:e2e",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@commander-js/extra-typings": "^13.1.0",

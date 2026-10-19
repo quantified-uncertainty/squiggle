@@ -1,0 +1,9 @@
+// The smallest relative values spec: items are the keys of `values`.
+
+fruit = {
+  values: {
+    apple: 1,
+    banana: 0.5 to 2,
+    mango: 2 to 6,
+  },
+}

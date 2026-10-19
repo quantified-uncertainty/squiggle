@@ -1,0 +1,5 @@
+// Imported by ./middle.squiggle. Fails at runtime (index out of bounds).
+
+values = [1, 2, 3]
+
+export base = values[10]

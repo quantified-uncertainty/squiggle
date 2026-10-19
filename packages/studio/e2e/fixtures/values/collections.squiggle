@@ -1,0 +1,33 @@
+// Lists, dicts and tables.
+
+@name("List of numbers")
+numbers = [1, 2, 3, 5, 8, 13]
+
+@name("List of dists")
+distList = [normal(0, 1), 2 to 5, uniform(3, 4)]
+
+@name("Dict")
+config = { rate: 0.05, years: 10, label: "base case" }
+
+@name("Nested dict")
+nested = {
+  costs: { low: 1k, high: 5k, likely: 1k to 5k },
+  flags: { enabled: true, version: 2 },
+}
+
+@name("Long list")
+longList = List.upTo(1, 40)
+
+@name("Table")
+table = Table.make(
+  [
+    { name: "Apples", value: 3 to 5 },
+    { name: "Pears", value: 1 to 2 },
+  ],
+  {
+    columns: [
+      { name: "Name", fn: {|r| r.name} },
+      { name: "Value", fn: {|r| r.value} },
+    ],
+  }
+)

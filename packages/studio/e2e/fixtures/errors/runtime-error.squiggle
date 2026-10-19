@@ -1,0 +1,11 @@
+// A runtime error raised two calls deep, so the error has a stack.
+
+checkPositive(x) = if x > 0 then x else throw("Expected a positive number, got " + String(x))
+
+scaled(x) = checkPositive(x) * 10
+
+@name("Fine")
+fine = scaled(2)
+
+@name("Fails")
+fails = scaled(-1)

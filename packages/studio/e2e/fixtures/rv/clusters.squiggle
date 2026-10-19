@@ -1,0 +1,32 @@
+// The `fn` form, with items in two clusters.
+
+dists = {
+  essay: 1,
+  paper: 3 to 30,
+  bigPaper: 20 to 200,
+  tool: 10 to 400,
+  website: 2 to 50,
+  library: 30 to 900,
+}
+
+writing(id, name) = { id: id, name: name, clusterId: "writing" }
+software(id, name) = { id: id, name: name, clusterId: "software" }
+
+@name("Projects by cluster")
+projects = {
+  title: "Projects by cluster",
+  items: [
+    writing("essay", "Short essay"),
+    writing("paper", "Paper"),
+    writing("bigPaper", "Long paper"),
+    software("tool", "Internal tool"),
+    software("website", "Website"),
+    software("library", "Open-source library"),
+  ],
+  clusters: [
+    { id: "writing", name: "Writing", color: "#DB828C", recommendedUnit: "essay" },
+    { id: "software", name: "Software", color: "#5D8CD3", recommendedUnit: "tool" },
+  ],
+  recommendedUnit: "essay",
+  fn: {|a, b| [dists[a], dists[b]]},
+}

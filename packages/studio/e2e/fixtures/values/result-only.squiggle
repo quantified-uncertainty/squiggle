@@ -1,0 +1,3 @@
+// No bindings: only a final result expression.
+
+normal(100, 10) * 2

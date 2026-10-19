@@ -1,0 +1,28 @@
+// Functions: one parameter, several parameters, domains, @doc, a calculator.
+
+@name("Square")
+@doc("Returns x squared. One parameter, so it can be plotted.")
+square(x) = x * x
+
+@name("Growth")
+@doc("Compound growth of `principal` at `rate` for `years` years.")
+growth(principal, rate, years) = principal * (1 + rate) ^ years
+
+@name("Cost with a domain")
+costFn(x: [1, 100]) = x * (2 to 3)
+
+@name("Anonymous lambda")
+double = {|x| x * 2}
+
+@name("Calculator")
+calculator = Calculator.make(
+  growth,
+  {
+    title: "Compound growth",
+    inputs: [
+      Input.text({ name: "principal", default: "1000" }),
+      Input.text({ name: "rate", default: "0.05" }),
+      Input.text({ name: "years", default: "10" }),
+    ],
+  }
+)

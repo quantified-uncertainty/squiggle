@@ -1,0 +1,12 @@
+// Tests change `recommendedUnit` on disk (e.g. to "medium") and check that the
+// List view follows it until the user picks a unit.
+
+sizes = {
+  values: {
+    small: 1,
+    medium: 3 to 6,
+    large: 10 to 30,
+    huge: 50 to 200,
+  },
+  recommendedUnit: "small",
+}
