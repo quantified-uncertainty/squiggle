@@ -693,8 +693,13 @@ export const scenarios: Scenario[] = [
     check: async (h) => {
       const w = await workspace(h);
       expect(w.rootChangedTo).toBeUndefined();
-      expect(treePaths(w.tree)).not.toContain("agent-new.squiggle");
-      expect(withoutBarriers(w.externalChanges)).toEqual([]);
+      // Nothing from the other folder reached this window. (Only those
+      // paths: restarting the server's watcher on macOS can replay recent
+      // events for this folder's own files.)
+      for (const p of ["agent-new.squiggle", "main.squiggle"]) {
+        expect(treePaths(w.tree)).not.toContain(p);
+        expect(w.externalChanges[p]).toBeUndefined();
+      }
       expect(await h.readFile("aa.squiggle")).toContain("unsavedEdit = 42");
     },
   },

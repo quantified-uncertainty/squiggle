@@ -472,16 +472,24 @@ export class WorkspaceModel {
     reportBusy("events:connect", false);
   }
 
-  private async boot() {
-    reportBusy("workspace:boot", true);
-    try {
-      const info = await api.getRoot();
-      await this.resetForRoot(info);
-    } catch (e) {
-      this.onError(errorMessage(e));
-    } finally {
-      reportBusy("workspace:boot", false);
-    }
+  private bootPromise: Promise<void> | undefined;
+
+  // Loads the server's folder. A failure is a toast; the next resync
+  // (reconnect, window focus) tries again.
+  private boot(): Promise<void> {
+    this.bootPromise ??= (async () => {
+      reportBusy("workspace:boot", true);
+      try {
+        const info = await api.getRoot();
+        await this.resetForRoot(info);
+      } catch (e) {
+        this.onError(errorMessage(e));
+      } finally {
+        reportBusy("workspace:boot", false);
+        this.bootPromise = undefined;
+      }
+    })();
+    return this.bootPromise;
   }
 
   private configureAutosave() {
@@ -724,7 +732,7 @@ export class WorkspaceModel {
   // ── Resync (#2) ────────────────────────────────────────────────────────
 
   readonly resync = (): Promise<void> => {
-    if (this.root === undefined) return Promise.resolve();
+    if (this.root === undefined) return this.boot();
     this.resyncPromise ??= this.runResync().finally(() => {
       this.resyncPromise = undefined;
     });

@@ -335,6 +335,24 @@ describe.each(["wp7", "m2"] as const)("workspace model (%s server)", (mode) => {
     expect(ws().mru).toEqual(["b.squiggle"]);
   });
 
+  test("a failed first load of the folder is retried on the next resync", async () => {
+    server = new FakeServer(mode);
+    server.files.set("a.squiggle", "a = 1");
+    server.failNext["GET /api/root"] = 1;
+    vi.stubGlobal("fetch", server.fetch);
+    errors = [];
+    model = new WorkspaceModel({ onError: (m) => errors.push(m) });
+    stop = model.start();
+    FakeEventSource.current.open();
+    await flush();
+    expect(errors).toEqual(["Simulated failure"]);
+    expect(ws().rootInfo).toBeUndefined();
+    window.dispatchEvent(new Event("focus"));
+    await flush();
+    expect(ws().rootInfo?.root).toBe(server.root);
+    expect(ws().treeLoaded).toBe(true);
+  });
+
   test("opening a file that failed to load tries again", async () => {
     await boot(mode, { "a.squiggle": "a = 1" });
     server.failNext["GET /api/file"] = 1;
