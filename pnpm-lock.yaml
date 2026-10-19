@@ -1455,9 +1455,6 @@ importers:
       '@quri/squiggle-components':
         specifier: workspace:*
         version: link:../components
-      '@quri/squiggle-lang':
-        specifier: workspace:*
-        version: link:../squiggle-lang
       '@quri/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1492,6 +1489,9 @@ importers:
       '@quri/configs':
         specifier: workspace:*
         version: link:../../internal-packages/configs
+      '@quri/squiggle-lang':
+        specifier: workspace:*
+        version: link:../squiggle-lang
       '@storybook/addon-essentials':
         specifier: 8.6.12
         version: 8.6.12(@types/react@19.1.0)(storybook@8.6.17(prettier@3.9.0))
@@ -1540,6 +1540,9 @@ importers:
       postcss-cli:
         specifier: ^11.0.1
         version: 11.0.1(jiti@2.4.2)(postcss@8.5.30)(tsx@4.19.3)
+      postcss-import:
+        specifier: ^15.1.0
+        version: 15.1.0(postcss@8.5.30)
       prettier:
         specifier: ^3.5.3
         version: 3.9.0

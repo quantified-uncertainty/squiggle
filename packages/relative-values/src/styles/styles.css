@@ -1,0 +1,56 @@
+/*
+ * Scoped stylesheet: every rule only applies inside `.squiggle-rv` elements,
+ * which the dashboard components render. It doesn't restyle the rest of the
+ * page, and the page's own element styles (e.g. `button { ... }`) don't leak
+ * into the dashboard.
+ *
+ * Built with `postcss-scope.cjs`, which prefixes all selectors. Includes
+ * Tailwind's preflight (scoped), the Tailwind classes used by this package,
+ * @quri/ui and @quri/squiggle-components, and @quri/squiggle-components'
+ * common styles.
+ */
+@import "@quri/squiggle-components/dist/common.css";
+
+/*
+ * The wrapper doesn't inherit text styles from the page. Zero specificity, so
+ * that the classes that you pass in `className` take precedence.
+ */
+:where(.squiggle-rv) {
+  all: initial;
+  display: block;
+}
+
+/*
+ * Neutralize the page's element styles (e.g. `button { ... }`, `div { ... }`)
+ * inside the wrapper: revert to the browser's defaults, which Tailwind's
+ * preflight and utilities (more specific, and later in this file) then
+ * build on. SVGs and replaced elements are excluded because their
+ * presentation attributes (`width`, `fill`, ...) would be reverted too.
+ */
+.squiggle-rv
+  :where(:not(svg, svg *, img, video, canvas, iframe, embed, object)) {
+  all: revert;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .squiggle-rv {
+    /* Override with `--squiggle-rv-font-family` on a parent element. */
+    font-family: var(--squiggle-rv-font-family, theme(fontFamily.sans));
+    font-size: 1rem;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.5;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-align: left;
+    text-indent: 0;
+    text-transform: none;
+    text-shadow: none;
+    white-space: normal;
+    color: #000;
+  }
+}
