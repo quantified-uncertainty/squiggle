@@ -116,6 +116,8 @@ export function App({ code }: { code: string }) {
         spec={spec.value}
         modelCode={code} // optional, enables per-pair charts in the list sidebar
         initialTab="list"
+        // optional: resolve imports in the per-pair charts (re-runs modelCode)
+        // linker={linker} sourceId="models/main.squiggle"
         onTabChange={(tab) => console.log(tab)}
       />
     ) : (

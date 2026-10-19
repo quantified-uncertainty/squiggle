@@ -11,28 +11,27 @@ Squiggle is a small, immutable, expression-based language. Every value can be a 
 ## Workflow
 
 1. **Write the model** in a `.squiggle` file. Follow the style rules below. Look up any function that you aren't sure exists before using it.
-2. **Check it**: `squiggle check model.squiggle` reports parse errors, type errors, and lint warnings, with hints. Fix everything it reports.
-3. **Run it**: `squiggle run model.squiggle --json` gives `{ ok, result, bindings, errors: [{kind, message, location}] }`. Distributions are summarized as `{type: "Dist", mean, stdev, p5, p50, p95, ...}`. Use `--seed <s>` for reproducible numbers and `--sample-count <n>` for more precision.
+2. **Check it**: `squiggle check model.squiggle` reports parse errors, type errors, and lint warnings, with hints, without running the model (it also checks imported files). Add `--run` to also catch runtime errors, `--json` for `{ ok, files, errors, warnings, ran }`, and `--no-warnings` to hide lint warnings. Fix everything it reports.
+3. **Run it**: `squiggle run model.squiggle --json` prints one JSON object `{ ok, result, bindings, exports, errors, timeMs }`. `errors` is a list of `{ kind, message, location: { file, start: {line, column}, end } }`; when `ok` is false, `result` is `null` and `bindings` is `{}`. Distributions are summarized as `{ type: "Dist", subtype, mean, stdev, p5, p25, p50, p75, p95, min, max, sampleCount }`; dicts and lists become JSON objects and arrays, and functions become `{ type: "Lambda", signature, ... }`. Use `--seed <s>` for reproducible numbers, `-n/--sample-count <n>` for more precision, `--samples <N>` to include up to N raw samples per sample-set distribution, and `-w/--watch` to re-run when the file or its imports change. The exit code is 1 if the model fails.
 4. **Sanity-check the numbers**, not just the absence of errors. Are the p5 to p95 ranges plausible? Are probabilities between 0 and 1? Is anything negative that can't be? Is an extreme probability (below 5% or above 95%) actually justified? Iterate on inputs and structure.
 5. **Show the user** the model (see "Showing results" below) and summarize the key outputs with their ranges, and the inputs that drive them.
 
 To try out a snippet without a file: `squiggle run -e 'x = 5 to 10
-mean(x)'`.
+mean(x)'` (`check` takes `-e` too).
 
 ### Getting the CLI
 
 The CLI is the `squiggle` binary from the `@quri/squiggle-lang` npm package.
 
-- If `squiggle` is on the PATH, use it.
-- Otherwise use `npx -y @quri/squiggle-lang <command> ...`, or install it with `npm i -g @quri/squiggle-lang`.
 - Inside the Squiggle monorepo, use `node packages/squiggle-lang/bin/squiggle.js <command>` (build `packages/squiggle-lang` first).
+- Otherwise, if `squiggle` is on the PATH, or via `npx -y @quri/squiggle-lang <command> ...`.
 
-`check`, `docs`, `--json`, `--seed`, and `--watch` are recent additions. If the installed version doesn't have them, use `squiggle run <file>`, which prints errors and bindings as text, and look up functions in [reference/language.md](reference/language.md).
+The commands and flags on this page (`check`, `docs`, `run --json`, `--seed`, `--samples`, `--watch`) are in squiggle-lang 0.10.1, which isn't published to npm yet; the published 0.10.0 only has `run` (text output). With an older CLI, use `squiggle run <file>`, which prints errors and bindings as text, and look up functions in [reference/language.md](reference/language.md). Run `squiggle --help` to see what the installed version supports.
 
 ## Looking up functions
 
 - `squiggle docs Dist.normal` shows the signatures, description, and examples for one builtin.
-- `squiggle docs normal` searches builtins by name or text. `squiggle docs --list` lists every builtin. Add `--json` for machine-readable output.
+- `squiggle docs normal` searches builtins by name or text. `squiggle docs Dist` lists the functions in a namespace, and `squiggle docs -l` (`--list`) lists all namespaces. Add `--json` for machine-readable output.
 - [reference/language.md](reference/language.md) is the full documentation bundle (about 120 KB): common mistakes, guides, and every builtin module. Grep it for a module or function name (for example `# Builtin module: List`) instead of reading all of it.
 
 Functions that LLMs often invent but that **don't exist**: `List.sum` (use `Number.sum` or `Dist.sum`), `List.map2`, `List.keys`, `List.sample`, `List.repeat` (use `List.make`), `List.sort` (use `List.sortBy` or `Number.sort`), `Number.parseFloat`, `Duration.toMonths`, `Date.now` (use `Danger.now`), `random()` (use `sample(uniform(0, 1))`).
@@ -70,7 +69,7 @@ label = if mean(costPerYear) > 5k then "high" else "low"  // `if` always needs `
 - **`stdev`, not `sd`**: `normal({ mean: 0.3, stdev: 0.1 })`.
 - **No type annotations.** `f(x: Number)` is invalid. The only parameter annotations are numeric or date ranges: `f(n: [1, 10])`, `f(t: [Date(2020), Date(2030)])`. Functions with range domains can't be called with distributions.
 - **Two dict syntaxes.** `{a: 1, b: 2}` is a plain dict whose values can't reference each other. `{ a = 1; b = a + 1; {a, b} }` (newlines, no commas) is a block that returns a dict. Tags (`@name`) only work in the block form. Don't end block assignments with commas.
-- **Imports go at the top of the file**, and the CLI only resolves relative imports (`import "./lib.squiggle" as lib`). Hub imports such as `import "hub:ozziegooen/sTest" as sTest` work on Squiggle Hub but not in the CLI.
+- **Imports go at the top of the file**, and the CLI only resolves relative imports (`import "./lib.squiggle" as lib`). Hub imports such as `import "hub:ozziegooen/sTest" as sTest` work on Squiggle Hub and in Squiggle Studio, but not in the CLI.
 - **Annotations stay together.** No blank lines or comments between `@name(...)`, `@doc(...)`, `@format(...)` and the variable they tag. `@format` can't be used on functions, lists, or dicts.
 - **`String(x)` of a tagged value includes its tags.** Use `Tag.clear(x)` or an untagged variable before interpolating into strings, and format numbers with `String(x, ",.2f")`. For a distribution, show a range: `String(Dist.inv(d, 0.05), ",.0f") + " to " + String(Dist.inv(d, 0.95), ",.0f")`.
 - **Sample-set correlation.** Distributions derived from the same samples stay correlated (`x - x` is 0). Converting to point sets or symbolic dists breaks that. Plots smooth samples with KDE, so a positive distribution can show a little mass below 0.
@@ -98,9 +97,9 @@ These are distilled from the full guide in [reference/style-guide.md](reference/
 
 Pick whichever fits the user's setup:
 
-- **Squiggle Studio** (if available): `npx @quri/squiggle-studio [dir] [--port 4321]` opens a local file browser, editor, and live playground that reloads when you edit files on disk. It's the best way to iterate with the user watching. Some versions also support `squiggle-studio render <file> --out model.png` to produce a screenshot that you can read back to check the visuals.
+- **Squiggle Studio**: `squiggle-studio [dir] [--port 4321] [--no-open]` opens a local file browser, editor, and live playground that reloads when you edit files on disk. It's the best way to iterate with the user watching. `squiggle-studio render <file> [--out model.png] [--variable name]` writes a PNG of the output that you can read back to check the visuals (it needs `puppeteer-core` and a local Chrome). Studio isn't published to npm yet; see the `studio` skill for how to run it from the Squiggle monorepo.
 - **Web playground link**: `node ${CLAUDE_SKILL_DIR}/scripts/playground-url.mjs model.squiggle` prints a https://squiggle-language.com/playground link with the code embedded. Good for sharing; very large models make very long URLs.
-- **Local playground**: `squiggle playground` serves a playground locally.
+- **Online playground**: `squiggle playground` opens the empty online playground in a browser (`--print-url` prints the URL instead). To open it with code, use the `playground-url.mjs` script above.
 - **VS Code**: the [Squiggle extension](https://marketplace.visualstudio.com/items?itemName=QURI.vscode-squiggle) adds syntax highlighting and a live preview for `.squiggle` files.
 - **Squiggle Hub** (squigglehub.org) hosts and versions models, and supports hub imports.
 
@@ -108,4 +107,4 @@ In chat, report the headline numbers from `squiggle run --json` (mean and the p5
 
 ## Relative values
 
-Relative values models estimate the value of many items relative to each other, as ratios of distributions. They are rendered as List, Grid, and Plot views in Studio and on Squiggle Hub. See [reference/relative-values.md](reference/relative-values.md). The details are still subject to change.
+Relative values models estimate the value of many items relative to each other, as ratios of distributions. Write them as a top-level dict `{ items, fn: {|a, b| [distA, distB]} }` or `{ values: { id: dist, ... } }`, with optional `title`, `clusters` and `recommendedUnit`. Squiggle Studio shows them in a **Relative values** tab with List, Grid, and Plot views. See [reference/relative-values.md](reference/relative-values.md).

@@ -6,6 +6,7 @@ import {
   useAdjustSquiggleVersion,
   versionedSquigglePackages,
 } from "@quri/versioned-squiggle-components";
+import { hubLinkerOptions } from "@/squiggle/hubLinkerOptions";
 
 import { ModelCardDTO } from "@/models/data/cards";
 
@@ -20,7 +21,10 @@ export const ViewSquiggleSnippet: FC<Props> = ({ data }) => {
 
   const squiggle = use(versionedSquigglePackages(checkedVersion));
 
-  const project = useMemo(() => sqProjectWithHubLinker(squiggle), [squiggle]);
+  const project = useMemo(
+    () => sqProjectWithHubLinker(squiggle, hubLinkerOptions()),
+    [squiggle]
+  );
 
   return <squiggle.components.SquiggleChart code={code} project={project} />;
 };

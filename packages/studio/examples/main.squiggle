@@ -1,0 +1,23 @@
+// A small model that imports another local file.
+// Try editing lib/costs.squiggle on disk: this view updates automatically.
+
+import "./lib/costs.squiggle" as costs
+
+@name("Weeks of work")
+weeks = 8 to 20
+
+@name("Total project cost ($)")
+@format("$,.0f")
+totalCost = costs.weeklyCost * weeks
+
+@name("Value delivered ($)")
+@format("$,.0f")
+value = lognormal({ p5: 5k, p95: 60k })
+
+@name("Net value ($)")
+@format("$,.0f")
+netValue = value - totalCost
+
+@name("Probability the project is worth it")
+@format(".0%")
+pWorthIt = 1 - cdf(netValue, 0)

@@ -1,0 +1,28 @@
+@import "@quri/squiggle-components/common.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-slate-800 antialiased;
+}
+
+/* WithToasts (from @quri/ui) wraps the app in an unstyled div. */
+#root > div {
+  height: 100%;
+}
+
+/* Embedded (render) mode: let the page grow with its content. */
+html.studio-embed,
+html.studio-embed body,
+html.studio-embed #root,
+html.studio-embed #root > div {
+  height: auto;
+}

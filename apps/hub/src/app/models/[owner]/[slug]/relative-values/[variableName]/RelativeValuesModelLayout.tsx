@@ -3,6 +3,7 @@
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
+import { serializeSourceId } from "@quri/hub-linker";
 import { result } from "@quri/squiggle-lang";
 import {
   ModelEvaluator,
@@ -22,12 +23,22 @@ function hubPlaygroundUrl(code: string) {
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
+    owner: string;
+    slug: string;
     code: string;
     variableName: string;
     cache: RelativeValuesExportFullDTO["cache"];
     definitionRevision: RelativeValuesDefinitionFullDTO["currentRevision"];
   }>
-> = ({ code, variableName, cache, definitionRevision, children }) => {
+> = ({
+  owner,
+  slug,
+  code,
+  variableName,
+  cache,
+  definitionRevision,
+  children,
+}) => {
   const [evaluatorResult, setEvaluatorResult] = useState<
     result<ModelEvaluator, string> | undefined
   >();
@@ -59,6 +70,8 @@ export const RelativeValuesModelLayout: FC<
         definition={definitionRevision}
         evaluator={evaluatorResult.value}
         getPlaygroundUrl={hubPlaygroundUrl}
+        linker={relativeValuesHubLinker}
+        sourceId={serializeSourceId({ owner, slug })}
       >
         {children}
       </RelativeValuesProvider>

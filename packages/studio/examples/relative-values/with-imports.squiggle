@@ -1,0 +1,18 @@
+// Relative values with a local import. Open the "Relative values" tab, then
+// click an item in the List view: the sidebar re-runs this model (imports
+// included) to chart the pair.
+// Try editing ../lib/costs.squiggle on disk: the dashboard updates.
+
+import "../lib/costs.squiggle" as costs
+
+@name("Projects")
+projects = {
+  title: "Projects, valued in weeks of work",
+  values: {
+    weekOfWork: costs.weeklyCost,
+    bugBash: costs.weeklyCost * (1 to 3),
+    docsRewrite: costs.weeklyCost * (2 to 6),
+    newFeature: costs.weeklyCost * (5 to 30),
+  },
+  recommendedUnit: "weekOfWork",
+}

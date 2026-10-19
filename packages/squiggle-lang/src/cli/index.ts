@@ -1,4 +1,7 @@
+import { setColorEnabled, shouldUseColorInTerminal } from "./colors.js";
 import { makeProgram } from "./makeProgram.js";
+
+setColorEnabled(shouldUseColorInTerminal());
 
 const main = async () => {
   await makeProgram().parseAsync();

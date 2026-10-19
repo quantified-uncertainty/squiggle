@@ -1,0 +1,69 @@
+{
+  "name": "@quri/squiggle-studio",
+  "version": "0.1.0",
+  "description": "A local, browser-first editor and viewer for .squiggle files",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/quantified-uncertainty/squiggle.git",
+    "directory": "packages/studio"
+  },
+  "author": "Quantified Uncertainty Research Institute",
+  "type": "module",
+  "bin": {
+    "squiggle-studio": "./bin/squiggle-studio.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "examples",
+    "!**/*.tsbuildinfo"
+  ],
+  "scripts": {
+    "dev": "tsx src/cli/index.ts examples --dev",
+    "build": "pnpm run build:server && pnpm run build:client",
+    "build:server": "tsc -b",
+    "build:client": "vite build",
+    "typecheck:client": "tsc -p tsconfig.client.json",
+    "start": "node ./bin/squiggle-studio.js examples",
+    "test": "vitest run",
+    "lint": "prettier --check . && pnpm run typecheck:client",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@commander-js/extra-typings": "^13.1.0",
+    "commander": "^13.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@quri/configs": "workspace:*",
+    "@quri/squiggle-components": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
+    "@quri/squiggle-relative-values": "workspace:*",
+    "@quri/ui": "workspace:*",
+    "@tailwindcss/forms": "^0.5.10",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.21",
+    "clsx": "^2.1.1",
+    "postcss": "^8.5.3",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "tailwindcss": "^3.4.14",
+    "tsx": "^4.19.3",
+    "typescript": "5.8.2",
+    "vite": "^6.2.4",
+    "vitest": "^3.1.1"
+  },
+  "optionalDependencies": {
+    "puppeteer-core": "^24.43.1"
+  }
+}
