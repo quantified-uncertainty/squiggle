@@ -343,11 +343,24 @@ export const scenarios: Scenario[] = [
       await h.page.click(".cm-content");
       expect((await focused(h)).inEditor).toBe(true);
 
+      // F10 focuses the File trigger without opening it (as on Windows and
+      // in VS Code, §3.3); ↓ then opens File at its first item.
       await h.key("F10");
       let now = await focused(h);
       expect(now.testId).toBe(TID.menubarTrigger);
       expect(now.menu, "F10 focuses File").toBe("file");
       expect(await menuGone(h, "file"), "F10 doesn't open a menu").toBe(true);
+      await h.key("ArrowDown");
+      await waitForMenu(h, "file");
+      now = await focused(h);
+      expect(now.menu, "↓ opens File").toBe("file");
+      expect(now.command, "at its first item").toBe("explorer.newFile");
+      await h.key("Escape");
+      now = await focused(h);
+      expect(now.testId, "Esc closes File, back on its trigger").toBe(
+        TID.menubarTrigger
+      );
+      expect(now.menu).toBe("file");
 
       await h.key("ArrowRight");
       expect((await focused(h)).menu).toBe("edit");
@@ -680,6 +693,82 @@ export const scenarios: Scenario[] = [
       expect(files[0]?.label).toBe("costs.squiggle · imports/lib");
       expect(files.every((i) => !i.disabled)).toBe(true);
       expect(list.map((i) => i.command)).toContain("squiggle.clearRecent");
+    },
+  },
+  {
+    id: "menus/open-recent-folders",
+    title:
+      "File ▸ Open Recent: folders with a long common prefix show their names, the parent as a hint and the full path as a tooltip; More… shows ⌃R",
+    tags: ["menus"],
+    viewport,
+    state: { file: FILE },
+    steps: async (h) => {
+      const prefix =
+        "/Users/someone/Documents/agent-workspaces/squiggle-models-clone";
+      await h.page.setRequestInterception(true);
+      h.page.on("request", (request: HTTPRequest) => {
+        const { pathname } = new URL(request.url());
+        if (request.method() === "GET" && pathname === "/api/recent") {
+          void request.respond({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify([
+              { path: `${prefix}/alpha`, openedAt: Date.now() },
+              { path: `${prefix}/beta`, openedAt: Date.now() - 1000 },
+            ]),
+          });
+          return;
+        }
+        void request.continue();
+      });
+      await h.page.reload({ waitUntil: "load" });
+      await h.whenIdle();
+      await openByClick(h, "file");
+      await h.page.hover(
+        byId(TID.menu, { "data-menu": "file" }) + " [data-submenu='openRecent']"
+      );
+      await waitForMenu(h, "openRecent");
+      await frames(h);
+      await h.shot("menus/open-recent-folders");
+    },
+    check: async (h) => {
+      const folders = await h.page.$$eval(
+        `${byId(TID.menu, { "data-menu": "openRecent" })} [data-command='squiggle.openRecentFolder']`,
+        (els) =>
+          els.map((el) => {
+            const label = el.querySelector("span.truncate > span.truncate");
+            return {
+              label: label?.textContent ?? "",
+              labelCut: label ? label.scrollWidth > label.clientWidth : true,
+              text: el.textContent ?? "",
+              title: el.getAttribute("title"),
+            };
+          })
+      );
+      expect(folders.map((f) => f.label)).toEqual(["alpha", "beta"]);
+      expect(
+        folders.every((f) => !f.labelCut),
+        "names are never cut"
+      ).toBe(true);
+      expect(folders[0]?.text).toContain(
+        "~/Documents/agent-workspaces/squiggle-models-clone"
+      );
+      expect(folders.map((f) => f.title)).toEqual([
+        "~/Documents/agent-workspaces/squiggle-models-clone/alpha",
+        "~/Documents/agent-workspaces/squiggle-models-clone/beta",
+      ]);
+      const list = await items(h, "openRecent");
+      const more = list.find(
+        (i) => i.command === "workbench.action.openRecent"
+      );
+      expect(more?.label).toBe("More…");
+      const platform = await platformOf(h);
+      if (platform === "mac") expect(more?.shortcut).toBe("⌃R");
+      // It opens the Open Recent pick.
+      await h.page.click(
+        `${byId(TID.menu, { "data-menu": "openRecent" })} [data-command='workbench.action.openRecent']`
+      );
+      await h.page.waitForSelector(`${byId(TID.quickPick)}[data-mode='pick']`);
     },
   },
   {

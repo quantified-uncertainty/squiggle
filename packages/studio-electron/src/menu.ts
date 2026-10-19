@@ -272,6 +272,13 @@ export function buildMenuTemplate(
       }
     }
     out.push(separator);
+    // The Open Recent pick, with its accelerator (⌃R / Ctrl+R), as in the
+    // browser's menu.
+    const openRecent = getCommand("workbench.action.openRecent");
+    const more =
+      openRecent &&
+      commandItem("file/openRecent", openRecent, undefined, "More…");
+    if (more) out.push(more);
     out.push(
       rendererItem("squiggle.clearRecent", undefined, "Clear Recent Files")
     );

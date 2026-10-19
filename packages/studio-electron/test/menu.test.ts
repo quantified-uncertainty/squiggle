@@ -37,6 +37,7 @@ function fullState(): MenuState {
   for (const menu of STUDIO_MENUS) visit(menu.items);
   for (const id of [
     "squiggle.openFile",
+    "workbench.action.openRecent",
     "squiggle.clearRecent",
     "squiggle.clearChanges",
     "squiggle.view.select",
@@ -309,9 +310,14 @@ describe("the native menu template", () => {
       "costs.squiggle · lib",
       "main.squiggle",
       "separator",
+      "More…",
       "Clear Recent Files",
     ]);
     expect(recent[0].enabled).toBe(false);
+    // "More…" opens the Open Recent pick and shows its key.
+    const more = recent[recent.length - 2];
+    expect(more.accelerator).toBe("Ctrl+R");
+    expect(more.enabled).toBe(true);
 
     const changed = submenuOf(template, "go/changedFiles");
     expect(changed.map((i) => [i.label ?? i.type, i.enabled])).toEqual([

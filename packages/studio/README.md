@@ -64,7 +64,7 @@ Keys follow VS Code where a browser allows it. The sheet (`?`) lists every key f
 | Next changed file                                            | ⌥F5                             | Alt+F5                                       |
 | Focus Explorer / code / output                               | ⇧⌘E / ⌘1 / ⌘2                   | Ctrl+Shift+E / Ctrl+1 / Ctrl+2               |
 | Next part (the way out of the editor)                        | F6                              | F6                                           |
-| Menubar                                                      | F10                             | F10, or tap Alt                              |
+| Menubar (focuses File; ↓ or ↵ opens it)                      | F10                             | F10, or tap Alt                              |
 | Copy relative path (`:line` or `:start-end` from the editor) | ⌘K P                            | Ctrl+K P                                     |
 
 On an Output card, `e` jumps to its code, ↵ zooms and Space collapses. Bare keys never trigger commands, so typing `p`, `?`, `[` or ⌥-characters such as `ß` in the editor or an input is always text.

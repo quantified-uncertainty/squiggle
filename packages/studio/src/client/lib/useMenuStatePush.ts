@@ -32,6 +32,7 @@ const DYNAMIC_COMMANDS: Record<string, string[]> = {
   recent: [
     "squiggle.openRecentFolder",
     "squiggle.openFile",
+    "workbench.action.openRecent", // "More…"
     "squiggle.clearRecent",
   ],
   changedFiles: ["squiggle.openFile", "squiggle.clearChanges"],

@@ -14,6 +14,7 @@ import {
 import {
   firstIndex,
   flatItems,
+  folderLabel,
   lastIndex,
   type MenuEnv,
   nextIndex,
@@ -285,13 +286,22 @@ describe("resolveMenu: dynamic nodes", () => {
       "group",
       "separator",
       "command",
+      "command",
     ]);
     const [folders, files] = nodes;
     if (folders.kind !== "group" || files.kind !== "group") throw new Error();
     expect(folders.label).toBe("Folders");
-    expect(folders.items.map((i) => i.label)).toEqual([
-      "~/other",
-      "/opt/shared",
+    // The folder's name, then its parent as a path hint, with the full path
+    // as the tooltip: folders with a long common prefix stay apart (#52).
+    expect(
+      folders.items.map((i) =>
+        i.kind === "command"
+          ? [i.label, i.detail, i.detailIsPath, i.tooltip]
+          : undefined
+      )
+    ).toEqual([
+      ["other", "~", true, "~/other"],
+      ["shared", "/opt", true, "/opt/shared"],
     ]);
     expect(
       folders.items.map((i) => (i.kind === "command" ? i.args : undefined))
@@ -307,9 +317,31 @@ describe("resolveMenu: dynamic nodes", () => {
     });
     expect(main).toMatchObject({ label: "main.squiggle" });
     expect(main.kind === "command" && main.detail).toBeFalsy();
+    // "More…" opens the Open Recent pick and shows its key (§3.4).
     expect(nodes[3]).toMatchObject({
+      command: "workbench.action.openRecent",
+      label: "More…",
+      shortcut: "⌃R",
+    });
+    expect(nodes[4]).toMatchObject({
       command: "squiggle.clearRecent",
       enabled: true,
+    });
+  });
+
+  test("folderLabel splits a folder into its name and a ~/ parent", () => {
+    expect(folderLabel("/Users/me/agent-workspaces/clone/alpha")).toEqual({
+      name: "alpha",
+      parent: "~/agent-workspaces/clone",
+    });
+    expect(folderLabel("/opt/shared/")).toEqual({
+      name: "shared",
+      parent: "/opt",
+    });
+    expect(folderLabel("/top")).toEqual({ name: "top", parent: "/" });
+    expect(folderLabel("C:\\Users\\me\\models")).toEqual({
+      name: "models",
+      parent: "~",
     });
   });
 

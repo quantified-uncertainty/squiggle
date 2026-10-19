@@ -49,11 +49,42 @@ const Label: FC<{ label: string; detail?: ReactNode; struck?: boolean }> = ({
   label,
   detail,
   struck,
-}) => (
-  <span className={clsx("min-w-0 flex-1 truncate", struck && "line-through")}>
-    {label}
-    {detail}
-  </span>
+}) =>
+  detail ? (
+    // The label keeps most of the room; the detail truncates first.
+    <span
+      className={clsx(
+        "flex min-w-0 flex-1 items-baseline truncate",
+        struck && "line-through"
+      )}
+    >
+      <span className="min-w-0 max-w-[75%] shrink-0 truncate">{label}</span>
+      {detail}
+    </span>
+  ) : (
+    <span className={clsx("min-w-0 flex-1 truncate", struck && "line-through")}>
+      {label}
+    </span>
+  );
+
+// The dim text after a label: " · lib", " · ~/models" (a path, cut off at its
+// start so its end stays visible), " · lib · 12s ago".
+const Detail: FC<{ item: ResolvedCommandItem }> = ({ item }) => (
+  <>
+    <span className={clsx("shrink-0 whitespace-pre", DIM_CLASS)}>{" · "}</span>
+    {item.detailIsPath ? (
+      <span dir="rtl" className={clsx("min-w-0 truncate text-left", DIM_CLASS)}>
+        <bdi dir="ltr">{item.detail}</bdi>
+      </span>
+    ) : (
+      <span
+        className={clsx("min-w-0 truncate", DIM_CLASS)}
+        data-volatile={item.volatile ? "" : undefined}
+      >
+        {item.detail}
+      </span>
+    )}
+  </>
 );
 
 type CommandRowProps = RowEvents & {
@@ -78,6 +109,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, CommandRowProps>(
         aria-disabled={item.enabled ? undefined : true}
         aria-keyshortcuts={item.ariaKeyshortcuts}
         data-testid={TID.menuitem}
+        title={item.tooltip}
         data-command={item.command}
         data-args={
           item.args === undefined ? undefined : JSON.stringify(item.args)
@@ -96,16 +128,7 @@ export const MenuItem = forwardRef<HTMLButtonElement, CommandRowProps>(
         <Label
           label={item.label}
           struck={item.struck}
-          detail={
-            item.detail ? (
-              <span
-                className={DIM_CLASS}
-                data-volatile={item.volatile ? "" : undefined}
-              >
-                {` · ${item.detail}`}
-              </span>
-            ) : undefined
-          }
+          detail={item.detail ? <Detail item={item} /> : undefined}
         />
         {item.shortcut && (
           <kbd className={clsx("ml-8 shrink-0 font-sans text-xs", DIM_CLASS)}>

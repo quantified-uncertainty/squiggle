@@ -96,6 +96,12 @@ exports[`the native menu template > snapshot (darwin) 1`] = `
             "type": "separator",
           },
           {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+          },
+          {
             "enabled": true,
             "label": "Clear Recent Files",
           },
@@ -704,6 +710,13 @@ exports[`the native menu template > snapshot (linux) 1`] = `
           },
           {
             "type": "separator",
+          },
+          {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+            "registerAccelerator": false,
           },
           {
             "enabled": true,
@@ -1362,6 +1375,13 @@ exports[`the native menu template > snapshot (win32) 1`] = `
           },
           {
             "type": "separator",
+          },
+          {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+            "registerAccelerator": false,
           },
           {
             "enabled": true,

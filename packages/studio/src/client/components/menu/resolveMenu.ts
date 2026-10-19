@@ -34,6 +34,8 @@ export type ResolvedCommandItem = {
   args?: unknown;
   label: string;
   detail?: string; // dim text after the label: a folder hint, "12s ago"
+  detailIsPath?: boolean; // a long path: cut off at its start, not its end
+  tooltip?: string; // the full text, e.g. a folder's absolute path
   volatile?: boolean; // the detail changes over time ("12s ago")
   struck?: boolean; // deleted on disk
   role: MenuItemRole;
@@ -170,7 +172,13 @@ function roleOf(spec: CommandSpec): MenuItemRole {
 
 // ── Resolving ───────────────────────────────────────────────────────────────
 
-type Options = { title?: string; detail?: string; volatile?: boolean };
+type Options = {
+  title?: string;
+  detail?: string;
+  detailIsPath?: boolean;
+  tooltip?: string;
+  volatile?: boolean;
+};
 
 function commandItem(
   env: MenuEnv,
@@ -199,6 +207,8 @@ function commandItem(
     ...(args === undefined ? {} : { args }),
     label: options.title ?? spec.menuTitle ?? spec.title,
     ...(options.detail ? { detail: options.detail } : {}),
+    ...(options.detail && options.detailIsPath ? { detailIsPath: true } : {}),
+    ...(options.tooltip ? { tooltip: options.tooltip } : {}),
     ...(options.volatile ? { volatile: true } : {}),
     ...(options.struck ? { struck: true } : {}),
     role,
@@ -210,6 +220,18 @@ function commandItem(
 
 function placeholder(key: string, label: string): ResolvedPlaceholder {
   return { kind: "placeholder", key, label };
+}
+
+// A recent folder as its name and its parent ("/Users/me/models/alpha" →
+// "alpha", "~/models"), so folders with a long common prefix stay apart
+// (#52, #55), like recent files.
+export function folderLabel(abs: string): { name: string; parent: string } {
+  const trimmed = abs.replace(/(.)[\\/]+$/, "$1");
+  const cut = Math.max(trimmed.lastIndexOf("/"), trimmed.lastIndexOf("\\"));
+  if (cut < 0) return { name: trimmed, parent: "" };
+  const name = trimmed.slice(cut + 1) || trimmed;
+  const parent = cut === 0 ? trimmed.slice(0, 1) : trimmed.slice(0, cut);
+  return { name, parent: tildePath(parent) };
 }
 
 function recentNodes(env: MenuEnv, key: string): ResolvedNode[] {
@@ -226,18 +248,23 @@ function recentNodes(env: MenuEnv, key: string): ResolvedNode[] {
       kind: "group",
       key: `${key}/folders`,
       label: "Folders",
-      items: folders.flatMap(
-        (path) =>
+      items: folders.flatMap((path) => {
+        const { name, parent } = folderLabel(path);
+        return (
           commandItem(
             env,
             `${key}/folder:${path}`,
             "squiggle.openRecentFolder",
             { path },
             {
-              title: tildePath(path),
+              title: name,
+              detail: parent || undefined,
+              detailIsPath: true,
+              tooltip: tildePath(path),
             }
           ) ?? []
-      ),
+        );
+      }),
     });
   }
   if (files.length) {
@@ -261,6 +288,15 @@ function recentNodes(env: MenuEnv, key: string): ResolvedNode[] {
     });
   }
   out.push({ kind: "separator", key: `${key}/sep` });
+  // The Open Recent pick, which shows the key (⌃R) that opens it (§3.4).
+  const more = commandItem(
+    env,
+    `${key}/more`,
+    "workbench.action.openRecent",
+    undefined,
+    { title: "More…" }
+  );
+  if (more) out.push(more);
   const clear = commandItem(
     env,
     `${key}/clear`,
