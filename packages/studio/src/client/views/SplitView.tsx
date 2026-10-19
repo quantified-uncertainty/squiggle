@@ -2,7 +2,7 @@ import { FC } from "react";
 
 import { SquigglePlayground } from "@quri/squiggle-components";
 
-import type { StudioViewContext } from "./types.js";
+import type { StudioView, StudioViewContext } from "./types.js";
 
 export const SplitView: FC<{ context: StudioViewContext }> = ({ context }) => {
   return (
@@ -21,4 +21,14 @@ export const SplitView: FC<{ context: StudioViewContext }> = ({ context }) => {
       />
     </div>
   );
+};
+
+// The full Squiggle playground (its own editor, settings and viewer). The id is
+// "split" for compatibility with saved state and `?view=split`.
+export const splitView: StudioView = {
+  id: "split",
+  label: "Playground",
+  hasOwnEditor: true,
+  isAvailable: () => true,
+  render: (context) => <SplitView context={context} />,
 };

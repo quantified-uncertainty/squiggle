@@ -9,18 +9,19 @@ import { z } from "zod";
 
 import { GlobeIcon, PlusIcon, RefreshIcon, TextTooltip } from "@quri/ui";
 
-import { isDirty, type Workspace } from "../lib/useWorkspace.js";
-import { basename } from "../lib/paths.js";
+import { basename } from "../../shared/paths.js";
+import { TID } from "../../shared/testIds.js";
 import { readStorage, writeStorage } from "../lib/storage.js";
 import { formatAgo, useNow } from "../lib/time.js";
+import { isDirty, useWorkspaceContext } from "../lib/workspaceTypes.js";
 import { FileTree } from "./FileTree.js";
-import { InlineNameInput, withExtension } from "./InlineNameInput.js";
 import { HubImportModal } from "./HubImportModal.js";
-import { FolderIcon, SquiggleIcon } from "./icons.js";
+import { FolderIcon } from "./icons.js";
+import { InlineNameInput, withExtension } from "./InlineNameInput.js";
 import { OpenFolderModal } from "./OpenFolderModal.js";
 
 const SectionTitle: FC<PropsWithChildren> = ({ children }) => (
-  <div className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+  <div className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
     {children}
   </div>
 );
@@ -77,11 +78,16 @@ function useSidebarWidth() {
   return { width: clampWidth(width), onPointerDown };
 }
 
-export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
+// WP0 stub (owned by WP3): the former Sidebar, renamed and reading the
+// workspace from context. The brand row moved to the application header and
+// the Live/Follow footer to the status bar; WP3 rebuilds the rest (§3.9).
+export const Explorer: FC = () => {
+  const workspace = useWorkspaceContext();
   const { width, onPointerDown } = useSidebarWidth();
   const [modal, setModal] = useState<"folder" | "hub" | null>(null);
   const [creating, setCreating] = useState(false);
   const { rootInfo, files } = workspace;
+  const allowOpenFolder = rootInfo?.allowOpenFolder !== false;
 
   const dirtyPaths = useMemo(
     () =>
@@ -93,33 +99,41 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
     [files]
   );
 
-  const recentFiles = workspace.recentFiles.filter(
-    (p) => p !== workspace.activePath
-  );
+  const recentFiles = workspace.mru.filter((p) => p !== workspace.activePath);
 
   const now = useNow(5000);
-  const changes = Object.entries(workspace.externalChanges)
+  const changedAt = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(workspace.externalChanges).map(([p, c]) => [p, c.at])
+      ),
+    [workspace.externalChanges]
+  );
+  const changes = Object.entries(changedAt)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
 
   return (
     <div className="flex h-full shrink-0" style={{ width }}>
-      <aside className="flex min-w-0 flex-1 flex-col bg-slate-50">
-        <div className="flex items-center gap-2 border-b border-slate-200 px-3 py-2.5">
-          <SquiggleIcon size={18} className="text-orange-500" />
-          <span className="text-sm font-semibold text-slate-800">
-            Squiggle Studio
-          </span>
-        </div>
-        <div className="flex items-center gap-1 px-2 pt-2">
+      <aside
+        aria-label="Explorer"
+        data-testid={TID.explorer}
+        data-studio-region="tree"
+        className="flex min-w-0 flex-1 flex-col bg-slate-50"
+      >
+        <div
+          data-testid={TID.explorerHeader}
+          className="flex h-9 shrink-0 items-center gap-1 border-b border-slate-200 px-2"
+        >
           <button
             type="button"
             className="flex min-w-0 flex-1 items-center gap-1.5 rounded px-1 py-1 text-left hover:bg-slate-200"
             title={rootInfo?.root}
+            disabled={!allowOpenFolder}
             onClick={() => setModal("folder")}
           >
-            <FolderIcon size={14} className="shrink-0 text-slate-400" />
-            <span className="truncate text-sm font-medium text-slate-700">
+            <FolderIcon size={14} className="shrink-0 text-slate-500" />
+            <span className="truncate text-[11px] font-semibold uppercase tracking-wider text-slate-600">
               {rootInfo?.name ?? "…"}
             </span>
           </button>
@@ -157,9 +171,11 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
             nodes={workspace.tree}
             activePath={workspace.activePath}
             dirtyPaths={dirtyPaths}
-            externalChanges={workspace.externalChanges}
-            onOpen={workspace.openFile}
-            onRename={workspace.renameFile}
+            externalChanges={changedAt}
+            onOpen={(p) => workspace.openFile(p, { reason: "tree" })}
+            onRename={async (from, to) => {
+              await workspace.renameFile(from, to);
+            }}
           />
 
           {changes.length > 0 && (
@@ -175,7 +191,7 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
                       onClick={() => workspace.openFile(p)}
                     >
                       <span className="truncate">{basename(p)}</span>
-                      <span className="ml-auto shrink-0 text-xs text-slate-400">
+                      <span className="ml-auto shrink-0 text-xs text-slate-500">
                         {formatAgo(at, now)}
                       </span>
                     </button>
@@ -199,7 +215,7 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
                     >
                       {basename(p)}
                       {p.includes("/") && (
-                        <span className="ml-1.5 text-xs text-slate-400">
+                        <span className="ml-1.5 text-xs text-slate-500">
                           {p.slice(0, p.lastIndexOf("/"))}
                         </span>
                       )}
@@ -236,42 +252,6 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
           )}
         </div>
 
-        <div className="flex items-center gap-2 border-t border-slate-200 px-3 py-2 text-xs text-slate-500">
-          <TextTooltip
-            text={
-              workspace.connected
-                ? "Changes to files on disk (e.g. by a coding agent) show up automatically."
-                : "Lost connection to the Studio server. Retrying…"
-            }
-            placement="top"
-          >
-            <span className="flex items-center gap-1.5">
-              <span
-                className={
-                  workspace.connected
-                    ? "h-2 w-2 rounded-full bg-emerald-500"
-                    : "h-2 w-2 animate-pulse rounded-full bg-amber-500"
-                }
-              />
-              {workspace.connected ? "Live" : "Reconnecting…"}
-            </span>
-          </TextTooltip>
-          <TextTooltip
-            text="Open files automatically when they change on disk, e.g. while a coding agent works."
-            placement="top"
-          >
-            <label className="ml-auto flex cursor-pointer items-center gap-1.5">
-              <input
-                type="checkbox"
-                className="h-3.5 w-3.5 rounded border-slate-300 text-orange-500 focus:ring-orange-400"
-                checked={workspace.followChanges}
-                onChange={(e) => workspace.setFollowChanges(e.target.checked)}
-              />
-              Follow changes
-            </label>
-          </TextTooltip>
-        </div>
-
         {modal === "folder" && rootInfo && (
           <OpenFolderModal
             currentRoot={rootInfo.root}
@@ -282,7 +262,7 @@ export const Sidebar: FC<{ workspace: Workspace }> = ({ workspace }) => {
         )}
         {modal === "hub" && (
           <HubImportModal
-            onImported={workspace.openFile}
+            onImported={(p) => workspace.openFile(p, { reason: "api" })}
             close={() => setModal(null)}
           />
         )}

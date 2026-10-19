@@ -1,4 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+// The workspace model. WP0 adapted the HEAD implementation to the `Workspace`
+// interface (workspaceTypes.ts); members that arrive with WP4 (history,
+// autosave, hash-based sync, resync, Follow's gates, …) are simple or no-op
+// here. Owner: WP4.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
   RecentFolder,
@@ -6,65 +11,70 @@ import type {
   StudioEvent,
   TreeNode,
 } from "../../shared/api.js";
-import { API_ERROR_CODES } from "../../shared/api.js";
+import { API_ERROR_CODES, parseHubImport } from "../../shared/api.js";
 import { api, ApiError, setExpectedRoot } from "./api.js";
+import { reportBusy, useReportBusy } from "./idle.js";
+import { clearViewState, recordNavigation } from "./navigation.js";
 import {
   loadFolderState,
-  loadFollowChanges,
+  loadViewIds,
   saveFolderState,
-  saveFollowChanges,
+  saveViewIds,
 } from "./storage.js";
+import { updateSettings, useSetting } from "./studioState.js";
 import { useStudioEvents } from "./useStudioEvents.js";
+import {
+  type ChangeEntry,
+  isDirty,
+  type OpenFile,
+  type OpenReason,
+  type SaveState,
+  treeFilePaths,
+  type Workspace,
+} from "./workspaceTypes.js";
 
-export type OpenFile = {
-  path: string;
-  status: "loading" | "ready" | "error";
-  error?: string;
-  buffer: string; // current editor contents
-  disk: string; // last known contents on disk
-  // Set when the file changed on disk while the buffer had unsaved edits.
-  conflict?: { disk: string };
-  deletedOnDisk: boolean;
-  // Bumped when the buffer is replaced from outside; editors remount on change.
-  editorEpoch: number;
-  // Bumped when a dependency (imported file) changes; runs restart on change.
-  runEpoch: number;
-};
+export { isDirty, type OpenFile, type Workspace } from "./workspaceTypes.js";
 
-function treeFilePaths(nodes: TreeNode[]): string[] {
-  return nodes.flatMap((n) =>
-    n.type === "file" ? [n.path] : treeFilePaths(n.children)
-  );
-}
-
-export const isDirty = (file: OpenFile) =>
-  file.status === "ready" && file.buffer !== file.disk;
-
-const MAX_RECENT_FILES = 12;
+const MAX_RECENT_FILES = 20;
 
 // File-change events for a path within this long after our own save of it are
-// treated as echoes of that save, not as external changes.
+// treated as echoes of that save, not as external changes. (WP4 replaces this
+// with hash-based echo detection, #34.)
 const OWN_SAVE_ECHO_MS = 2000;
+
+const emptyFile = (path: string): OpenFile => ({
+  path,
+  status: "loading",
+  buffer: "",
+  disk: "",
+  diskHash: "",
+  deletedOnDisk: false,
+  editorEpoch: 0,
+  externalRevision: 0,
+  runEpoch: 0,
+});
 
 export function useWorkspace(options: {
   onError: (message: string) => void;
   initialFile?: string;
-}) {
+}): Workspace {
   const { onError } = options;
   const [rootInfo, setRootInfo] = useState<RootInfo | undefined>();
   const [tree, setTree] = useState<TreeNode[]>([]);
+  const [treeLoaded, setTreeLoaded] = useState(false);
+  const [treeSkipped, setTreeSkipped] = useState<string[]>([]);
   const [recentFolders, setRecentFolders] = useState<RecentFolder[]>([]);
-  const [recentFiles, setRecentFiles] = useState<string[]>([]);
+  const [mru, setMru] = useState<string[]>([]);
   const [files, setFiles] = useState<Record<string, OpenFile>>({});
-  const [order, setOrder] = useState<string[]>([]);
   const [activePath, setActivePath] = useState<string | null>(null);
-  // When each file last changed on disk from outside Studio (e.g. edited by a
-  // coding agent), in ms since epoch.
   const [externalChanges, setExternalChanges] = useState<
-    Record<string, number>
+    Record<string, ChangeEntry>
   >({});
-  // Open files automatically when they change on disk.
-  const [followChanges, setFollowChangesState] = useState(loadFollowChanges);
+  const [viewIds, setViewIds] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState<Record<string, true>>({});
+  // Not idle before the first tree has loaded (§6.5).
+  useReportBusy("workspace:boot", !treeLoaded);
+  const followChanges = useSetting("squiggle.followChanges");
   const followChangesRef = useRef(followChanges);
   followChangesRef.current = followChanges;
   const ownSavesRef = useRef(new Map<string, number>());
@@ -73,6 +83,8 @@ export function useWorkspace(options: {
   const depsRef = useRef(new Map<string, Set<string>>());
   const filesRef = useRef(files);
   filesRef.current = files;
+  const viewIdsRef = useRef(viewIds);
+  viewIdsRef.current = viewIds;
   const rootRef = useRef<string | undefined>(undefined);
   const openingFolderRef = useRef(false);
   // `?file=` only applies to the folder Studio was opened with.
@@ -80,8 +92,6 @@ export function useWorkspace(options: {
   // Set when another window/tab switched the server to a different folder while
   // this one had unsaved edits; those edits can't be saved anymore.
   const [rootChangedTo, setRootChangedTo] = useState<string | undefined>();
-  const orderRef = useRef(order);
-  orderRef.current = order;
 
   const updateFile = useCallback(
     (path: string, fn: (file: OpenFile) => OpenFile) => {
@@ -92,10 +102,17 @@ export function useWorkspace(options: {
     []
   );
 
-  const refreshTree = useCallback(async () => {
-    const { tree } = await api.getTree();
-    setTree(tree);
-    return tree;
+  const refreshTreeNodes = useCallback(async () => {
+    reportBusy("tree", true);
+    try {
+      const response = await api.getTree();
+      setTree(response.tree);
+      setTreeSkipped(response.skipped);
+      setTreeLoaded(true);
+      return response.tree;
+    } finally {
+      reportBusy("tree", false);
+    }
   }, []);
 
   const refreshRecentFolders = useCallback(async () => {
@@ -103,16 +120,18 @@ export function useWorkspace(options: {
   }, []);
 
   const loadFile = useCallback(async (path: string) => {
+    reportBusy(`load:${path}`, true);
     try {
-      const { content } = await api.readFile(path);
+      const { content, hash } = await api.readFile(path);
       setFiles((prev) => ({
         ...prev,
         [path]: {
-          ...prev[path],
+          ...(prev[path] ?? emptyFile(path)),
           status: "ready",
           error: undefined,
           buffer: content,
           disk: content,
+          diskHash: hash,
           conflict: undefined,
           deletedOnDisk: false,
           editorEpoch: (prev[path]?.editorEpoch ?? 0) + 1,
@@ -122,61 +141,73 @@ export function useWorkspace(options: {
       const message = e instanceof Error ? e.message : String(e);
       setFiles((prev) => ({
         ...prev,
-        [path]: { ...prev[path], status: "error", error: message },
+        [path]: {
+          ...(prev[path] ?? emptyFile(path)),
+          status: "error",
+          error: message,
+        },
       }));
+    } finally {
+      reportBusy(`load:${path}`, false);
     }
   }, []);
 
   const openFile = useCallback(
-    (path: string) => {
+    (
+      path: string,
+      opts: { reason?: OpenReason; view?: string; focus?: "keep" | "main" } = {}
+    ) => {
       setActivePath(path);
-      setOrder((prev) => (prev.includes(path) ? prev : [...prev, path]));
-      setRecentFiles((prev) =>
+      setMru((prev) =>
         [path, ...prev.filter((p) => p !== path)].slice(0, MAX_RECENT_FILES)
       );
+      if (opts.view) {
+        setViewIds((prev) => ({ ...prev, [path]: opts.view as string }));
+      }
+      recordNavigation(
+        { file: path, view: opts.view ?? viewIdsRef.current[path] },
+        opts.reason ?? "api"
+      );
       if (!filesRef.current[path]) {
-        setFiles((prev) => ({
-          ...prev,
-          [path]: {
-            path,
-            status: "loading",
-            buffer: "",
-            disk: "",
-            deletedOnDisk: false,
-            editorEpoch: 0,
-            runEpoch: 0,
-          },
-        }));
+        setFiles((prev) => ({ ...prev, [path]: emptyFile(path) }));
         void loadFile(path);
       }
     },
     [loadFile]
   );
 
-  const closeFile = useCallback((path: string) => {
-    const file = filesRef.current[path];
-    if (
-      file &&
-      isDirty(file) &&
-      !window.confirm(`${path} has unsaved changes. Close anyway?`)
-    ) {
-      return;
-    }
-    const prev = orderRef.current;
-    const next = prev.filter((p) => p !== path);
-    setOrder(next);
-    setActivePath((active) => {
-      if (active !== path) return active;
-      const i = prev.indexOf(path);
-      return next[Math.min(i, next.length - 1)] ?? null;
-    });
-    setFiles((prev) => {
-      const next = { ...prev };
-      delete next[path];
-      return next;
-    });
-    depsRef.current.delete(path);
-  }, []);
+  const mruRef = useRef(mru);
+  mruRef.current = mru;
+
+  // Removes the file from the working set and MRU, then shows the next MRU
+  // file, or the start page.
+  const closeFile = useCallback(
+    async (path: string) => {
+      const file = filesRef.current[path];
+      if (
+        file &&
+        isDirty(file) &&
+        !window.confirm(`${path} has unsaved changes. Close anyway?`)
+      ) {
+        return;
+      }
+      setFiles((prev) => {
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+      depsRef.current.delete(path);
+      const rest = mruRef.current.filter((p) => p !== path);
+      setMru(rest);
+      if (rest[0]) openFile(rest[0], { reason: "api" });
+      else {
+        setActivePath((active) => (active === path ? null : active));
+        // The start page has no view parameters in the address bar.
+        clearViewState();
+      }
+    },
+    [openFile]
+  );
 
   const setBuffer = useCallback(
     (path: string, buffer: string) =>
@@ -184,57 +215,92 @@ export function useWorkspace(options: {
     [updateFile]
   );
 
+  const write = useCallback(async (path: string, content: string) => {
+    ownSavesRef.current.set(path, Date.now());
+    setSaving((prev) => ({ ...prev, [path]: true }));
+    reportBusy(`save:${path}`, true);
+    try {
+      return await api.writeFile(path, content);
+    } catch (e) {
+      if (e instanceof ApiError && e.code === API_ERROR_CODES.rootChanged) {
+        setRootChangedTo(e.root ?? "another folder");
+        throw new Error(
+          `Not saved: Studio was switched to ${e.root ?? "another folder"} in another window.`
+        );
+      }
+      throw e;
+    } finally {
+      reportBusy(`save:${path}`, false);
+      setSaving((prev) => {
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+    }
+  }, []);
+
   const saveFile = useCallback(
     async (path: string) => {
       const file = filesRef.current[path];
       if (!file || file.status !== "ready") return;
       const content = file.buffer;
-      ownSavesRef.current.set(path, Date.now());
-      try {
-        await api.writeFile(path, content);
-      } catch (e) {
-        if (e instanceof ApiError && e.code === API_ERROR_CODES.rootChanged) {
-          setRootChangedTo(e.root ?? "another folder");
-          throw new Error(
-            `Not saved: Studio was switched to ${e.root ?? "another folder"} in another window.`
-          );
-        }
-        throw e;
-      }
+      const { hash } = await write(path, content);
       updateFile(path, (f) => ({
         ...f,
         disk: content,
+        diskHash: hash,
         conflict: undefined,
         deletedOnDisk: false,
       }));
     },
-    [updateFile]
+    [updateFile, write]
   );
 
-  // Conflict resolution.
+  const saveAll = useCallback(async () => {
+    for (const file of Object.values(filesRef.current)) {
+      if (isDirty(file)) await saveFile(file.path);
+    }
+  }, [saveFile]);
+
+  const saveState = useCallback(
+    (path: string): SaveState => {
+      const file = files[path];
+      if (rootChangedTo) return "blocked";
+      if (saving[path]) return "saving";
+      if (!file) return "saved";
+      if (file.conflict) return "conflict";
+      if (file.deletedOnDisk) return "deleted";
+      return isDirty(file) ? "dirty" : "saved";
+    },
+    [files, saving, rootChangedTo]
+  );
+
+  // Conflict resolution. Reload re-reads the file (#9).
   const reloadFromDisk = useCallback(
-    (path: string) => {
+    async (path: string) => {
+      await loadFile(path);
+    },
+    [loadFile]
+  );
+  const overwriteWithMine = useCallback(
+    async (path: string) => {
       updateFile(path, (f) =>
         f.conflict
           ? {
               ...f,
-              buffer: f.conflict.disk,
               disk: f.conflict.disk,
+              diskHash: f.conflict.hash,
               conflict: undefined,
-              editorEpoch: f.editorEpoch + 1,
             }
           : f
       );
+      filesRef.current = {
+        ...filesRef.current,
+        [path]: { ...filesRef.current[path], conflict: undefined },
+      };
+      await saveFile(path);
     },
-    [updateFile]
-  );
-  const keepMine = useCallback(
-    (path: string) => {
-      updateFile(path, (f) =>
-        f.conflict ? { ...f, disk: f.conflict.disk, conflict: undefined } : f
-      );
-    },
-    [updateFile]
+    [updateFile, saveFile]
   );
 
   const recordDependency = useCallback((file: string, dep: string) => {
@@ -257,20 +323,13 @@ export function useWorkspace(options: {
       const isOwnSave =
         savedAt !== undefined && Date.now() - savedAt < OWN_SAVE_ECHO_MS;
       if (!isOwnSave) {
-        setExternalChanges((prev) => ({ ...prev, [path]: Date.now() }));
-        if (
-          exists &&
-          followChangesRef.current &&
-          !filesRef.current[path] &&
-          path.endsWith(".squiggle")
-        ) {
-          // Follow mode: open the file the agent is working on. Already-open
-          // files are reloaded below.
-          openFile(path);
-          return;
-        }
-        if (exists && followChangesRef.current && filesRef.current[path]) {
-          setActivePath(path);
+        setExternalChanges((prev) => ({
+          ...prev,
+          [path]: { at: Date.now(), exists, seen: false },
+        }));
+        if (exists && followChangesRef.current && path.endsWith(".squiggle")) {
+          // Follow mode: show the file the agent is working on.
+          openFile(path, { reason: "follow" });
         }
       }
 
@@ -281,8 +340,9 @@ export function useWorkspace(options: {
         return;
       }
       let content: string;
+      let hash: string;
       try {
-        content = (await api.readFile(path)).content;
+        ({ content, hash } = await api.readFile(path));
       } catch (e) {
         if (e instanceof ApiError && e.status === 404) {
           updateFile(path, (f) => ({ ...f, deletedOnDisk: true }));
@@ -302,21 +362,27 @@ export function useWorkspace(options: {
             status: "ready",
             buffer: content,
             disk: content,
+            diskHash: hash,
             conflict: undefined,
             deletedOnDisk: false,
+            externalRevision: f.externalRevision + 1,
+            // WP5 applies external changes in place; until then, remount.
             editorEpoch:
               f.buffer === content ? f.editorEpoch : f.editorEpoch + 1,
           };
         }
-        return { ...f, conflict: { disk: content }, deletedOnDisk: false };
+        return {
+          ...f,
+          conflict: { disk: content, hash },
+          deletedOnDisk: false,
+        };
       });
     },
     [updateFile, openFile]
   );
 
-  const setFollowChanges = useCallback((follow: boolean) => {
-    setFollowChangesState(follow);
-    saveFollowChanges(follow);
+  const setFollowChanges = useCallback((on: boolean) => {
+    void updateSettings({ "squiggle.followChanges": on });
   }, []);
 
   const resetForRoot = useCallback(
@@ -328,33 +394,28 @@ export function useWorkspace(options: {
       setExpectedRoot(info.root);
       depsRef.current.clear();
       const saved = loadFolderState(info.root);
-      const [tree] = await Promise.all([refreshTree(), refreshRecentFolders()]);
-      // Don't restore tabs or recent entries for files deleted since.
-      const existing = new Set(treeFilePaths(tree));
-      const state = {
-        ...saved,
-        openFiles: saved.openFiles.filter((p) => existing.has(p)),
-        recentFiles: saved.recentFiles.filter((p) => existing.has(p)),
-      };
+      setViewIds(loadViewIds(info.root));
+      const [treeResult] = await Promise.allSettled([
+        refreshTreeNodes(),
+        refreshRecentFolders(),
+      ]);
+      const nodes = treeResult.status === "fulfilled" ? treeResult.value : [];
+      // Don't restore files deleted since.
+      const existing = new Set(treeFilePaths(nodes));
       setFiles({});
-      setOrder([]);
       setActivePath(null);
       setExternalChanges({});
       filesRef.current = {};
-      orderRef.current = [];
-      setRecentFiles(state.recentFiles);
-      const toOpen = state.openFiles;
+      setMru(saved.recentFiles.filter((p) => existing.has(p)));
       setRootChangedTo(undefined);
-      for (const p of toOpen) openFile(p);
       const initialFile = initialFileRef.current;
       initialFileRef.current = undefined;
-      if (initialFile) openFile(initialFile);
-      else if (state.activeFile && toOpen.includes(state.activeFile)) {
-        setActivePath(state.activeFile);
+      if (initialFile) openFile(initialFile, { reason: "url" });
+      else if (saved.activeFile && existing.has(saved.activeFile)) {
+        openFile(saved.activeFile, { reason: "start" });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [openFile, refreshRecentFolders, refreshTree]
+    [openFile, refreshRecentFolders, refreshTreeNodes]
   );
 
   useEffect(() => {
@@ -372,15 +433,16 @@ export function useWorkspace(options: {
     };
   }, [resetForRoot, onError]);
 
-  // Persist open files per folder.
+  // Persist the shown file and recent files per folder (WP4 moves this into
+  // studioState's root state).
   useEffect(() => {
     if (!rootInfo) return;
     saveFolderState(rootInfo.root, {
-      openFiles: order,
+      openFiles: activePath ? [activePath] : [],
       activeFile: activePath,
-      recentFiles,
+      recentFiles: mru,
     });
-  }, [rootInfo, order, activePath, recentFiles]);
+  }, [rootInfo, activePath, mru]);
 
   const connected = useStudioEvents((event: StudioEvent) => {
     switch (event.type) {
@@ -390,7 +452,7 @@ export function useWorkspace(options: {
         );
         break;
       case "tree-changed":
-        void refreshTree();
+        void refreshTreeNodes();
         break;
       case "root-changed":
         // Another window (or Electron shell) switched folders.
@@ -402,15 +464,14 @@ export function useWorkspace(options: {
           void api.getRoot().then(resetForRoot);
         }
         break;
+      default:
+        break;
     }
   });
 
-  const dirtyCount = () =>
-    Object.values(filesRef.current).filter(isDirty).length;
-
   const openFolder = useCallback(
     async (folder: string) => {
-      const dirty = dirtyCount();
+      const dirty = Object.values(filesRef.current).filter(isDirty).length;
       if (
         dirty > 0 &&
         !window.confirm(
@@ -430,43 +491,77 @@ export function useWorkspace(options: {
     [resetForRoot]
   );
 
+  const refreshTree = useCallback(async () => {
+    await refreshTreeNodes();
+  }, [refreshTreeNodes]);
+
   const createFile = useCallback(
-    async (path: string, content: string) => {
+    async (path: string, content = "") => {
       ownSavesRef.current.set(path, Date.now());
-      await api.createFile(path, content);
-      await refreshTree();
-      openFile(path);
+      const result = await api.createFile(path, content);
+      await refreshTreeNodes();
+      openFile(result.path, { reason: "api" });
+      return result.path;
     },
-    [refreshTree, openFile]
+    [refreshTreeNodes, openFile]
   );
 
-  // Renames on disk and carries over open buffers (including unsaved edits),
-  // tabs, recent files and the active file.
+  // Renames on disk and carries over the buffer (including unsaved edits),
+  // the view choice, recent files and the shown file.
   const renameFile = useCallback(
     async (from: string, to: string) => {
       const now = Date.now();
       ownSavesRef.current.set(from, now);
       ownSavesRef.current.set(to, now);
-      await api.renameFile(from, to);
-      const move = (p: string) => (p === from ? to : p);
+      const result = await api.renameFile(from, to);
+      const dest = result.to;
+      const move = (p: string) => (p === from ? dest : p);
       setFiles((prev) => {
         if (!prev[from]) return prev;
-        const next = { ...prev, [to]: { ...prev[from], path: to } };
+        const next = { ...prev, [dest]: { ...prev[from], path: dest } };
         delete next[from];
         filesRef.current = next;
         return next;
       });
-      setOrder((prev) => prev.map(move));
-      setRecentFiles((prev) => prev.map(move));
+      setMru((prev) => prev.map(move));
       setActivePath((prev) => (prev === null ? prev : move(prev)));
+      setViewIds((prev) => {
+        if (!(from in prev)) return prev;
+        const next = { ...prev, [dest]: prev[from] };
+        delete next[from];
+        return next;
+      });
       const deps = depsRef.current.get(from);
       if (deps) {
         depsRef.current.delete(from);
-        depsRef.current.set(to, deps);
+        depsRef.current.set(dest, deps);
       }
-      await refreshTree();
+      await refreshTreeNodes();
+      return dest;
     },
-    [refreshTree]
+    [refreshTreeNodes]
+  );
+
+  const importFromHub = useCallback(
+    async (
+      id: string,
+      opts: { path?: string; overwrite?: boolean; signal?: AbortSignal } = {}
+    ) => {
+      const parsed = parseHubImport(id.startsWith("hub:") ? id : `hub:${id}`);
+      if (!parsed)
+        throw new Error(`Invalid Hub id "${id}", expected owner/slug`);
+      const path = opts.path ?? `hub/${parsed.slug}.squiggle`;
+      ownSavesRef.current.set(path, Date.now());
+      const result = await api.importFromHubLegacy({
+        ...parsed,
+        path,
+        overwrite: opts.overwrite,
+        signal: opts.signal,
+      });
+      await refreshTreeNodes();
+      return result.path;
+    },
+    [refreshTreeNodes]
   );
 
   // Accepts the folder switch made elsewhere, discarding unsaved edits.
@@ -474,33 +569,93 @@ export function useWorkspace(options: {
     await resetForRoot(await api.getRoot());
   }, [resetForRoot]);
 
+  const selectView = useCallback((path: string, viewId: string) => {
+    setViewIds((prev) => {
+      if (prev[path] === viewId) return prev;
+      const next = { ...prev, [path]: viewId };
+      if (rootRef.current) saveViewIds(rootRef.current, next);
+      return next;
+    });
+  }, []);
+
+  const markSeen = useCallback((path: string) => {
+    setExternalChanges((prev) =>
+      prev[path] && !prev[path].seen
+        ? { ...prev, [path]: { ...prev[path], seen: true } }
+        : prev
+    );
+  }, []);
+
+  // Viewing a changed file marks its change as seen.
+  useEffect(() => {
+    if (activePath) markSeen(activePath);
+  }, [activePath, markSeen]);
+
+  const clearChanges = useCallback(() => setExternalChanges({}), []);
+  const clearRecent = useCallback(() => setMru([]), []);
+
+  const externalChangesRef = useRef(externalChanges);
+  externalChangesRef.current = externalChanges;
+  const nextChange = useCallback(
+    (dir: 1 | -1) => {
+      const unseen = Object.entries(externalChangesRef.current)
+        .filter(([, c]) => !c.seen && c.exists)
+        .sort(([, a], [, b]) => b.at - a.at)
+        .map(([p]) => p);
+      const target = dir === 1 ? unseen[0] : unseen[unseen.length - 1];
+      if (target) openFile(target, { reason: "api" });
+    },
+    [openFile]
+  );
+
+  const history = useMemo(
+    () => ({
+      canGoBack: false,
+      canGoForward: false,
+      back: () => window.history.back(),
+      forward: () => window.history.forward(),
+    }),
+    []
+  );
+
   return {
     rootInfo,
     tree,
-    recentFolders,
-    recentFiles,
+    treeLoaded,
+    treeSkipped,
+    recentFolders: rootInfo?.allowOpenFolder === false ? [] : recentFolders,
     files,
-    order,
     activePath,
-    setActivePath,
+    mru,
+    externalChanges,
+    followNotice: undefined,
+    connection: connected ? "live" : "reconnecting",
+    rootChangedTo,
+    rootMissing: false,
+    viewIds,
+    selectView,
+    history,
     openFile,
     closeFile,
     setBuffer,
     saveFile,
+    saveAll,
+    flushAll: saveAll,
+    saveState,
     reloadFromDisk,
-    keepMine,
-    recordDependency,
-    refreshTree,
-    openFolder,
-    connected,
-    externalChanges,
-    followChanges,
-    setFollowChanges,
-    rootChangedTo,
-    followRootChange,
+    overwriteWithMine,
     createFile,
     renameFile,
+    importFromHub,
+    openFolder,
+    followRootChange,
+    refreshTree,
+    resync: refreshTree,
+    recordDependency,
+    markSeen,
+    clearChanges,
+    clearRecent,
+    nextChange,
+    setFollowChanges,
   };
 }
-
-export type Workspace = ReturnType<typeof useWorkspace>;

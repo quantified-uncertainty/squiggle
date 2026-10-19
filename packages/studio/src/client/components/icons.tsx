@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 type Props = { size?: number; className?: string };
 
@@ -48,4 +48,56 @@ export const SquiggleIcon: FC<Props> = ({ size = 16, className }) => (
       strokeLinecap="round"
     />
   </svg>
+);
+
+const Outline: FC<Props & { children: ReactNode }> = ({
+  size = 16,
+  className,
+  children,
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden
+  >
+    {children}
+  </svg>
+);
+
+// A window with a left panel: the Explorer toggle.
+export const SidebarIcon: FC<Props> = (props) => (
+  <Outline {...props}>
+    <rect x="2.75" y="3.75" width="14.5" height="12.5" rx="1.75" />
+    <path d="M7.75 3.75v12.5" />
+  </Outline>
+);
+
+export const FolderPlusIcon: FC<Props> = (props) => (
+  <Outline {...props}>
+    <path d="M2.75 6A1.25 1.25 0 0 1 4 4.75h3.4l1.6 1.75H16A1.25 1.25 0 0 1 17.25 7.75v7A1.25 1.25 0 0 1 16 16H4a1.25 1.25 0 0 1-1.25-1.25z" />
+    <path d="M10 8.75v4.5M7.75 11h4.5" />
+  </Outline>
+);
+
+// Two stacked chevrons pointing at a line: Collapse Folders in Explorer.
+export const CollapseAllIcon: FC<Props> = (props) => (
+  <Outline {...props}>
+    <rect x="3.25" y="3.25" width="13.5" height="13.5" rx="1.75" />
+    <path d="M7 10h6" />
+  </Outline>
+);
+
+// Follow changes on disk.
+export const EyeIcon: FC<Props> = (props) => (
+  <Outline {...props}>
+    <path d="M1.75 10S4.75 4.75 10 4.75 18.25 10 18.25 10 15.25 15.25 10 15.25 1.75 10 1.75 10z" />
+    <circle cx="10" cy="10" r="2.5" />
+  </Outline>
 );

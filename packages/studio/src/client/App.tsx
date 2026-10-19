@@ -1,147 +1,59 @@
-import { FC, useCallback, useEffect, useRef, useState } from "react";
+import { FC, useCallback, useEffect, useRef } from "react";
 
-import { Button, useToast } from "@quri/ui";
+import { useToast } from "@quri/ui";
 
+import {
+  initialStateFor,
+  urlFlagsFromSearch,
+  viewStateFromSearch,
+} from "../shared/viewState.js";
+import { AgentCommands } from "./commands/AgentCommands.js";
+import { ChordIndicator } from "./commands/ChordIndicator.js";
+import { CoreCommands } from "./commands/CoreCommands.js";
+import { EditorCommands } from "./commands/EditorCommands.js";
+import { ExplorerCommands } from "./commands/ExplorerCommands.js";
+import { OverlayHost } from "./commands/OverlayHost.js";
+import { ShellCommands } from "./commands/ShellCommands.js";
+import { WorkspaceCommands } from "./commands/WorkspaceCommands.js";
+import { AppHeader } from "./components/AppHeader.js";
+import { Explorer } from "./components/Explorer.js";
 import { FileBanner } from "./components/FileBanner.js";
-import { FileTabs } from "./components/FileTabs.js";
 import { FileWorkspace } from "./components/FileWorkspace.js";
-import { SquiggleIcon } from "./components/icons.js";
-import { Sidebar } from "./components/Sidebar.js";
-import { loadViewIds, saveViewIds } from "./lib/storage.js";
-import { isDirty, useWorkspace } from "./lib/useWorkspace.js";
+import { RootBanner } from "./components/RootBanner.js";
+import { StartPage } from "./components/StartPage.js";
+import { StatusBar } from "./components/StatusBar.js";
+import { installAgentHooks } from "./lib/agentHooks.js";
+import { installIdleTracking } from "./lib/idle.js";
+import { useLayout } from "./lib/stores/layout.js";
+import { useWorkspace } from "./lib/useWorkspace.js";
+import {
+  isDirty,
+  type Workspace,
+  WorkspaceContext,
+} from "./lib/workspaceTypes.js";
 import { getStudioViews } from "./views/index.js";
 
-const params = new URLSearchParams(window.location.search);
-const urlFile = params.get("file") ?? undefined;
-const urlView = params.get("view") ?? undefined;
-const embed = params.get("embed") === "1";
-const urlVariable = params.get("variable") ?? undefined;
+// URL parameters are initial state only (#17): they pick the initial file and
+// its view, spec and tab; from then on the address bar mirrors the current
+// view (navigation.ts). In embed mode (`render`) they stay authoritative.
+const initialView = viewStateFromSearch(window.location.search);
+const flags = urlFlagsFromSearch(window.location.search);
+const embed = flags.embed === "1";
 if (embed) document.documentElement.classList.add("studio-embed");
+// Deterministic screenshots: no transitions or animations; the command log.
+if (flags.test === "1") document.documentElement.classList.add("studio-test");
+installIdleTracking();
 
-declare global {
-  interface Window {
-    // Used by the Electron shell to check for unsaved edits before switching
-    // folders (see packages/studio-electron).
-    squiggleStudio?: {
-      hasUnsavedChanges: () => boolean;
-      discardChanges: () => void;
-    };
-  }
-}
-
-const EmptyState: FC<{
-  recentFiles: string[];
-  onOpen: (path: string) => void;
-}> = ({ recentFiles, onOpen }) => (
-  <div className="grid h-full place-items-center bg-slate-50">
-    <div className="w-full max-w-md px-6">
-      <div className="text-center">
-        <SquiggleIcon size={40} className="mx-auto text-orange-400" />
-        <h2 className="mt-3 text-base font-semibold text-slate-700">
-          Open a file to get started
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Pick a <code>.squiggle</code> file from the sidebar. Changes made on
-          disk, for example by a coding agent, show up here automatically.
-        </p>
-      </div>
-      {recentFiles.length > 0 && (
-        <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white">
-          <div className="border-b border-slate-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-            Recent files
-          </div>
-          <ul>
-            {recentFiles.slice(0, 6).map((p) => (
-              <li key={p}>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
-                  onClick={() => onOpen(p)}
-                >
-                  <SquiggleIcon
-                    size={14}
-                    className="shrink-0 text-orange-500"
-                  />
-                  <span className="truncate">{p}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <p className="mt-6 text-center text-xs text-slate-400">
-        Tip: turn on <span className="font-medium">Follow changes</span> in the
-        sidebar to open files as your agent edits them.
-      </p>
-    </div>
-  </div>
-);
-
-export const App: FC = () => {
-  const toast = useToast();
-  const onError = useCallback(
-    (message: string) => toast(message, "error"),
-    [toast]
-  );
-  const workspace = useWorkspace({ onError, initialFile: urlFile });
-  const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
-  const activeFile = workspace.activePath
-    ? workspace.files[workspace.activePath]
-    : undefined;
-
-  // Chosen view per file; files without a choice get a default that depends
-  // on their content (see FileWorkspace).
-  const root = workspace.rootInfo?.root;
-  const [viewIds, setViewIds] = useState<Record<string, string>>({});
-  useEffect(() => {
-    if (root) setViewIds(loadViewIds(root));
-  }, [root]);
-  const viewId =
-    urlView ??
-    (workspace.activePath ? viewIds[workspace.activePath] : undefined);
-
-  const selectView = (id: string) => {
-    if (!workspace.activePath || !root) return;
-    const next = { ...viewIds, [workspace.activePath]: id };
-    setViewIds(next);
-    saveViewIds(root, next);
-  };
-
-  const { saveFile } = workspace;
-  const save = useCallback(
-    async (path: string) => {
-      try {
-        await saveFile(path);
-      } catch (e) {
-        toast(e instanceof Error ? e.message : String(e), "error");
-      }
-    },
-    [saveFile, toast]
-  );
-
-  // Cmd/Ctrl+S saves the active file. Capture phase, so it wins over editors.
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (
-        (e.metaKey || e.ctrlKey) &&
-        !e.altKey &&
-        e.key.toLowerCase() === "s"
-      ) {
-        e.preventDefault();
-        if (workspace.activePath) void save(workspace.activePath);
-      }
-    };
-    window.addEventListener("keydown", handler, true);
-    return () => window.removeEventListener("keydown", handler, true);
-  }, [save, workspace.activePath]);
-
-  // Warn before closing the tab with unsaved edits.
-  const hasDirty = Object.values(workspace.files).some(isDirty);
-  const hasDirtyRef = useRef(hasDirty);
-  hasDirtyRef.current = hasDirty;
+// Unsaved edits block closing the tab, and window.squiggleStudio reports them
+// (the Electron shell asks before switching folders).
+function useUnloadGuardAndAgentHooks(workspace: Workspace) {
+  const workspaceRef = useRef(workspace);
+  workspaceRef.current = workspace;
   // Set when the user already agreed to discard edits (e.g. in Electron's
   // dialog), so that the page doesn't ask a second time.
   const discardingRef = useRef(false);
+  const hasDirty = Object.values(workspace.files).some(isDirty);
+
   useEffect(() => {
     if (!hasDirty) return;
     const handler = (e: BeforeUnloadEvent) => {
@@ -151,17 +63,44 @@ export const App: FC = () => {
     return () => window.removeEventListener("beforeunload", handler);
   }, [hasDirty]);
 
-  useEffect(() => {
-    window.squiggleStudio = {
-      hasUnsavedChanges: () => hasDirtyRef.current,
-      discardChanges: () => {
-        discardingRef.current = true;
-      },
-    };
-    return () => {
-      delete window.squiggleStudio;
-    };
-  }, []);
+  useEffect(
+    () =>
+      installAgentHooks(
+        {
+          root: () => workspaceRef.current.rootInfo?.root,
+          dirtyFiles: () =>
+            Object.values(workspaceRef.current.files)
+              .filter(isDirty)
+              .map((f) => f.path),
+          conflicts: () =>
+            Object.values(workspaceRef.current.files)
+              .filter((f) => f.conflict !== undefined)
+              .map((f) => f.path),
+          connected: () => workspaceRef.current.connection === "live",
+          flush: () => workspaceRef.current.flushAll(),
+        },
+        () => {
+          discardingRef.current = true;
+        }
+      ),
+    []
+  );
+}
+
+export const App: FC = () => {
+  const toast = useToast();
+  const onError = useCallback(
+    (message: string) => toast(message, "error"),
+    [toast]
+  );
+  const workspace = useWorkspace({ onError, initialFile: initialView.file });
+  const [sidebarVisible] = useLayout("sidebarVisible");
+  const [statusBarVisible] = useLayout("statusBarVisible");
+  useUnloadGuardAndAgentHooks(workspace);
+
+  const activeFile = workspace.activePath
+    ? workspace.files[workspace.activePath]
+    : undefined;
 
   useEffect(() => {
     const name = workspace.rootInfo?.name;
@@ -171,77 +110,65 @@ export const App: FC = () => {
       .join(" — ");
   }, [workspace.rootInfo, workspace.activePath]);
 
-  const workspaceView = activeFile ? (
+  const save = async (path: string) => {
+    try {
+      await workspace.saveFile(path);
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e), "error");
+    }
+  };
+
+  const fileWorkspace = activeFile ? (
     <FileWorkspace
+      // A new file is a new workspace (its own run, view state and editor).
+      key={activeFile.path}
       file={activeFile}
+      workspace={workspace}
       views={getStudioViews()}
-      viewId={embed ? (urlView ?? "output") : viewId}
-      onSelectView={selectView}
-      setBuffer={workspace.setBuffer}
-      openFile={workspace.openFile}
-      recordDependency={workspace.recordDependency}
       embed={embed}
-      variable={urlVariable}
-      toolbarTarget={toolbarEl}
-      toolbarRight={
-        isDirty(activeFile) ? (
-          <Button size="small" onClick={() => void save(activeFile.path)}>
-            Save
-          </Button>
-        ) : (
-          <span className="text-xs text-slate-400">Saved</span>
+      initial={initialStateFor(activeFile.path, initialView)}
+      banner={
+        embed ? undefined : (
+          <FileBanner
+            file={activeFile}
+            onReload={() => void workspace.reloadFromDisk(activeFile.path)}
+            onKeepMine={() => void workspace.overwriteWithMine(activeFile.path)}
+            onSave={() => void save(activeFile.path)}
+          />
         )
       }
     />
   ) : null;
 
   if (embed) {
-    return <div className="bg-white">{workspaceView}</div>;
+    return (
+      <WorkspaceContext.Provider value={workspace}>
+        <div className="studio-app bg-white">{fileWorkspace}</div>
+      </WorkspaceContext.Provider>
+    );
   }
 
   return (
-    <div className="flex h-full">
-      <Sidebar workspace={workspace} />
-      <main className="flex min-w-0 flex-1 flex-col">
-        {workspace.rootChangedTo && (
-          <div
-            role="alert"
-            className="flex shrink-0 items-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900"
-          >
-            <span className="flex-1">
-              Another window switched Studio to{" "}
-              <strong className="font-semibold">
-                {workspace.rootChangedTo}
-              </strong>
-              . Unsaved edits here can no longer be saved; copy anything you
-              need first.
-            </span>
-            <Button
-              size="small"
-              onClick={() => void workspace.followRootChange()}
-            >
-              Discard edits and switch
-            </Button>
-          </div>
-        )}
-        <FileTabs workspace={workspace} toolbarRef={setToolbarEl} />
-        {activeFile && (
-          <FileBanner
-            file={activeFile}
-            onReload={() => workspace.reloadFromDisk(activeFile.path)}
-            onKeepMine={() => workspace.keepMine(activeFile.path)}
-            onSave={() => void save(activeFile.path)}
-          />
-        )}
-        <div className="min-h-0 flex-1">
-          {workspaceView ?? (
-            <EmptyState
-              recentFiles={workspace.recentFiles}
-              onOpen={workspace.openFile}
-            />
-          )}
+    <WorkspaceContext.Provider value={workspace}>
+      <div className="studio-app flex h-full flex-col">
+        <AppHeader />
+        <RootBanner />
+        <div className="flex min-h-0 flex-1">
+          {sidebarVisible && <Explorer />}
+          <main className="flex min-w-0 flex-1 flex-col">
+            {fileWorkspace ?? <StartPage />}
+          </main>
         </div>
-      </main>
-    </div>
+        {statusBarVisible && <StatusBar />}
+        <WorkspaceCommands />
+        <ExplorerCommands />
+        <EditorCommands />
+        <ShellCommands />
+        <AgentCommands />
+        <OverlayHost />
+        <CoreCommands />
+        <ChordIndicator />
+      </div>
+    </WorkspaceContext.Provider>
   );
 };

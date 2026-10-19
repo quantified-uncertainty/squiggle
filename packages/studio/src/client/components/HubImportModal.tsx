@@ -43,7 +43,7 @@ export const HubImportModal: FC<Props> = ({ onImported, close }) => {
     setBusy(true);
     try {
       const path = target.endsWith(".squiggle") ? target : `${target}.squiggle`;
-      await api.importFromHub({ ...parsed, path, overwrite });
+      await api.importFromHubLegacy({ ...parsed, path, overwrite });
       toast(`Imported ${parsed.owner}/${parsed.slug}`, "confirmation");
       onImported(path);
       close();

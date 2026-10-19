@@ -15,7 +15,11 @@ import {
 import { RefreshIcon } from "@quri/ui";
 
 import { readStorage, writeStorage } from "../lib/storage.js";
-import type { StudioRunOutput, StudioViewContext } from "./types.js";
+import type {
+  StudioRunOutput,
+  StudioView,
+  StudioViewContext,
+} from "./types.js";
 
 // `isAvailable` runs on every render, so detection is memoized per run.
 const exportsByOutput = new WeakMap<SqModuleOutput, RelativeValuesExport[]>();
@@ -352,4 +356,15 @@ export const RelativeValuesView: FC<{ context: StudioViewContext }> = ({
       onTabChange={(tab) => updateUiState({ tab })}
     />
   );
+};
+
+// Shown for files with a top-level relative values spec (see
+// @quri/squiggle-relative-values). The dashboard has its own List / Grid / Plot
+// tabs.
+export const relativeValuesView: StudioView = {
+  id: "relative-values",
+  label: "Relative values",
+  isAvailable: ({ filePath, runOutput }) =>
+    hasRelativeValues(filePath, runOutput),
+  render: (context) => <RelativeValuesView context={context} />,
 };

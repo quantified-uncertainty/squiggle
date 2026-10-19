@@ -113,6 +113,8 @@ export const CodePane: FC<{
       <div
         className="min-w-0 shrink-0 overflow-hidden"
         style={{ width: `${shown * 100}%` }}
+        data-testid="code-pane"
+        data-studio-region="editor"
       >
         <CodeEditor
           // Uncontrolled: remount when the code is replaced from outside.
@@ -133,7 +135,9 @@ export const CodePane: FC<{
         className="w-1 shrink-0 cursor-col-resize border-l border-slate-200 bg-white hover:bg-orange-200"
         onPointerDown={onPointerDown}
       />
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 flex-1" data-studio-region="view">
+        {children}
+      </div>
     </div>
   );
 };

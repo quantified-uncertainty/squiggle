@@ -11,7 +11,11 @@ import { SqValue, SqValuePath, SqValuePathEdge } from "@quri/squiggle-lang";
 import { RefreshIcon } from "@quri/ui";
 
 import { readStorage, writeStorage } from "../lib/storage.js";
-import type { StudioRunOutput, StudioViewContext } from "./types.js";
+import type {
+  StudioRunOutput,
+  StudioView,
+  StudioViewContext,
+} from "./types.js";
 
 type Layout = "cards" | "list";
 
@@ -314,4 +318,11 @@ export const OutputView: FC<{ context: StudioViewContext }> = ({ context }) => {
       </div>
     </ProjectContext.Provider>
   );
+};
+
+export const outputView: StudioView = {
+  id: "output",
+  label: "Output",
+  isAvailable: () => true,
+  render: (context) => <OutputView context={context} />,
 };

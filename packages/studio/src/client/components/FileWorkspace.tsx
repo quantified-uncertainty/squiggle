@@ -1,56 +1,63 @@
-import { FC, ReactNode, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 
 import { useSimulator } from "@quri/squiggle-components";
 import { RefreshIcon } from "@quri/ui";
 
+import { TID } from "../../shared/testIds.js";
+import type { ViewState } from "../../shared/viewState.js";
+import { useReportBusy } from "../lib/idle.js";
 import { makeStudioLinker } from "../lib/linker.js";
-import type { OpenFile } from "../lib/useWorkspace.js";
+import { updateViewState } from "../lib/navigation.js";
+import { useLayout } from "../lib/stores/layout.js";
+import type { OpenFile, Workspace } from "../lib/workspaceTypes.js";
 import type {
   StudioRunOutput,
   StudioView,
   StudioViewContext,
 } from "../views/types.js";
-import { CodePane, CodeToggle, useCodePaneState } from "./CodePane.js";
-import { ViewTabs } from "./ViewTabs.js";
+import { CodePane } from "./CodePane.js";
+import { EditorHeader } from "./EditorHeader.js";
 
-type Props = {
+export type FileWorkspaceProps = {
   file: OpenFile;
+  workspace: Workspace;
   views: readonly StudioView[];
-  viewId: string | undefined; // undefined: pick a default for this file
-  onSelectView: (id: string) => void;
-  setBuffer: (path: string, code: string) => void;
-  openFile: (path: string) => void;
-  recordDependency: (file: string, dep: string) => void;
   embed: boolean;
-  variable?: string;
-  toolbarRight?: ReactNode;
-  // Slot in the tab bar for the view switcher and save state.
-  toolbarTarget: HTMLElement | null;
+  initial?: ViewState; // URL initial state for this file (authoritative in embed)
+  banner?: ReactNode; // FileBanner, rendered under the editor header
 };
 
-const Toolbar: FC<{ target: HTMLElement | null; children: ReactNode }> = ({
-  target,
-  children,
-}) => (target ? createPortal(children, target) : null);
+// WP0 stub (owned by WP5): the HEAD workspace with the v2 props. The editor
+// header replaces the tab bar's toolbar portal; the URL is initial state only
+// (#17): outside embed mode the file's chosen view wins once the user picks
+// one, and `?variable=` filters Output only in embed mode.
+
+const Shell: FC<{
+  header: ReactNode;
+  banner?: ReactNode;
+  children: ReactNode;
+}> = ({ header, banner, children }) => (
+  <div className="flex h-full min-h-0 flex-col">
+    {header}
+    {banner}
+    <div className="min-h-0 flex-1">{children}</div>
+  </div>
+);
 
 // Runs the file (for the Output view and any registered views) and renders the
-// view bar plus the active view. Remounted (via `key`) when the file's imports
-// change on disk, which resets the SqProject's module cache.
-const SquiggleFileWorkspace: FC<Props> = ({
+// active view. Remounted (via `key`) when the file's imports change on disk,
+// which resets the SqProject's module cache (WP5 replaces this with RunHost,
+// #10).
+const SquiggleFileWorkspace: FC<FileWorkspaceProps> = ({
   file,
+  workspace,
   views,
-  viewId,
-  onSelectView,
-  setBuffer,
-  openFile,
-  recordDependency,
   embed,
-  variable,
-  toolbarRight,
-  toolbarTarget,
+  initial,
+  banner,
 }) => {
-  const [codePane, setCodePane] = useCodePaneState();
+  const [codePane, setCodePane] = useLayout("codePane");
+  const { recordDependency } = workspace;
   const [linker] = useState(() =>
     makeStudioLinker((dep) => recordDependency(file.path, dep))
   );
@@ -60,6 +67,7 @@ const SquiggleFileWorkspace: FC<Props> = ({
     sourceId: file.path,
     setup: { type: "projectFromLinker", linker },
   });
+  useReportBusy(`run:${file.path}`, !simulation || simulation.isStale);
 
   const runOutput: StudioRunOutput | undefined = useMemo(
     () =>
@@ -76,6 +84,10 @@ const SquiggleFileWorkspace: FC<Props> = ({
     [simulation, project, file.path]
   );
 
+  const viewId = embed
+    ? (initial?.view ?? "output")
+    : (workspace.viewIds[file.path] ?? initial?.view);
+
   const availableViews = views.filter((v) =>
     v.isAvailable({ filePath: file.path, runOutput })
   );
@@ -84,23 +96,31 @@ const SquiggleFileWorkspace: FC<Props> = ({
     // In embed mode (`render`), fall back to the Output view, which reports
     // errors, rather than to the editor.
     (embed ? availableViews.find((v) => v.id === "output") : undefined) ??
-    // Without a saved choice, files with a relative values spec open on their
+    // Without a choice, files with a relative values spec open on their
     // dashboard.
     (viewId === undefined
       ? availableViews.find((v) => v.id === "relative-values")
       : undefined) ??
     availableViews[0];
 
+  // The address bar mirrors the shown view (replaceState).
+  useEffect(() => {
+    if (!embed && activeView) updateViewState({ view: activeView.id });
+  }, [embed, activeView]);
+
   const context: StudioViewContext = {
     filePath: file.path,
     code: file.buffer,
     runOutput,
     linker,
-    editorKey: `${file.path}:${file.editorEpoch}`,
-    setCode: (code) => setBuffer(file.path, code),
-    openFile,
+    editorKey: `${file.path}:${file.editorEpoch}:${file.externalRevision}`,
+    setCode: (code) => workspace.setBuffer(file.path, code),
+    openFile: (path) => workspace.openFile(path, { reason: "link" }),
     embed,
-    variable,
+    initial,
+    variable: embed ? initial?.variable : undefined,
+    revealInCode: () => undefined, // WP5
+    registerReveal: () => () => undefined, // WP5
   };
 
   if (embed) {
@@ -112,74 +132,99 @@ const SquiggleFileWorkspace: FC<Props> = ({
   const showCode = canShowCode && codePane.open;
 
   return (
-    <div className="h-full min-h-0">
-      <Toolbar target={toolbarTarget}>
-        {toolbarRight}
-        {canShowCode && (
-          <CodeToggle
-            open={codePane.open}
-            onToggle={() => setCodePane({ open: !codePane.open })}
-          />
-        )}
-        <ViewTabs
-          views={availableViews}
-          activeId={activeView?.id ?? ""}
-          onSelect={onSelectView}
+    <Shell
+      banner={banner}
+      header={
+        <EditorHeader
+          file={file}
+          views={{
+            available: availableViews,
+            activeId: activeView?.id ?? "",
+            onSelect: (id) => workspace.selectView(file.path, id),
+          }}
+          toolbar={activeView?.renderToolbar?.(context)}
+          codePane={
+            canShowCode
+              ? {
+                  open: codePane.open,
+                  onToggle: () =>
+                    setCodePane({ ...codePane, open: !codePane.open }),
+                }
+              : undefined
+          }
         />
-      </Toolbar>
-      {showCode ? (
-        <CodePane
-          editorKey={context.editorKey}
-          code={file.buffer}
-          setCode={context.setCode}
-          sourceId={file.path}
-          project={project}
-          simulation={simulation}
-          fraction={codePane.fraction}
-          onResize={(fraction) => setCodePane({ fraction })}
-        >
-          {activeView?.render(context)}
-        </CodePane>
-      ) : (
-        activeView?.render(context)
-      )}
-    </div>
+      }
+    >
+      <div className="h-full min-h-0">
+        {showCode ? (
+          <CodePane
+            editorKey={context.editorKey}
+            code={file.buffer}
+            setCode={context.setCode}
+            sourceId={file.path}
+            project={project}
+            simulation={simulation}
+            fraction={codePane.fraction}
+            onResize={(fraction) => setCodePane({ ...codePane, fraction })}
+          >
+            {activeView?.render(context)}
+          </CodePane>
+        ) : (
+          <div className="h-full min-h-0" data-studio-region="view">
+            {activeView?.render(context)}
+          </div>
+        )}
+      </div>
+    </Shell>
   );
 };
 
-// Plain text editor for .json / .md files.
-const TextFileWorkspace: FC<Props> = ({
+// Plain text editor for .json / .md files. Keyed by path, so switching
+// between two text files never shows the previous file's text (#1).
+const TextFileWorkspace: FC<FileWorkspaceProps> = ({
   file,
-  setBuffer,
-  toolbarRight,
-  toolbarTarget,
+  workspace,
+  banner,
 }) => (
-  <div className="flex h-full min-h-0 flex-col">
-    <Toolbar target={toolbarTarget}>{toolbarRight}</Toolbar>
-    <textarea
-      key={file.editorEpoch}
-      className="min-h-0 flex-1 resize-none border-0 p-4 font-mono text-sm text-slate-800 focus:ring-0"
-      spellCheck={false}
-      defaultValue={file.buffer}
-      onChange={(e) => setBuffer(file.path, e.target.value)}
-    />
-  </div>
+  <Shell banner={banner} header={<EditorHeader file={file} />}>
+    <div className="flex h-full min-h-0 flex-col" data-studio-region="editor">
+      <textarea
+        key={`${file.path}:${file.editorEpoch}:${file.externalRevision}`}
+        data-testid={TID.textEditor}
+        aria-label={`Contents of ${file.path}`}
+        className="min-h-0 flex-1 resize-none border-0 p-4 font-mono text-sm text-slate-800 focus:ring-0"
+        spellCheck={false}
+        defaultValue={file.buffer}
+        onChange={(e) => workspace.setBuffer(file.path, e.target.value)}
+      />
+    </div>
+  </Shell>
 );
 
-export const FileWorkspace: FC<Props> = (props) => {
-  const { file } = props;
+export const FileWorkspace: FC<FileWorkspaceProps> = (props) => {
+  const { file, embed, banner } = props;
   if (file.status === "loading") {
     return (
-      <div className="grid h-full place-items-center">
-        <RefreshIcon className="animate-spin text-slate-400" size={20} />
-      </div>
+      <Shell
+        banner={banner}
+        header={embed ? null : <EditorHeader file={file} />}
+      >
+        <div className="grid h-full place-items-center">
+          <RefreshIcon className="animate-spin text-slate-400" size={20} />
+        </div>
+      </Shell>
     );
   }
   if (file.status === "error") {
     return (
-      <div className="p-6 text-sm text-red-700">
-        Couldn&apos;t open {file.path}: {file.error}
-      </div>
+      <Shell
+        banner={banner}
+        header={embed ? null : <EditorHeader file={file} />}
+      >
+        <div className="p-6 text-sm text-red-700" data-studio-error="">
+          Couldn&apos;t open {file.path}: {file.error}
+        </div>
+      </Shell>
     );
   }
   if (!file.path.endsWith(".squiggle")) {
