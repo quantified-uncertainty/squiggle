@@ -26,11 +26,28 @@ const TYPE_NAMES = new Set([
 ]);
 
 // Removes string literals and line comments so that heuristics don't fire on text inside them.
+// A single pass rather than regexes, so that it stays linear on unterminated strings.
+// An unterminated string extends to the end of the line.
 function stripStringsAndComments(line: string): string {
-  return line
-    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
-    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
-    .replace(/\/\/.*$/, "");
+  let result = "";
+  let i = 0;
+  while (i < line.length) {
+    const ch = line[i];
+    if (ch === '"' || ch === "'") {
+      let j = i + 1;
+      while (j < line.length && line[j] !== ch) {
+        j += line[j] === "\\" ? 2 : 1;
+      }
+      result += ch + ch;
+      i = j + 1;
+    } else if (ch === "/" && line[i + 1] === "/") {
+      break;
+    } else {
+      result += ch;
+      i++;
+    }
+  }
+  return result;
 }
 
 function levenshtein(a: string, b: string): number {
@@ -110,7 +127,7 @@ export function getErrorHints({
       );
     } else if (name === "Date.now") {
       hints.push("Use Danger.now() for the current time.");
-    } else if (TYPE_NAMES.has(name) && /\w+\s*:\s*[A-Z]/.test(code)) {
+    } else if (TYPE_NAMES.has(name) && /\w\s*:\s*[A-Z]/.test(code)) {
       hints.push(
         `Type annotations like 'x: ${name}' are not supported. Omit the annotation, or use a domain such as 'x: [0, 100]' or 'd: [Date(2020), Date(2030)]'.`
       );
@@ -163,8 +180,13 @@ export function getErrorHints({
       "'if' always needs 'then' and 'else': 'if cond then a else b' (or 'if cond { a } else { b }')."
     );
   }
+  // Equivalent to /^Expected "->".*end of input.* but "[\w"]/, without the
+  // polynomial backtracking.
+  const endOfInput = message.indexOf("end of input");
   if (
-    /^Expected "->".*end of input.* but "[\w"]/.test(message) &&
+    message.startsWith('Expected "->"') &&
+    endOfInput !== -1 &&
+    / but "[\w"]/.test(message.slice(endOfInput)) &&
     !/^\s*import\b/.test(code)
   ) {
     hints.push(
@@ -206,7 +228,16 @@ export function getCodeWarnings(code: string): SqCodeWarning[] {
       line = line.slice(end + 2);
       inBlockComment = false;
     }
-    line = line.replace(/\/\*.*?\*\//g, "");
+    // Remove block comments that end on this line.
+    for (
+      let start = line.indexOf("/*");
+      start !== -1;
+      start = line.indexOf("/*", start)
+    ) {
+      const end = line.indexOf("*/", start + 2);
+      if (end === -1) break;
+      line = line.slice(0, start) + line.slice(end + 2);
+    }
     if (line.includes("/*")) {
       line = line.slice(0, line.indexOf("/*"));
       inBlockComment = true;

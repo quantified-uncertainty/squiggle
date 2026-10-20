@@ -39,7 +39,10 @@ export const RelativeValuesModelLayout: FC<
 
   useEffect(() => {
     let cancelled = false;
-    // ModelEvaluator.create is async because Squiggle evaluation is async
+    // ModelEvaluator.create is async because Squiggle evaluation is async.
+    // The linker resolves the model's `hub:` imports; the views don't re-run
+    // the model (the list sidebar's pair charts use the evaluator's comparison
+    // function), so the provider needs no linker.
     ModelEvaluator.create(code, variableName, {
       cache: evaluatorCache,
       linker: relativeValuesHubLinker,

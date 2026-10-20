@@ -75,6 +75,13 @@ const MAX_BODY_BYTES = 10 * 1024 * 1024;
 // An API error with a status; answered as `{error, code, ...details}`.
 class HttpError extends PathError {}
 
+// What the client gets for an unexpected error; the error itself is logged.
+const INTERNAL_ERROR = "Internal server error";
+
+function isAbortError(e: unknown): boolean {
+  return e instanceof Error && e.name === "AbortError";
+}
+
 function sendJson(res: ServerResponse, status: number, body: unknown) {
   const data = JSON.stringify(body);
   res.writeHead(status, {
@@ -473,10 +480,17 @@ export async function startStudioServer(
     }
   };
 
+  // Our own errors (PathError, HttpError, HubError) carry messages meant for
+  // the client; anything else is logged here and reported generically, so
+  // that unexpected failures don't leak internals (paths, stack details).
   const sendApiError = (res: ServerResponse, e: unknown) => {
     const known = e instanceof PathError || e instanceof HubError;
+    // A request the client abandoned (#49) has nobody to answer and isn't a
+    // server failure.
+    const abandoned = isAbortError(e) && res.destroyed;
+    if (!known && !abandoned) console.error("Squiggle Studio: API error:", e);
     const status = known ? e.status : 500;
-    const message = e instanceof Error ? e.message : String(e);
+    const message = known ? e.message : INTERNAL_ERROR;
     const code = e instanceof PathError ? e.code : undefined;
     const details = e instanceof PathError ? e.details : {};
     if (code === API_ERROR_CODES.rootMissing) watcher?.checkRoot();
@@ -504,8 +518,11 @@ export async function startStudioServer(
       return;
     }
     serveStatic(clientDir, url.pathname, res).catch((e: unknown) => {
-      if (!res.headersSent) {
-        sendText(res, 500, e instanceof Error ? e.message : String(e));
+      // serveStatic answers its own expected failures (a malformed URL, a
+      // missing client build); anything else is logged, not sent.
+      console.error("Squiggle Studio: static request failed:", e);
+      if (!res.headersSent && !res.destroyed) {
+        sendText(res, 500, INTERNAL_ERROR);
       } else res.end();
     });
   };
@@ -516,7 +533,7 @@ export async function startStudioServer(
       handleRequest(req, res);
     } catch (e) {
       console.error("Squiggle Studio: request failed:", e);
-      if (!res.headersSent) sendText(res, 500, "Internal error");
+      if (!res.headersSent) sendText(res, 500, INTERNAL_ERROR);
       else res.end();
     }
   });

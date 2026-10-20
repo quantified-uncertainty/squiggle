@@ -63,4 +63,34 @@ describe("getCodeWarnings", () => {
     expect(lines).toEqual(expect.arrayContaining([2, 3, 4, 5]));
     expect(warnings.find((w) => w.line === 3)?.message).toBeDefined();
   });
+
+  test("ignores code inside strings and comments", () => {
+    const warnings = getCodeWarnings(
+      [
+        'a = "Y = null // not code"',
+        "b = 'it\\'s null'",
+        'c = "unterminated \\" null',
+        "d = 1 /* null */ + /* null */ 2",
+        "e = null",
+      ].join("\n")
+    );
+    expect(warnings.map((w) => w.line)).toEqual([5]);
+  });
+
+  test("stays fast on pathological input", () => {
+    const start = Date.now();
+    getCodeWarnings('x = "' + '\\"'.repeat(50000));
+    getCodeWarnings("x = 1 " + "/*a".repeat(50000));
+    expect(Date.now() - start).toBeLessThan(1000);
+  });
+});
+
+describe("getErrorHints: bare expressions", () => {
+  test("only the final statement may be a bare expression", () => {
+    const hints = getErrorHints({
+      message: 'Expected "->", assignment, or end of input but "y" found.',
+      line: "y = 1",
+    });
+    expect(hints.join("\n")).toMatch(/Only the final statement/);
+  });
 });

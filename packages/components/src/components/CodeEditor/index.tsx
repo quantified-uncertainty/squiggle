@@ -1,3 +1,5 @@
+"use client";
+
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 
 import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";

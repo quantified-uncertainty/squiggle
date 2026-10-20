@@ -1,3 +1,5 @@
+"use client";
+
 import { redo, selectAll, toggleComment, undo } from "@codemirror/commands";
 import { openSearchPanel } from "@codemirror/search";
 import { EditorState, Transaction } from "@codemirror/state";

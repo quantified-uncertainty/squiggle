@@ -1,0 +1,9 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    // lint type-checks the client, which needs dependencies' type declarations
+    "lint": {
+      "dependsOn": ["^build"]
+    }
+  }
+}

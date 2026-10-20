@@ -3,7 +3,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 
 import { hashContent } from "../src/server/files.js";
 import { resolveSafePath } from "../src/server/paths.js";
@@ -224,6 +224,27 @@ describe("file API", () => {
   test("returns 404 for missing files", async () => {
     const { status } = await api("/api/file?path=missing.squiggle");
     expect(status).toBe(404);
+  });
+
+  test("unexpected errors are logged, not sent to the client", async () => {
+    const locked = path.join(root, "locked.squiggle");
+    await fs.writeFile(locked, "secret = 1");
+    await fs.chmod(locked, 0o000);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const { status, json } = await api("/api/file?path=locked.squiggle");
+      expect(status).toBe(500);
+      // The raw EACCES error names the absolute path.
+      expect(json).toEqual({ error: "Internal server error" });
+      expect(logged).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ code: "EACCES" })
+      );
+    } finally {
+      logged.mockRestore();
+      await fs.chmod(locked, 0o644);
+      await fs.rm(locked);
+    }
   });
 
   test("refuses to read outside the root", async () => {

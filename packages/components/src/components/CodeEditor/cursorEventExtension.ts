@@ -1,3 +1,5 @@
+"use client";
+
 import { Extension } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
