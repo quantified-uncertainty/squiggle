@@ -212,6 +212,24 @@ async function resolveVisibleFile(
   return abs;
 }
 
+// A write the filesystem refused for a reason the user can fix (a read-only
+// file, folder or volume, a full disk), as a PathError that names only the
+// root-relative path, so the client can say why (`what`, e.g. "write
+// a.squiggle"). Anything else is returned as is, to be logged and answered
+// generically.
+function writeRefused(e: unknown, what: string): unknown {
+  if (isErrno(e, "EACCES", "EPERM")) {
+    return new PathError(`Studio can't ${what}: permission denied`, 403);
+  }
+  if (isErrno(e, "EROFS")) {
+    return new PathError(`Studio can't ${what}: the disk is read-only`, 403);
+  }
+  if (isErrno(e, "ENOSPC", "EDQUOT")) {
+    return new PathError(`Studio can't ${what}: the disk is full`, 507);
+  }
+  return e;
+}
+
 function fileExistsError(apiPath: string): PathError {
   return new PathError(
     `File already exists: ${apiPath}`,
@@ -325,26 +343,30 @@ export async function writeFile(
       throw fileExistsError(canonical);
     }
     await realRootOf(root); // never recreate a deleted root below
-    await fs.mkdir(path.dirname(target), { recursive: true });
-    await atomicWrite(target, content, async () => {
-      options.signal?.throwIfAborted();
-      if (options.baseHash !== undefined) {
-        const current = await diskState(target);
-        if (current.hash !== options.baseHash) {
-          throw new PathError(
-            current.exists
-              ? `${canonical} changed on disk since it was read`
-              : `${canonical} was deleted on disk since it was read`,
-            409,
-            API_ERROR_CODES.diskChanged,
-            { current }
-          );
+    try {
+      await fs.mkdir(path.dirname(target), { recursive: true });
+      await atomicWrite(target, content, async () => {
+        options.signal?.throwIfAborted();
+        if (options.baseHash !== undefined) {
+          const current = await diskState(target);
+          if (current.hash !== options.baseHash) {
+            throw new PathError(
+              current.exists
+                ? `${canonical} changed on disk since it was read`
+                : `${canonical} was deleted on disk since it was read`,
+              409,
+              API_ERROR_CODES.diskChanged,
+              { current }
+            );
+          }
         }
-      }
-      if (options.overwrite === false && (await lexists(abs))) {
-        throw fileExistsError(canonical);
-      }
-    });
+        if (options.overwrite === false && (await lexists(abs))) {
+          throw fileExistsError(canonical);
+        }
+      });
+    } catch (e) {
+      throw writeRefused(e, `write ${canonical}`);
+    }
     const written = await fs.stat(target);
     return {
       path: canonical,
@@ -383,8 +405,12 @@ export async function renameFile(root: string, from: string, to: string) {
         toStat.dev === fromStat.dev;
       if (!caseOnly) throw fileExistsError(toPath);
     }
-    await fs.mkdir(path.dirname(toAbs), { recursive: true });
-    await fs.rename(fromAbs, toAbs);
+    try {
+      await fs.mkdir(path.dirname(toAbs), { recursive: true });
+      await fs.rename(fromAbs, toAbs);
+    } catch (e) {
+      throw writeRefused(e, `move ${fromPath} to ${toPath}`);
+    }
     const stat = await fs.stat(toAbs);
     return {
       from: fromPath,

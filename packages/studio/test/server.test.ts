@@ -673,6 +673,90 @@ describe("write guard (#5)", () => {
   });
 });
 
+// A read-only folder or volume, or a full disk, is the user's to fix: the
+// client gets the reason, with the root-relative path only.
+describe("refused writes", () => {
+  const put = (body: Record<string, unknown>) =>
+    api("/api/file", { method: "PUT", body });
+  const rename = (from: string, to: string) =>
+    api("/api/file/rename", { method: "POST", body: { from, to } });
+  const ro = () => path.join(root, "ro");
+
+  // Runs `fn` with ro/ read-only (it holds ro/x.squiggle); nothing may be
+  // logged, as these aren't server failures.
+  async function withReadOnlyFolder(fn: () => Promise<void>) {
+    await fs.mkdir(ro(), { recursive: true });
+    await fs.writeFile(path.join(ro(), "x.squiggle"), "x = 1");
+    await fs.chmod(ro(), 0o555);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await fn();
+      expect(logged).not.toHaveBeenCalled();
+    } finally {
+      logged.mockRestore();
+      await fs.chmod(ro(), 0o755);
+      await fs.rm(ro(), { recursive: true });
+    }
+  }
+
+  test("saving into a read-only folder says permission denied", async () => {
+    await withReadOnlyFolder(async () => {
+      for (const body of [
+        { path: "ro/x.squiggle", content: "x = 2" },
+        { path: "ro/new.squiggle", content: "n = 1", overwrite: false },
+      ]) {
+        const { status, json } = await put(body);
+        expect(status).toBe(403);
+        expect(json).toEqual({
+          error: `Studio can't write ${body.path}: permission denied`,
+        });
+      }
+      expect(await fs.readFile(path.join(ro(), "x.squiggle"), "utf-8")).toBe(
+        "x = 1"
+      );
+      expect(await fs.readdir(ro())).toEqual(["x.squiggle"]);
+    });
+  });
+
+  test("moving into or out of a read-only folder says permission denied", async () => {
+    await fs.writeFile(path.join(root, "movable.squiggle"), "m = 1");
+    await withReadOnlyFolder(async () => {
+      for (const [from, to] of [
+        ["movable.squiggle", "ro/movable.squiggle"],
+        ["ro/x.squiggle", "x-moved.squiggle"],
+      ]) {
+        const { status, json } = await rename(from, to);
+        expect(status).toBe(403);
+        expect(json).toEqual({
+          error: `Studio can't move ${from} to ${to}: permission denied`,
+        });
+        expect(await exists(path.join(root, from))).toBe(true);
+      }
+    });
+    await fs.rm(path.join(root, "movable.squiggle"));
+  });
+
+  test.each([
+    ["ENOSPC", 507, "the disk is full"],
+    ["EROFS", 403, "the disk is read-only"],
+  ])("%s is answered %i: %s", async (code, status, reason) => {
+    const failure = Object.assign(
+      new Error(`${code}: refused, open '${root}/full.squiggle.tmp'`),
+      { code }
+    );
+    const write = vi.spyOn(fs, "writeFile").mockRejectedValueOnce(failure);
+    try {
+      expect(await put({ path: "full.squiggle", content: "f = 1" })).toEqual({
+        status,
+        json: { error: `Studio can't write full.squiggle: ${reason}` },
+      });
+    } finally {
+      write.mockRestore();
+    }
+    expect(await exists(path.join(root, "full.squiggle"))).toBe(false);
+  });
+});
+
 describe("canonical paths (#8)", () => {
   test.each([
     ["./dot2.squiggle", "dot2.squiggle"],
