@@ -1,0 +1,26 @@
+// Plots.
+
+@name("One distribution")
+distPlot = Plot.dist(normal(5, 2))
+
+@name("Several distributions")
+distsPlot = Plot.dists(
+  [
+    { name: "Low", value: 1 to 4 },
+    { name: "High", value: 3 to 9 },
+  ]
+)
+
+@name("Numeric function")
+numericFnPlot = Plot.numericFn({|x| x ^ 2}, { xScale: Scale.linear({ min: 0, max: 10 }) })
+
+@name("Dist function")
+distFnPlot = Plot.distFn(
+  {|x| normal(x, 1)},
+  { xScale: Scale.linear({ min: 0, max: 10 }) }
+)
+
+xs = SampleSet.fromDist(2 to 5)
+
+@name("Scatter")
+scatterPlot = Plot.scatter({ xDist: xs, yDist: xs * (1 to 2) })

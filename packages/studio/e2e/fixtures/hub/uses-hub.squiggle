@@ -1,0 +1,10 @@
+// Imports a model from Squiggle Hub. In the e2e harness the Hub is a local
+// stub that serves e2e/fixtures/hub-stub/<owner>/<slug>.squiggle.
+
+import "hub:quri/exports-example" as example
+
+@name("Hub variable a, scaled")
+scaled = example.a * 10
+
+@name("Sum of Hub list b")
+total = List.reduce(example.b, 0, {|acc, x| acc + x})

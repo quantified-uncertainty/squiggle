@@ -1,0 +1,13 @@
+{
+  "extends": "@quri/configs/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true,
+    "rootDir": "..",
+    "types": ["node"],
+    "tsBuildInfoFile": "../dist/test.tsbuildinfo",
+  },
+  "include": ["./**/*.ts", "../src/**/*", "../vitest.config.ts"],
+}

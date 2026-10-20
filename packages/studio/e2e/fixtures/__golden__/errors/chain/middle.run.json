@@ -1,0 +1,28 @@
+{
+  "ok": false,
+  "result": null,
+  "bindings": {},
+  "errors": [
+    {
+      "kind": "runtime",
+      "message": "Array index not found: 10",
+      "location": {
+        "file": "errors/chain/bottom.squiggle",
+        "start": { "line": 5, "column": 15 },
+        "end": { "line": 5, "column": 25 }
+      },
+      "stack": [
+        { "name": "#indexLookup" },
+        {
+          "name": "<top>",
+          "location": {
+            "file": "errors/chain/bottom.squiggle",
+            "start": { "line": 5, "column": 15 },
+            "end": { "line": 5, "column": 25 }
+          }
+        }
+      ],
+      "importChain": ["errors/chain/bottom.squiggle"]
+    }
+  ]
+}

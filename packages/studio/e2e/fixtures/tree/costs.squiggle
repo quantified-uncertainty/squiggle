@@ -1,0 +1,4 @@
+// Same file name as ./lib/costs.squiggle.
+
+@name("Top-level costs")
+costs = 100 to 200

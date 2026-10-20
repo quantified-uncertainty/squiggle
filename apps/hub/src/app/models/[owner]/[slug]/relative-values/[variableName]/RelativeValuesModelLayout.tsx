@@ -3,7 +3,6 @@
 import { FC, PropsWithChildren, useEffect, useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 
-import { serializeSourceId } from "@quri/hub-linker";
 import { result } from "@quri/squiggle-lang";
 import {
   ModelEvaluator,
@@ -23,22 +22,12 @@ function hubPlaygroundUrl(code: string) {
 
 export const RelativeValuesModelLayout: FC<
   PropsWithChildren<{
-    owner: string;
-    slug: string;
     code: string;
     variableName: string;
     cache: RelativeValuesExportFullDTO["cache"];
     definitionRevision: RelativeValuesDefinitionFullDTO["currentRevision"];
   }>
-> = ({
-  owner,
-  slug,
-  code,
-  variableName,
-  cache,
-  definitionRevision,
-  children,
-}) => {
+> = ({ code, variableName, cache, definitionRevision, children }) => {
   const [evaluatorResult, setEvaluatorResult] = useState<
     result<ModelEvaluator, string> | undefined
   >();
@@ -50,7 +39,10 @@ export const RelativeValuesModelLayout: FC<
 
   useEffect(() => {
     let cancelled = false;
-    // ModelEvaluator.create is async because Squiggle evaluation is async
+    // ModelEvaluator.create is async because Squiggle evaluation is async.
+    // The linker resolves the model's `hub:` imports; the views don't re-run
+    // the model (the list sidebar's pair charts use the evaluator's comparison
+    // function), so the provider needs no linker.
     ModelEvaluator.create(code, variableName, {
       cache: evaluatorCache,
       linker: relativeValuesHubLinker,
@@ -70,8 +62,6 @@ export const RelativeValuesModelLayout: FC<
         definition={definitionRevision}
         evaluator={evaluatorResult.value}
         getPlaygroundUrl={hubPlaygroundUrl}
-        linker={relativeValuesHubLinker}
-        sourceId={serializeSourceId({ owner, slug })}
       >
         {children}
       </RelativeValuesProvider>

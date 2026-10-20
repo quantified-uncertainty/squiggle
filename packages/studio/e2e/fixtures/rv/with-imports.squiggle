@@ -1,0 +1,15 @@
+// A relative values spec whose values come from an imported file.
+
+import "./lib/costs.squiggle" as costs
+
+@name("Projects")
+projects = {
+  title: "Projects, valued in weeks of work",
+  values: {
+    weekOfWork: costs.weeklyCost,
+    bugBash: costs.weeklyCost * (1 to 3),
+    docsRewrite: costs.weeklyCost * (2 to 6),
+    newFeature: costs.weeklyCost * (5 to 30),
+  },
+  recommendedUnit: "weekOfWork",
+}

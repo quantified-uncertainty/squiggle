@@ -1,0 +1,90 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "distPlot": {
+      "type": "Plot",
+      "plotType": "distributions",
+      "distributions": [
+        {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 5.032632163,
+          "stdev": 1.978080006,
+          "p5": 1.58665183,
+          "p25": 3.741020619,
+          "p50": 5.053982831,
+          "p75": 6.421150302,
+          "p95": 8.116704921,
+          "min": -0.9316266229,
+          "max": 11.4431789,
+          "sampleCount": 1000
+        }
+      ],
+      "name": "One distribution"
+    },
+    "distsPlot": {
+      "type": "Plot",
+      "plotType": "distributions",
+      "distributions": [
+        {
+          "name": "Low",
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 2.215111413,
+          "stdev": 0.9492536356,
+          "p5": 0.9982425497,
+          "p25": 1.543877124,
+          "p50": 2.03646674,
+          "p75": 2.708576185,
+          "p95": 4.022252839,
+          "min": 0.4331651329,
+          "max": 8.134903968,
+          "sampleCount": 1000
+        },
+        {
+          "name": "High",
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 5.492103062,
+          "stdev": 1.858888352,
+          "p5": 2.993411889,
+          "p25": 4.148459548,
+          "p50": 5.195354246,
+          "p75": 6.532625306,
+          "p95": 8.740479335,
+          "min": 2.011308351,
+          "max": 19.45945822,
+          "sampleCount": 1000
+        }
+      ],
+      "name": "Several distributions"
+    },
+    "numericFnPlot": {
+      "type": "Plot",
+      "plotType": "numericFn",
+      "name": "Numeric function"
+    },
+    "distFnPlot": {
+      "type": "Plot",
+      "plotType": "distFn",
+      "name": "Dist function"
+    },
+    "xs": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 3.31935507,
+      "stdev": 0.9359100191,
+      "p5": 2.065139182,
+      "p25": 2.654973135,
+      "p50": 3.18131704,
+      "p75": 3.830757718,
+      "p95": 5.066097749,
+      "min": 1.430127742,
+      "max": 7.365607353,
+      "sampleCount": 1000
+    },
+    "scatterPlot": { "type": "Plot", "plotType": "scatter", "name": "Scatter" }
+  },
+  "errors": []
+}

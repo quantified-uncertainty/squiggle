@@ -1,7 +1,14 @@
-import { app, BrowserWindow, dialog, shell } from "electron";
+import path from "node:path";
 
-import { startStudioServer, type StudioServer } from "@quri/squiggle-studio";
+import { app, BrowserWindow, dialog, shell, type WebContents } from "electron";
 
+import {
+  type MenuState,
+  startStudioServer,
+  type StudioServer,
+} from "@quri/squiggle-studio";
+
+import { runInPage } from "./bridge.js";
 import { log } from "./log.js";
 import type { OpenTarget } from "./target.js";
 import { initialBounds, saveWindowState } from "./windowState.js";
@@ -11,8 +18,14 @@ import { initialBounds, saveWindowState } from "./windowState.js";
 export type StudioWindow = {
   win: BrowserWindow;
   server: StudioServer;
+  origin: string; // the server's origin: the only one this window loads
+  // The native menu's state, as the page last reported it (bridge.ts).
+  menuState?: MenuState;
   open: (target: OpenTarget) => Promise<void>;
 };
+
+// The sandboxed preload that exposes `window.studioHost` (preload.cts).
+const PRELOAD = path.join(import.meta.dirname, "preload.cjs");
 
 const windows = new Set<StudioWindow>();
 
@@ -31,6 +44,12 @@ export function findStudioWindow(
   return win ? [...windows].find((w) => w.win === win) : undefined;
 }
 
+export function findStudioWindowByContents(
+  contents: WebContents
+): StudioWindow | undefined {
+  return [...windows].find((w) => w.win.webContents === contents);
+}
+
 function isExternalUrl(url: string): boolean {
   const protocol = new URL(url).protocol;
   return (
@@ -46,6 +65,37 @@ function appUrl(server: StudioServer, file: string | undefined): string {
   const url = new URL(server.url);
   if (file) url.searchParams.set("file", file);
   return url.toString();
+}
+
+// loadURL rejects with ERR_ABORTED when the navigation is cancelled, e.g. by
+// "Cancel" in the unsaved-changes prompt below, or superseded by another one.
+function isAbortError(e: unknown): boolean {
+  return e instanceof Error && "code" in e && e.code === "ERR_ABORTED";
+}
+
+async function loadUrl(win: BrowserWindow, url: string): Promise<void> {
+  try {
+    await win.loadURL(url);
+  } catch (e) {
+    if (!isAbortError(e)) throw e;
+    log(`navigation to ${url} aborted`);
+  }
+}
+
+// The client exposes `window.squiggleStudio.hasUnsavedChanges()`. If the
+// page can't answer (not loaded, older client), assume nothing is unsaved;
+// the beforeunload prompt is still there as a fallback.
+async function hasUnsavedChanges(contents: WebContents): Promise<boolean> {
+  try {
+    const dirty = await runInPage(
+      contents,
+      "window.squiggleStudio?.hasUnsavedChanges?.() ?? false"
+    );
+    return dirty === true;
+  } catch (e) {
+    log(`couldn't check for unsaved changes: ${String(e)}`);
+    return false;
+  }
 }
 
 export async function createStudioWindow(
@@ -71,6 +121,7 @@ export async function createStudioWindow(
     title: "Squiggle Studio",
     show: false,
     webPreferences: {
+      preload: PRELOAD,
       contextIsolation: true,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
@@ -86,14 +137,34 @@ export async function createStudioWindow(
   const studioWindow: StudioWindow = {
     win,
     server,
+    origin,
     async open(next) {
-      if (next.folder !== server.getRoot()) {
+      // Ask before switching: once the server's root changes, unsaved buffers
+      // would belong to the wrong folder, so "Cancel" in the beforeunload
+      // prompt (triggered by the reload below) would come too late.
+      const switching = next.folder !== server.getRoot();
+      if (await hasUnsavedChanges(win.webContents)) {
+        const { response } = await dialog.showMessageBox(win, {
+          type: "question",
+          buttons: ["Discard changes", "Cancel"],
+          defaultId: 1,
+          cancelId: 1,
+          message: "You have unsaved changes.",
+          detail: `Discard them and open ${switching ? next.folder : (next.file ?? "the folder again")}?`,
+        });
+        if (response !== 0) return;
+        // So that the reload doesn't prompt again.
+        await runInPage(
+          win.webContents,
+          "window.squiggleStudio?.discardChanges?.()"
+        ).catch((e: unknown) => log(`discardChanges failed: ${String(e)}`));
+      }
+      if (switching) {
         await server.openFolder(next.folder);
         app.addRecentDocument(next.folder);
       }
-      // Reloading with ?file= selects the file. If there are unsaved edits,
-      // the page's beforeunload handler triggers the prompt below.
-      await win.loadURL(appUrl(server, next.file));
+      // Reloading with ?file= selects the file.
+      await loadUrl(win, appUrl(server, next.file));
     },
   };
   windows.add(studioWindow);
@@ -156,6 +227,6 @@ export async function createStudioWindow(
   });
 
   app.addRecentDocument(server.getRoot());
-  await win.loadURL(appUrl(server, target.file));
+  await loadUrl(win, appUrl(server, target.file));
   return studioWindow;
 }

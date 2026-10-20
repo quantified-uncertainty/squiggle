@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "projects": {
+      "title": "Projects, valued in weeks of work",
+      "values": {
+        "weekOfWork": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 585.1493132,
+          "stdev": 268.21384,
+          "p5": 246.3856587,
+          "p25": 386.6350555,
+          "p50": 533.6047278,
+          "p75": 729.66146,
+          "p95": 1096.045605,
+          "min": 97.35624821,
+          "max": 2034.178533,
+          "sampleCount": 1000,
+          "name": "Weekly cost ($)"
+        },
+        "bugBash": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 1168.681157,
+          "stdev": 854.3606784,
+          "p5": 283.7717872,
+          "p25": 571.909544,
+          "p50": 939.8258007,
+          "p75": 1515.301751,
+          "p95": 2673.910165,
+          "min": 89.92492403,
+          "max": 5656.396396,
+          "sampleCount": 1000
+        },
+        "docsRewrite": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 2427.129467,
+          "stdev": 1947.089645,
+          "p5": 542.9853825,
+          "p25": 1146.466374,
+          "p50": 1895.585132,
+          "p75": 3047.324311,
+          "p95": 6218.781116,
+          "min": 100.3340931,
+          "max": 17928.50115,
+          "sampleCount": 1000
+        },
+        "newFeature": {
+          "type": "Dist",
+          "subtype": "SampleSet",
+          "mean": 8207.962749,
+          "stdev": 6278.068766,
+          "p5": 2023.84942,
+          "p25": 4123.093131,
+          "p50": 6606.072509,
+          "p75": 10503.66234,
+          "p95": 19270.96406,
+          "min": 822.1489278,
+          "max": 63104.7547,
+          "sampleCount": 1000
+        }
+      },
+      "recommendedUnit": "weekOfWork"
+    }
+  },
+  "errors": []
+}

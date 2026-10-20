@@ -1,0 +1,491 @@
+/*
+ * Acme's own global styles. The element rules (body, h1, button, input, a,
+ * td, ...) are deliberately loud, to show that they don't leak into the
+ * dashboards, and that the dashboards' stylesheet doesn't change them.
+ */
+:root {
+  --acme-ink: #1f2a37;
+  --acme-brand: #b4232c;
+  --acme-brand-dark: #7a1219;
+  --acme-paper: #f7f3ea;
+  --acme-navy: #0b3d91;
+  --acme-line: #d9ccae;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--acme-ink);
+  background: var(--acme-paper);
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: 40px;
+  line-height: 1.15;
+  color: var(--acme-navy);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 4px double var(--acme-navy);
+}
+
+h2 {
+  font-size: 24px;
+  font-style: italic;
+  color: var(--acme-navy);
+  margin: 28px 0 8px;
+}
+
+p {
+  margin: 0 0 12px;
+}
+
+button {
+  background: var(--acme-brand);
+  color: white;
+  border: 3px solid var(--acme-brand-dark);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font:
+    italic 700 14px/1 Georgia,
+    serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  box-shadow: 0 3px 0 var(--acme-brand-dark);
+  cursor: pointer;
+}
+
+input,
+select {
+  border: 2px dashed #6b21a8;
+  background: #faf5ff;
+  padding: 8px 12px;
+  font:
+    16px "Courier New",
+    monospace;
+}
+
+a {
+  color: #c2410c;
+  font-weight: 700;
+  text-decoration: underline wavy;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 4px;
+}
+
+td,
+th {
+  border: 1px solid var(--acme-line);
+  padding: 4px 10px;
+}
+
+ul {
+  list-style: square;
+}
+
+/* Layout */
+
+.acme-header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 14px 40px;
+  background: var(--acme-navy);
+  color: white;
+}
+
+.acme-logo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.acme-logo small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  opacity: 0.7;
+}
+
+.acme-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.acme-nav button[aria-current="page"] {
+  background: white;
+  color: var(--acme-navy);
+}
+
+.acme-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+}
+
+.acme-intro {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  align-items: start;
+}
+
+.acme-panel {
+  border: 1px solid var(--acme-line);
+  background: #fffdf7;
+  padding: 16px 20px;
+}
+
+.acme-panel h2 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.acme-card {
+  margin-top: 24px;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--acme-line);
+  border-top: 6px solid var(--acme-brand);
+  box-shadow: 0 8px 24px rgb(31 42 55 / 0.08);
+}
+
+.acme-meta {
+  font-size: 14px;
+  color: #6b5e45;
+  font-style: italic;
+}
+
+.acme-selected {
+  margin-top: 16px;
+}
+
+.acme-footer {
+  padding: 24px 40px;
+  font-size: 14px;
+  color: #6b5e45;
+  border-top: 1px solid var(--acme-line);
+}
+
+/*
+ * Custom tab content renders inside the dashboard, where element rules (like
+ * `td` or `a` above) are reset. Class rules apply, as long as this file is
+ * loaded after the dashboard stylesheet.
+ */
+.ranking {
+  font-family: Georgia, serif;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.ranking-table th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6b5e45;
+  border-bottom: 2px solid var(--acme-line);
+  padding: 6px 8px;
+}
+
+.ranking-table td {
+  border-bottom: 1px solid #eee5d0;
+  padding: 6px 8px;
+}
+
+.ranking-bar {
+  height: 10px;
+  background: var(--acme-brand);
+  border-radius: 2px;
+}
+
+.ranking-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.ranking-table .ranking-number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Links inside the dashboards (from `renderItemName` and custom tabs). */
+.acme-link {
+  color: #c2410c;
+  text-decoration: underline;
+  text-decoration-color: rgb(194 65 12 / 0.35);
+  text-underline-offset: 3px;
+}
+
+.acme-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* Scenario pages */
+
+.acme-breadcrumb {
+  font-size: 14px;
+  color: #6b5e45;
+}
+
+.acme-scenario-index li {
+  margin-bottom: 6px;
+}
+
+.acme-scenario {
+  margin-top: 40px;
+}
+
+.acme-scenario h2 {
+  margin-bottom: 4px;
+}
+
+.acme-scenario .acme-card {
+  margin-top: 12px;
+}
+
+.acme-scenario-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.acme-scenario-controls output {
+  font-family: "Courier New", monospace;
+}
+
+.acme-code summary {
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b5e45;
+  margin-top: 8px;
+}
+
+.acme-code pre {
+  overflow-x: auto;
+  background: #fffdf7;
+  border: 1px solid var(--acme-line);
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.acme-two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.acme-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--acme-line);
+}
+
+.acme-toolbar h2 {
+  margin: 0;
+}
+
+.acme-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acme-segmented {
+  display: inline-flex;
+  border: 2px solid var(--acme-navy);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: Georgia, serif;
+}
+
+.acme-segmented button {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 16px;
+  font-size: 14px;
+  color: var(--acme-navy);
+}
+
+.acme-segmented button[aria-selected="true"] {
+  background: var(--acme-navy);
+  color: white;
+}
+
+.acme-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.acme-small-button {
+  font-family: Georgia, serif;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 2px solid var(--acme-brand-dark);
+  background: var(--acme-brand);
+  color: white;
+  cursor: pointer;
+}
+
+.acme-drawer {
+  border-left: 6px solid var(--acme-navy);
+  background: #fffdf7;
+  padding: 12px 16px;
+  font-family: Georgia, serif;
+}
+
+.acme-drawer-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: var(--acme-navy);
+}
+
+.acme-drawer-title button {
+  font-family: Georgia, serif;
+  font-size: 12px;
+  border: 1px solid var(--acme-navy);
+  background: white;
+  color: var(--acme-navy);
+  padding: 2px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.acme-alert {
+  border: 2px solid var(--acme-brand);
+  background: #fdf0f0;
+  color: var(--acme-brand-dark);
+  padding: 12px 16px;
+  font-family: Georgia, serif;
+}
+
+.acme-empty {
+  font-family: Georgia, serif;
+  font-style: italic;
+  color: #6b5e45;
+  padding: 24px;
+  text-align: center;
+}
+
+.acme-events {
+  width: 100%;
+  margin: 4px 0 0;
+  font-size: 13px;
+  font-family: "Courier New", monospace;
+  color: #6b5e45;
+}
+
+.acme-top {
+  font-family: Georgia, serif;
+  font-size: 17px;
+}
+
+.acme-top li {
+  margin-bottom: 4px;
+}
+
+.acme-revenue {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 12px;
+  color: #2f855a;
+}
+
+.acme-interval-chart text {
+  font-family: Georgia, serif;
+  fill: var(--acme-ink);
+}
+
+.acme-shared-search {
+  margin-bottom: 12px;
+}
+
+.acme-ssr-preview {
+  max-height: 260px;
+  overflow: auto;
+  border: 1px dashed var(--acme-line);
+  padding: 8px;
+}
+
+/*
+ * Theme for the dashboard in scenario S9 (`themeClassName="acme-rv"`). The
+ * class is on the dashboard's root and on its dropdown portals.
+ */
+.acme-rv {
+  --squiggle-rv-font-family:
+    "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+  --squiggle-rv-accent: #0b3d91;
+  --squiggle-rv-border: #c9d3e6;
+  --squiggle-rv-header-bg: #eef2fa;
+  --squiggle-rv-selected-bg: #e3eafb;
+  --squiggle-rv-radius: 6px;
+}
+
+/* S9: a larger base font size; all text scales with it. */
+.acme-rv-large {
+  --squiggle-rv-font-size: 20px;
+}
+
+/* S9: wider grid cells, set on an ancestor of the dashboard. */
+.acme-wide-cells {
+  --squiggle-rv-grid-cell-width: 180px;
+}
+
+/* S9: a dark theme, with the documented variables only. */
+.acme-rv-dark {
+  --squiggle-rv-bg: #111827;
+  --squiggle-rv-text: #e5e7eb;
+  --squiggle-rv-muted: #9ca3af;
+  --squiggle-rv-border: #374151;
+  --squiggle-rv-header-bg: #1f2937;
+  --squiggle-rv-panel-bg: #1f2937;
+  --squiggle-rv-selected-bg: #374151;
+  --squiggle-rv-accent: #93c5fd;
+}
+/*
+ * The warm uncertainty tiers (3 to 5) are made for light backgrounds.
+ * `.squiggle-rv.acme-rv-dark` (the root with the theme class): more specific
+ * than the library's `.squiggle-rv .text-…` classes.
+ */
+.squiggle-rv.acme-rv-dark [data-rv-tier="3"] {
+  color: #fde68a;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier="4"] {
+  color: #fdba74;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier="5"] {
+  color: #fca5a5;
+}
+.squiggle-rv.acme-rv-dark [data-rv-tier] {
+  opacity: 1;
+}

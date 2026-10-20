@@ -2,6 +2,8 @@
 import _ from "lodash";
 import { useMemo } from "react";
 
+import { makeSortContext, sortOptions } from "../../../state/select.js";
+import { sortItems } from "../../../state/sort.js";
 import { Item } from "../../../types.js";
 import {
   extractOkValues,
@@ -9,7 +11,6 @@ import {
 } from "../../../values/ModelEvaluator.js";
 import { RelativeValue } from "../../../values/types.js";
 import { hasInvalid } from "../../../values/value.js";
-
 import { AxisConfig } from "../RelativeValuesProvider.js";
 
 const averageMetric = ({
@@ -60,43 +61,15 @@ export function averageUncertainty({ item, comparedTo, model }: AverageProps) {
   });
 }
 
-//Takes the first item, then appends the next item that has the lowest uncertainty with the last item
-function organizeBySimilarity({
-  items,
-  model,
-}: {
-  items: readonly Item[];
-  model: ModelEvaluator;
-}): Item[] {
-  let remaining = [...items];
-  let first = remaining.shift();
-  let sorted: Item[] = first ? [first] : [];
-
-  while (remaining.length > 0) {
-    // Keep iterating until all items are sorted
-    let lastItem = _.last(sorted);
-
-    if (!lastItem) break;
-
-    let nextItem = _.minBy(remaining, (item) => {
-      let result = model.compare((lastItem as Item).id, item.id);
-      return result.ok ? result.value.uncertainty : 10000;
-    });
-
-    if (!nextItem) break;
-
-    _.remove(remaining, (item) => item.id === (nextItem as Item).id);
-    sorted.push(nextItem);
-  }
-
-  return sorted;
-}
-
+/**
+ * Sorts items by an axis' sort settings; value sorts average over
+ * `otherDimensionItems`. Computes pairs synchronously.
+ */
 export const useSortedItems = ({
   items,
   config,
   model,
-  otherDimensionItems: otherDimensionChoices,
+  otherDimensionItems,
 }: {
   items: readonly Item[];
   config: AxisConfig;
@@ -104,34 +77,32 @@ export const useSortedItems = ({
   otherDimensionItems: readonly Item[]; // used for calculating average median and average uncertainty
 }) => {
   return useMemo(() => {
-    const sorted = (() => {
-      switch (config.sort.mode) {
-        case "median": {
-          return _.sortBy(items, (item) =>
-            averageMedian({
-              item,
-              model: model,
-              comparedTo: otherDimensionChoices,
-            })
-          );
-        }
-        case "uncertainty": {
-          return _.sortBy(items, (item) =>
-            averageUncertainty({
-              item,
-              model,
-              comparedTo: otherDimensionChoices,
-            })
-          );
-        }
-        case "similarity": {
-          return organizeBySimilarity({ items, model });
-        }
-        default:
-          return [...items];
-      }
-    })();
-
-    return config.sort.desc ? sorted.reverse() : sorted;
-  }, [items, config, model, otherDimensionChoices]);
+    const context = makeSortContext({
+      definition: { title: "", items: [...items], clusters: [] },
+      sorts: undefined,
+      lookup: (id1, id2) => model.compare(id1, id2),
+      locale: undefined,
+    });
+    return sortItems(
+      items,
+      sortOptions(context, {
+        sort: config.sort,
+        defaultOrder: items,
+        unit: undefined,
+        metric: (item) => {
+          const median = averageMedian({
+            item,
+            model,
+            comparedTo: otherDimensionItems,
+          });
+          const uncertainty = averageUncertainty({
+            item,
+            model,
+            comparedTo: otherDimensionItems,
+          });
+          return Number.isNaN(median) ? undefined : { median, uncertainty };
+        },
+      })
+    );
+  }, [items, config, model, otherDimensionItems]);
 };

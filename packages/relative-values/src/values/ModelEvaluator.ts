@@ -10,11 +10,15 @@ import {
   SqValue,
 } from "@quri/squiggle-lang";
 
-import { cartesianProduct } from "../lib/utils.js";
+import { cartesianProduct, yieldToEventLoop } from "../lib/utils.js";
 import {
   RelativeValuesSpec,
   relativeValuesSpecFromSqValue,
 } from "../spec/fromSqValue.js";
+import {
+  type RelativeValuesBundle,
+  relativeValuesCacheFromBundle,
+} from "./bundle.js";
 import {
   InMemoryRelativeValuesCache,
   makePairKey,
@@ -67,10 +71,24 @@ function parseRelativeValue(value: SqValue): RelativeValueResult {
     const field = dict.get(key);
     fields[key] = field?.tag === "Number" ? field.value : undefined;
   }
+  // A point ratio (p5 = p95, e.g. an item worth 0 in terms of any other) has
+  // no spread, but its uncertainty, log10(p95 / p5), is NaN for 0 / 0.
+  if (
+    Number.isNaN(fields["uncertainty"]) &&
+    fields["min"] !== undefined &&
+    fields["min"] === fields["max"]
+  ) {
+    fields["uncertainty"] = 0;
+  }
 
   const parsed = relativeValueSchema.safeParse(fields);
   if (!parsed.success) {
-    return { ok: false, value: parsed.error.message };
+    return {
+      ok: false,
+      value: `Invalid relative value: ${parsed.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join("; ")}`,
+    };
   }
   return { ok: true, value: parsed.data };
 }
@@ -113,6 +131,32 @@ export type ModelEvaluatorOptions = {
   fnExpression?: string;
 };
 
+export type ComputeProgress = {
+  // Pairs that are computed (or were already cached).
+  done: number;
+  total: number;
+};
+
+export type ComputeOptions = {
+  // Aborting rejects the returned promise with `signal.reason`. Pairs computed
+  // so far stay in the cache.
+  signal?: AbortSignal;
+  // Called after each chunk, and once more when all pairs are computed.
+  onProgress?: (progress: ComputeProgress) => void;
+  // How long to compute synchronously before yielding to the event loop.
+  // Defaults to 12ms, which keeps the UI responsive.
+  sliceMs?: number;
+};
+
+export type ItemPair = readonly [string, string];
+
+// `signal.throwIfAborted()`, which older environments (e.g. jsdom) lack.
+function throwIfAborted(signal: AbortSignal | undefined) {
+  if (signal?.aborted) {
+    throw signal.reason;
+  }
+}
+
 export type CreateModelEvaluatorOptions = Omit<
   ModelEvaluatorOptions,
   "modelCode" | "fnExpression"
@@ -132,13 +176,45 @@ export class ModelEvaluator {
   readonly fnExpression: string | undefined;
 
   private constructor(
-    private wrappedFn: SqLambda,
-    private environment: Env,
-    options: ModelEvaluatorOptions
+    // Undefined for cache-only evaluators (see `fromCache`).
+    private wrappedFn: SqLambda | undefined,
+    // The environment that comparisons run in; undefined for cache-only
+    // evaluators.
+    readonly environment: Env | undefined,
+    options: ModelEvaluatorOptions,
+    // The comparison function itself, `fn(id1, id2) -> [value1, value2]`
+    // (`wrappedFn` summarizes its ratio). Undefined for cache-only evaluators.
+    private pairFn?: SqLambda
   ) {
     this.cache = options.cache ?? new InMemoryRelativeValuesCache();
     this.modelCode = options.modelCode;
     this.fnExpression = options.fnExpression;
+  }
+
+  /**
+   * Build an evaluator that never runs Squiggle code: it only returns results
+   * from the cache. Pairs that aren't in the cache are reported as errors.
+   *
+   * Used for precomputed data, e.g. `fromBundle`.
+   */
+  static fromCache(cache: RelativeValuesCache): ModelEvaluator {
+    return new ModelEvaluator(undefined, undefined, { cache });
+  }
+
+  /**
+   * Build a cache-only evaluator from a precomputed bundle (see
+   * `createRelativeValuesBundle` and the `squiggle-rv bundle` CLI command).
+   */
+  static fromBundle(bundle: RelativeValuesBundle): ModelEvaluator {
+    return ModelEvaluator.fromCache(relativeValuesCacheFromBundle(bundle));
+  }
+
+  /**
+   * Whether this evaluator can compute new pairs, i.e. it's backed by a
+   * Squiggle function and not only by a cache.
+   */
+  get canCompute(): boolean {
+    return this.wrappedFn !== undefined;
   }
 
   /**
@@ -170,7 +246,7 @@ export class ModelEvaluator {
 
     return {
       ok: true,
-      value: new ModelEvaluator(wrapped.value.value, environment, options),
+      value: new ModelEvaluator(wrapped.value.value, environment, options, fn),
     };
   }
 
@@ -279,6 +355,12 @@ export class ModelEvaluator {
   }
 
   compareWithoutCache(id1: string, id2: string): RelativeValueResult {
+    if (!this.wrappedFn || !this.environment) {
+      return {
+        ok: false,
+        value: `No precomputed value for ${id1} / ${id2}`,
+      };
+    }
     const result = this.wrappedFn.call(
       [SqStringValue.create(id1), SqStringValue.create(id2)],
       this.environment
@@ -289,6 +371,47 @@ export class ModelEvaluator {
     return parseRelativeValue(result.value);
   }
 
+  /**
+   * The comparison function's own result for a pair: the two values (each a
+   * distribution or a number) before their ratio is summarized. Used for the
+   * pair charts of the list view sidebar. Not cached.
+   */
+  comparePairValues(
+    id1: string,
+    id2: string
+  ): result<[SqValue, SqValue], string> {
+    if (!this.pairFn || !this.environment) {
+      return {
+        ok: false,
+        value: `No comparison function for ${id1} / ${id2}`,
+      };
+    }
+    const result = this.pairFn.call(
+      [SqStringValue.create(id1), SqStringValue.create(id2)],
+      this.environment
+    );
+    if (!result.ok) {
+      return { ok: false, value: errorToString(result.value) };
+    }
+    const pair = result.value;
+    const values = pair.tag === "Array" ? pair.value.getValues() : [];
+    if (values.length !== 2) {
+      return {
+        ok: false,
+        value: `The comparison function must return a list of two values, got ${pair.tag === "Array" ? `a list of ${values.length}` : pair.tag}`,
+      };
+    }
+    return { ok: true, value: [values[0], values[1]] };
+  }
+
+  /**
+   * The cached result for a pair, if any. Never runs Squiggle code (unlike
+   * `compare`), so it's safe to call while rendering.
+   */
+  peek(id1: string, id2: string): RelativeValueResult | undefined {
+    return this.cache.get(makePairKey(id1, id2));
+  }
+
   compare(id1: string, id2: string): RelativeValueResult {
     const key = makePairKey(id1, id2);
     const cachedValue = this.cache.get(key);
@@ -297,14 +420,73 @@ export class ModelEvaluator {
     }
 
     const value = this.compareWithoutCache(id1, id2);
-    this.cache.set(key, value);
+    if (this.wrappedFn) {
+      // Cache-only evaluators don't store misses.
+      this.cache.set(key, value);
+    }
     return value;
   }
 
+  /**
+   * Synchronously compare all pairs of `ids` (n² pairs). For large lists, use
+   * `computeAll` first to avoid blocking the UI.
+   */
   compareAll(ids: string[]): RelativeValueResult[] {
     return cartesianProduct(ids, ids).map(([row, column]) =>
       this.compare(row, column)
     );
+  }
+
+  /**
+   * Whether all pairs are in the cache, i.e. `compare` won't run any Squiggle
+   * code for them.
+   */
+  isCached(pairs: readonly ItemPair[]): boolean {
+    return pairs.every(([id1, id2]) => !!this.cache.get(makePairKey(id1, id2)));
+  }
+
+  /**
+   * Like calling `compare` for each pair, but asynchronous: yields to the
+   * event loop every `sliceMs` milliseconds, so that the UI stays responsive.
+   *
+   * Results are stored in the cache, so `compare` is cheap afterwards.
+   */
+  async computePairs(
+    pairs: readonly ItemPair[],
+    options: ComputeOptions = {}
+  ): Promise<RelativeValueResult[]> {
+    const { signal, onProgress, sliceMs = 12 } = options;
+    throwIfAborted(signal);
+
+    const total = pairs.length;
+    const results: RelativeValueResult[] = [];
+    let sliceStart = performance.now();
+    for (const [id1, id2] of pairs) {
+      const cached = this.cache.get(makePairKey(id1, id2));
+      if (cached) {
+        results.push(cached);
+        continue;
+      }
+      if (performance.now() - sliceStart >= sliceMs) {
+        onProgress?.({ done: results.length, total });
+        await yieldToEventLoop();
+        throwIfAborted(signal);
+        sliceStart = performance.now();
+      }
+      results.push(this.compare(id1, id2));
+    }
+    onProgress?.({ done: total, total });
+    return results;
+  }
+
+  /**
+   * Asynchronous version of `compareAll`; see `computePairs` for options.
+   */
+  computeAll(
+    ids: string[],
+    options: ComputeOptions = {}
+  ): Promise<RelativeValueResult[]> {
+    return this.computePairs(cartesianProduct(ids, ids), options);
   }
 
   getParamPercentiles(

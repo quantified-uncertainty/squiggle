@@ -11,7 +11,9 @@ export const DropdownButton: FC<Props> = ({ text, children }) => {
   return (
     <div className="flex">
       <Dropdown render={children}>
-        <Button>{text}</Button>
+        <Button>
+          <span className="whitespace-nowrap">{text}</span>
+        </Button>
       </Dropdown>
     </div>
   );

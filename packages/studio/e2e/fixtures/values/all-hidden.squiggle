@@ -1,0 +1,10 @@
+// Every binding is hidden with @hide.
+
+@hide
+a = 1 to 2
+
+@hide
+b = a * 3
+
+@hide
+c = "hidden too"

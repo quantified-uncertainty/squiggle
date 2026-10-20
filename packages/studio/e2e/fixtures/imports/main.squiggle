@@ -1,0 +1,10 @@
+// Imports ./lib/costs.squiggle.
+
+import "./lib/costs.squiggle" as costs
+
+@name("Weeks of work")
+weeks = 8 to 20
+
+@name("Total project cost ($)")
+@format("$,.0f")
+totalCost = costs.weeklyCost * weeks

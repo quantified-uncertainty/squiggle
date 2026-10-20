@@ -27,14 +27,49 @@ export {
   type RelativeValuesCache,
 } from "./values/cache.js";
 export {
+  type ComputeOptions,
+  type ComputeProgress,
   type CreateModelEvaluatorOptions,
   extractOkValues,
   getParamPercentiles,
+  type ItemPair,
   ModelEvaluator,
   type ModelEvaluatorOptions,
 } from "./values/ModelEvaluator.js";
+
+// Precomputed bundles
+export {
+  type BundleNumber,
+  createRelativeValuesBundle,
+  type CreateRelativeValuesBundleParams,
+  parseRelativeValuesBundle,
+  RELATIVE_VALUES_BUNDLE_VERSION,
+  type RelativeValuesBundle,
+  type RelativeValuesBundleMeta,
+  relativeValuesBundleMetaSchema,
+  type RelativeValuesBundlePair,
+  relativeValuesBundleSchema,
+  relativeValuesCacheFromBundle,
+  stringifyRelativeValuesBundle,
+} from "./values/bundle.js";
+export {
+  type LoadedRelativeValuesBundle,
+  loadRelativeValuesBundle,
+} from "./values/loadBundle.js";
+export {
+  RELATIVE_VALUES_CSV_ERROR,
+  RELATIVE_VALUES_CSV_METRICS,
+  relativeValuesBundleToCsv,
+  type RelativeValuesCsvMetric,
+  type RelativeValuesCsvOptions,
+} from "./values/csv.js";
+export {
+  PAIR_CHARTS_SOURCE_ID,
+  pairChartsCode,
+  relativeValuesPairCharts,
+} from "./values/pairCharts.js";
 export { hasInvalid } from "./values/value.js";
-export { cartesianProduct } from "./lib/utils.js";
+export { cartesianProduct, yieldToEventLoop } from "./lib/utils.js";
 
 // Squiggle convention
 export {
@@ -49,3 +84,6 @@ export {
   type RelativeValuesExport,
   relativeValuesSpecFromCode,
 } from "./spec/findExports.js";
+
+// Host-control state (see README, "Customizing in your app")
+export * from "./state/index.js";

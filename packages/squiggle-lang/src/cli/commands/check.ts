@@ -6,15 +6,15 @@ import { SqModule } from "../../public/SqProject/SqModule.js";
 import { CliPrinter } from "../CliPrinter.js";
 import { green } from "../colors.js";
 import {
-  ErrorJson,
-  errorToJson,
-  printErrorJson,
-  printWarnings,
-  WarningJson,
+  type ErrorJson,
+  exceptionToErrorJson,
+  sqErrorToJson,
+  type WarningJson,
   warningsForSources,
-} from "../errorReport.js";
+} from "../../public/json.js";
+import { printErrorJson, printWarnings } from "../errorReport.js";
 import { EVAL_SOURCE_ID, FileLinker, makeFileLinker } from "../linker.js";
-import { loadSrc, myParseInt } from "../utils.js";
+import { loadSrc, myParsePositiveInt } from "../utils.js";
 import { makeEnvironment } from "./run.js";
 
 export type CheckJsonOutput = {
@@ -32,7 +32,7 @@ function reportFromSqError(
   sources: ReadonlyMap<string, string>
 ): ErrorReport {
   return {
-    json: errorToJson(error, sources),
+    json: sqErrorToJson(error, sources),
     details: error.toStringWithDetails(),
   };
 }
@@ -97,6 +97,55 @@ async function staticCheck(
   return reports;
 }
 
+type CheckResult = {
+  reports: ErrorReport[];
+  warnings: WarningJson[];
+  files: string[];
+  ran: boolean;
+};
+
+async function check(params: {
+  src: string;
+  filename: string | undefined;
+  run: boolean;
+  seed: string | undefined;
+  sampleCount: number | undefined;
+  warnings: boolean;
+}): Promise<CheckResult> {
+  const linker = makeFileLinker();
+  const rootName = params.filename ?? EVAL_SOURCE_ID;
+  linker.sources.set(rootName, params.src);
+  const root = new SqModule({ name: rootName, code: params.src });
+
+  const reports = await staticCheck(root, linker);
+
+  let ran = false;
+  if (params.run && reports.length === 0) {
+    ran = true;
+    const project = new SqProject({
+      linker,
+      environment: makeEnvironment({
+        seed: params.seed,
+        sampleCount: params.sampleCount,
+      }),
+    });
+    project.setHead("root", { module: root });
+    const output = await project.waitForOutput("root");
+    if (!output.result.ok) {
+      for (const error of output.result.value.errors) {
+        reports.push(reportFromSqError(error, linker.sources));
+      }
+    }
+  }
+
+  return {
+    reports,
+    warnings: params.warnings ? warningsForSources(linker.sources) : [],
+    files: [...linker.sources.keys()],
+    ran,
+  };
+}
+
 export function addCheckCommand(program: Command) {
   program
     .command("check")
@@ -117,7 +166,7 @@ export function addCheckCommand(program: Command) {
     .option(
       "-n, --sample-count <n>",
       "number of samples, with --run",
-      myParseInt
+      myParsePositiveInt
     )
     .option("--no-warnings", "don't report lint warnings")
     .addHelpText(
@@ -132,41 +181,34 @@ Exit code is 1 if there are errors. Warnings are heuristic and don't affect the 
     )
     .action(async (filename, options) => {
       const src = loadSrc({ program, filename, inline: options.eval });
-      const linker = makeFileLinker();
-      const rootName = filename ?? EVAL_SOURCE_ID;
-      linker.sources.set(rootName, src);
-      const root = new SqModule({ name: rootName, code: src });
 
-      const reports = await staticCheck(root, linker);
-
-      let ran = false;
-      if (options.run && reports.length === 0) {
-        ran = true;
-        const project = new SqProject({
-          linker,
-          environment: makeEnvironment({
-            seed: options.seed,
-            sampleCount: options.sampleCount,
-          }),
+      let result: CheckResult;
+      try {
+        result = await check({
+          src,
+          filename,
+          run: options.run ?? false,
+          seed: options.seed,
+          sampleCount: options.sampleCount,
+          warnings: options.warnings,
         });
-        project.setHead("root", { module: root });
-        const output = await project.waitForOutput("root");
-        if (!output.result.ok) {
-          for (const error of output.result.value.errors) {
-            reports.push(reportFromSqError(error, linker.sources));
-          }
-        }
+      } catch (e) {
+        if (!options.json) throw e;
+        // `--json` promises a single JSON object on stdout, so unexpected exceptions are reported in it too.
+        result = {
+          reports: [{ json: exceptionToErrorJson(e) }],
+          warnings: [],
+          files: [],
+          ran: false,
+        };
       }
+      const { reports, warnings, files, ran } = result;
 
-      const warnings = options.warnings
-        ? warningsForSources(linker.sources)
-        : [];
       const ok = reports.length === 0;
       if (!ok) {
         process.exitCode = 1;
       }
 
-      const files = [...linker.sources.keys()];
       if (options.json) {
         const output: CheckJsonOutput = {
           ok,

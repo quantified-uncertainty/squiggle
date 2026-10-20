@@ -1,13 +1,26 @@
+"use client";
+
 import { forwardRef, ReactNode, useImperativeHandle } from "react";
 
 import { SqLocation, SqProject, SqValuePath } from "@quri/squiggle-lang";
 
 import { Simulation } from "../../lib/hooks/useSimulator.js";
+import { applyExternalChange } from "./editorCommands.js";
 import { formatSquiggle } from "./formatSquiggleExtension.js";
-import { useSquiggleEditorView } from "./useSquiggleEditorView.js";
+import {
+  editorStateSnapshot,
+  type EditorStateSnapshot,
+  useSquiggleEditorView,
+} from "./useSquiggleEditorView.js";
+
+export type { EditorStateSnapshot } from "./useSquiggleEditorView.js";
 
 export type CodeEditorProps = {
   defaultValue: string;
+  // A state saved with `CodeEditorHandle.getState()` to start from (undo
+  // history, selection, scroll). Read on mount only. If its code differs from
+  // `defaultValue`, the difference is applied as an external change.
+  initialState?: EditorStateSnapshot;
   onChange: (value: string) => void;
   onSubmit?: () => void;
   // can be used as a hotkey (Cmd+Option+V, see `useViewNodeExtension`) or as an action for gutter markers
@@ -31,6 +44,15 @@ export type CodeEditorHandle = {
   format(): void;
   scrollTo(location: SqLocation, focus: boolean): void;
   getSourceId(): string;
+  focus(): void;
+  // Takes code written by another program (e.g. a coding agent) in place:
+  // one remote transaction outside the undo history, so the cursor,
+  // selection, scroll, folds, focus and the user's undo history survive.
+  applyExternalChange(code: string): void;
+  // Doc, selection, undo history and scroll, for `initialState`.
+  getState(): EditorStateSnapshot | undefined;
+  // The main selection (offsets), e.g. to find the value at the cursor.
+  getSelection(): { from: number; to: number } | undefined;
 };
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
@@ -52,6 +74,16 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
       format: () => formatSquiggle(view),
       scrollTo,
       getSourceId: () => props.sourceId,
+      focus: () => view?.focus(),
+      applyExternalChange: (code) => {
+        if (view) applyExternalChange(view, code);
+      },
+      getState: () => (view ? editorStateSnapshot(view) : undefined),
+      getSelection: () => {
+        if (!view) return undefined;
+        const { from, to } = view.state.selection.main;
+        return { from, to };
+      },
     }));
 
     return (

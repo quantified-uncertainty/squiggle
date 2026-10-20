@@ -1,0 +1,99 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "hourlyRate": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 98.94449984,
+      "stdev": 27.34010679,
+      "p5": 58.97570351,
+      "p25": 79.61137532,
+      "p50": 95.58424639,
+      "p75": 115.6314857,
+      "p95": 146.4292055,
+      "min": 41.52992368,
+      "max": 232.7133947,
+      "sampleCount": 1000,
+      "name": "Hourly rate ($)"
+    },
+    "hoursPerWeek": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 5.92708975,
+      "stdev": 2.189342516,
+      "p5": 2.995420089,
+      "p25": 4.374497451,
+      "p50": 5.563856174,
+      "p75": 7.127700073,
+      "p95": 10.04829765,
+      "min": 1.450644723,
+      "max": 18.5245079,
+      "sampleCount": 1000,
+      "name": "Hours per week"
+    },
+    "weeklyCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 585.1493132,
+      "stdev": 268.21384,
+      "p5": 246.3856587,
+      "p25": 386.6350555,
+      "p50": 533.6047278,
+      "p75": 729.66146,
+      "p95": 1096.045605,
+      "min": 97.35624821,
+      "max": 2034.178533,
+      "sampleCount": 1000,
+      "name": "Weekly cost ($)"
+    }
+  },
+  "exports": {
+    "hourlyRate": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 98.94449984,
+      "stdev": 27.34010679,
+      "p5": 58.97570351,
+      "p25": 79.61137532,
+      "p50": 95.58424639,
+      "p75": 115.6314857,
+      "p95": 146.4292055,
+      "min": 41.52992368,
+      "max": 232.7133947,
+      "sampleCount": 1000,
+      "name": "Hourly rate ($)"
+    },
+    "hoursPerWeek": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 5.92708975,
+      "stdev": 2.189342516,
+      "p5": 2.995420089,
+      "p25": 4.374497451,
+      "p50": 5.563856174,
+      "p75": 7.127700073,
+      "p95": 10.04829765,
+      "min": 1.450644723,
+      "max": 18.5245079,
+      "sampleCount": 1000,
+      "name": "Hours per week"
+    },
+    "weeklyCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 585.1493132,
+      "stdev": 268.21384,
+      "p5": 246.3856587,
+      "p25": 386.6350555,
+      "p50": 533.6047278,
+      "p75": 729.66146,
+      "p95": 1096.045605,
+      "min": 97.35624821,
+      "max": 2034.178533,
+      "sampleCount": 1000,
+      "name": "Weekly cost ($)"
+    }
+  },
+  "errors": []
+}

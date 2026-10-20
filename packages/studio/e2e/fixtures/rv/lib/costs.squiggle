@@ -1,0 +1,4 @@
+// Imported by ../with-imports.squiggle.
+
+@name("Weekly cost ($)")
+export weeklyCost = (60 to 150) * (3 to 10)

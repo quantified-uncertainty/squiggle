@@ -1,0 +1,3 @@
+// Imported with "../../shared.squiggle" from ./a/b/uses-parent.squiggle.
+
+export multiplier = 2 to 4

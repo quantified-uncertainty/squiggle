@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "weeklyCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 585.1493132,
+      "stdev": 268.21384,
+      "p5": 246.3856587,
+      "p25": 386.6350555,
+      "p50": 533.6047278,
+      "p75": 729.66146,
+      "p95": 1096.045605,
+      "min": 97.35624821,
+      "max": 2034.178533,
+      "sampleCount": 1000,
+      "name": "Weekly cost ($)"
+    }
+  },
+  "exports": {
+    "weeklyCost": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 585.1493132,
+      "stdev": 268.21384,
+      "p5": 246.3856587,
+      "p25": 386.6350555,
+      "p50": 533.6047278,
+      "p75": 729.66146,
+      "p95": 1096.045605,
+      "min": 97.35624821,
+      "max": 2034.178533,
+      "sampleCount": 1000,
+      "name": "Weekly cost ($)"
+    }
+  },
+  "errors": []
+}

@@ -228,16 +228,20 @@ export function getCodeWarnings(code: string): SqCodeWarning[] {
       line = line.slice(end + 2);
       inBlockComment = false;
     }
-    // Remove block comments that end on this line.
+    // Remove block comments that end on this line. One pass that copies the code between comments, so it stays linear in the number of comments.
+    let uncommented = "";
+    let pos = 0;
     for (
       let start = line.indexOf("/*");
       start !== -1;
-      start = line.indexOf("/*", start)
+      start = line.indexOf("/*", pos)
     ) {
       const end = line.indexOf("*/", start + 2);
       if (end === -1) break;
-      line = line.slice(0, start) + line.slice(end + 2);
+      uncommented += line.slice(pos, start);
+      pos = end + 2;
     }
+    line = uncommented + line.slice(pos);
     if (line.includes("/*")) {
       line = line.slice(0, line.indexOf("/*"));
       inBlockComment = true;

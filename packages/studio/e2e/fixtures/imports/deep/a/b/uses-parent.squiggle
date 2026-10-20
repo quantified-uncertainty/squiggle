@@ -1,0 +1,8 @@
+// Imports from two folders up, and from the imports/ root with ../../../.
+
+import "../../shared.squiggle" as shared
+import "../../../lib/costs.squiggle" as costs
+
+@name("Scaled weekly cost ($)")
+@format("$,.0f")
+scaledCost = costs.weeklyCost * shared.multiplier

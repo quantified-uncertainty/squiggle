@@ -1,0 +1,55 @@
+// Imports ./lib/params.squiggle and has many cards, so the Output scrolls
+// (QA #10).
+
+import "./lib/params.squiggle" as params
+
+@name("From params")
+fromParams = params.base
+
+@name("Value 1")
+value1 = 1 to 6
+
+@name("Value 2")
+value2 = 2 to 7
+
+@name("Value 3")
+value3 = 3 to 8
+
+@name("Value 4")
+value4 = 4 to 9
+
+@name("Value 5")
+value5 = 5 to 10
+
+@name("Value 6")
+value6 = 6 to 11
+
+@name("Value 7")
+value7 = 7 to 12
+
+@name("Value 8")
+value8 = 8 to 13
+
+@name("Value 9")
+value9 = 9 to 14
+
+@name("Value 10")
+value10 = 10 to 15
+
+@name("Value 11")
+value11 = 11 to 16
+
+@name("Value 12")
+value12 = 12 to 17
+
+@name("Value 13")
+value13 = 13 to 18
+
+@name("Value 14")
+value14 = 14 to 19
+
+@name("Value 15")
+value15 = 15 to 20
+
+@name("Value 16")
+value16 = 16 to 21

@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "costs": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 144.9967584,
+      "stdev": 30.16985428,
+      "p5": 98.70587893,
+      "p25": 123.8547419,
+      "p50": 142.2279389,
+      "p75": 164.2620852,
+      "p95": 196.3878472,
+      "min": 75.70480454,
+      "max": 278.8121937,
+      "sampleCount": 1000,
+      "name": "Top-level costs"
+    }
+  },
+  "errors": []
+}

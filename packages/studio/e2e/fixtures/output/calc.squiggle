@@ -1,0 +1,16 @@
+// A calculator whose inputs must survive reruns (QA #22).
+
+@name("Adder")
+calc = Calculator.make(
+  {|a, b| a + b},
+  {
+    title: "Adder",
+    inputs: [
+      Input.text({ name: "a", default: "20" }),
+      Input.textArea({ name: "b", default: "50 to 80" }),
+    ],
+  }
+)
+
+@name("Plain")
+plain = 5

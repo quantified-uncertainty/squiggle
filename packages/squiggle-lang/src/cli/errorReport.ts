@@ -1,96 +1,13 @@
-import { LocationRange } from "../ast/types.js";
 import {
-  getCodeWarnings,
-  getErrorHints,
-  SqCodeWarning,
-} from "../public/hints.js";
+  type ErrorJson,
+  sqErrorToJson,
+  type WarningJson,
+} from "../public/json.js";
 import { SqError } from "../public/SqError.js";
 import { CliPrinter } from "./CliPrinter.js";
 import { yellow } from "./colors.js";
 
-export type LocationJson = {
-  file: string;
-  start: { line: number; column: number };
-  end: { line: number; column: number };
-};
-
-export type ErrorJson = {
-  kind: "compile" | "runtime" | "other";
-  message: string;
-  location?: LocationJson;
-  stack?: { name: string; location?: LocationJson }[];
-  importChain?: string[];
-  hints?: string[];
-};
-
-export type WarningJson = SqCodeWarning & { file: string };
-
-function locationToJson(location: LocationRange): LocationJson {
-  return {
-    file: location.source,
-    start: { line: location.start.line, column: location.start.column },
-    end: { line: location.end.line, column: location.end.column },
-  };
-}
-
-// For import errors, returns the original error and the chain of imports that led to it.
-function unwrapError(error: SqError): {
-  inner: Exclude<SqError, { tag: "import" }>;
-  importChain?: string[];
-} {
-  if (error.tag !== "import") {
-    return { inner: error };
-  }
-  return {
-    inner: error.wrappedError() as Exclude<SqError, { tag: "import" }>,
-    importChain: error.getFrameArray().map((frame) => frame.name()),
-  };
-}
-
-export function errorToJson(
-  error: SqError,
-  // Source code by source id, used to look up the offending line for hints.
-  sources: ReadonlyMap<string, string>
-): ErrorJson {
-  const { inner, importChain } = unwrapError(error);
-  const json: ErrorJson = { kind: inner.tag, message: inner.toString() };
-
-  const location = inner.tag === "other" ? undefined : inner.location();
-  if (location) {
-    json.location = locationToJson(location);
-  }
-
-  if (inner.tag === "runtime") {
-    json.stack = inner.getFrameArray().map((frame) => {
-      const frameLocation = frame.location();
-      return {
-        name: frame.name(),
-        ...(frameLocation ? { location: locationToJson(frameLocation) } : {}),
-      };
-    });
-  }
-
-  if (importChain?.length) {
-    json.importChain = importChain;
-  }
-
-  const line = location
-    ? sources.get(location.source)?.split("\n")[location.start.line - 1]
-    : undefined;
-  const hints = getErrorHints({ message: json.message, line });
-  if (hints.length) {
-    json.hints = hints;
-  }
-  return json;
-}
-
-export function warningsForSources(
-  sources: ReadonlyMap<string, string>
-): WarningJson[] {
-  return [...sources.entries()].flatMap(([file, code]) =>
-    getCodeWarnings(code).map((w) => ({ file, ...w }))
-  );
-}
+// The JSON serializers are in src/public/json.ts (public API, browser-safe).
 
 function errorHeader(kind: ErrorJson["kind"]): string {
   switch (kind) {
@@ -100,6 +17,8 @@ function errorHeader(kind: ErrorJson["kind"]): string {
       return "Runtime Error";
     case "other":
       return "Error";
+    case "internal":
+      return "Internal Error";
   }
 }
 
@@ -131,7 +50,7 @@ export function printErrors(
   for (const error of errors) {
     printErrorJson(
       printer,
-      errorToJson(error, sources),
+      sqErrorToJson(error, sources),
       error.toStringWithDetails()
     );
   }

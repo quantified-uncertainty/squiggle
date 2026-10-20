@@ -1,8 +1,12 @@
 import { Item } from "../types.js";
 
 /**
- * Squiggle code for the list view sidebar: plots the comparison of two items,
- * evaluated in the scope of the model code.
+ * Self-contained Squiggle code for the list view sidebar's "Open in
+ * Playground" link: the model followed by the pair's charts. Items' values may
+ * be numbers, so every chart goes through the `Dist(...)`-wrapped values.
+ *
+ * The sidebar's own charts don't re-run the model; see
+ * `relativeValuesPairCharts` in `values/pairCharts.ts`.
  */
 export const buildPairSquiggleCode = ({
   modelCode,
@@ -32,8 +36,8 @@ tickFormatObj = {tickFormat: tickFormat}
 @name("Normalized Scatter Plot")
 scatter = Plot.scatter(
   {
-    xDist: SampleSet(dists[1] / medianDenominator),
-    yDist: SampleSet(dists[0] / medianDenominator),
+    xDist: SampleSet(value_${denominatorItemName} / medianDenominator),
+    yDist: SampleSet(value_${numeratorItemName} / medianDenominator),
     xScale: Scale.symlog(
       { tickFormatObj, title: ${JSON.stringify(denominatorItem.name)} }
     ),

@@ -1,25 +1,26 @@
 "use client";
 import { FC } from "react";
 
+import { Cluster, Item } from "../../types.js";
 import { ClusterIcon } from "../common/ClusterIcon.js";
-import { Item } from "../../types.js";
-
-import { useDefinitionClusters } from "./RelativeValuesProvider.js";
+import { ItemName } from "./ItemName.js";
 
 export const Header: FC<{
   item: Item;
-}> = ({ item }) => {
-  const clusters = useDefinitionClusters();
-
-  const cluster = item.clusterId ? clusters[item.clusterId] : undefined;
+  // The item's cluster, if any.
+  cluster?: Cluster;
+  // Render the name with `renderItemName` / `onItemClick`; false for
+  // pseudo-items, e.g. clusters in the cluster grid.
+  customName?: boolean;
+}> = ({ item, cluster, customName = false }) => {
   return (
-    <div className="flex p-1 text-sm font-semibold text-slate-800">
+    <div className="flex p-1 text-sm font-semibold text-[color:var(--squiggle-rv-text,#1e293b)]">
       {cluster ? (
         <div className="float-left px-0.5 pr-2 pt-1.5">
           <ClusterIcon cluster={cluster} />
         </div>
       ) : null}
-      <div>{item.name}</div>
+      <div>{customName ? <ItemName item={item} /> : item.name}</div>
     </div>
   );
 };

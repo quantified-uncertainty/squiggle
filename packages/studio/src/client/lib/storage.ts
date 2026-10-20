@@ -25,35 +25,61 @@ export function writeStorage(key: string, value: unknown): void {
   }
 }
 
+// ── Helpers for studioState's first-paint cache and its migration (§7) ────
+
+const recordSchema = z.record(z.string(), z.unknown());
+
+// A stored JSON object, or {} (missing, invalid, or storage unavailable).
+export function readStorageRecord(key: string): Record<string, unknown> {
+  return readStorage(key, recordSchema) ?? {};
+}
+
+// Every stored key starting with `prefix`.
+export function storageKeys(prefix: string): string[] {
+  try {
+    const keys: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key?.startsWith(prefix)) keys.push(key);
+    }
+    return keys;
+  } catch {
+    return [];
+  }
+}
+
+// ── Legacy per-origin keys, read once by studioState's migration (§7) ──────
+
 const folderStateSchema = z.object({
   openFiles: z.array(z.string()),
   activeFile: z.string().nullable(),
   recentFiles: z.array(z.string()),
 });
-export type FolderState = z.infer<typeof folderStateSchema>;
+type FolderState = z.infer<typeof folderStateSchema>;
 
-const folderKey = (root: string) => `squiggle-studio:folder:${root}`;
+export function readLegacyFolderState(root: string): FolderState | undefined {
+  return readStorage(`squiggle-studio:folder:${root}`, folderStateSchema);
+}
 
-export function loadFolderState(root: string): FolderState {
-  return (
-    readStorage(folderKey(root), folderStateSchema) ?? {
-      openFiles: [],
-      activeFile: null,
-      recentFiles: [],
-    }
+// The view (Output, Relative values, Playground) last chosen per file.
+export function readLegacyViewIds(
+  root: string
+): Record<string, string> | undefined {
+  return readStorage(
+    `squiggle-studio:views:${root}`,
+    z.record(z.string(), z.string())
   );
 }
 
-export function saveFolderState(root: string, state: FolderState): void {
-  writeStorage(folderKey(root), state);
+export function readLegacyFollowChanges(): boolean | undefined {
+  return readStorage("squiggle-studio:follow-changes", z.boolean());
 }
 
-const viewKey = "squiggle-studio:view";
-
-export function loadViewId(): string | undefined {
-  return readStorage(viewKey, z.string());
-}
-
-export function saveViewId(id: string): void {
-  writeStorage(viewKey, id);
-}
+// Keys of other legacy per-origin state, written by CodePane, Explorer,
+// OutputView and RelativeValuesView before v2.
+export const LEGACY_KEYS = {
+  codePane: "squiggle-studio:code-pane", // {open, fraction}
+  sidebarWidth: "squiggle-studio:sidebar-width", // number
+  outputLayout: "squiggle-studio:output-layout", // "cards" | "list"
+  relativeValuesPrefix: "squiggle-studio:relative-values:", // + file path
+} as const;

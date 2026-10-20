@@ -50,10 +50,16 @@ export class MixedShape implements PointSet<MixedShape> {
     });
   }
 
+  // A mixed shape may have an empty continuous or discrete part (e.g. the
+  // discrete-only `mx(1, 2, 3)`); only the non-empty parts bound it.
   minX() {
+    if (this.continuous.isEmpty()) return this.discrete.minX();
+    if (this.discrete.isEmpty()) return this.continuous.minX();
     return Math.min(this.continuous.minX(), this.discrete.minX());
   }
   maxX() {
+    if (this.continuous.isEmpty()) return this.discrete.maxX();
+    if (this.discrete.isEmpty()) return this.continuous.maxX();
     return Math.max(this.continuous.maxX(), this.discrete.maxX());
   }
 

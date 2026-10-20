@@ -128,7 +128,19 @@ export class SqModuleOutput {
       importOutput: SqModuleOutput;
     }[] = [];
 
-    for (const importBinding of module.getImports(params.state.linker)) {
+    // `getImportOutputs` has succeeded, so the imports should be resolvable,
+    // unless the linker's `resolve` is not deterministic.
+    const imports = module.getImports(params.state.linker);
+    if (!imports.ok) {
+      return new SqModuleOutput({
+        module,
+        environment,
+        result: Err(imports.value),
+        executionTime: 0,
+      });
+    }
+
+    for (const importBinding of imports.value) {
       const importOutput = importOutputs.value[importBinding.name];
       if (!importOutput) {
         throw new Error(

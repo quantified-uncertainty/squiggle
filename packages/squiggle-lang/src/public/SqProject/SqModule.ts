@@ -3,7 +3,7 @@ import { TypedAST } from "../../analysis/types.js";
 import { parse } from "../../ast/parse.js";
 import { AST, LocationRange } from "../../ast/types.js";
 import { Env } from "../../dists/env.js";
-import { errMap, getExt, result } from "../../utility/result.js";
+import { Err, errMap, getExt, Ok, result } from "../../utility/result.js";
 import {
   SqCompileError,
   SqErrorList,
@@ -113,18 +113,43 @@ export class SqModule {
     return getExt(this.typedAst());
   }
 
-  getImports(linker: SqLinker): Import[] {
+  /**
+   * Resolves the module's imports through `linker.resolve`.
+   *
+   * Fails if `resolve` throws for any of the imports. `resolve` is called
+   * synchronously while the project builds its import graph, so its exceptions
+   * must not escape: they become import errors at the location of the import
+   * statement, just like the failures of `linker.loadModule`.
+   *
+   * Returns no imports if the module fails to parse.
+   */
+  getImports(linker: SqLinker): result<Import[], SqErrorList> {
     const ast = this.ast();
     if (!ast.ok) {
-      return [];
+      return Ok([]);
     }
     const program = ast.value;
 
     const resolvedImports: Import[] = [];
+    const errors: SqImportError[] = [];
 
     for (const importNode of program.imports) {
       const { path, variable } = importNode;
-      const name = linker.resolve(path.value, this.name);
+      let name: string;
+      try {
+        name = linker.resolve(path.value, this.name);
+      } catch (e) {
+        errors.push(
+          new SqImportError(new SqOtherError(String(e)), {
+            path: path.value,
+            name: path.value, // unresolved, so the original import string is the best name we have
+            hash: undefined,
+            variable: variable.value,
+            location: path.location,
+          })
+        );
+        continue;
+      }
       resolvedImports.push({
         path: path.value,
         name,
@@ -134,7 +159,7 @@ export class SqModule {
       });
     }
 
-    return resolvedImports;
+    return errors.length ? Err(new SqErrorList(errors)) : Ok(resolvedImports);
   }
 
   // TODO - cache the hash for performance
@@ -175,8 +200,13 @@ export class SqModule {
       };
     }
 
+    const imports = this.getImports(state.linker);
+    if (!imports.ok) {
+      return { type: "failed", value: imports.value };
+    }
+
     const result: Record<string, SqModule> = {};
-    for (const importBinding of this.getImports(state.linker)) {
+    for (const importBinding of imports.value) {
       const importedModuleData = state.getModuleDataByPointer(
         importToPointer(importBinding)
       );

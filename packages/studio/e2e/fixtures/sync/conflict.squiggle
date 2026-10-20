@@ -1,0 +1,5 @@
+// conflict test
+@name("Counter")
+counter = 2
+
+mine = 43

@@ -10,9 +10,11 @@
   },
   "author": "Quantified Uncertainty Research Institute",
   "description": "Relative values dashboards (List, Grid, Plot) for Squiggle models",
+  "bin": {
+    "squiggle-rv": "./bin/squiggle-rv.js"
+  },
   "dependencies": {
     "@quri/squiggle-components": "workspace:*",
-    "@quri/squiggle-lang": "workspace:*",
     "@quri/ui": "workspace:*",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
@@ -26,11 +28,13 @@
     "@babel/preset-typescript": "^7.27.0",
     "@jest/globals": "^29.7.0",
     "@quri/configs": "workspace:*",
+    "@quri/squiggle-lang": "workspace:*",
     "@storybook/addon-essentials": "8.6.12",
     "@storybook/react": "8.6.12",
     "@storybook/react-vite": "8.6.12",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/react": "^16.3.0",
     "@types/d3": "^7.4.3",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.16",
@@ -40,8 +44,10 @@
     "autoprefixer": "^10.4.21",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.1",
+    "postcss-import": "^15.1.0",
     "prettier": "^3.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -52,6 +58,7 @@
     "vite": "^6.2.4"
   },
   "peerDependencies": {
+    "@quri/squiggle-lang": "workspace:^",
     "react": "^18 || ^19",
     "react-dom": "^18 || ^19"
   },
@@ -59,7 +66,7 @@
     "dev": "storybook dev -p 6008 --no-version-updates",
     "clean": "rm -rf dist",
     "build:ts": "tsc -b",
-    "build:css": "postcss ./src/styles/full.css -o ./dist/full.css",
+    "build:css": "postcss ./src/styles/full.css ./src/styles/styles.css --dir ./dist",
     "build": "pnpm run build:ts && pnpm run build:css",
     "build:storybook": "storybook build",
     "lint": "prettier --check .",
@@ -67,9 +74,11 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "files": [
+    "bin",
     "dist",
     "src",
     "examples",
+    "!examples/host-app",
     "!**/*.tsbuildinfo"
   ],
   "type": "module",
@@ -82,9 +91,13 @@
       "types": "./dist/core.d.ts",
       "default": "./dist/core.js"
     },
+    "./styles.css": {
+      "default": "./dist/styles.css"
+    },
     "./full.css": {
       "default": "./dist/full.css"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

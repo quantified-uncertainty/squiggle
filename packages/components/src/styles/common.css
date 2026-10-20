@@ -10,7 +10,7 @@
 }
 
 .cm-gutters {
-  color: #aaa !important;
+  color: #64748b !important;
 }
 
 .ͼ2 .cm-gutters {
@@ -41,6 +41,7 @@
 
 .cm-gutterElement.cm-activeLineGutter {
   background-color: #abd3e857;
+  color: #334155; /* slate-700: legible on the highlight */
 }
 
 .ͼ2 .cm-activeLine {
@@ -48,7 +49,7 @@
 }
 
 .cm-gutter.cm-lineNumbers {
-  color: #bbb;
+  color: #64748b;
 }
 
 .cm-tooltip-autocomplete .cm-tooltip {
@@ -76,5 +77,5 @@
 }
 
 .cm-search button[name="close"] {
-  @apply !right-2 !text-base !text-slate-400 hover:!text-slate-700;
+  @apply !right-2 !text-base !text-slate-600 hover:!text-slate-800;
 }

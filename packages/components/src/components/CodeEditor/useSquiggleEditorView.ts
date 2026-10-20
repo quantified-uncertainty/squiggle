@@ -7,6 +7,7 @@ import {
 import {
   defaultKeymap,
   history,
+  historyField,
   historyKeymap,
   indentWithTab,
 } from "@codemirror/commands";
@@ -17,7 +18,7 @@ import {
   syntaxHighlighting,
 } from "@codemirror/language";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
-import { EditorState } from "@codemirror/state";
+import { EditorState, EditorStateConfig, Transaction } from "@codemirror/state";
 import {
   drawSelection,
   dropCursor,
@@ -31,6 +32,8 @@ import {
   useCodemirrorView,
   useConfigureCodemirrorView,
 } from "./codemirrorHooks.js";
+import { cursorEventExtension } from "./cursorEventExtension.js";
+import { computeExternalChange } from "./editorCommands.js";
 import { errorsExtension } from "./errorsExtension.js";
 import { showGutterFacet, useReactPropsField } from "./fields.js";
 import { formatSquiggleExtension } from "./formatSquiggleExtension.js";
@@ -128,6 +131,7 @@ export function useSquiggleEditorExtensions(
         height: params.height,
       }),
       tooltipsExtension(),
+      cursorEventExtension(),
     ];
 
     return [
@@ -141,8 +145,51 @@ export function useSquiggleEditorExtensions(
   return extensions;
 }
 
+// A saved editor (doc, selection, undo history and scroll position), for
+// restoring it after a remount, e.g. when an app switches between files.
+export type EditorStateSnapshot = {
+  state: unknown; // EditorState.toJSON({ history: historyField })
+  scrollTop: number;
+};
+
+const snapshotFields = { history: historyField };
+
+export function editorStateSnapshot(view: EditorView): EditorStateSnapshot {
+  return {
+    state: view.state.toJSON(snapshotFields),
+    scrollTop: view.scrollDOM.scrollTop,
+  };
+}
+
+// Restores `snapshot` with the editor's extensions. If the code changed since
+// (`doc`, e.g. another program edited the file meanwhile), the difference is
+// applied as one remote transaction outside the undo history, so the history
+// maps through it. A snapshot that can't be restored gives a fresh state.
+export function restoreEditorState(
+  snapshot: EditorStateSnapshot,
+  config: EditorStateConfig,
+  doc: string
+): EditorState {
+  let state: EditorState;
+  try {
+    state = EditorState.fromJSON(snapshot.state, config, snapshotFields);
+  } catch {
+    return EditorState.create({ ...config, doc });
+  }
+  const change = computeExternalChange(state.doc.toString(), doc);
+  if (!change) return state;
+  return state.update({
+    changes: change,
+    annotations: [
+      Transaction.remote.of(true),
+      Transaction.addToHistory.of(false),
+    ],
+  }).state;
+}
+
 export function useSquiggleEditorView({
   defaultValue,
+  initialState,
   ...params
 }: CodeEditorProps) {
   /**
@@ -158,10 +205,27 @@ export function useSquiggleEditorView({
   const [view, setView] = useCodemirrorView();
 
   const extensions = useSquiggleEditorExtensions(view, params);
-  const ref = useConfigureCodemirrorView(view, setView, {
-    extensions,
-    doc: defaultValue,
-  });
+  const ref = useConfigureCodemirrorView(
+    view,
+    setView,
+    { extensions, doc: defaultValue },
+    initialState
+      ? {
+          createState: (config) =>
+            restoreEditorState(initialState, config, defaultValue),
+          onAttach: (view) => {
+            // Restore the scroll position once the editor has measured its
+            // content (until then the scroller can't scroll that far).
+            view.requestMeasure({
+              read: () => undefined,
+              write: () => {
+                view.scrollDOM.scrollTop = initialState.scrollTop;
+              },
+            });
+          },
+        }
+      : {}
+  );
 
   return { view, ref };
 }

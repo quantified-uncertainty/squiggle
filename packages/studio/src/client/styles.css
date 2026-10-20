@@ -14,15 +14,69 @@ body {
   @apply bg-white text-slate-800 antialiased;
 }
 
-/* WithToasts (from @quri/ui) wraps the app in an unstyled div. */
-#root > div {
+/* WithToasts (from @quri/ui) renders two divs under #root: an unstyled
+   wrapper around the app, then the fixed toast container. Only the wrapper
+   and the app fill the window; a viewport-tall toast container put toasts at
+   the top of the window, clipped (#33). */
+#root > div:first-child,
+.studio-app {
   height: 100%;
+}
+
+/* Toasts sit above the 24 px status bar, and long messages (absolute paths)
+   wrap instead of spanning the window. */
+#root > div.fixed {
+  bottom: 2rem;
+  max-width: min(36rem, calc(100vw - 2rem));
+}
+
+[data-testid="toast"] {
+  overflow-wrap: anywhere;
 }
 
 /* Embedded (render) mode: let the page grow with its content. */
 html.studio-embed,
 html.studio-embed body,
 html.studio-embed #root,
-html.studio-embed #root > div {
+html.studio-embed #root > div:first-child,
+html.studio-embed .studio-app {
   height: auto;
+}
+
+/* `?test=1`: deterministic screenshots, no transitions or animations. */
+html.studio-test *,
+html.studio-test *::before,
+html.studio-test *::after {
+  transition: none !important;
+  animation: none !important;
+  caret-color: transparent;
+}
+
+/* Tooltips fade in through framer-motion (an inline opacity that the rules
+   above can't stop, and that reduced motion keeps): in test mode they show
+   at full opacity at once, so a screenshot or the contrast check never
+   catches one mid-fade. */
+html.studio-test [role="tooltip"] {
+  opacity: 1 !important;
+}
+
+/* A subtle outline when a region itself receives keyboard focus (F6, ⇧⌘E).
+   Menu panels are regions too, but show their focus with the active row. */
+[data-studio-region]:not([role="menu"]):focus-visible {
+  outline: 2px solid rgb(253 186 116); /* orange-300 */
+  outline-offset: -2px;
+}
+
+/* Highlights a file in the tree when it changes on disk. */
+@keyframes studio-changed {
+  from {
+    background-color: rgb(253 230 138); /* amber-200 */
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.studio-changed {
+  animation: studio-changed 4s ease-out;
 }

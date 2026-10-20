@@ -1,0 +1,5 @@
+// Imports a file that doesn't exist.
+
+import "./does-not-exist.squiggle" as missing
+
+total = missing.value * 2

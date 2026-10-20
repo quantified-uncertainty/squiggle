@@ -11,11 +11,11 @@ import { widgetRegistry } from "./registry.js";
 
 widgetRegistry.register("TableChart", {
   Preview: (value) => (
-    <div className="flex items-center space-x-1 font-mono text-slate-400">
+    <div className="flex items-center space-x-1 font-mono text-slate-600">
       <TableCellsIcon size={14} className="flex opacity-60" />
       <div>
         {value.value.rowCount}
-        <span className="opacity-60">x</span>
+        <span className="text-slate-500">x</span>
         {value.value.columnCount}
       </div>
     </div>

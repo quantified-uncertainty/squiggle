@@ -1,10 +1,16 @@
 import { FC, useEffect, useRef, useState } from "react";
 
-import { Button, Modal, StyledInput, useToast } from "@quri/ui";
+import { Button, StyledInput, useToast } from "@quri/ui";
 
-import { api, ApiError } from "../lib/api.js";
+import { API_ERROR_CODES } from "../../shared/api.js";
+import { TID } from "../../shared/testIds.js";
+import { ApiError } from "../lib/api.js";
+import { resolveNameInput } from "../lib/explorerUi.js";
+import type { Workspace } from "../lib/workspaceTypes.js";
+import { ExplorerModalFrame } from "./ExplorerModalFrame.js";
 
 type Props = {
+  importModel: Workspace["importFromHub"];
   onImported: (path: string) => void;
   close: () => void;
 };
@@ -21,12 +27,25 @@ export function parseHubReference(
   return undefined;
 }
 
-export const HubImportModal: FC<Props> = ({ onImported, close }) => {
+const errorMessage = (e: unknown) =>
+  e instanceof Error ? e.message : String(e);
+
+// Downloads a copy of a Squiggle Hub model into the folder, through the
+// workspace (which records the write as Studio's own, so it isn't listed as
+// changed on disk). Cancel, Esc or closing aborts a request in flight and a
+// late result is ignored; declining an overwrite just keeps the modal open
+// (#49).
+export const HubImportModal: FC<Props> = ({
+  importModel,
+  onImported,
+  close,
+}) => {
   const toast = useToast();
   const [reference, setReference] = useState("");
   const [fileName, setFileName] = useState("");
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const requestRef = useRef<AbortController | null>(null);
 
   // The modal animates in through a portal, so `autoFocus` isn't reliable.
   useEffect(() => {
@@ -34,84 +53,60 @@ export const HubImportModal: FC<Props> = ({ onImported, close }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const parsed = parseHubReference(reference);
-  const target = fileName || (parsed ? `hub/${parsed.slug}.squiggle` : "");
+  // Closing the modal (Cancel, Esc, the close button, a click outside)
+  // aborts an import in flight.
+  useEffect(() => () => requestRef.current?.abort(), []);
 
-  const submit = async (overwrite = false) => {
-    if (!parsed || !target) return;
+  const parsed = parseHubReference(reference);
+  const target =
+    fileName.trim() || (parsed ? `hub/${parsed.slug}.squiggle` : "");
+
+  const submit = async (overwrite = false): Promise<void> => {
+    if (!parsed || !target || requestRef.current) return;
+    const name = resolveNameInput(target, { mode: "create" });
+    if (!name.ok) {
+      toast(name.error, "error");
+      return;
+    }
+    const request = new AbortController();
+    requestRef.current = request;
     setBusy(true);
     try {
-      const path = target.endsWith(".squiggle") ? target : `${target}.squiggle`;
-      await api.importFromHub({ ...parsed, path, overwrite });
+      const path = await importModel(`${parsed.owner}/${parsed.slug}`, {
+        path: name.path,
+        overwrite,
+        signal: request.signal,
+      });
+      if (request.signal.aborted) return;
+      requestRef.current = null;
       toast(`Imported ${parsed.owner}/${parsed.slug}`, "confirmation");
       onImported(path);
       close();
     } catch (e) {
-      if (
-        e instanceof ApiError &&
-        e.status === 409 &&
-        window.confirm(`${target} already exists. Overwrite it?`)
-      ) {
-        setBusy(false);
-        return submit(true);
-      }
-      toast(e instanceof Error ? e.message : String(e), "error");
-    } finally {
+      if (request.signal.aborted) return; // cancelled: nothing to report
+      requestRef.current = null;
       setBusy(false);
+      if (
+        !overwrite &&
+        e instanceof ApiError &&
+        e.code === API_ERROR_CODES.fileExists
+      ) {
+        if (window.confirm(`${name.path} already exists. Overwrite it?`)) {
+          return submit(true);
+        }
+        return; // declined: no error, the modal stays open
+      }
+      toast(errorMessage(e), "error");
     }
   };
 
   return (
-    <Modal close={close}>
-      <Modal.Header>Import from Squiggle Hub</Modal.Header>
-      <Modal.Body>
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit();
-          }}
-        >
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">
-              Model
-            </span>
-            <StyledInput
-              size="small"
-              ref={inputRef}
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              placeholder="owner/slug or https://squigglehub.org/models/owner/slug"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">
-              Save as
-            </span>
-            <StyledInput
-              size="small"
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-              placeholder={
-                parsed ? `hub/${parsed.slug}.squiggle` : "file.squiggle"
-              }
-            />
-          </label>
-          <p className="text-xs text-slate-500">
-            Downloads a copy of the model into this folder. To use a live Hub
-            model instead, write{" "}
-            <code className="rounded bg-slate-100 px-1">
-              import &quot;hub:
-              {parsed ? `${parsed.owner}/${parsed.slug}` : "owner/slug"}&quot;
-              as model
-            </code>
-            .
-          </p>
-          <button type="submit" className="hidden" />
-        </form>
-      </Modal.Body>
-      <Modal.Footer>
-        <div className="flex justify-end gap-2">
+    <ExplorerModalFrame
+      testId={TID.modalHubImport}
+      title="Import from Squiggle Hub"
+      close={close}
+      footer={
+        <div className="flex justify-end gap-2" data-testid={TID.modalActions}>
           <Button onClick={close}>Cancel</Button>
           <Button
             theme="primary"
@@ -121,7 +116,54 @@ export const HubImportModal: FC<Props> = ({ onImported, close }) => {
             {busy ? "Importing…" : "Import"}
           </Button>
         </div>
-      </Modal.Footer>
-    </Modal>
+      }
+    >
+      <form
+        className="space-y-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submit();
+        }}
+      >
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">
+            Model
+          </span>
+          <StyledInput
+            size="small"
+            ref={inputRef}
+            value={reference}
+            name="hub-model"
+            onChange={(e) => setReference(e.target.value)}
+            placeholder="owner/slug or https://squigglehub.org/models/owner/slug"
+          />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-slate-700">
+            Save as
+          </span>
+          <StyledInput
+            size="small"
+            value={fileName}
+            name="hub-path"
+            onChange={(e) => setFileName(e.target.value)}
+            placeholder={
+              parsed ? `hub/${parsed.slug}.squiggle` : "file.squiggle"
+            }
+          />
+        </label>
+        <p className="text-xs text-slate-600">
+          Downloads a copy of the model into this folder. To use a live Hub
+          model instead, write{" "}
+          <code className="rounded bg-slate-100 px-1">
+            import &quot;hub:
+            {parsed ? `${parsed.owner}/${parsed.slug}` : "owner/slug"}&quot; as
+            model
+          </code>
+          .
+        </p>
+        <button type="submit" className="hidden" aria-label="Import" />
+      </form>
+    </ExplorerModalFrame>
   );
 };

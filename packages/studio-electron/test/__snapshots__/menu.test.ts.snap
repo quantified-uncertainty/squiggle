@@ -1,0 +1,1977 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`the native menu template > snapshot (darwin) 1`] = `
+[
+  {
+    "label": "Squiggle Studio",
+    "submenu": [
+      {
+        "role": "about",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "role": "services",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "role": "hide",
+      },
+      {
+        "role": "hideOthers",
+      },
+      {
+        "role": "unhide",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "role": "quit",
+      },
+    ],
+  },
+  {
+    "id": "file",
+    "label": "File",
+    "submenu": [
+      {
+        "accelerator": "Cmd+N",
+        "enabled": true,
+        "id": "file/explorer.newFile",
+        "label": "New File…",
+      },
+      {
+        "enabled": true,
+        "id": "file/explorer.newFolder",
+        "label": "New Folder…",
+      },
+      {
+        "accelerator": "Cmd+Shift+N",
+        "id": "file/workbench.action.newWindow",
+        "label": "New Window",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+O",
+        "id": "file/workbench.action.files.openFolder",
+        "label": "Open Folder…",
+      },
+      {
+        "id": "file/workbench.action.files.openFile",
+        "label": "Open File…",
+      },
+      {
+        "id": "file/openRecent",
+        "label": "Open Recent",
+        "submenu": [
+          {
+            "enabled": false,
+            "label": "Folders",
+          },
+          {
+            "label": "~/other",
+          },
+          {
+            "label": "/opt/shared",
+          },
+          {
+            "enabled": false,
+            "label": "Files",
+          },
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib",
+          },
+          {
+            "enabled": true,
+            "label": "main.squiggle",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+          },
+          {
+            "enabled": true,
+            "label": "Clear Recent Files",
+          },
+        ],
+      },
+      {
+        "accelerator": "Cmd+P",
+        "enabled": true,
+        "id": "file/workbench.action.quickOpen",
+        "label": "Go to File…",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+S",
+        "enabled": true,
+        "id": "file/workbench.action.files.save",
+        "label": "Save",
+      },
+      {
+        "accelerator": "Cmd+Alt+S",
+        "enabled": true,
+        "id": "file/workbench.action.files.saveAll",
+        "label": "Save All",
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "id": "file/workbench.action.toggleAutoSave",
+        "label": "Auto Save",
+        "type": "checkbox",
+      },
+      {
+        "enabled": true,
+        "id": "file/workbench.action.files.revert",
+        "label": "Revert File",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "F2",
+        "enabled": true,
+        "id": "file/renameFile",
+        "label": "Rename…",
+      },
+      {
+        "enabled": true,
+        "id": "file/squiggle.hub.import",
+        "label": "Import from Squiggle Hub…",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "file/copyFilePath",
+        "label": "Copy Path",
+      },
+      {
+        "enabled": true,
+        "id": "file/copyRelativeFilePath",
+        "label": "Copy Relative Path",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+W",
+        "enabled": true,
+        "id": "file/workbench.action.closeActiveEditor",
+        "label": "Close File",
+      },
+      {
+        "accelerator": "Cmd+Shift+W",
+        "id": "file/workbench.action.closeWindow",
+        "label": "Close Window",
+      },
+    ],
+  },
+  {
+    "id": "edit",
+    "label": "Edit",
+    "submenu": [
+      {
+        "accelerator": "Cmd+Z",
+        "id": "edit/undo",
+        "label": "Undo",
+        "role": "undo",
+      },
+      {
+        "accelerator": "Cmd+Shift+Z",
+        "id": "edit/redo",
+        "label": "Redo",
+        "role": "redo",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+X",
+        "id": "edit/editor.action.clipboardCutAction",
+        "label": "Cut",
+        "role": "cut",
+      },
+      {
+        "accelerator": "Cmd+C",
+        "id": "edit/editor.action.clipboardCopyAction",
+        "label": "Copy",
+        "role": "copy",
+      },
+      {
+        "accelerator": "Cmd+V",
+        "id": "edit/editor.action.clipboardPasteAction",
+        "label": "Paste",
+        "role": "paste",
+      },
+      {
+        "accelerator": "Cmd+A",
+        "id": "edit/editor.action.selectAll",
+        "label": "Select All",
+        "role": "selectAll",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+F",
+        "enabled": true,
+        "id": "edit/actions.find",
+        "label": "Find",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "edit/editor.action.startFindReplaceAction",
+        "label": "Replace",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+/",
+        "enabled": true,
+        "id": "edit/editor.action.commentLine",
+        "label": "Toggle Line Comment",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Shift+F",
+        "enabled": true,
+        "id": "edit/editor.action.formatDocument",
+        "label": "Format Document",
+        "registerAccelerator": false,
+      },
+    ],
+  },
+  {
+    "id": "view",
+    "label": "View",
+    "submenu": [
+      {
+        "accelerator": "Cmd+Shift+P",
+        "enabled": true,
+        "id": "view/workbench.action.showCommands",
+        "label": "Command Palette…",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "label": "Output",
+        "type": "radio",
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "label": "Relative Values",
+        "type": "radio",
+      },
+      {
+        "checked": false,
+        "enabled": false,
+        "label": "Playground",
+        "type": "radio",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+\\",
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleCodePane",
+        "label": "Code Pane",
+        "type": "checkbox",
+      },
+      {
+        "id": "view/outputLayout",
+        "label": "Output Layout",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"cards"}",
+            "label": "Cards",
+            "type": "radio",
+          },
+          {
+            "checked": true,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"list"}",
+            "label": "List",
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "id": "view/rvTab",
+        "label": "Relative Values Tab",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"list"}",
+            "label": "List",
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"grid"}",
+            "label": "Grid",
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"plot"}",
+            "label": "Plot",
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+B",
+        "checked": true,
+        "enabled": true,
+        "id": "view/workbench.action.toggleSidebarVisibility",
+        "label": "Explorer",
+        "type": "checkbox",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/workbench.action.toggleStatusbarVisibility",
+        "label": "Status Bar",
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleFollowChanges",
+        "label": "Follow Changes on Disk",
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+=",
+        "id": "view/workbench.action.zoomIn",
+        "label": "Zoom In",
+        "role": "zoomIn",
+      },
+      {
+        "accelerator": "Cmd+-",
+        "id": "view/workbench.action.zoomOut",
+        "label": "Zoom Out",
+        "role": "zoomOut",
+      },
+      {
+        "accelerator": "Cmd+0",
+        "id": "view/workbench.action.zoomReset",
+        "label": "Actual Size",
+        "role": "resetZoom",
+      },
+      {
+        "accelerator": "Cmd+Ctrl+F",
+        "id": "view/workbench.action.toggleFullScreen",
+        "label": "Full Screen",
+      },
+    ],
+  },
+  {
+    "id": "go",
+    "label": "Go",
+    "submenu": [
+      {
+        "accelerator": "Cmd+P",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpen",
+        "label": "Go to File…",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Tab",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpenPreviousRecentlyUsedEditor",
+        "label": "Switch to Recent File…",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+-",
+        "enabled": true,
+        "id": "go/workbench.action.navigateBack",
+        "label": "Back",
+      },
+      {
+        "accelerator": "Ctrl+Shift+-",
+        "enabled": true,
+        "id": "go/workbench.action.navigateForward",
+        "label": "Forward",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+F5",
+        "enabled": true,
+        "id": "go/squiggle.nextChange",
+        "label": "Next Changed File",
+      },
+      {
+        "accelerator": "Alt+Shift+F5",
+        "enabled": true,
+        "id": "go/squiggle.previousChange",
+        "label": "Previous Changed File",
+      },
+      {
+        "id": "go/changedFiles",
+        "label": "Changed on Disk",
+        "submenu": [
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib · 12s ago",
+          },
+          {
+            "enabled": false,
+            "label": "gone.squiggle · 1m ago",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "enabled": true,
+            "label": "Clear List",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+Shift+V",
+        "enabled": true,
+        "id": "go/squiggle.revealInOutput",
+        "label": "Reveal Value in Output",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "go/workbench.files.action.showActiveFileInExplorer",
+        "label": "Reveal Active File in Explorer",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+Shift+E",
+        "enabled": true,
+        "id": "go/workbench.view.explorer",
+        "label": "Focus Explorer",
+      },
+      {
+        "accelerator": "Cmd+1",
+        "enabled": true,
+        "id": "go/workbench.action.focusFirstEditorGroup",
+        "label": "Focus Code Editor",
+      },
+      {
+        "accelerator": "Cmd+2",
+        "enabled": true,
+        "id": "go/workbench.action.focusSecondEditorGroup",
+        "label": "Focus Output",
+      },
+      {
+        "accelerator": "F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusNextPart",
+        "label": "Focus Next Part",
+      },
+      {
+        "accelerator": "Shift+F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusPreviousPart",
+        "label": "Focus Previous Part",
+      },
+    ],
+  },
+  {
+    "id": "run",
+    "label": "Run",
+    "submenu": [
+      {
+        "accelerator": "Cmd+Enter",
+        "enabled": true,
+        "id": "run/squiggle.run",
+        "label": "Run",
+        "registerAccelerator": false,
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "run/squiggle.toggleAutorun",
+        "label": "Auto-run",
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "id": "run/copyForAgent",
+        "label": "Copy for Agent",
+        "submenu": [
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyContext",
+            "label": "Context for Agent",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.copyViewLink",
+            "label": "Link to Current View",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRunCommand",
+            "label": "Run Command",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRenderCommand",
+            "label": "Render Command",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyProblems",
+            "label": "Problems",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.output.copyJson",
+            "label": "Output as JSON",
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.rv.copyCsv",
+            "label": "Relative Values as CSV",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    "role": "windowMenu",
+  },
+  {
+    "id": "help",
+    "label": "Help",
+    "role": "help",
+    "submenu": [
+      {
+        "enabled": true,
+        "id": "help/workbench.action.openGlobalKeybindings",
+        "label": "Keyboard Shortcuts",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.docs",
+        "label": "Squiggle Documentation",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.relativeValues",
+        "label": "Relative Values Guide",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.agents",
+        "label": "Using Studio with a Coding Agent",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.hub",
+        "label": "Squiggle Hub",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.reportIssue",
+        "label": "Report an Issue",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Cmd+Alt+I",
+        "id": "help/workbench.action.toggleDevTools",
+        "label": "Toggle Developer Tools",
+      },
+      {
+        "accelerator": "Cmd+R",
+        "id": "help/workbench.action.reloadWindow",
+        "label": "Reload Window",
+      },
+    ],
+  },
+]
+`;
+
+exports[`the native menu template > snapshot (linux) 1`] = `
+[
+  {
+    "id": "file",
+    "label": "&File",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+N",
+        "enabled": true,
+        "id": "file/explorer.newFile",
+        "label": "New File…",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/explorer.newFolder",
+        "label": "New Folder…",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Shift+N",
+        "id": "file/workbench.action.newWindow",
+        "label": "New Window",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+O",
+        "id": "file/workbench.action.files.openFolder",
+        "label": "Open Folder…",
+      },
+      {
+        "id": "file/workbench.action.files.openFile",
+        "label": "Open File…",
+      },
+      {
+        "id": "file/openRecent",
+        "label": "Open Recent",
+        "submenu": [
+          {
+            "enabled": false,
+            "label": "Folders",
+          },
+          {
+            "label": "~/other",
+          },
+          {
+            "label": "/opt/shared",
+          },
+          {
+            "enabled": false,
+            "label": "Files",
+          },
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib",
+          },
+          {
+            "enabled": true,
+            "label": "main.squiggle",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "label": "Clear Recent Files",
+          },
+        ],
+      },
+      {
+        "accelerator": "Ctrl+P",
+        "enabled": true,
+        "id": "file/workbench.action.quickOpen",
+        "label": "Go to File…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+S",
+        "enabled": true,
+        "id": "file/workbench.action.files.save",
+        "label": "Save",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/workbench.action.files.saveAll",
+        "label": "Save All",
+        "registerAccelerator": false,
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "id": "file/workbench.action.toggleAutoSave",
+        "label": "Auto Save",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "enabled": true,
+        "id": "file/workbench.action.files.revert",
+        "label": "Revert File",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "F2",
+        "enabled": true,
+        "id": "file/renameFile",
+        "label": "Rename…",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/squiggle.hub.import",
+        "label": "Import from Squiggle Hub…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "file/copyFilePath",
+        "label": "Copy Path",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/copyRelativeFilePath",
+        "label": "Copy Relative Path",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+W",
+        "enabled": true,
+        "id": "file/workbench.action.closeActiveEditor",
+        "label": "Close File",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Shift+W",
+        "id": "file/workbench.action.closeWindow",
+        "label": "Close Window",
+      },
+      {
+        "id": "file/workbench.action.quit",
+        "label": "Exit",
+      },
+    ],
+  },
+  {
+    "id": "edit",
+    "label": "&Edit",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Z",
+        "id": "edit/undo",
+        "label": "Undo",
+        "role": "undo",
+      },
+      {
+        "accelerator": "Ctrl+Y",
+        "id": "edit/redo",
+        "label": "Redo",
+        "role": "redo",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+X",
+        "id": "edit/editor.action.clipboardCutAction",
+        "label": "Cut",
+        "role": "cut",
+      },
+      {
+        "accelerator": "Ctrl+C",
+        "id": "edit/editor.action.clipboardCopyAction",
+        "label": "Copy",
+        "role": "copy",
+      },
+      {
+        "accelerator": "Ctrl+V",
+        "id": "edit/editor.action.clipboardPasteAction",
+        "label": "Paste",
+        "role": "paste",
+      },
+      {
+        "accelerator": "Ctrl+A",
+        "id": "edit/editor.action.selectAll",
+        "label": "Select All",
+        "role": "selectAll",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+F",
+        "enabled": true,
+        "id": "edit/actions.find",
+        "label": "Find",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "edit/editor.action.startFindReplaceAction",
+        "label": "Replace",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+/",
+        "enabled": true,
+        "id": "edit/editor.action.commentLine",
+        "label": "Toggle Line Comment",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Shift+F",
+        "enabled": true,
+        "id": "edit/editor.action.formatDocument",
+        "label": "Format Document",
+        "registerAccelerator": false,
+      },
+    ],
+  },
+  {
+    "id": "view",
+    "label": "&View",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Shift+P",
+        "enabled": true,
+        "id": "view/workbench.action.showCommands",
+        "label": "Command Palette…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "label": "Output",
+        "type": "radio",
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "label": "Relative Values",
+        "type": "radio",
+      },
+      {
+        "checked": false,
+        "enabled": false,
+        "label": "Playground",
+        "type": "radio",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+\\",
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleCodePane",
+        "label": "Code Pane",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "id": "view/outputLayout",
+        "label": "Output Layout",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"cards"}",
+            "label": "Cards",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": true,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"list"}",
+            "label": "List",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "id": "view/rvTab",
+        "label": "Relative Values Tab",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"list"}",
+            "label": "List",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"grid"}",
+            "label": "Grid",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"plot"}",
+            "label": "Plot",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+B",
+        "checked": true,
+        "enabled": true,
+        "id": "view/workbench.action.toggleSidebarVisibility",
+        "label": "Explorer",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/workbench.action.toggleStatusbarVisibility",
+        "label": "Status Bar",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleFollowChanges",
+        "label": "Follow Changes on Disk",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+=",
+        "id": "view/workbench.action.zoomIn",
+        "label": "Zoom In",
+        "role": "zoomIn",
+      },
+      {
+        "accelerator": "Ctrl+-",
+        "id": "view/workbench.action.zoomOut",
+        "label": "Zoom Out",
+        "role": "zoomOut",
+      },
+      {
+        "accelerator": "Ctrl+0",
+        "id": "view/workbench.action.zoomReset",
+        "label": "Actual Size",
+        "role": "resetZoom",
+      },
+      {
+        "accelerator": "F11",
+        "id": "view/workbench.action.toggleFullScreen",
+        "label": "Full Screen",
+      },
+    ],
+  },
+  {
+    "id": "go",
+    "label": "&Go",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+P",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpen",
+        "label": "Go to File…",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Tab",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpenPreviousRecentlyUsedEditor",
+        "label": "Switch to Recent File…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+Left",
+        "enabled": true,
+        "id": "go/workbench.action.navigateBack",
+        "label": "Back",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Right",
+        "enabled": true,
+        "id": "go/workbench.action.navigateForward",
+        "label": "Forward",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+F5",
+        "enabled": true,
+        "id": "go/squiggle.nextChange",
+        "label": "Next Changed File",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Shift+F5",
+        "enabled": true,
+        "id": "go/squiggle.previousChange",
+        "label": "Previous Changed File",
+        "registerAccelerator": false,
+      },
+      {
+        "id": "go/changedFiles",
+        "label": "Changed on Disk",
+        "submenu": [
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib · 12s ago",
+          },
+          {
+            "enabled": false,
+            "label": "gone.squiggle · 1m ago",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "enabled": true,
+            "label": "Clear List",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+Shift+V",
+        "enabled": true,
+        "id": "go/squiggle.revealInOutput",
+        "label": "Reveal Value in Output",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "go/workbench.files.action.showActiveFileInExplorer",
+        "label": "Reveal Active File in Explorer",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+Shift+E",
+        "enabled": true,
+        "id": "go/workbench.view.explorer",
+        "label": "Focus Explorer",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+1",
+        "enabled": true,
+        "id": "go/workbench.action.focusFirstEditorGroup",
+        "label": "Focus Code Editor",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+2",
+        "enabled": true,
+        "id": "go/workbench.action.focusSecondEditorGroup",
+        "label": "Focus Output",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusNextPart",
+        "label": "Focus Next Part",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Shift+F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusPreviousPart",
+        "label": "Focus Previous Part",
+        "registerAccelerator": false,
+      },
+    ],
+  },
+  {
+    "id": "run",
+    "label": "&Run",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Enter",
+        "enabled": true,
+        "id": "run/squiggle.run",
+        "label": "Run",
+        "registerAccelerator": false,
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "run/squiggle.toggleAutorun",
+        "label": "Auto-run",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "id": "run/copyForAgent",
+        "label": "Copy for Agent",
+        "submenu": [
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyContext",
+            "label": "Context for Agent",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.copyViewLink",
+            "label": "Link to Current View",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRunCommand",
+            "label": "Run Command",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRenderCommand",
+            "label": "Render Command",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyProblems",
+            "label": "Problems",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.output.copyJson",
+            "label": "Output as JSON",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.rv.copyCsv",
+            "label": "Relative Values as CSV",
+            "registerAccelerator": false,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    "role": "windowMenu",
+  },
+  {
+    "id": "help",
+    "label": "&Help",
+    "submenu": [
+      {
+        "enabled": true,
+        "id": "help/workbench.action.openGlobalKeybindings",
+        "label": "Keyboard Shortcuts",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.docs",
+        "label": "Squiggle Documentation",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.relativeValues",
+        "label": "Relative Values Guide",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.agents",
+        "label": "Using Studio with a Coding Agent",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.hub",
+        "label": "Squiggle Hub",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.reportIssue",
+        "label": "Report an Issue",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+Shift+I",
+        "id": "help/workbench.action.toggleDevTools",
+        "label": "Toggle Developer Tools",
+      },
+      {
+        "accelerator": "Ctrl+Shift+R",
+        "id": "help/workbench.action.reloadWindow",
+        "label": "Reload Window",
+      },
+    ],
+  },
+]
+`;
+
+exports[`the native menu template > snapshot (win32) 1`] = `
+[
+  {
+    "id": "file",
+    "label": "&File",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+N",
+        "enabled": true,
+        "id": "file/explorer.newFile",
+        "label": "New File…",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/explorer.newFolder",
+        "label": "New Folder…",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Shift+N",
+        "id": "file/workbench.action.newWindow",
+        "label": "New Window",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+O",
+        "id": "file/workbench.action.files.openFolder",
+        "label": "Open Folder…",
+      },
+      {
+        "id": "file/workbench.action.files.openFile",
+        "label": "Open File…",
+      },
+      {
+        "id": "file/openRecent",
+        "label": "Open Recent",
+        "submenu": [
+          {
+            "enabled": false,
+            "label": "Folders",
+          },
+          {
+            "label": "~/other",
+          },
+          {
+            "label": "/opt/shared",
+          },
+          {
+            "enabled": false,
+            "label": "Files",
+          },
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib",
+          },
+          {
+            "enabled": true,
+            "label": "main.squiggle",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "accelerator": "Ctrl+R",
+            "enabled": true,
+            "id": "file/openRecent/workbench.action.openRecent",
+            "label": "More…",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "label": "Clear Recent Files",
+          },
+        ],
+      },
+      {
+        "accelerator": "Ctrl+P",
+        "enabled": true,
+        "id": "file/workbench.action.quickOpen",
+        "label": "Go to File…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+S",
+        "enabled": true,
+        "id": "file/workbench.action.files.save",
+        "label": "Save",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/workbench.action.files.saveAll",
+        "label": "Save All",
+        "registerAccelerator": false,
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "id": "file/workbench.action.toggleAutoSave",
+        "label": "Auto Save",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "enabled": true,
+        "id": "file/workbench.action.files.revert",
+        "label": "Revert File",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "F2",
+        "enabled": true,
+        "id": "file/renameFile",
+        "label": "Rename…",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/squiggle.hub.import",
+        "label": "Import from Squiggle Hub…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "file/copyFilePath",
+        "label": "Copy Path",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "file/copyRelativeFilePath",
+        "label": "Copy Relative Path",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+W",
+        "enabled": true,
+        "id": "file/workbench.action.closeActiveEditor",
+        "label": "Close File",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Shift+W",
+        "id": "file/workbench.action.closeWindow",
+        "label": "Close Window",
+      },
+      {
+        "id": "file/workbench.action.quit",
+        "label": "Exit",
+      },
+    ],
+  },
+  {
+    "id": "edit",
+    "label": "&Edit",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Z",
+        "id": "edit/undo",
+        "label": "Undo",
+        "role": "undo",
+      },
+      {
+        "accelerator": "Ctrl+Y",
+        "id": "edit/redo",
+        "label": "Redo",
+        "role": "redo",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+X",
+        "id": "edit/editor.action.clipboardCutAction",
+        "label": "Cut",
+        "role": "cut",
+      },
+      {
+        "accelerator": "Ctrl+C",
+        "id": "edit/editor.action.clipboardCopyAction",
+        "label": "Copy",
+        "role": "copy",
+      },
+      {
+        "accelerator": "Ctrl+V",
+        "id": "edit/editor.action.clipboardPasteAction",
+        "label": "Paste",
+        "role": "paste",
+      },
+      {
+        "accelerator": "Ctrl+A",
+        "id": "edit/editor.action.selectAll",
+        "label": "Select All",
+        "role": "selectAll",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+F",
+        "enabled": true,
+        "id": "edit/actions.find",
+        "label": "Find",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "edit/editor.action.startFindReplaceAction",
+        "label": "Replace",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+/",
+        "enabled": true,
+        "id": "edit/editor.action.commentLine",
+        "label": "Toggle Line Comment",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Shift+F",
+        "enabled": true,
+        "id": "edit/editor.action.formatDocument",
+        "label": "Format Document",
+        "registerAccelerator": false,
+      },
+    ],
+  },
+  {
+    "id": "view",
+    "label": "&View",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Shift+P",
+        "enabled": true,
+        "id": "view/workbench.action.showCommands",
+        "label": "Command Palette…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "label": "Output",
+        "type": "radio",
+      },
+      {
+        "checked": true,
+        "enabled": true,
+        "label": "Relative Values",
+        "type": "radio",
+      },
+      {
+        "checked": false,
+        "enabled": false,
+        "label": "Playground",
+        "type": "radio",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+\\",
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleCodePane",
+        "label": "Code Pane",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "id": "view/outputLayout",
+        "label": "Output Layout",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"cards"}",
+            "label": "Cards",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": true,
+            "enabled": true,
+            "id": "view/outputLayout/squiggle.output.setLayout{"layout":"list"}",
+            "label": "List",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "id": "view/rvTab",
+        "label": "Relative Values Tab",
+        "submenu": [
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"list"}",
+            "label": "List",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"grid"}",
+            "label": "Grid",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+          {
+            "checked": false,
+            "enabled": true,
+            "id": "view/rvTab/squiggle.rv.setTab{"tab":"plot"}",
+            "label": "Plot",
+            "registerAccelerator": false,
+            "type": "radio",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+B",
+        "checked": true,
+        "enabled": true,
+        "id": "view/workbench.action.toggleSidebarVisibility",
+        "label": "Explorer",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/workbench.action.toggleStatusbarVisibility",
+        "label": "Status Bar",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "view/squiggle.toggleFollowChanges",
+        "label": "Follow Changes on Disk",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+=",
+        "id": "view/workbench.action.zoomIn",
+        "label": "Zoom In",
+        "role": "zoomIn",
+      },
+      {
+        "accelerator": "Ctrl+-",
+        "id": "view/workbench.action.zoomOut",
+        "label": "Zoom Out",
+        "role": "zoomOut",
+      },
+      {
+        "accelerator": "Ctrl+0",
+        "id": "view/workbench.action.zoomReset",
+        "label": "Actual Size",
+        "role": "resetZoom",
+      },
+      {
+        "accelerator": "F11",
+        "id": "view/workbench.action.toggleFullScreen",
+        "label": "Full Screen",
+      },
+    ],
+  },
+  {
+    "id": "go",
+    "label": "&Go",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+P",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpen",
+        "label": "Go to File…",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+Tab",
+        "enabled": true,
+        "id": "go/workbench.action.quickOpenPreviousRecentlyUsedEditor",
+        "label": "Switch to Recent File…",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+Left",
+        "enabled": true,
+        "id": "go/workbench.action.navigateBack",
+        "label": "Back",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Right",
+        "enabled": true,
+        "id": "go/workbench.action.navigateForward",
+        "label": "Forward",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+F5",
+        "enabled": true,
+        "id": "go/squiggle.nextChange",
+        "label": "Next Changed File",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Alt+Shift+F5",
+        "enabled": true,
+        "id": "go/squiggle.previousChange",
+        "label": "Previous Changed File",
+        "registerAccelerator": false,
+      },
+      {
+        "id": "go/changedFiles",
+        "label": "Changed on Disk",
+        "submenu": [
+          {
+            "enabled": true,
+            "label": "costs.squiggle · lib · 12s ago",
+          },
+          {
+            "enabled": false,
+            "label": "gone.squiggle · 1m ago",
+          },
+          {
+            "type": "separator",
+          },
+          {
+            "enabled": true,
+            "label": "Clear List",
+          },
+        ],
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Alt+Shift+V",
+        "enabled": true,
+        "id": "go/squiggle.revealInOutput",
+        "label": "Reveal Value in Output",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "go/workbench.files.action.showActiveFileInExplorer",
+        "label": "Reveal Active File in Explorer",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+Shift+E",
+        "enabled": true,
+        "id": "go/workbench.view.explorer",
+        "label": "Focus Explorer",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+1",
+        "enabled": true,
+        "id": "go/workbench.action.focusFirstEditorGroup",
+        "label": "Focus Code Editor",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Ctrl+2",
+        "enabled": true,
+        "id": "go/workbench.action.focusSecondEditorGroup",
+        "label": "Focus Output",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusNextPart",
+        "label": "Focus Next Part",
+        "registerAccelerator": false,
+      },
+      {
+        "accelerator": "Shift+F6",
+        "enabled": true,
+        "id": "go/workbench.action.focusPreviousPart",
+        "label": "Focus Previous Part",
+        "registerAccelerator": false,
+      },
+    ],
+  },
+  {
+    "id": "run",
+    "label": "&Run",
+    "submenu": [
+      {
+        "accelerator": "Ctrl+Enter",
+        "enabled": true,
+        "id": "run/squiggle.run",
+        "label": "Run",
+        "registerAccelerator": false,
+      },
+      {
+        "checked": false,
+        "enabled": true,
+        "id": "run/squiggle.toggleAutorun",
+        "label": "Auto-run",
+        "registerAccelerator": false,
+        "type": "checkbox",
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "id": "run/copyForAgent",
+        "label": "Copy for Agent",
+        "submenu": [
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyContext",
+            "label": "Context for Agent",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.copyViewLink",
+            "label": "Link to Current View",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRunCommand",
+            "label": "Run Command",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyRenderCommand",
+            "label": "Render Command",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.agent.copyProblems",
+            "label": "Problems",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.output.copyJson",
+            "label": "Output as JSON",
+            "registerAccelerator": false,
+          },
+          {
+            "enabled": true,
+            "id": "run/copyForAgent/squiggle.rv.copyCsv",
+            "label": "Relative Values as CSV",
+            "registerAccelerator": false,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    "role": "windowMenu",
+  },
+  {
+    "id": "help",
+    "label": "&Help",
+    "submenu": [
+      {
+        "enabled": true,
+        "id": "help/workbench.action.openGlobalKeybindings",
+        "label": "Keyboard Shortcuts",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.docs",
+        "label": "Squiggle Documentation",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.relativeValues",
+        "label": "Relative Values Guide",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.agents",
+        "label": "Using Studio with a Coding Agent",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.hub",
+        "label": "Squiggle Hub",
+        "registerAccelerator": false,
+      },
+      {
+        "enabled": true,
+        "id": "help/squiggle.help.reportIssue",
+        "label": "Report an Issue",
+        "registerAccelerator": false,
+      },
+      {
+        "type": "separator",
+      },
+      {
+        "accelerator": "Ctrl+Shift+I",
+        "id": "help/workbench.action.toggleDevTools",
+        "label": "Toggle Developer Tools",
+      },
+      {
+        "accelerator": "Ctrl+Shift+R",
+        "id": "help/workbench.action.reloadWindow",
+        "label": "Reload Window",
+      },
+    ],
+  },
+]
+`;

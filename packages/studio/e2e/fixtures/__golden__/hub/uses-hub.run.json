@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "result": null,
+  "bindings": {
+    "scaled": {
+      "type": "Dist",
+      "subtype": "SampleSet",
+      "mean": 32.98149995,
+      "stdev": 9.113368931,
+      "p5": 19.65856784,
+      "p25": 26.53712511,
+      "p50": 31.86141546,
+      "p75": 38.54382857,
+      "p95": 48.80973515,
+      "min": 13.84330789,
+      "max": 77.57113156,
+      "sampleCount": 1000,
+      "name": "Hub variable a, scaled"
+    },
+    "total": 10
+  },
+  "errors": []
+}

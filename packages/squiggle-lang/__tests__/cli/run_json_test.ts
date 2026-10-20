@@ -151,6 +151,38 @@ describe("run options", () => {
     }
   });
 
+  test.each(["0", "-5", "abc"])(
+    "--sample-count %s is rejected",
+    async (value) => {
+      const result = await runCLI(["run", "--json", "-e", "1", "-n", value]);
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toMatch(
+        /option '-n, --sample-count <n>' argument '.*' is invalid/
+      );
+    }
+  );
+
+  test("SAMPLE_COUNT=0 is rejected", async () => {
+    process.env["SAMPLE_COUNT"] = "0";
+    try {
+      const result = await runCLI(["run", "--json", "-e", "1"]);
+      expect(result.exitCode).toBe(1);
+      expect(result.stdout).toBe("");
+      expect(result.stderr).toMatch(
+        /value '0' from env 'SAMPLE_COUNT' is invalid. Must be a positive integer/
+      );
+    } finally {
+      delete process.env["SAMPLE_COUNT"];
+    }
+  });
+
+  test("check --sample-count 0 is rejected", async () => {
+    const result = await runCLI(["check", "--run", "-e", "1", "-n", "0"]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toMatch(/Must be a positive integer/);
+  });
+
   test("--watch requires a filename", async () => {
     const result = await runCLI(["run", "-e", "1", "--watch"]);
     expect(result.exitCode).not.toBe(0);

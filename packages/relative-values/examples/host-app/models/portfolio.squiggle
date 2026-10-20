@@ -1,0 +1,76 @@
+// Q3 initiative portfolio: estimated annual value of each initiative, in $k.
+// Precomputed with `pnpm bundle` (see package.json) into
+// src/data/portfolio.bundle.json.
+import "./assumptions.squiggle" as a
+
+revenue = a.customers * a.revenuePerCustomer
+
+values = {
+  sso: revenue * (0.01 to 0.04),
+  auditLog: revenue * (0.005 to 0.02),
+  usageBilling: revenue * (0.02 to 0.08),
+  partnerApi: revenue * (0.01 to 0.06),
+  onboardingRevamp: revenue * a.churnRate * (0.05 to 0.2),
+  inAppHelp: revenue * a.churnRate * (0.02 to 0.1),
+  healthScores: revenue * a.churnRate * (0.05 to 0.25),
+  winBackEmails: revenue * a.churnRate * (0.01 to 0.06),
+  dbMigration: a.engineerCost * (2 to 6),
+  ciSpeedup: a.engineerCost * (1 to 4),
+  observability: a.engineerCost * (0.5 to 3),
+  costDashboards: a.engineerCost * (0.3 to 2),
+  forecastingModel: revenue * (0.002 to 0.03),
+  anomalyDetection: revenue * (0.001 to 0.01),
+  pricingExperiment: revenue * normal({ p5: -0.01, p95: 0.05 }),
+}
+
+clusterOf = {
+  sso: "enterprise",
+  auditLog: "enterprise",
+  usageBilling: "enterprise",
+  partnerApi: "enterprise",
+  onboardingRevamp: "retention",
+  inAppHelp: "retention",
+  healthScores: "retention",
+  winBackEmails: "retention",
+  dbMigration: "platform",
+  ciSpeedup: "platform",
+  observability: "platform",
+  costDashboards: "platform",
+  forecastingModel: "research",
+  anomalyDetection: "research",
+  pricingExperiment: "research",
+}
+
+names = {
+  sso: "Single sign-on",
+  auditLog: "Audit log",
+  usageBilling: "Usage-based billing",
+  partnerApi: "Partner API",
+  onboardingRevamp: "Onboarding revamp",
+  inAppHelp: "In-app help center",
+  healthScores: "Customer health scores",
+  winBackEmails: "Win-back emails",
+  dbMigration: "Database migration",
+  ciSpeedup: "CI speedup",
+  observability: "Observability stack",
+  costDashboards: "Cloud cost dashboards",
+  forecastingModel: "Demand forecasting",
+  anomalyDetection: "Anomaly detection",
+  pricingExperiment: "Pricing experiment",
+}
+
+@name("Q3 portfolio")
+portfolio = {
+  title: "Q3 initiative portfolio",
+  items: Dict.keys(values) -> map(
+    {|id| { id, name: names[id], clusterId: clusterOf[id] }}
+  ),
+  clusters: [
+    { id: "enterprise", name: "Enterprise", recommendedUnit: "sso" },
+    { id: "retention", name: "Retention", recommendedUnit: "onboardingRevamp" },
+    { id: "platform", name: "Platform", recommendedUnit: "ciSpeedup" },
+    { id: "research", name: "Research", recommendedUnit: "forecastingModel" },
+  ],
+  recommendedUnit: "sso",
+  fn: {|x, y| [values[x], values[y]]},
+}

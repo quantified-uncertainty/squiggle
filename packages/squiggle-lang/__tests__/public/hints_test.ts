@@ -77,10 +77,23 @@ describe("getCodeWarnings", () => {
     expect(warnings.map((w) => w.line)).toEqual([5]);
   });
 
+  test("ignores several block comments on a line and one left open", () => {
+    const warnings = getCodeWarnings(
+      [
+        "a = 1 /* null *//* undefined */ + /**/ 2 /* nil",
+        "still Infinity in the comment */ b = 2",
+        "c = null",
+      ].join("\n")
+    );
+    expect(warnings.map((w) => w.line)).toEqual([3]);
+  });
+
   test("stays fast on pathological input", () => {
     const start = Date.now();
     getCodeWarnings('x = "' + '\\"'.repeat(50000));
     getCodeWarnings("x = 1 " + "/*a".repeat(50000));
+    // Many closed block comments on one line: stripping them must not copy the rest of the line once per comment.
+    getCodeWarnings("x = 1 " + "/* */".repeat(200000));
     expect(Date.now() - start).toBeLessThan(1000);
   });
 });
