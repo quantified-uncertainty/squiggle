@@ -3,7 +3,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 
 import { browseFolder, resolveUserFolder } from "../src/server/folders.js";
 import {
@@ -197,5 +197,77 @@ describe("resolveUserFolder (#19)", () => {
     });
     await api("/api/root", "POST", { path: root });
     expect(server.getRoot()).toBe(root);
+  });
+});
+
+describe("static files", () => {
+  async function page(pathname: string, base = server.url) {
+    const response = await fetch(`${base}${pathname}`);
+    return { status: response.status, text: await response.text() };
+  }
+
+  test("serves the client and falls back to index.html", async () => {
+    expect(await page("/")).toEqual({ status: 200, text: "<!doctype html>" });
+    expect(await page("/some/route")).toEqual({
+      status: 200,
+      text: "<!doctype html>",
+    });
+  });
+
+  test("an unreadable asset is logged and answered generically", async () => {
+    const assets = path.join(clientDir, "assets");
+    const locked = path.join(assets, "locked.js");
+    await fs.mkdir(assets, { recursive: true });
+    await fs.writeFile(locked, "x");
+    await fs.chmod(locked, 0o000);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      // Not "the client is not built", and no absolute path.
+      expect(await page("/assets/locked.js")).toEqual({
+        status: 500,
+        text: "Internal server error",
+      });
+      expect(logged).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ code: "EACCES" })
+      );
+    } finally {
+      logged.mockRestore();
+      await fs.chmod(locked, 0o644);
+      await fs.rm(assets, { recursive: true });
+    }
+  });
+
+  test("an unreadable index.html is not reported as a missing build", async () => {
+    const index = path.join(clientDir, "index.html");
+    await fs.chmod(index, 0o000);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(await page("/")).toEqual({
+        status: 500,
+        text: "Internal server error",
+      });
+      expect(logged).toHaveBeenCalledOnce();
+    } finally {
+      logged.mockRestore();
+      await fs.chmod(index, 0o644);
+    }
+  });
+
+  test("a missing client build says how to build it", async () => {
+    const unbuilt = await startStudioServer({
+      root,
+      port: 0,
+      clientDir: path.join(tmp, "no-client"),
+      recentFile: path.join(tmp, "recent.json"),
+      stateDir: path.join(tmp, "state"),
+    });
+    try {
+      const { status, text } = await page("/", unbuilt.url);
+      expect(status).toBe(500);
+      expect(text).toMatch(/client is not built.*pnpm build/);
+    } finally {
+      await unbuilt.close();
+    }
   });
 });

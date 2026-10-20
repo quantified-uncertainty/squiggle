@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import type { ServerResponse } from "node:http";
 import path from "node:path";
 
+import { isErrno } from "./paths.js";
+
 const MIME_TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -41,16 +43,21 @@ export async function serveStatic(
   const insideClient =
     target === clientDir || target.startsWith(clientDir + path.sep);
 
-  let file = insideClient ? target : path.join(clientDir, "index.html");
+  const indexHtml = path.join(clientDir, "index.html");
+  let file = insideClient ? target : indexHtml;
   const stat = await fs.stat(file).catch(() => undefined);
   if (!stat?.isFile()) {
-    file = path.join(clientDir, "index.html");
+    file = indexHtml;
   }
 
   let data: Buffer;
   try {
     data = await fs.readFile(file);
-  } catch {
+  } catch (e) {
+    // Only a missing index.html means there is no build. Any other failure
+    // (EACCES, EISDIR, EMFILE, an asset that vanished) is the caller's to log
+    // and answer generically.
+    if (file !== indexHtml || !isErrno(e, "ENOENT", "ENOTDIR")) throw e;
     res.writeHead(500, { "content-type": "text/plain" });
     res.end(
       `Squiggle Studio client is not built (looked in ${clientDir}). Run \`pnpm build\` in packages/studio, or start with --dev.`
