@@ -64,6 +64,6 @@
     "vitest": "^4.1.12"
   },
   "optionalDependencies": {
-    "puppeteer-core": "^24.43.1"
+    "puppeteer-core": "^25.16.0"
   }
 }
