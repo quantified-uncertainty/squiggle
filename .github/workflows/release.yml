@@ -23,7 +23,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/install
 
       - name: Build changelog script
@@ -35,7 +35,7 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         if: inputs.post-publish-only != true
-        uses: changesets/action@v1
+        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1
         with:
           title: New release
           version: pnpm run changeset-version
@@ -57,7 +57,7 @@ jobs:
 
       - name: Create PR with version patches
         if: steps.changesets.outputs.published == 'true' || inputs.post-publish-only
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
         with:
           commit-message: Bump versions after ${{ steps.published-version.outputs.published-version }} release
           title: Bump versions after ${{ steps.published-version.outputs.published-version }} release
