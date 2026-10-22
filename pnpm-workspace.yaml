@@ -11,3 +11,12 @@ allowBuilds:
   esbuild: true
   prisma: true
   sharp: true
+
+# These packages import Zod 3 types but declare Zod only as a dev dependency.
+packageExtensions:
+  "@fumadocs/content-collections@1.1.5":
+    dependencies:
+      zod: "3.24.2"
+  "@hookform/resolvers@5.0.1":
+    dependencies:
+      zod: "3.24.2"
