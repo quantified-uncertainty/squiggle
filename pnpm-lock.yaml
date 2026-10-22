@@ -124,7 +124,7 @@ overrides:
   storybook: 8.6.19
   '@storybook/core': 8.6.19
 
-packageExtensionsChecksum: sha256-sGfVy9kB9qla619n9ScHqfAAyRT+zQ7Isr3G2Mbrkus=
+packageExtensionsChecksum: sha256-xdkOuoKYzHkTyxUgKyrk147oJX4W2uskDzD1z5tC6zE=
 
 patchedDependencies:
   fumadocs-core@14.0.2:
@@ -16810,6 +16810,7 @@ snapshots:
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.53.2(react@19.1.0)
+      zod: 3.24.2
 
   '@humanfs/core@0.19.2':
     dependencies:
