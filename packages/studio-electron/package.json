@@ -25,7 +25,7 @@
   "devDependencies": {
     "@quri/configs": "workspace:*",
     "@types/node": "^22.14.0",
-    "electron": "^44.9.0",
+    "electron": "^44.9.1",
     "typescript": "5.8.2"
   }
 }
