@@ -178,8 +178,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.1.0)(react@19.1.0)
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -279,7 +279,7 @@ importers:
         version: 5.0.0-beta.32(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       next-safe-action:
         specifier: ^7.10.4
-        version: 7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2)
+        version: 7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@4.6.6)
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -314,8 +314,8 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -597,8 +597,8 @@ importers:
         specifier: ^37.3.1
         version: 37.3.6(react@19.1.0)
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -730,8 +730,8 @@ importers:
         specifier: ^0.14.7
         version: 0.14.7
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@mdx-js/typescript-plugin':
         specifier: ^0.0.8
@@ -805,7 +805,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.135.0
-        version: 0.135.0(zod@3.24.2)
+        version: 0.135.0(zod@4.6.6)
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -835,7 +835,7 @@ importers:
         version: 16.4.7
       openai:
         specifier: ^4.91.1
-        version: 4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@3.24.2)
+        version: 4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@4.6.6)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.17))(@types/node@22.14.0)(typescript@5.8.2)
@@ -843,8 +843,8 @@ importers:
         specifier: ^4.19.3
         version: 4.19.3
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.26.9
@@ -894,8 +894,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@mdx-js/typescript-plugin':
         specifier: ^0.0.8
@@ -925,8 +925,8 @@ importers:
   internal-packages/hub-api-client:
     dependencies:
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -966,8 +966,8 @@ importers:
         specifier: workspace:^
         version: link:../versioned-components
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -1025,8 +1025,8 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/plugin-syntax-typescript':
         specifier: ^7.25.7
@@ -1143,8 +1143,8 @@ importers:
         specifier: npm:@quri/squiggle-lang@0.9.5
         version: '@quri/squiggle-lang@0.9.5'
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -1291,8 +1291,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/plugin-syntax-import-attributes':
         specifier: ^7.26.0
@@ -1482,8 +1482,8 @@ importers:
         specifier: 4.18.0
         version: 4.18.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.26.9
@@ -1730,8 +1730,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -1804,8 +1804,8 @@ importers:
         specifier: workspace:*
         version: link:../studio
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: ^4.6.6
+        version: 4.6.6
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -5810,8 +5810,8 @@ packages:
   '@swc/helpers@0.5.17':
     resolution: {integrity: sha512-5IKx/Y13RsYd+sauPb2x+U/xZikHjolzfuDgTAl/Tdf3Q8rslRvC19NKDLgAJQ6wsqADk10ntlv08nPFw/gO/A==}
 
-  '@swc/types@0.1.25':
-    resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
+  '@swc/types@0.1.28':
+    resolution: {integrity: sha512-V6Mnml8v09QALx6K0elJ7o9K/MkVDtW3t6L+7Ou/JcWtb3xwId2AH4FeOceySd2JaO87IMw4+6vSZxLm34LPbw==}
 
   '@tailwindcss/forms@0.5.10':
     resolution: {integrity: sha512-utI1ONF6uf/pPNO68kmN1b8rEwNXv3czukalo8VtJH8ksIkZXr3Q3VYudZLkCsDd4Wku120uF02hYK25XGPorw==}
@@ -8408,6 +8408,7 @@ packages:
   eslint@9.23.0:
     resolution: {integrity: sha512-jV7AbNoFPAY1EkFYpLq5bslU9NLNO8xnEeQXwErNibVryjk67wHVmddTBilc5srIttJDBrB0eMHKZBFbSIABCw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -14173,8 +14174,11 @@ packages:
   zod@3.24.2:
     resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
 
-  zod@4.6.7:
-    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zustand@4.5.5:
     resolution: {integrity: sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==}
@@ -14305,13 +14309,13 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anthropic-ai/sdk@0.135.0(zod@3.24.2)':
+  '@anthropic-ai/sdk@0.135.0(zod@4.6.6)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.1.1
     optionalDependencies:
-      zod: 3.24.2
+      zod: 4.6.6
 
   '@anthropic-ai/sdk@0.39.0(encoding@0.1.12)':
     dependencies:
@@ -15726,7 +15730,7 @@ snapshots:
       tinyglobby: 0.2.12
       typescript: 5.8.2
       yaml: 2.8.3
-      zod: 3.24.2
+      zod: 3.25.76
 
   '@content-collections/integrations@0.2.1(@content-collections/core@0.8.2(typescript@5.8.2))':
     dependencies:
@@ -17875,7 +17879,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -17919,7 +17923,7 @@ snapshots:
       react-markdown: 8.0.7(@types/react@19.1.0)(react@19.1.0)
       react-resizable: 3.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vscode-uri: 3.0.8
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -17959,7 +17963,7 @@ snapshots:
       react-markdown: 9.1.0(@types/react@19.1.0)(react@19.1.0)
       react-resizable: 3.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vscode-uri: 3.0.8
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -17997,7 +18001,7 @@ snapshots:
       react-draggable: 4.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-hook-form: 7.53.2(react@19.1.0)
       react-markdown: 9.1.0(@types/react@19.1.0)(react@19.1.0)
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18039,7 +18043,7 @@ snapshots:
       shikiji: 0.9.15
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18081,7 +18085,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18121,7 +18125,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -18162,7 +18166,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 3.25.76
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -19594,7 +19598,7 @@ snapshots:
   '@swc/core@1.10.1(@swc/helpers@0.5.17)':
     dependencies:
       '@swc/counter': 0.1.3
-      '@swc/types': 0.1.25
+      '@swc/types': 0.1.28
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.10.1
       '@swc/core-darwin-x64': 1.10.1
@@ -19620,7 +19624,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@swc/types@0.1.25':
+  '@swc/types@0.1.28':
     dependencies:
       '@swc/counter': 0.1.3
     optional: true
@@ -21526,7 +21530,7 @@ snapshots:
     dependencies:
       devtools-protocol: 0.0.1704951
       mitt: 3.0.1
-      zod: 4.6.7
+      zod: 4.6.6
     optional: true
 
   ci-info@3.9.0: {}
@@ -26446,13 +26450,13 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  next-safe-action@7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2):
+  next-safe-action@7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@4.6.6):
     dependencies:
       next: 15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
     optionalDependencies:
-      zod: 3.24.2
+      zod: 4.6.6
 
   next-themes@0.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -26840,7 +26844,7 @@ snapshots:
       is-inside-container: 1.0.0
       is-wsl: 2.2.0
 
-  openai@4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@3.24.2):
+  openai@4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@4.6.6):
     dependencies:
       '@types/node': 18.19.86
       '@types/node-fetch': 2.6.12
@@ -26851,7 +26855,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.12)
     optionalDependencies:
       ws: 8.21.0
-      zod: 3.24.2
+      zod: 4.6.6
     transitivePeerDependencies:
       - encoding
 
@@ -30602,8 +30606,9 @@ snapshots:
 
   zod@3.24.2: {}
 
-  zod@4.6.7:
-    optional: true
+  zod@3.25.76: {}
+
+  zod@4.6.6: {}
 
   zustand@4.5.5(@types/react@19.1.0)(react@19.1.0):
     dependencies:
