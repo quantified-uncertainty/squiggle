@@ -57,11 +57,11 @@ export async function failValidationOnConstraint<T, S extends z.ZodType>(
         Array.isArray(e.meta?.["target"]) &&
         e.meta?.["target"].join(",") === handler.constraint.join(",")
       ) {
-        returnValidationErrors(schema, {
+        returnValidationErrors<S, S>(schema, {
           [handler.input]: {
             _errors: [handler.error],
           },
-        } as ValidationErrors<z.input<S>>);
+        } as ValidationErrors<S>);
       }
     }
     throw e;

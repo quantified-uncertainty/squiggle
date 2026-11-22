@@ -9,5 +9,5 @@ import { squiggleAiLibraries } from "./src/collections/squiggleAiLibraries.js";
 // Config for https://www.content-collections.dev/.
 
 export default defineConfig({
-  collections: [docs, meta, apiDocs, rawApiDocs, squiggleAiLibraries],
+  content: [docs, meta, apiDocs, rawApiDocs, squiggleAiLibraries],
 });

@@ -80,7 +80,7 @@ export const v1WorkflowSchema = z.discriminatedUnion("status", [
   z.object({
     ...commonV1WorkflowFields,
     status: z.literal("loading"),
-    result: z.undefined(),
+    result: z.undefined().optional(),
   }),
   z.object({
     ...commonV1WorkflowFields,

@@ -33,7 +33,7 @@ export const liteMarketSchema = z.object({
   mechanism: z.string(), // dpm-2, cpmm-1, or cpmm-multi-1
 
   probability: z.number().optional(),
-  pool: z.record(z.number()).optional(), // For CPMM markets, the number of shares in the liquidity pool. For DPM markets, the amount of mana invested in each answer.
+  pool: z.record(z.string(), z.number()).optional(), // For CPMM markets, the number of shares in the liquidity pool. For DPM markets, the amount of mana invested in each answer.
   p: z.number().optional(), // CPMM markets only, probability constant in y^p * n^(1-p) = k
   totalLiquidity: z.number().optional(), // CPMM markets only, the amount of mana deposited into the liquidity pool
 
@@ -73,7 +73,7 @@ export const fullMarketSchema = liteMarketSchema.extend({
         index: z.number(),
         text: z.string(),
         probability: z.number(),
-        pool: z.record(z.number()).optional(),
+        pool: z.record(z.string(), z.number()).optional(),
       })
     )
     .optional(),

@@ -1,5 +1,5 @@
 import { defineCollection } from "@content-collections/core";
-import { createMetaSchema } from "@fumadocs/content-collections/configuration";
+import { z } from "zod";
 
 /*
  * Collection for `meta.json` files in `/docs` directory.
@@ -14,5 +14,12 @@ export const meta = defineCollection({
   directory: "content/docs",
   include: "**/meta.json",
   parser: "json",
-  schema: createMetaSchema,
+  schema: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    pages: z.array(z.string()).optional(),
+    icon: z.string().optional(),
+    root: z.boolean().optional(),
+    defaultOpen: z.boolean().optional(),
+  }),
 });

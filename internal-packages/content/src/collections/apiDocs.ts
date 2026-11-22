@@ -1,28 +1,24 @@
 import { defineCollection, Schema } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
-import { z as zod } from "zod";
+import { z } from "zod";
 
 import { generateApiFunctionSection } from "../apiUtils.js";
 import { docTitleFromMeta, mdxOptions } from "./utils.js";
 
-export function getApiDocSchema(z: typeof zod) {
-  return {
-    description: z.string().optional().nullable(),
-    sections: z
-      .array(
-        z.object({
-          name: z.string(),
-          description: z.string().optional().nullable(),
-        })
-      )
-      .optional(),
-  };
-}
+export const apiDocSchema = z.object({
+  content: z.string(),
+  description: z.string().optional().nullable(),
+  sections: z
+    .array(
+      z.object({
+        name: z.string(),
+        description: z.string().optional().nullable(),
+      })
+    )
+    .optional(),
+});
 
-export type ApiModuleDoc = Schema<
-  "frontmatter",
-  ReturnType<typeof getApiDocSchema>
->;
+export type ApiModuleDoc = Schema<"frontmatter", typeof apiDocSchema>;
 
 /*
  * Collection for `/docs/Api` documentation pages.
@@ -37,7 +33,7 @@ export const apiDocs = defineCollection({
   name: "apiDocs",
   directory: "content/api",
   include: "**/*.mdx",
-  schema: getApiDocSchema,
+  schema: apiDocSchema,
   transform: async (doc, context) => {
     const title = docTitleFromMeta(doc._meta);
 
