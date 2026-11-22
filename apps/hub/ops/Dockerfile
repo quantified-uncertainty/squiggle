@@ -26,7 +26,7 @@ RUN npm install -g npm@11.21.0 corepack@0.36.0 turbo@2.9.14 \
 RUN npm install --prefix /tmp/npm-security-patches --install-strategy=nested \
         --ignore-scripts --no-audit --no-fund \
         brace-expansion@5.0.12 ip-address@10.7.4 \
-        postcss-selector-parser@7.1.6 undici@6.28.1 \
+        postcss-selector-parser@7.1.6 undici@6.29.1 \
     && npm_vendor_dir="$(npm root -g)/npm/node_modules" \
     && for package in brace-expansion ip-address postcss-selector-parser undici; do \
         rm -rf "${npm_vendor_dir}/${package}"; \

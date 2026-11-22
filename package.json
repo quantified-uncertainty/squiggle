@@ -128,7 +128,7 @@
       "yaml@1.10.2": "2.8.3",
       "yaml@2.7.0": "2.8.3",
       "yaml@2.7.1": "2.8.3",
-      "follow-redirects@<1.16.1": "1.16.1",
+      "follow-redirects@<1.16.2": "1.16.2",
       "tinypool": "2.1.2",
       "basic-ftp": "6.2.1",
       "@graphql-tools/executor-legacy-ws": "1.1.36",
