@@ -30,7 +30,7 @@
     "fumadocs-core": "14.0.2",
     "fumadocs-ui": "14.0.2",
     "katex": "^0.18.2",
-    "next": "15.5.28",
+    "next": "15.5.29",
     "pako": "^2.1.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
