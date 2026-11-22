@@ -1,5 +1,6 @@
 import { defineCollection } from "@content-collections/core";
 import { transformMDX } from "@fumadocs/content-collections/configuration";
+import { z } from "zod";
 
 import { mdxOptions } from "./utils.js";
 
@@ -18,7 +19,8 @@ export const docs = defineCollection({
   name: "doc",
   directory: "content/docs",
   include: ["**/*.mdx", "**/*.md"],
-  schema: (z) => ({
+  schema: z.object({
+    content: z.string(),
     title: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
   }),

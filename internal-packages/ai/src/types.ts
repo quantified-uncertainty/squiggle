@@ -136,7 +136,7 @@ export const clientWorkflowSchema = z.discriminatedUnion("status", [
   z.object({
     ...commonClientWorkflowFields,
     status: z.literal("loading"),
-    result: z.undefined(),
+    result: z.undefined().optional(),
   }),
   z.object({
     ...commonClientWorkflowFields,

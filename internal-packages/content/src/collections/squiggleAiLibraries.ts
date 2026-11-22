@@ -71,7 +71,7 @@ export const squiggleAiLibraries = defineCollection({
   directory: "content/squiggleAiLibraries",
   include: "**/*.yaml",
   parser: "yaml",
-  schema: (z) => ({
+  schema: z.object({
     owner: z.string(),
     slug: z.string(),
   }),

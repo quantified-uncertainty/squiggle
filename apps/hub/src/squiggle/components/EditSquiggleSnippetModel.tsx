@@ -285,7 +285,7 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
         )}
       </div>
     ),
-    renderExtraModal: (name) => {
+    renderExtraModal: (name: string) => {
       if (name === "Relative Values") {
         return {
           body: (
@@ -320,7 +320,11 @@ export const EditSquiggleSnippetModel: FC<Props> = ({
       playgroundProps
     )
   ) {
-    playgroundProps.renderExtraDropdownItems = ({ openModal }) =>
+    playgroundProps.renderExtraDropdownItems = ({
+      openModal,
+    }: {
+      openModal: (name: string) => void;
+    }) =>
       model.isEditable ? (
         <>
           <DropdownMenuHeader>Experimental</DropdownMenuHeader>

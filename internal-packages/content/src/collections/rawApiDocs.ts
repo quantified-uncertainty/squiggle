@@ -1,6 +1,6 @@
 import { defineCollection } from "@content-collections/core";
 
-import { getApiDocSchema } from "./apiDocs.js";
+import { apiDocSchema } from "./apiDocs.js";
 import { docTitleFromMeta } from "./utils.js";
 
 /*
@@ -14,7 +14,7 @@ export const rawApiDocs = defineCollection({
   name: "rawApiDocs",
   directory: "content/api",
   include: "**/*.mdx",
-  schema: getApiDocSchema,
+  schema: apiDocSchema,
   transform: async (doc) => {
     return {
       ...doc,

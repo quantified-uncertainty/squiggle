@@ -6,6 +6,7 @@ settings:
 
 overrides:
   '@auth/core': 0.41.3
+  zod: 4.6.7
   '@babel/core@7.26.10': 7.29.6
   '@babel/plugin-transform-modules-systemjs@7.25.9': 7.29.4
   '@babel/runtime@7.26.0': 7.26.10
@@ -78,7 +79,7 @@ overrides:
   nanoid@>=3 <4: 3.3.18
   next: 15.5.28
   next-auth: 5.0.0-beta.32
-  node-forge@1.3.1: 1.4.0
+  node-forge@<=1.4.0: 1.4.3
   nodemailer@6.9.13: 9.0.1
   pbkdf2@3.1.2: 3.1.7
   pbkdf2@>=3 <4: 3.1.7
@@ -107,8 +108,7 @@ overrides:
   underscore@1.12.1: 1.13.8
   underscore@1.13.6: 1.13.8
   underscore@1.13.7: 1.13.8
-  undici@6.21.1: 6.28.1
-  undici@>=6 <7: 6.28.1
+  undici@>=6 <6.29.1: 6.29.1
   uuid@8.3.2: 11.1.1
   uuid@9.0.1: 11.1.1
   vite@6.2.4: 6.4.4
@@ -119,12 +119,10 @@ overrides:
   follow-redirects@<1.16.1: 1.16.1
   tinypool: 2.1.2
   basic-ftp: 6.2.1
-  '@graphql-tools/executor-legacy-ws': 1.1.35
+  '@graphql-tools/executor-legacy-ws': 1.1.36
   '@graphql-tools/utils': 12.0.2
   storybook: 8.6.19
   '@storybook/core': 8.6.19
-
-packageExtensionsChecksum: sha256-xdkOuoKYzHkTyxUgKyrk147oJX4W2uskDzD1z5tC6zE=
 
 patchedDependencies:
   fumadocs-core@14.0.2:
@@ -178,8 +176,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.1.0)(react@19.1.0)
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -279,7 +277,7 @@ importers:
         version: 5.0.0-beta.32(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       next-safe-action:
         specifier: ^7.10.4
-        version: 7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2)
+        version: 7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@4.6.7)
       pako:
         specifier: ^2.1.0
         version: 2.1.0
@@ -314,8 +312,8 @@ importers:
         specifier: ^0.0.1
         version: 0.0.1
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -597,8 +595,8 @@ importers:
         specifier: ^37.3.1
         version: 37.3.6(react@19.1.0)
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -659,10 +657,10 @@ importers:
     dependencies:
       '@content-collections/mdx':
         specifier: ^0.2.2
-        version: 0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@fumadocs/content-collections':
-        specifier: ^1.1.5
-        version: 1.1.5(@content-collections/core@0.8.2(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@26.0.1)(@types/react@19.1.0))
+        specifier: 1.1.5
+        version: 1.1.5(@content-collections/core@0.15.3(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@26.0.1)(@types/react@19.1.0))
       '@quri/content':
         specifier: workspace:*
         version: link:../../internal-packages/content
@@ -730,8 +728,8 @@ importers:
         specifier: ^0.14.7
         version: 0.14.7
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@mdx-js/typescript-plugin':
         specifier: ^0.0.8
@@ -805,7 +803,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.135.0
-        version: 0.135.0(zod@3.24.2)
+        version: 0.135.0(zod@4.6.7)
       '@quri/configs':
         specifier: workspace:*
         version: link:../configs
@@ -835,7 +833,7 @@ importers:
         version: 16.4.7
       openai:
         specifier: ^4.91.1
-        version: 4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@3.24.2)
+        version: 4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@4.6.7)
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.10.1(@swc/helpers@0.5.17))(@types/node@22.14.0)(typescript@5.8.2)
@@ -843,8 +841,8 @@ importers:
         specifier: ^4.19.3
         version: 4.19.3
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.26.9
@@ -874,13 +872,13 @@ importers:
     dependencies:
       '@content-collections/cli':
         specifier: ^0.1.6
-        version: 0.1.6(@content-collections/core@0.8.2(typescript@5.8.2))
+        version: 0.1.6(@content-collections/core@0.15.3(typescript@5.8.2))
       '@content-collections/core':
-        specifier: ^0.8.2
-        version: 0.8.2(typescript@5.8.2)
+        specifier: ^0.15.3
+        version: 0.15.3(typescript@5.8.2)
       '@fumadocs/content-collections':
-        specifier: ^1.1.5
-        version: 1.1.5(@content-collections/core@0.8.2(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(@types/react@18.3.3))
+        specifier: 1.1.5
+        version: 1.1.5(@content-collections/core@0.15.3(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(@types/react@18.3.3))
       '@quri/squiggle-lang':
         specifier: workspace:*
         version: link:../../packages/squiggle-lang
@@ -894,8 +892,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@mdx-js/typescript-plugin':
         specifier: ^0.0.8
@@ -925,8 +923,8 @@ importers:
   internal-packages/hub-api-client:
     dependencies:
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -966,8 +964,8 @@ importers:
         specifier: workspace:^
         version: link:../versioned-components
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -1025,8 +1023,8 @@ importers:
         specifier: ^11.0.5
         version: 11.0.5
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@babel/plugin-syntax-typescript':
         specifier: ^7.25.7
@@ -1143,8 +1141,8 @@ importers:
         specifier: npm:@quri/squiggle-lang@0.9.5
         version: '@quri/squiggle-lang@0.9.5'
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@commander-js/extra-typings':
         specifier: ^13.1.0
@@ -1231,8 +1229,8 @@ importers:
         specifier: ^1.0.6
         version: 1.0.6(react@19.1.0)
       '@hookform/resolvers':
-        specifier: ^5.0.1
-        version: 5.0.1(react-hook-form@7.53.2(react@19.1.0))
+        specifier: ^5.2.2
+        version: 5.9.2(@sinclair/typebox@0.27.8)(@standard-schema/spec@1.1.0)(ajv@8.18.0)(react-hook-form@7.92.0(@types/react@19.1.0)(react@19.1.0))(zod@4.6.7)
       '@lezer/common':
         specifier: ^1.2.2
         version: 1.2.3
@@ -1270,8 +1268,8 @@ importers:
         specifier: ^4.4.6
         version: 4.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-hook-form:
-        specifier: ^7.53.2
-        version: 7.53.2(react@19.1.0)
+        specifier: ^7.55.0
+        version: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.1.0)(react@19.1.0)
@@ -1291,8 +1289,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@babel/plugin-syntax-import-attributes':
         specifier: ^7.26.0
@@ -1482,8 +1480,8 @@ importers:
         specifier: 4.18.0
         version: 4.18.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@babel/preset-env':
         specifier: ^7.26.9
@@ -1730,8 +1728,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -1804,8 +1802,8 @@ importers:
         specifier: workspace:*
         version: link:../studio
       zod:
-        specifier: ^3.24.2
-        version: 3.24.2
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@quri/configs':
         specifier: workspace:*
@@ -1814,8 +1812,8 @@ importers:
         specifier: ^22.14.0
         version: 22.14.0
       electron:
-        specifier: ^44.9.0
-        version: 44.9.0
+        specifier: ^44.9.1
+        version: 44.11.5
       typescript:
         specifier: 5.8.2
         version: 5.8.2
@@ -2030,6 +2028,10 @@ packages:
       graphql:
         optional: true
 
+  '@11ty/gray-matter@3.0.0':
+    resolution: {integrity: sha512-mi6KB36DZCpCfCb9XP3NtDDNXe1N0jKtuFj9mTCZNy5H7vTabODyMgFmmOiGIGJKt+i8mJqEb/REtK+JTEzlpQ==}
+    engines: {node: '>=11'}
+
   '@adobe/css-tools@4.4.1':
     resolution: {integrity: sha512-12WGKBQzjUAI4ayyF4IAtfw2QR/IDoqk6jTddXDhtYTJF9ASmoE1zst7cVtP0aL/F1jUJL5r+JxKXKEgHNbEUQ==}
 
@@ -2094,7 +2096,7 @@ packages:
     resolution: {integrity: sha512-WWrdL57JhU5KoynpTjt9GXK6k7ud9nPw2uw/Trn+oBXh6s0KpjhAccWZm2Qxw08ARYG1UDQj5iC+JO42j1rt/g==}
     hasBin: true
     peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
+      zod: 4.6.7
     peerDependenciesMeta:
       zod:
         optional: true
@@ -3086,10 +3088,10 @@ packages:
     peerDependencies:
       '@content-collections/core': 0.x
 
-  '@content-collections/core@0.8.2':
-    resolution: {integrity: sha512-62yVC3ne47YJ1KeCw5nk0H/G/xGBagcoWyMpVyTaCnDJhoIoTvmqBrsc+78Zk8s2Ssnb0Eo1Q4w3ZHwgL88pjg==}
+  '@content-collections/core@0.15.3':
+    resolution: {integrity: sha512-0tdMU9I6U1wQWh8/TcKbcSKWOzICujaWFpogltiZ7trDh8q7RSAEmO4QOs4+wrd2QtMgRmOcFgmT7P8iElH3jw==}
     peerDependencies:
-      typescript: ^5.0.2
+      typescript: ^5.0.2 || ^6.0.0 || ^7.0.0
 
   '@content-collections/integrations@0.2.1':
     resolution: {integrity: sha512-AyEcS2MmcOXSYt6vNmJsAiu6EBYjtNiwYGUVUmpG3llm8Gt8uiNrhIhlHyv3cuk+N8KJ2PWemLcMqtQJ+sW3bA==}
@@ -3707,8 +3709,8 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-tools/executor-legacy-ws@1.1.35':
-    resolution: {integrity: sha512-9wV6p+b6lagujNCcBMRvWcWO/6ZpANt1uMe0ST60/zTxQa+9GZ/pMR/Q9wsGeOorQ+0PNnOkt8GB8mtd4o9Bow==}
+  '@graphql-tools/executor-legacy-ws@1.1.36':
+    resolution: {integrity: sha512-67DbDed5noXD/kejnEyuZ0V965t4Uvv1dH7jXQCe9JKsIMP0UQycMR3hW2tucHh7jW1xEloPMRZ3DQRI/R0TwA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -3874,10 +3876,83 @@ packages:
     peerDependencies:
       react-hook-form: ^7.0.0
 
-  '@hookform/resolvers@5.0.1':
-    resolution: {integrity: sha512-u/+Jp83luQNx9AdyW2fIPGY6Y7NG68eN2ZW8FOJYL+M0i4s49+refdJdOp/A9n9HFQtQs3HIDHQvX3ZET2o7YA==}
+  '@hookform/resolvers@5.9.2':
+    resolution: {integrity: sha512-RtjTnZqsC38s4NKp2XO3fD8IA5uyN4tB7McQ5C6uiMPcV+WWO8F+wVa3e+BXUpH2ScgxghAlwFRMVqjT9WChAQ==}
     peerDependencies:
+      '@sinclair/typebox': '>=0.25.24'
+      '@standard-schema/spec': ^1.0.0
+      '@typeschema/main': '>=0.13.7'
+      '@vinejs/vine': ^2.0.0 || ^3.0.0 || ^4.0.0
+      ajv: 8.18.0
+      ajv-errors: ^3.0.0
+      ajv-formats: ^2.1.1
+      arktype: ^2.0.0
+      ata-validator: ^1.23.0
+      class-transformer: '>=0.4.0'
+      class-validator: '>=0.12.0'
+      computed-types: ^1.0.0
+      effect: ^3.10.3
+      fluentvalidation-ts: ^3.0.0
+      fp-ts: ^2.7.0
+      io-ts: ^2.0.0
+      joi: ^17.0.0 || ^18.0.0
+      nope-validator: '>=0.12.0'
       react-hook-form: ^7.55.0
+      superstruct: '>=0.12.0'
+      typanion: ^3.3.2
+      valibot: '>=0.31.0 || ^1.0.0-beta.4 || ^1.0.0-rc'
+      vest: '>=6.0.0'
+      yup: ^1.0.0
+      zod: 4.6.7
+    peerDependenciesMeta:
+      '@sinclair/typebox':
+        optional: true
+      '@standard-schema/spec':
+        optional: true
+      '@typeschema/main':
+        optional: true
+      '@vinejs/vine':
+        optional: true
+      ajv:
+        optional: true
+      ajv-errors:
+        optional: true
+      ajv-formats:
+        optional: true
+      arktype:
+        optional: true
+      ata-validator:
+        optional: true
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+      computed-types:
+        optional: true
+      effect:
+        optional: true
+      fluentvalidation-ts:
+        optional: true
+      fp-ts:
+        optional: true
+      io-ts:
+        optional: true
+      joi:
+        optional: true
+      nope-validator:
+        optional: true
+      superstruct:
+        optional: true
+      typanion:
+        optional: true
+      valibot:
+        optional: true
+      vest:
+        optional: true
+      yup:
+        optional: true
+      zod:
+        optional: true
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -5516,6 +5591,7 @@ packages:
   '@secretlint/secretlint-rule-preset-recommend@10.2.2':
     resolution: {integrity: sha512-K3jPqjva8bQndDKJqctnGfwuAxU2n9XNCPtbXVI5JvC7FnQiNg/yWlQPbMUlBXtBoBGFYp08A94m6fvtc9v+zA==}
     engines: {node: '>=20.0.0'}
+    deprecated: Built into secretlint v14 and later. Remove this package; the rule id still works. https://github.com/secretlint/secretlint/blob/HEAD/docs/rules/preset-recommend.md
 
   '@secretlint/source-creator@10.2.2':
     resolution: {integrity: sha512-h6I87xJfwfUTgQ7irWq7UTdq/Bm1RuQ/fYhA3dtTIAop5BwSFmZyrchph4WcoEvbN460BWKmk4RYSvPElIIvxw==}
@@ -7299,6 +7375,10 @@ packages:
     resolution: {integrity: sha512-7VT13fmjotKpGipCW9JEQAusEPE+Ei8nl6/g4FBAmIm0GOOLMua9NDDo/DWp0ZAxCr3cPq5ZpBqmPAQgDda2Pw==}
     engines: {node: '>= 8.10.0'}
 
+  chokidar@5.0.0:
+    resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
+    engines: {node: '>= 20.19.0'}
+
   chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
 
@@ -8137,8 +8217,8 @@ packages:
   electron-to-chromium@1.5.454:
     resolution: {integrity: sha512-NqD5GhkXnxJpDQVCmmpc546qjH6kei2VI9m45CTF+sQU7bcS7YeVt7ba0cnjueMH1AXGRu/driZUP9iYVSv7vg==}
 
-  electron@44.9.0:
-    resolution: {integrity: sha512-boP8zA5OIoMGYe3uWP4IqB1VJNoEzdHYgcBaVYnd1DBv5TogwXkbM4yJGSfNmYCzalVQ5J3TAIbaKOY+ILTnyg==}
+  electron@44.11.5:
+    resolution: {integrity: sha512-FgtBBAgWRyT/k2LbXDvlnHQRtc35sfp4UaWjYvktsh2HWWYSnfA/DnYGEOxQUZXpcp4EELj37x5zSSrh585nwg==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -8408,6 +8488,7 @@ packages:
   eslint@9.23.0:
     resolution: {integrity: sha512-jV7AbNoFPAY1EkFYpLq5bslU9NLNO8xnEeQXwErNibVryjk67wHVmddTBilc5srIttJDBrB0eMHKZBFbSIABCw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -10808,7 +10889,7 @@ packages:
       react-dom: '>= 18.2.0'
       valibot: '>= 0.36.0'
       yup: '>= 1.0.0'
-      zod: '>= 3.0.0'
+      zod: 4.6.7
     peerDependenciesMeta:
       '@sinclair/typebox':
         optional: true
@@ -10858,6 +10939,7 @@ packages:
 
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
+    deprecated: This package is no longer needed on supported Node.js versions. Node.js 16+ includes AbortController and AbortSignal as built-in globals. All Node.js versions requiring this polyfill are end-of-life. Use the built-in globals instead.
 
   node-addon-api@4.3.0:
     resolution: {integrity: sha512-73sE9+3UaLYYFmDsFZnqCInzPyh3MqIwZO9cw58yIqAZhONrrabrYyYe3TuIqtIiOuTXVhsGau8hcrhhwSsDIQ==}
@@ -10887,8 +10969,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-forge@1.4.0:
-    resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
+  node-forge@1.4.3:
+    resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
 
   node-int64@0.4.0:
@@ -11093,7 +11175,7 @@ packages:
     hasBin: true
     peerDependencies:
       ws: 8.21.0
-      zod: ^3.23.8
+      zod: 4.6.7
     peerDependenciesMeta:
       ws:
         optional: true
@@ -11353,6 +11435,10 @@ packages:
 
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
+    engines: {node: '>=12'}
+
+  picomatch@4.0.7:
+    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
   pify@2.3.0:
@@ -11813,6 +11899,16 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
 
+  react-hook-form@7.92.0:
+    resolution: {integrity: sha512-O5ILyY5fYHN7N13Pfxpe55KboyNFsJdM03BHpshQkClJd8raugiAUGY7VjifITrfhVxyx81ko25azXCoayhf1w==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8.0 || ^17 || ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   react-icons@5.5.0:
     resolution: {integrity: sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==}
     peerDependencies:
@@ -12010,6 +12106,10 @@ packages:
   readdirp@3.6.0:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
+
+  readdirp@5.1.1:
+    resolution: {integrity: sha512-Kko+Y5XQ6fM+Ce3dq3m9YGxnacYZYl9cA1wZjaF3Vbry2L3i1qVg8+CAgNPsXRArPMUMCaOR7oa9Nqntc43JKA==}
+    engines: {node: '>= 20.19.0'}
 
   recast@0.23.11:
     resolution: {integrity: sha512-YTUo+Flmw4ZXiWfQKGcwwc11KnoRAYgzAE2E7mXKCjSviTKShtxBsN6YUUBB2gtaBzKzeKunxhUwNHQuRryhWA==}
@@ -12356,8 +12456,8 @@ packages:
   sentence-case@3.0.4:
     resolution: {integrity: sha512-8LS0JInaQMCRoQ7YUytAo/xUu5W2XnQxV2HI/6uM6U7CITS1RqPElr30V6uIqyMKM9lJGRVFy5/4CuzcixNYSg==}
 
-  serialize-javascript@7.0.5:
-    resolution: {integrity: sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==}
+  serialize-javascript@7.1.4:
+    resolution: {integrity: sha512-FqlEuoTq/zRmA4Lg6aOqyH3lCHbUtCB0bmHCeFniX2GBdDqMJM3FwdvEhlE5Pim1dlt2FfBdVPmUNNiGhhKqpw==}
     engines: {node: '>=20.0.0'}
 
   server-only@0.0.1:
@@ -13249,8 +13349,8 @@ packages:
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
-  undici@6.28.1:
-    resolution: {integrity: sha512-zWpdTVD54H48CIybL0rWQ3ukpb9d23wM7eH5RtfdmeP70cWHNjtfo7P4vZX+5CoDcO53J4Pu5uXp7lNfjc6DRA==}
+  undici@6.29.1:
+    resolution: {integrity: sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==}
     engines: {node: '>=18.17'}
 
   undici@7.30.1:
@@ -14105,6 +14205,11 @@ packages:
     engines: {node: '>= 14.6'}
     hasBin: true
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
     engines: {node: '>=6'}
@@ -14170,9 +14275,6 @@ packages:
   yoga-layout@3.2.1:
     resolution: {integrity: sha512-0LPOt3AxKqMdFBZA3HBAt/t/8vIKq7VaQYbuA8WxCgung+p9TVyKRYdpvCb80HcdTN2NkbIKbhNwKUfm3tQywQ==}
 
-  zod@3.24.2:
-    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
-
   zod@4.6.7:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
@@ -14199,6 +14301,11 @@ snapshots:
   '@0no-co/graphql.web@1.1.2(graphql@16.10.0)':
     optionalDependencies:
       graphql: 16.10.0
+
+  '@11ty/gray-matter@3.0.0':
+    dependencies:
+      js-yaml: 5.4.3
+      section-matter: 1.0.0
 
   '@adobe/css-tools@4.4.1': {}
 
@@ -14305,13 +14412,13 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anthropic-ai/sdk@0.135.0(zod@3.24.2)':
+  '@anthropic-ai/sdk@0.135.0(zod@4.6.7)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.1.1
     optionalDependencies:
-      zod: 3.24.2
+      zod: 4.6.7
 
   '@anthropic-ai/sdk@0.39.0(encoding@0.1.12)':
     dependencies:
@@ -14608,7 +14715,7 @@ snapshots:
       '@babel/core': 7.29.6
       '@babel/helper-compilation-targets': 7.27.0
       '@babel/helper-plugin-utils': 7.26.5
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       lodash.debounce: 4.0.8
       resolve: 1.22.10
     transitivePeerDependencies:
@@ -15387,7 +15494,7 @@ snapshots:
       '@babel/parser': 7.27.0
       '@babel/template': 7.27.0
       '@babel/types': 7.27.0
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -15704,37 +15811,37 @@ snapshots:
     dependencies:
       commander: 13.1.0
 
-  '@content-collections/cli@0.1.6(@content-collections/core@0.8.2(typescript@5.8.2))':
+  '@content-collections/cli@0.1.6(@content-collections/core@0.15.3(typescript@5.8.2))':
     dependencies:
       '@clerc/core': 0.44.0
       '@clerc/plugin-completions': 0.44.0(@clerc/core@0.44.0)
       '@clerc/plugin-help': 0.44.0(@clerc/core@0.44.0)
       '@clerc/plugin-version': 0.44.0(@clerc/core@0.44.0)
-      '@content-collections/core': 0.8.2(typescript@5.8.2)
-      '@content-collections/integrations': 0.2.1(@content-collections/core@0.8.2(typescript@5.8.2))
+      '@content-collections/core': 0.15.3(typescript@5.8.2)
+      '@content-collections/integrations': 0.2.1(@content-collections/core@0.15.3(typescript@5.8.2))
 
-  '@content-collections/core@0.8.2(typescript@5.8.2)':
+  '@content-collections/core@0.15.3(typescript@5.8.2)':
     dependencies:
-      '@parcel/watcher': 2.5.1
+      '@11ty/gray-matter': 3.0.0
+      '@standard-schema/spec': 1.1.0
       camelcase: 8.0.0
+      chokidar: 5.0.0
       esbuild: 0.28.2
-      gray-matter: 4.0.3
       p-limit: 6.2.0
-      picomatch: 4.0.4
+      picomatch: 4.0.7
       pluralize: 8.0.0
-      serialize-javascript: 7.0.5
-      tinyglobby: 0.2.12
+      serialize-javascript: 7.1.4
+      tinyglobby: 0.2.17
       typescript: 5.8.2
-      yaml: 2.8.3
-      zod: 3.24.2
+      yaml: 2.9.1
 
-  '@content-collections/integrations@0.2.1(@content-collections/core@0.8.2(typescript@5.8.2))':
+  '@content-collections/integrations@0.2.1(@content-collections/core@0.15.3(typescript@5.8.2))':
     dependencies:
-      '@content-collections/core': 0.8.2(typescript@5.8.2)
+      '@content-collections/core': 0.15.3(typescript@5.8.2)
 
-  '@content-collections/mdx@0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@content-collections/mdx@0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
-      '@content-collections/core': 0.8.2(typescript@5.8.2)
+      '@content-collections/core': 0.15.3(typescript@5.8.2)
       esbuild: 0.28.2
       mdx-bundler: 10.1.1(acorn@8.17.0)(esbuild@0.28.2)
       react: 19.1.0
@@ -15790,7 +15897,7 @@ snapshots:
       ms: 2.1.3
       secure-json-parse: 3.0.2
       tslib: 2.8.1
-      undici: 6.28.1
+      undici: 6.29.1
     transitivePeerDependencies:
       - supports-color
 
@@ -15928,7 +16035,7 @@ snapshots:
   '@esbuild-plugins/node-resolve@0.2.2(esbuild@0.28.2)':
     dependencies:
       '@types/resolve': 1.20.6
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       esbuild: 0.28.2
       escape-string-regexp: 4.0.0
       resolve: 1.22.10
@@ -16189,19 +16296,17 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.8.2(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(@types/react@18.3.3))':
+  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.15.3(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(@types/react@18.3.3))':
     dependencies:
-      '@content-collections/core': 0.8.2(typescript@5.8.2)
-      '@content-collections/mdx': 0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@content-collections/core': 0.15.3(typescript@5.8.2)
+      '@content-collections/mdx': 0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       fumadocs-core: 14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(@types/react@18.3.3)
-      zod: 3.24.2
 
-  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.8.2(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@26.0.1)(@types/react@19.1.0))':
+  '@fumadocs/content-collections@1.1.5(@content-collections/core@0.15.3(typescript@5.8.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(fumadocs-core@14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@26.0.1)(@types/react@19.1.0))':
     dependencies:
-      '@content-collections/core': 0.8.2(typescript@5.8.2)
-      '@content-collections/mdx': 0.2.2(@content-collections/core@0.8.2(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@content-collections/core': 0.15.3(typescript@5.8.2)
+      '@content-collections/mdx': 0.2.2(@content-collections/core@0.15.3(typescript@5.8.2))(acorn@8.17.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       fumadocs-core: 14.0.2(patch_hash=d0c4571314725b673f1f9f54d01a47f7228e92b31a028f308238e4a9453f9855)(@opentelemetry/api@1.9.0)(@types/node@26.0.1)(@types/react@19.1.0)
-      zod: 3.24.2
 
   '@graphql-codegen/add@3.2.3(graphql@16.10.0)':
     dependencies:
@@ -16538,7 +16643,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@graphql-tools/executor-legacy-ws@1.1.35(graphql@16.10.0)':
+  '@graphql-tools/executor-legacy-ws@1.1.36(graphql@16.10.0)':
     dependencies:
       '@graphql-tools/utils': 12.0.2(graphql@16.10.0)
       '@types/ws': 8.18.1
@@ -16716,7 +16821,7 @@ snapshots:
     dependencies:
       '@graphql-tools/executor-graphql-ws': 2.0.5(graphql@16.10.0)
       '@graphql-tools/executor-http': 1.3.2(@types/node@22.14.0)(graphql@16.10.0)
-      '@graphql-tools/executor-legacy-ws': 1.1.35(graphql@16.10.0)
+      '@graphql-tools/executor-legacy-ws': 1.1.36(graphql@16.10.0)
       '@graphql-tools/utils': 12.0.2(graphql@16.10.0)
       '@graphql-tools/wrap': 10.0.34(graphql@16.10.0)
       '@types/ws': 8.18.1
@@ -16806,11 +16911,15 @@ snapshots:
     dependencies:
       react-hook-form: 7.53.2(react@19.1.0)
 
-  '@hookform/resolvers@5.0.1(react-hook-form@7.53.2(react@19.1.0))':
+  '@hookform/resolvers@5.9.2(@sinclair/typebox@0.27.8)(@standard-schema/spec@1.1.0)(ajv@8.18.0)(react-hook-form@7.92.0(@types/react@19.1.0)(react@19.1.0))(zod@4.6.7)':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.53.2(react@19.1.0)
-      zod: 3.24.2
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
+    optionalDependencies:
+      '@sinclair/typebox': 0.27.8
+      '@standard-schema/spec': 1.1.0
+      ajv: 8.18.0
+      zod: 4.6.7
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -17721,6 +17830,7 @@ snapshots:
       '@parcel/watcher-win32-arm64': 2.5.1
       '@parcel/watcher-win32-ia32': 2.5.1
       '@parcel/watcher-win32-x64': 2.5.1
+    optional: true
 
   '@peggyjs/from-mem@1.3.5':
     dependencies:
@@ -17875,7 +17985,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -17919,7 +18029,7 @@ snapshots:
       react-markdown: 8.0.7(@types/react@19.1.0)(react@19.1.0)
       react-resizable: 3.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vscode-uri: 3.0.8
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -17959,7 +18069,7 @@ snapshots:
       react-markdown: 9.1.0(@types/react@19.1.0)(react@19.1.0)
       react-resizable: 3.0.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vscode-uri: 3.0.8
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -17997,7 +18107,7 @@ snapshots:
       react-draggable: 4.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-hook-form: 7.53.2(react@19.1.0)
       react-markdown: 9.1.0(@types/react@19.1.0)(react@19.1.0)
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18039,7 +18149,7 @@ snapshots:
       shikiji: 0.9.15
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18081,7 +18191,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@types/react'
       - supports-color
@@ -18121,7 +18231,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -18162,7 +18272,7 @@ snapshots:
       shikiji: 0.10.2
       unist-util-visit: 5.0.0
       unist-util-visit-parents: 6.0.1
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - '@emotion/is-prop-valid'
       - '@types/react'
@@ -18273,7 +18383,7 @@ snapshots:
       react: 19.1.0
       react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
-      react-hook-form: 7.53.2(react@19.1.0)
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.2(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -18290,7 +18400,7 @@ snapshots:
       react: 19.1.0
       react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
-      react-hook-form: 7.53.2(react@19.1.0)
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.3(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -18307,7 +18417,7 @@ snapshots:
       react: 19.1.0
       react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
-      react-hook-form: 7.53.2(react@19.1.0)
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.3(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -18324,7 +18434,7 @@ snapshots:
       react: 19.1.0
       react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
-      react-hook-form: 7.53.2(react@19.1.0)
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.3(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -18341,7 +18451,7 @@ snapshots:
       react: 19.1.0
       react-colorful: 5.6.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-dom: 19.1.0(react@19.1.0)
-      react-hook-form: 7.53.2(react@19.1.0)
+      react-hook-form: 7.92.0(@types/react@19.1.0)(react@19.1.0)
       react-select: 5.10.1(patch_hash=dd5e66aed9f2c4bf7df19afa0284a2b59b1a6d4e739fb6126f8fe1fab24f2314)(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-textarea-autosize: 8.5.3(@types/react@19.1.0)(react@19.1.0)
       react-use: 17.6.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -21502,7 +21612,7 @@ snapshots:
       parse5: 7.2.1
       parse5-htmlparser2-tree-adapter: 7.1.0
       parse5-parser-stream: 7.1.2
-      undici: 6.28.1
+      undici: 6.29.1
       whatwg-mimetype: 4.0.0
 
   chokidar@3.6.0:
@@ -21516,6 +21626,10 @@ snapshots:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  chokidar@5.0.0:
+    dependencies:
+      readdirp: 5.1.1
 
   chownr@1.1.4:
     optional: true
@@ -22278,7 +22392,8 @@ snapshots:
 
   detect-indent@6.1.0: {}
 
-  detect-libc@1.0.3: {}
+  detect-libc@1.0.3:
+    optional: true
 
   detect-libc@2.1.2:
     optional: true
@@ -22399,7 +22514,7 @@ snapshots:
 
   electron-to-chromium@1.5.454: {}
 
-  electron@44.9.0:
+  electron@44.11.5:
     dependencies:
       '@electron-internal/extract-zip': 1.0.5
       '@electron/get': 5.1.0
@@ -22617,7 +22732,7 @@ snapshots:
 
   esbuild-register@3.6.0(esbuild@0.28.2):
     dependencies:
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       esbuild: 0.28.2
     transitivePeerDependencies:
       - supports-color
@@ -23130,6 +23245,10 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.4
 
+  fdir@6.5.0(picomatch@4.0.7):
+    optionalDependencies:
+      picomatch: 4.0.7
+
   fetch-blob@3.2.0:
     dependencies:
       node-domexception: 1.0.0
@@ -23585,7 +23704,7 @@ snapshots:
 
   google-p12-pem@3.1.4:
     dependencies:
-      node-forge: 1.4.0
+      node-forge: 1.4.3
 
   google-spreadsheet@3.3.0(encoding@0.1.12):
     dependencies:
@@ -26277,7 +26396,7 @@ snapshots:
   micromark@4.0.0:
     dependencies:
       '@types/debug': 4.1.10
-      debug: 4.4.0(supports-color@5.5.0)
+      debug: 4.4.3
       decode-named-character-reference: 1.0.2
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.0
@@ -26446,13 +26565,13 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  next-safe-action@7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@3.24.2):
+  next-safe-action@7.10.4(next@15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(zod@4.6.7):
     dependencies:
       next: 15.5.28(@babel/core@7.29.6)(@opentelemetry/api@1.9.0)(@types/node@22.14.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
     optionalDependencies:
-      zod: 3.24.2
+      zod: 4.6.7
 
   next-themes@0.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -26577,7 +26696,8 @@ snapshots:
   node-addon-api@4.3.0:
     optional: true
 
-  node-addon-api@7.1.1: {}
+  node-addon-api@7.1.1:
+    optional: true
 
   node-domexception@1.0.0: {}
 
@@ -26597,7 +26717,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.4.0: {}
+  node-forge@1.4.3: {}
 
   node-int64@0.4.0: {}
 
@@ -26840,7 +26960,7 @@ snapshots:
       is-inside-container: 1.0.0
       is-wsl: 2.2.0
 
-  openai@4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@3.24.2):
+  openai@4.91.1(encoding@0.1.12)(ws@8.21.0)(zod@4.6.7):
     dependencies:
       '@types/node': 18.19.86
       '@types/node-fetch': 2.6.12
@@ -26851,7 +26971,7 @@ snapshots:
       node-fetch: 2.7.0(encoding@0.1.12)
     optionalDependencies:
       ws: 8.21.0
-      zod: 3.24.2
+      zod: 4.6.7
     transitivePeerDependencies:
       - encoding
 
@@ -27149,6 +27269,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.4: {}
+
+  picomatch@4.0.7: {}
 
   pify@2.3.0: {}
 
@@ -27571,6 +27693,12 @@ snapshots:
     dependencies:
       react: 19.1.0
 
+  react-hook-form@7.92.0(@types/react@19.1.0)(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+    optionalDependencies:
+      '@types/react': 19.1.0
+
   react-icons@5.5.0(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -27925,6 +28053,8 @@ snapshots:
   readdirp@3.6.0:
     dependencies:
       picomatch: 4.0.4
+
+  readdirp@5.1.1: {}
 
   recast@0.23.11:
     dependencies:
@@ -28403,7 +28533,7 @@ snapshots:
       tslib: 2.8.1
       upper-case-first: 2.0.2
 
-  serialize-javascript@7.0.5: {}
+  serialize-javascript@7.1.4: {}
 
   server-only@0.0.1: {}
 
@@ -29290,8 +29420,8 @@ snapshots:
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
 
   tinyrainbow@3.2.0: {}
 
@@ -29602,7 +29732,7 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  undici@6.28.1: {}
+  undici@6.29.1: {}
 
   undici@7.30.1:
     optional: true
@@ -30514,6 +30644,8 @@ snapshots:
 
   yaml@2.8.3: {}
 
+  yaml@2.9.1: {}
+
   yargs-parser@18.1.3:
     dependencies:
       camelcase: 5.3.1
@@ -30600,10 +30732,7 @@ snapshots:
 
   yoga-layout@3.2.1: {}
 
-  zod@3.24.2: {}
-
-  zod@4.6.7:
-    optional: true
+  zod@4.6.7: {}
 
   zustand@4.5.5(@types/react@19.1.0)(react@19.1.0):
     dependencies:

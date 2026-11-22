@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@content-collections/mdx": "^0.2.2",
-    "@fumadocs/content-collections": "^1.1.5",
+    "@fumadocs/content-collections": "1.1.5",
     "@quri/content": "workspace:*",
     "@quri/hub-linker": "workspace:^",
     "@quri/squiggle-components": "workspace:*",
@@ -40,7 +40,7 @@
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "shiki": "^0.14.7",
-    "zod": "^3.24.2"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@mdx-js/typescript-plugin": "^0.0.8",
