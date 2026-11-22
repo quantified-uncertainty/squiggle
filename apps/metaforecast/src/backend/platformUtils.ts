@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { prisma } from "@quri/metaforecast-db";
+import { type Prisma, prisma } from "@quri/metaforecast-db";
 
 import { saveQuestionsWithStats } from "./dbUtils";
 import { Platform } from "./types";
@@ -25,10 +25,9 @@ export async function getPlatformState<TState extends z.ZodTypeAny>(
   return parsed;
 }
 
-export async function setPlatformState<TState extends z.ZodTypeAny>(
-  platform: Platform<TState>,
-  state: z.infer<TState>
-) {
+export async function setPlatformState<
+  TState extends z.ZodType<Prisma.InputJsonValue>,
+>(platform: Platform<TState>, state: z.infer<TState>) {
   await prisma.platformState.upsert({
     where: {
       platform: platform.name,
