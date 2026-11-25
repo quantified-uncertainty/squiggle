@@ -13,20 +13,33 @@ export const polymarket: Platform = {
 
   async fetcher() {
     const questions: FetchedQuestion[] = [];
+    let skippedCount = 0;
 
     for await (const market of fetchAllOpenMarkets()) {
       const metaforecast_id = `${platformName}-${market.id}`;
 
+      // Legacy Polymarket markets used "Long"/"Short" outcomes instead of "Yes"/"No".
+      // These are incompatible with our probability model, so skip them.
       if (market.outcomes.includes("Long")) {
-        // some legacy workaround? I don't know what this checks for
+        skippedCount++;
         continue;
       }
 
       if (!market.outcomePrices || !market.volumeNum || !market.liquidityNum) {
+        skippedCount++;
+        continue;
+      }
+
+      if (market.outcomes.length !== market.outcomePrices.length) {
+        console.warn(
+          `Market ${metaforecast_id}: outcomes length (${market.outcomes.length}) !== outcomePrices length (${market.outcomePrices.length}), skipping`
+        );
+        skippedCount++;
         continue;
       }
 
       if (market.category === "Sports") {
+        skippedCount++;
         continue;
       }
 
@@ -62,6 +75,10 @@ export const polymarket: Platform = {
       if (verbose) console.log(result);
       questions.push(result);
     }
+
+    console.log(
+      `Polymarket: fetched ${questions.length} questions, skipped ${skippedCount} markets`
+    );
 
     return { questions };
   },

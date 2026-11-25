@@ -48,7 +48,9 @@ export async function fetchAllMarketsLite({
     let filteredMarkets = markets;
     if (upToUpdatedTime) {
       filteredMarkets = markets.filter(
-        (market) => market.lastUpdatedTime! >= upToUpdatedTime // keep only the markets that were updated after upToUpdatedTime
+        (market) =>
+          market.lastUpdatedTime !== undefined &&
+          market.lastUpdatedTime >= upToUpdatedTime
       );
     }
 
@@ -60,8 +62,8 @@ export async function fetchAllMarketsLite({
     {
       const total = allMarkets.length;
       const added = filteredMarkets.length;
-      const minDate = filteredMarkets[0].lastUpdatedTime!;
-      const maxDate = filteredMarkets.at(-1)?.lastUpdatedTime!;
+      const minDate = filteredMarkets[0].lastUpdatedTime ?? "unknown";
+      const maxDate = filteredMarkets.at(-1)?.lastUpdatedTime ?? "unknown";
       console.log(
         `Total: ${total}, added: ${added}, minDate: ${minDate}, maxDate: ${maxDate}`
       );
